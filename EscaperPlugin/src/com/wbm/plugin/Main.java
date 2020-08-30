@@ -20,7 +20,7 @@ public class Main extends JavaPlugin
 	GameManager gManager;
 	PlayerDataManager pDataManager;
 	
-	
+	 
 	@Override
 	public void onEnable()
 	{
