@@ -1,0 +1,6 @@
+name: EscaperServerPlugin
+main: com.wbm.plugin.Main
+version: 1.0
+description: made by LLLJH (discord -> arong#7075)
+
+commands:
