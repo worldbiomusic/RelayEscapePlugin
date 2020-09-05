@@ -14,21 +14,33 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import com.wbm.plugin.data.PlayerData;
 import com.wbm.plugin.util.PlayerDataManager;
 import com.wbm.plugin.util.Role;
+import com.wbm.plugin.util.RoomManager;
 
 public class GameManager implements Listener 
 {
 	PlayerDataManager pDataManager;
 	PlayerManager pManager;
+	RoomManager roomManager;
 	
 	public GameManager(
 			PlayerDataManager pDataManager,
-			PlayerManager pManager) {
+			PlayerManager pManager,
+			RoomManager roomManager) 
+	{
 		this.pDataManager = pDataManager;
 		this.pManager = pManager;
+		this.roomManager = roomManager;
+		
+		// main room base로 설정
+		this.roomManager.setBaseMainRoom();
 	}
+	
+	
 	
 	@EventHandler
 	public void onGameEnd(BlockBreakEvent e) {
+		
+		
 		Block block = e.getBlock();
 		Material mat = block.getType();
 		
@@ -37,7 +49,7 @@ public class GameManager implements Listener
 		PlayerData newMakerPData = this.pDataManager.getPlayerData(newMakerUUID);
 		Role newMakerRole = newMakerPData.getRole();
 		
-		
+		// challeger가 부순지 확인
 		if(newMakerRole == Role.CHALLENGER && 
 				mat.equals(Material.GLOWSTONE)) {
 			// 공간 초기화 (공기블럭)
@@ -57,6 +69,10 @@ public class GameManager implements Listener
 			// 2. 클리어한 Challenger -> Maker로 변경
 			this.pManager.changePlayerRole(newMakerUUID);
 			newMaker.sendMessage("you are now Maker");
+			
+			
+			// 3. main room 초기화
+			this.roomManager.setEmptyMainRoom();
 		}
 	}
 	
@@ -67,6 +83,7 @@ public class GameManager implements Listener
 		PlayerData pData = this.pDataManager.getPlayerData(uuid);
 		Role role = pData.getRole();
 		
+		// challenger 금지
 		if(role == Role.CHALLENGER) {
 			e.setCancelled(true);
 			p.sendMessage("Challegner can't break block");
@@ -79,7 +96,8 @@ public class GameManager implements Listener
 		UUID uuid = p.getUniqueId();
 		PlayerData pData = this.pDataManager.getPlayerData(uuid);
 		Role role = pData.getRole();
-		
+
+		// challenger 금지
 		if(role == Role.CHALLENGER) {
 			e.setCancelled(true);
 			p.sendMessage("Challegner can't place block");

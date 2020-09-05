@@ -8,6 +8,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import com.wbm.plugin.listener.GameManager;
 import com.wbm.plugin.listener.PlayerManager;
 import com.wbm.plugin.util.PlayerDataManager;
+import com.wbm.plugin.util.RoomManager;
 
 import net.md_5.bungee.api.ChatColor;
 
@@ -19,8 +20,8 @@ public class Main extends JavaPlugin
 	PlayerManager pManager;
 	GameManager gManager;
 	PlayerDataManager pDataManager;
+	RoomManager roomManager;
 	
-	 
 	@Override 
 	public void onEnable()
 	{
@@ -40,8 +41,9 @@ public class Main extends JavaPlugin
 	
 	void setupManagers() {
 		this.pDataManager = new PlayerDataManager();
-		this.pManager = new PlayerManager(this.pDataManager);
-		this.gManager = new GameManager(this.pDataManager, this.pManager);
+		this.roomManager = new RoomManager();
+		this.pManager = new PlayerManager(this.pDataManager, this.roomManager);
+		this.gManager = new GameManager(this.pDataManager, this.pManager, this.roomManager);
 		
 		this.registerEvent(this.pManager);
 		this.registerEvent(this.gManager);
