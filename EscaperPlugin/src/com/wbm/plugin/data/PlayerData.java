@@ -1,12 +1,17 @@
 package com.wbm.plugin.data;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
+
+import org.bukkit.configuration.serialization.ConfigurationSerializable;
 
 import com.wbm.plugin.util.Role;
 
-public class PlayerData
+public class PlayerData implements ConfigurationSerializable
 {
-	UUID uuid;
+	
+	transient UUID uuid;
 	String name;
 	Role role;
 	
@@ -46,12 +51,16 @@ public class PlayerData
 		this.role=role;
 	}
 	
-	public void changeRole()
+	@Override
+	public Map<String, Object> serialize()
 	{
-		if(this.role == Role.CHALLENGER)
-			this.role = Role.MAKER;
-		else
-			this.role = Role.CHALLENGER;
+		Map<String, Object> serialData = new HashMap<>();
+		serialData.put("uuid", this.uuid.toString());
+		serialData.put("name", this.name);
+		serialData.put("role", this.role.name());
+		
+		
+		return null;
 	}
 	
 	
