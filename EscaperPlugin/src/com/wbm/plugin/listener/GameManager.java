@@ -2,7 +2,6 @@ package com.wbm.plugin.listener;
 
 import java.util.UUID;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -14,9 +13,9 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import com.wbm.plugin.data.PlayerData;
 import com.wbm.plugin.util.PlayerDataManager;
 import com.wbm.plugin.util.RelayManager;
-import com.wbm.plugin.util.Role;
 import com.wbm.plugin.util.RolePermission;
 import com.wbm.plugin.util.RoomManager;
+import com.wbm.plugin.util.enums.Role;
 
 public class GameManager implements Listener 
 {
@@ -42,7 +41,7 @@ public class GameManager implements Listener
 	
 	@EventHandler
 	public void onPlayerBreakCore(BlockBreakEvent e) {
-		
+		// Tester, Challenger의 core부수는 상황
 		
 		Block block = e.getBlock();
 		Material mat = block.getType();
@@ -57,21 +56,17 @@ public class GameManager implements Listener
 		// core체크
 		if(mat.equals(Material.GLOWSTONE)) {
 		// Role별로 권한 체크
+			// Time: Challenging / Role: Challenger
 			if(role == Role.CHALLENGER) {
 				
-				// 1. 현재 Maker -> Challenger로 변경
-				PlayerData makerPData = this.pDataManager.getMakerPlayerData();
-				if(makerPData != null) {
-					UUID makerUUID = makerPData.getUUID();
-					this.pDataManager.changePlayerRole(makerUUID, Role.CHALLENGER);
-					
-					Player maker = Bukkit.getPlayer(makerUUID);
+				// 1. 현재 Maker에게 이제 Challenger라는 메세지 전송
+				Player maker = this.pDataManager.getMaker();
+				if(maker != null && maker.isOnline()) {
 					maker.sendMessage("you are now Challenger");
 				}
 				
-				// 2. 클리어한 Challenger -> Maker로 변경
-				this.pDataManager.changePlayerRole(pUuid, Role.MAKER);
-				p.sendMessage("you are now Maker");
+				// 2. 클리어한  maker는 pDataManager의 maker로 등록
+				this.pDataManager.registerMaker(p);
 				
 				
 				// 3. main room 초기화
@@ -80,12 +75,14 @@ public class GameManager implements Listener
 				// 4. block 파괴
 				block.setType(Material.AIR);
 				
-				// 5.새로운 relay 시작
-				this.relayManager.readyForNewRelay();
+				// 5.next relay 시작
+				this.relayManager.stopCurrentTaskAndStartNextTime();
 			
-			} else if(role == Role.TESTER) {
-				// 1.View로 역할변경
-				this.pDataManager.changePlayerRole(pUuid, Role.VIEWER);
+			} 
+			// Time: Testing / Role: Tester 
+			else if(role == Role.TESTER) {
+				// 1.next relay 시작
+				this.relayManager.stopCurrentTaskAndStartNextTime();
 				// 2.이벤트 취소
 				e.setCancelled(true);
 			}
@@ -112,6 +109,8 @@ public class GameManager implements Listener
 			permission = RolePermission.TESTER_BREAKBLOCK;
 		} else if(role == Role.VIEWER) {
 			permission = RolePermission.VIEWER_BREAKBLOCK;
+		} else if(role == Role.WAITER) {
+			permission = RolePermission.WAITER_BREAKBLOCK;
 		}
 		
 		e.setCancelled(!permission);
@@ -135,6 +134,8 @@ public class GameManager implements Listener
 			permission = RolePermission.TESTER_PLACEBLOCK;
 		} else if(role == Role.VIEWER) {
 			permission = RolePermission.VIEWER_PLACEBLOCK;
+		} else if(role == Role.WAITER) {
+			permission = RolePermission.WAITER_PLACEBLOCK;
 		}
 		
 		e.setCancelled(!permission);

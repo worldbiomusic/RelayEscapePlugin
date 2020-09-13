@@ -13,4 +13,7 @@ public class RolePermission
 	
 	public final static boolean VIEWER_BREAKBLOCK = false;
 	public final static boolean VIEWER_PLACEBLOCK = false;
+	
+	public final static boolean WAITER_BREAKBLOCK = false;
+	public final static boolean WAITER_PLACEBLOCK = false;
 }

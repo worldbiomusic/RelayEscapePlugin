@@ -1,9 +1,10 @@
-package com.wbm.plugin.util;
+package com.wbm.plugin.util.enums;
 
 public enum Role
 {
 	MAKER,
 	CHALLENGER,
 	TESTER,
-	VIEWER
+	VIEWER,
+	WAITER,
 }

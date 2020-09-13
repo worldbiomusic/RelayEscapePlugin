@@ -10,10 +10,15 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
 import com.wbm.plugin.data.PlayerData;
+import com.wbm.plugin.util.config.ConfigurationMember;
+import com.wbm.plugin.util.enums.Role;
 
 public class PlayerDataManager implements ConfigurationMember
 {
 	Map<UUID, PlayerData> playerList;
+	
+	// 실제적인 Role에 상관없이 한 판의 제작자를 가리키는 변수
+	Player maker;
 	
 	public PlayerDataManager() {
 		this.playerList = new HashMap<UUID, PlayerData>();
@@ -37,15 +42,13 @@ public class PlayerDataManager implements ConfigurationMember
 		return null;
 	}
 	
-	public PlayerData getMakerPlayerData() {
-		for(PlayerData pData : this.playerList.values()) {
-			if(pData.getRole() == Role.MAKER || 
-					pData.getRole() == Role.VIEWER) {
-				return pData;
-			}
-		}
-		
-		return null;
+	// TODO: 메소드 이름 getMakerPlayerData -> getMaeker로 바꾸기 
+	public Player getMaker() {
+		return this.maker;
+	}
+	
+	public void registerMaker(Player p) {
+		this.maker = p;
 	}
 	
 	public void printAllPlayer() {
@@ -78,6 +81,8 @@ public class PlayerDataManager implements ConfigurationMember
 			mode = GameMode.SURVIVAL;
 		} else if(role == Role.VIEWER) {
 			mode = GameMode.SPECTATOR;
+		} else if(role == Role.WAITER) {
+			mode = GameMode.SURVIVAL;
 		}
 		
 		

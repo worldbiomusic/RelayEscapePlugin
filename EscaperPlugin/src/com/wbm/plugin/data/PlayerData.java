@@ -6,7 +6,7 @@ import java.util.UUID;
 
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 
-import com.wbm.plugin.util.Role;
+import com.wbm.plugin.util.enums.Role;
 
 public class PlayerData implements ConfigurationSerializable
 {

@@ -1,4 +1,4 @@
-package com.wbm.plugin.util;
+package com.wbm.plugin.util.general;
 
 public class Setting
 {

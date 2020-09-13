@@ -6,6 +6,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.wbm.plugin.cmd.DebugCommand;
 import com.wbm.plugin.data.PlayerData;
 import com.wbm.plugin.listener.GameManager;
 import com.wbm.plugin.listener.PlayerManager;
@@ -26,6 +27,9 @@ public class Main extends JavaPlugin
 	RoomManager roomManager;
 	RelayManager relayManager;
 //	ConfigManager configManager;
+	
+	// command executor
+	DebugCommand dCmd;
 	
 	static {
 	    ConfigurationSerialization.registerClass(PlayerData.class);
@@ -48,12 +52,21 @@ public class Main extends JavaPlugin
 			
 			this.setupManagers();
 			
+			this.registerListeners();
+			this.registerCommands();
+			
+
 			
 			this.getServer().getConsoleSender().sendMessage(ChatColor.GREEN + "EscaperServerPlugin ON");
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
 	}
+	
+	
+
+	
+
 	
 	void setupMain() {
 		this.server = this.getServer();
@@ -68,16 +81,27 @@ public class Main extends JavaPlugin
 		this.pManager = new PlayerManager(this.pDataManager, this.roomManager, this.relayManager);
 		this.gManager = new GameManager(this.pDataManager, this.roomManager, this.relayManager);
 		
-		this.registerEvent(this.pManager);
-		this.registerEvent(this.gManager);
 		
 //		this.configManager.registerMember("player", this.pDataManager);
 		
 //		this.configManager.installEachConfigData();
 	}
 	
+	
+	private void registerListeners()
+	{
+		this.registerEvent(this.pManager);
+		this.registerEvent(this.gManager);
+	}
 	void registerEvent(Listener listener) {
 		this.pluginManager.registerEvents(listener, this);
+	}
+	
+	
+	private void registerCommands()
+	{
+		this.dCmd = new DebugCommand(this.pDataManager, this.relayManager);
+		this.getCommand("re").setExecutor(dCmd);
 	}
 	
 	@Override
