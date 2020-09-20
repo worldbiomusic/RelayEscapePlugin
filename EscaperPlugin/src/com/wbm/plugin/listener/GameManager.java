@@ -40,141 +40,11 @@ public class GameManager implements Listener
 		
 		// init
 		this.init();
-		
-		// main room base로 설정
-		this.roomManager.setBaseMainRoom();
-	}
-	
-	
-	
-	@EventHandler
-	public void onPlayerBreakCore(BlockBreakEvent e) {
-		// Tester, Challenger의 core부수는 상황
-		
-		Block block = e.getBlock();
-		Material mat = block.getType();
-		
-		Player p = e.getPlayer();
-		UUID pUuid = p.getUniqueId();
-		PlayerData pData = this.pDataManager.getPlayerData(pUuid);
-		Role role = pData.getRole();
-		
-		
-
-		// core체크
-		if(mat.equals(Material.GLOWSTONE)) {
-		// Role별로 권한 체크
-			// Time: Challenging / Role: Challenger
-			if(role == Role.CHALLENGER) {
-				
-				// 1. 현재 Maker에게 이제 Challenger라는 메세지 전송
-				Player maker = this.pDataManager.getMaker();
-				if(maker != null && maker.isOnline()) {
-					maker.sendMessage("you are now Challenger");
-				}
-				
-				// 2. 클리어한  maker는 pDataManager의 maker로 등록
-				this.pDataManager.registerMaker(p);
-				
-				
-				// 3. main room 초기화
-				this.roomManager.setEmptyMainRoom();
-				
-				// 4. block 파괴
-				block.setType(Material.AIR);
-				
-				// 5.next relay 시작
-				this.relayManager.startNextTime();
-			
-			} 
-			// Time: Testing / Role: Tester 
-			else if(role == Role.TESTER) {
-				// 1.next relay 시작
-				this.relayManager.startNextTime();
-				// 2.이벤트 취소
-				e.setCancelled(true);
-			}
-		}
-		
-		
-	}
-	
-	@EventHandler
-	public void onPlayerBreakBlock(BlockBreakEvent e) {
-		Player p = e.getPlayer();
-		UUID uuid = p.getUniqueId();
-		PlayerData pData = this.pDataManager.getPlayerData(uuid);
-		Role role = pData.getRole();
-		
-		boolean permission = false;
-		
-		// Role별로 권한 체크
-		if(role == Role.MAKER) {
-			permission = RolePermission.MAKER_BREAKBLOCK;
-		} else if(role == Role.CHALLENGER) {
-			permission = RolePermission.CHALLENGER_BREAKBLOCK;
-		} else if(role == Role.TESTER) {
-			permission = RolePermission.TESTER_BREAKBLOCK;
-		} else if(role == Role.VIEWER) {
-			permission = RolePermission.VIEWER_BREAKBLOCK;
-		} else if(role == Role.WAITER) {
-			permission = RolePermission.WAITER_BREAKBLOCK;
-		}
-		
-		e.setCancelled(!permission);
-	}
-	
-	@EventHandler
-	public void onPlayerPlaceBlock(BlockPlaceEvent e) {
-		Player p = e.getPlayer();
-		UUID uuid = p.getUniqueId();
-		PlayerData pData = this.pDataManager.getPlayerData(uuid);
-		Role role = pData.getRole();
-
-		boolean permission = false;
-		
-		// Role별로 권한 체크
-		if(role == Role.MAKER) {
-			permission = RolePermission.MAKER_PLACEBLOCK;
-		} else if(role == Role.CHALLENGER) {
-			permission = RolePermission.CHALLENGER_PLACEBLOCK;
-		} else if(role == Role.TESTER) {
-			permission = RolePermission.TESTER_PLACEBLOCK;
-		} else if(role == Role.VIEWER) {
-			permission = RolePermission.VIEWER_PLACEBLOCK;
-		} else if(role == Role.WAITER) {
-			permission = RolePermission.WAITER_PLACEBLOCK;
-		}
-		
-		e.setCancelled(!permission);
-	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	@EventHandler
-	public void onPlayerJoin(PlayerJoinEvent e) {
-		Player p = e.getPlayer();
-		p.sendMessage("hello challenger");
-
-		
-		// PlayerData 처리
-		this.processPlayerData(p);
 	}
 	
 	void init() {
-		// PlayerDataManager의 maker초기화
-		this.pDataManager.registerMaker(null);
-		
-		
+		// resetRelay
+		this.relayManager.resetRelay();
 		
 		// 서버 리로드하면 서버에 남아있는 플레이어들 다시 등록
 		this.reRegisterAllPlayer();
@@ -266,18 +136,189 @@ public class GameManager implements Listener
 		this.pDataManager.setPlayerGameModeWithRole(uuid);
 	}
 	
+	public void reRegisterAllPlayer() {
+		for(Player p : Bukkit.getOnlinePlayers()) {
+			this.processPlayerData(p);
+		}
+	}
+	
+	
+	
+	
+	@EventHandler
+	public void onTesterAndChallengerBreakCore(BlockBreakEvent e) {
+		// Tester, Challenger의 core부수는 상황
+		
+		Block block = e.getBlock();
+		Material mat = block.getType();
+		
+		Player p = e.getPlayer();
+		UUID pUuid = p.getUniqueId();
+		PlayerData pData = this.pDataManager.getPlayerData(pUuid);
+		Role role = pData.getRole();
+		
+		
+
+		// core체크
+		if(mat.equals(Material.GLOWSTONE)) {
+		// Role별로 권한 체크
+			// Time: Challenging / Role: Challenger
+			if(role == Role.CHALLENGER) {
+				// resetRelaySettings
+				this.relayManager.resetRelaySetting();
+				
+				// 1. 현재 Maker에게 이제 Challenger라는 메세지 전송
+				BroadcastTool.sendMessageToEveryone("core is broken!!!!!!!!!!!!");
+				
+				// 2. 클리어한  maker는 pDataManager의 maker로 등록
+				this.pDataManager.registerMaker(p);
+				
+				// 3. main room 초기화
+				this.roomManager.setEmptyMainRoom();
+				
+				// 4. block 파괴
+				block.setType(Material.AIR);
+				
+				// 5.next relay 시작
+				this.relayManager.startNextTime();
+				
+				
+			
+			} 
+			// Time: Testing / Role: Tester 
+			else if(role == Role.TESTER) {
+				// 1.next relay 시작
+				this.relayManager.startNextTime();
+				// 2.이벤트 취소
+				e.setCancelled(true);
+			}
+		}
+		
+		
+	}
+	
+	
+	
+	// MakekingTime에서 Maker가 core를 설치했는지 확인 (최대 1개만 설치 가능)
+	@EventHandler
+	public void onMakerPlaceCore(BlockPlaceEvent e) {
+		Block core = e.getBlock();
+		if(core.getType() == Material.GLOWSTONE) {
+			RelayTime time = this.relayManager.getCurrentTime();
+			if(time == RelayTime.MAKING) {
+				Player p = e.getPlayer();
+				if(this.pDataManager.isMaker(p)) {
+					// 이미 설치되어 있을때
+					if(this.relayManager.isCorePlaced()) {
+						BroadcastTool.sendMessage(p, "core is already placed");
+						e.setCancelled(true);
+						return;
+					}
+					
+					// 설치 x 있을때
+					BroadcastTool.sendMessage(p, "core is placed");
+					this.relayManager.setCorePlaced(true);
+				}
+			}
+		}
+	}
+	
+	@EventHandler
+	public void onMakerBreakCore(BlockBreakEvent e) {
+		Block core = e.getBlock();
+		if(core.getType() == Material.GLOWSTONE) {
+			RelayTime time = this.relayManager.getCurrentTime();
+			if(time == RelayTime.MAKING) {
+				Player p = e.getPlayer();
+				if(this.pDataManager.isMaker(p)) {
+					BroadcastTool.sendMessage(p, "core is broken");
+					this.relayManager.setCorePlaced(false);
+				}
+			}
+		}
+	}
+	
+	@EventHandler
+	public void onPlayerBreakBlock(BlockBreakEvent e) {
+		Player p = e.getPlayer();
+		UUID uuid = p.getUniqueId();
+		PlayerData pData = this.pDataManager.getPlayerData(uuid);
+		Role role = pData.getRole();
+		
+		boolean permission = false;
+		
+		// Role별로 권한 체크
+		if(role == Role.MAKER) {
+			permission = RolePermission.MAKER_BREAKBLOCK;
+		} else if(role == Role.CHALLENGER) {
+			permission = RolePermission.CHALLENGER_BREAKBLOCK;
+		} else if(role == Role.TESTER) {
+			permission = RolePermission.TESTER_BREAKBLOCK;
+		} else if(role == Role.VIEWER) {
+			permission = RolePermission.VIEWER_BREAKBLOCK;
+		} else if(role == Role.WAITER) {
+			permission = RolePermission.WAITER_BREAKBLOCK;
+		}
+		
+		e.setCancelled(!permission);
+	}
+	
+	@EventHandler
+	public void onPlayerPlaceBlock(BlockPlaceEvent e) {
+		Player p = e.getPlayer();
+		UUID uuid = p.getUniqueId();
+		PlayerData pData = this.pDataManager.getPlayerData(uuid);
+		Role role = pData.getRole();
+
+		boolean permission = false;
+		
+		// Role별로 권한 체크
+		if(role == Role.MAKER) {
+			permission = RolePermission.MAKER_PLACEBLOCK;
+		} else if(role == Role.CHALLENGER) {
+			permission = RolePermission.CHALLENGER_PLACEBLOCK;
+		} else if(role == Role.TESTER) {
+			permission = RolePermission.TESTER_PLACEBLOCK;
+		} else if(role == Role.VIEWER) {
+			permission = RolePermission.VIEWER_PLACEBLOCK;
+		} else if(role == Role.WAITER) {
+			permission = RolePermission.WAITER_PLACEBLOCK;
+		}
+		
+		e.setCancelled(!permission);
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	@EventHandler
+	public void onPlayerJoin(PlayerJoinEvent e) {
+		Player p = e.getPlayer();
+		p.sendMessage("welcome to RelayEscape server!");
+
+		
+		// PlayerData 처리
+		this.processPlayerData(p);
+	}
 	
 	@EventHandler
 	public void onPlayerQuit(PlayerQuitEvent e) {
 		Player p = e.getPlayer();
 		
-		Player maker = this.pDataManager.getMaker();
-		if(maker == null) {
+		if(! this.pDataManager.makerExists()) {
 			return;
 		}
 		
 		// Maker가 나갔을 때
-		if(p.equals(maker)) {
+		if(this.pDataManager.isMaker(p)) {
 			RelayTime time = this.relayManager.getCurrentTime();
 			
 			// Time = WAITING, MAKING, TESTING일떄
@@ -287,14 +328,8 @@ public class GameManager implements Listener
 				// msg보내기
 				BroadcastTool.sendMessageToEveryone("Maker quit server");
 				
-				// Room 초기화
-				this.roomManager.setBaseMainRoom();
-				
-				// PlayerDataManager maker = null 처리
-				this.pDataManager.registerMaker(null);
-				
-				// RelayTime set to CHALLENGING
-				this.relayManager.startAnotherTime(RelayTime.CHALLENGING);
+				// reset relay
+				this.relayManager.resetRelay();
 			}
 			
 			
@@ -310,11 +345,7 @@ public class GameManager implements Listener
 		this.pDataManager.saveAndRemovePlayerData(p.getUniqueId());
 	}
 	
-	public void reRegisterAllPlayer() {
-		for(Player p : Bukkit.getOnlinePlayers()) {
-			this.processPlayerData(p);
-		}
-	}
+	
 }
 
 

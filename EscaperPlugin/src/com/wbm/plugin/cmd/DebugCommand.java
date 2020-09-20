@@ -12,6 +12,7 @@ import com.wbm.plugin.util.PlayerDataManager;
 import com.wbm.plugin.util.RelayManager;
 import com.wbm.plugin.util.enums.RelayTime;
 import com.wbm.plugin.util.enums.Role;
+import com.wbm.plugin.util.general.BroadcastTool;
 
 
 public class DebugCommand implements CommandExecutor
@@ -77,7 +78,12 @@ public class DebugCommand implements CommandExecutor
 		// MakingTime일때 Testing으로 넘어갈 수 있게 해주는 명령어
 		RelayTime time = this.relayManager.getCurrentTime();
 		if(time == RelayTime.MAKING) {
-			this.relayManager.startNextTime();
+			if(! this.relayManager.isCorePlaced()) {
+				BroadcastTool.sendMessage(p, "core is not placed");
+			} else {
+				this.relayManager.startNextTime();
+			}
+			
 		}
 	}
 
@@ -100,7 +106,7 @@ public class DebugCommand implements CommandExecutor
 	}
 	
 	void printAllPlayerRole(Player p) {
-		p.sendMessage(ChatColor.BOLD + "[Role]");
+		p.sendMessage(ChatColor.BOLD + "[Challenger]");
 		for(Player each : Bukkit.getOnlinePlayers()) {
 			String eachName = each.getName();
 			// all중에 자신이름일때 색깔 초혹

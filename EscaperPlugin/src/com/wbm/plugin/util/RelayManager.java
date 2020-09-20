@@ -3,6 +3,8 @@ package com.wbm.plugin.util;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.print.attribute.standard.MediaSize.ISO;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -45,11 +47,16 @@ public class RelayManager
 
 	BukkitTask currentCountDownTask;
 	
+	private boolean corePlaced;
+	
+	
+
 	public RelayManager(PlayerDataManager pDataManager,
 			RoomManager roomManager) {
 		this.pDataManager = pDataManager;
 		this.roomManager = roomManager;
 		this.currentTime = RelayTime.CHALLENGING;
+		this.corePlaced = false;
 		
 		System.out.println(ChatColor.RED + "RelayTime.WAITING: " + RelayTime.WAITING);
 		System.out.println(ChatColor.RED + "isSame TESTING, WAITING: " + RelayTime.WAITING);
@@ -84,7 +91,8 @@ public class RelayManager
 			@Override
 			public void run()
 			{
-				startMaking();
+//				startMaking();
+				startNextTime();
 			}
 		}, 20 * RelayTime.WAITING.getAmount());
 	}
@@ -113,7 +121,11 @@ public class RelayManager
 			@Override
 			public void run()
 			{
-				startTesting();
+				if(! isCorePlaced()) {
+					resetRelay();
+				} else {
+					startNextTime();
+				}
 			}
 		}, 20 * RelayTime.MAKING.getAmount());
 	}
@@ -136,14 +148,16 @@ public class RelayManager
 		
 				
 				
-		// ChallengingTime 카운트다운
+		// resetRelay 카운트다운
 		this.currentCountDownTask = Bukkit.getScheduler().runTaskLater(Main.getInstance(), new Runnable()
 		{
-			
+			// TestingTime에서 시간이 다되었다는것은 통과를 못했다는 뜻 -> restRelay 
 			@Override
 			public void run()
 			{	
-				startChallenging();
+				// reset relay
+				BroadcastTool.sendMessageToEveryone("Maker couldn't pass the test");
+				resetRelay();
 			}
 		}, 20 * RelayTime.TESTING.getAmount());
 	}
@@ -169,17 +183,16 @@ public class RelayManager
 		
 		
 		
-		// ChallengingTime 카운트다운
+		// resetRelay 카운트다운
 		this.currentCountDownTask = Bukkit.getScheduler().runTaskLater(Main.getInstance(), new Runnable()
 		{
-			// TODO: ChallengingTime에서 시간이 다되었다는것은 사람이 없거나 난이도가 어렵다는 뜻 -> baseRoom으로 변경후 ChallengingTime 재시작
+			// ChallengingTime에서 시간이 다되었다는것은 사람이 없거나 난이도가 어렵다는 뜻 -> resetRelay
 			@Override
 			public void run()
 			{	
-				// baseRoom으로 되돌려버리고, maker도 challenger로 바꿈, startChallenging재시작
-				pDataManager.unregisterMaker();
-				roomManager.setBaseMainRoom();
-				startChallenging();
+				// reset relay
+				BroadcastTool.sendMessageToEveryone("no one pass the room");
+				resetRelay();
 			}
 		}, 20 * RelayTime.CHALLENGING.getAmount());
 		
@@ -227,7 +240,8 @@ public class RelayManager
 		}
 	}
 	
-	// 일반적으로 자연스러운 Time flow (시간이 다 됬을때 or 조건이 만족되었을때)
+	// 일반적으로 자연스러운 Time flow (시간이 다 됬을때 or 조건이 만족되었을때(명령어))
+	// 다음Time 조건 검사도 해줌
 	public void startNextTime() {
 		// 먼저 현재 time task 중지
 		this.stopCurrentTime();
@@ -239,6 +253,7 @@ public class RelayManager
 		} else if(t == RelayTime.MAKING) {
 			this.startTesting();
 		} else if(t == RelayTime.TESTING) {
+			// core부수면 바로 시작
 			this.startChallenging();
 		} else if(t == RelayTime.CHALLENGING) {
 			this.startWaiting();
@@ -260,6 +275,36 @@ public class RelayManager
 			this.startChallenging();
 		}
 	}
+	
+	public void resetRelay() { 
+		// reset message
+		BroadcastTool.sendMessageToEveryone("relay reset");
+		
+		// Room 초기화
+		this.roomManager.setBaseMainRoom();
+		
+		// RelayTime set to CHALLENGING
+		this.startAnotherTime(RelayTime.CHALLENGING);
+		
+		// resetSettings
+		this.resetRelaySetting();
+	}
+	
+	public void resetRelaySetting() {
+		// corePlaced 초기화
+		this.corePlaced = false;
+		
+		// PlayerDataManager maker = null 처리
+		this.pDataManager.unregisterMaker();
+	}
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	
 	
@@ -286,6 +331,19 @@ public class RelayManager
 	{
 		this.currentCountDownTask=currentCountDownTask;
 	}
+
+	public boolean isCorePlaced()
+	{
+		return corePlaced;
+	}
+
+	public void setCorePlaced(boolean corePlaced)
+	{
+		this.corePlaced=corePlaced;
+	}
+	
+	
+	
 }
 
 

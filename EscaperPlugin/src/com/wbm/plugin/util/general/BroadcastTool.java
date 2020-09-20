@@ -7,6 +7,13 @@ import org.bukkit.entity.Player;
 
 public class BroadcastTool
 {
+	// TODO: broadcast해줄때 앞에 "[serverName] " 붙여주는 기능
+	public static String serverName;
+	
+	public static void setServerNamePrefix(String name) {
+		serverName = name;
+	}
+	
 	// sendMessage
 	public static void sendMessage(Player p, String msg)
 	{

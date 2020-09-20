@@ -74,6 +74,10 @@ public class PlayerDataManager implements ConfigurationMember
 		return (this.maker == null) ? false : true;
 	}
 	
+	public boolean isMaker(Player p) {
+		return ( p.getUniqueId().equals(this.maker.getUniqueId()) );
+	}
+	
 	public void printAllPlayer() {
 		for(PlayerData pData : this.onlinePlayerList.values()) {
 			Bukkit.getServer().broadcastMessage("player: " + pData.getName());
