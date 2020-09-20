@@ -55,4 +55,37 @@ public class BroadcastTool
 			p.sendTitle(title, subTitle, fadeIn, stay, fadeOut);
 		}
 	}
+	
+	
+	
+	
+	// Console 전용
+	public static void printConsleMessage(String msg) {
+		Bukkit.getConsoleSender().sendMessage(msg);
+	}
+	
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

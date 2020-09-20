@@ -13,7 +13,12 @@ import com.wbm.plugin.data.PlayerData;
 import com.wbm.plugin.util.PlayerDataManager;
 import com.wbm.plugin.util.RelayManager;
 import com.wbm.plugin.util.RoomManager;
+import com.wbm.plugin.util.enums.RelayTime;
 import com.wbm.plugin.util.enums.Role;
+import com.wbm.plugin.util.general.BroadcastTool;
+
+// TODO: PlayerManager를 GameManager로 통합하기 (기능 중복)
+
 
 public class PlayerManager implements Listener 
 {
@@ -57,16 +62,84 @@ public class PlayerManager implements Listener
 		// data 처리
 		UUID uuid = p.getUniqueId();
 		
-		// PlayerDataManager에 데이터 없는지 확인 (=서버 켜고 처음 들어옴)
+		// 모든 player는 무조건 Challenger이고,  각 Time에 맞는 Challenger의 Role로 역할이 배정됨! (w, m, t = Waiter, c = Challenger)
+		// (Challeging때 나간 Maker가 다시 들어온 경우 제외)
 		PlayerData pData;
-		if((pData = this.pDataManager.getPlayerData(uuid)) == null) {
-			String name = p.getName();
-			Role role = Role.CHALLENGER;
-			pData = new PlayerData(uuid, name, role);
-			this.pDataManager.addPlayerData(pData);
+		
+		Role baseRole = Role.WAITER;
+		RelayTime time = this.relayManager.getCurrentTime();
+//		if(time == RelayTime.WAITING
+//				|| time == RelayTime.MAKING
+//				|| time == RelayTime.TESTING) {
+//			role = Role.WAITER;
+//		} else 
+		
+		
+		if(time == RelayTime.CHALLENGING) {
+			baseRole = Role.CHALLENGER;
 		}
 		
 		
+		
+		
+		// TODO: config연동됬을때 활성화 시킬 코드
+//		// PlayerDataManager에 데이터 없는지 확인 (= 서버 처음 들어옴)
+//		if(this.pDataManager.isFirstJoin(uuid)) {
+//			String name = p.getName();
+//			pData = new PlayerData(uuid, name, baseRole);
+//		} 
+//		// 전에 들어왔음 (바꿀것은 Role밖에 없음)
+//		else {
+//			pData = this.pDataManager.getPlayerData(uuid);
+//			
+//			// maker가 남아있는경우는 Maker가 ChallengingTime일떄 나간경우임!
+//			// -> role을 유지해서 viewer로 겜모를바꿔서 자신이 만든룸을 clear못하게 만들어야 함
+//			if(this.pDataManager.makerExists()) {
+//				Player maker = this.pDataManager.getMaker();
+//				// 들어온사람이 전에 나간 Maker였을때
+//				if(uuid.equals(maker.getUniqueId())) {
+//					p.sendMessage("you are Viewer in your room(structure)");
+//					baseRole = Role.VIEWER;
+//				}
+//			}
+//			
+//			// role변경
+//			pData.setRole(baseRole);
+//		}
+		// TODO: config연동됬을때 활성화 시킬 코드
+		
+		
+		
+		
+		
+		
+		// TODO: config연동 안했을때 사용코드
+		if(time == RelayTime.CHALLENGING) {
+			// maker가 남아있는경우는 Maker가 ChallengingTime일떄 나간경우임!
+			// -> role을 유지해서 viewer로 겜모를바꿔서 자신이 만든룸을 clear못하게 만들어야 함
+			if(this.pDataManager.makerExists()) {
+				// 들어온사람이 전에 나간 Maker였을때
+				Player maker = this.pDataManager.getMaker();
+				if(uuid.equals(maker.getUniqueId())) {
+					p.sendMessage("you are Viewer in your room(structure)");
+					// 바꿀 목표 데이터
+					baseRole = Role.VIEWER;
+				}
+			}
+		}
+		// TODO: config연동 안했을때 사용코드
+		
+		
+		
+		
+		// 최종 PlayerData객체 만들기
+		String name = p.getName();
+		pData = new PlayerData(uuid, name, baseRole);
+		
+		
+		
+		// playerDataManager에 데이터 add
+		this.pDataManager.addPlayerData(pData);
 		// gamemode 처리
 		this.pDataManager.setPlayerGameModeWithRole(uuid);
 	}
@@ -74,30 +147,45 @@ public class PlayerManager implements Listener
 	
 	@EventHandler
 	public void onPlayerQuit(PlayerQuitEvent e) {
-//		Player p = e.getPlayer();
-//		
-//		UUID pUuid = p.getUniqueId();
-//		Player maker = this.pDataManager.getMakerPlayerData();
-//		if(maker.isOnline()) {
-//			return;
-//		}
-//		UUID makerUuid = maker.getUniqueId();
-//		
-//		// Maker가 제작중에 서버를 나갔을시 (제작후에는 상관없음) 
-//		// TODO: 나중에 시간시스템 넣으면 제작자가 제작중에 나갔을때만 조건 추가해야 함
-//		if(pUuid == makerUuid) {
-//			Bukkit.getServer().broadcastMessage("Maker quit server!");
-//			Bukkit.getServer().broadcastMessage("Main room will be changed to base room");
-//			
-//			this.roomManager.setBaseMainRoom();
-//		}
-//		
-//		// pDataManager 삭제하지말고 HashMap에 데이터 저장하고 있다가, 서버 끝날떄 파일로 저장하기 (또는 시간주기) 
-////		this.pDataManager.deletePlayerData(uuid);
-//		
-//		// 나간 player Role.CHALLENGER로 바꾸기
-//		PlayerData pData = this.pDataManager.getPlayerData(pUuid);
-//		pData.setRole(Role.CHALLENGER);
+		Player p = e.getPlayer();
+		
+		Player maker = this.pDataManager.getMaker();
+		if(maker == null) {
+			return;
+		}
+		
+		// Maker가 나갔을 때
+		if(p.equals(maker)) {
+			RelayTime time = this.relayManager.getCurrentTime();
+			
+			// Time = WAITING, MAKING, TESTING일떄
+			if(time == RelayTime.WAITING
+					|| time == RelayTime.MAKING
+					|| time == RelayTime.TESTING) {
+				// msg보내기
+				BroadcastTool.sendMessageToEveryone("Maker quit server");
+				
+				// Room 초기화
+				this.roomManager.setBaseMainRoom();
+				
+				// PlayerDataManager maker = null 처리
+				this.pDataManager.registerMaker(null);
+				
+				// RelayTime set to CHALLENGING
+				this.relayManager.startAnotherTime(RelayTime.CHALLENGING);
+			}
+			
+			
+			// Time = CHALLENGING 일때
+			// -> 재접해서 다시 클리어 방지!
+			else if(time == RelayTime.CHALLENGING) {
+				// PlayerDataManager maker = null 처리하지 않고, 다시 들어올때 maker에 있는 player로 maker판별!
+				// -> 수행할 동작이 없음
+			}
+		}
+		
+		// PlayerDataManager 처리
+		this.pDataManager.saveAndRemovePlayerData(p.getUniqueId());
 	}
 	
 	public void reRegisterAllPlayer() {

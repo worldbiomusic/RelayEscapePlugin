@@ -9,7 +9,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import com.wbm.plugin.cmd.DebugCommand;
 import com.wbm.plugin.data.PlayerData;
 import com.wbm.plugin.listener.GameManager;
-import com.wbm.plugin.listener.PlayerManager;
 import com.wbm.plugin.util.PlayerDataManager;
 import com.wbm.plugin.util.RelayManager;
 import com.wbm.plugin.util.RoomManager;
@@ -21,7 +20,6 @@ public class Main extends JavaPlugin
 	Server server;
 	PluginManager pluginManager;
 	
-	PlayerManager pManager;
 	GameManager gManager;
 	PlayerDataManager pDataManager;
 	RoomManager roomManager;
@@ -75,10 +73,9 @@ public class Main extends JavaPlugin
 	
 	void setupManagers() throws Exception {
 		this.pDataManager = new PlayerDataManager();
-		this.relayManager = new RelayManager(this.pDataManager);
 		this.roomManager = new RoomManager();
+		this.relayManager = new RelayManager(this.pDataManager, this.roomManager);
 //		this.configManager = new ConfigManager(this.getDataFolder().getPath());
-		this.pManager = new PlayerManager(this.pDataManager, this.roomManager, this.relayManager);
 		this.gManager = new GameManager(this.pDataManager, this.roomManager, this.relayManager);
 		
 		
@@ -90,7 +87,6 @@ public class Main extends JavaPlugin
 	
 	private void registerListeners()
 	{
-		this.registerEvent(this.pManager);
 		this.registerEvent(this.gManager);
 	}
 	void registerEvent(Listener listener) {

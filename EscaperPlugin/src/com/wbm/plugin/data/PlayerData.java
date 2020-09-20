@@ -12,8 +12,9 @@ public class PlayerData implements ConfigurationSerializable
 {
 	
 	transient UUID uuid;
-	String name;
-	Role role;
+	transient String name;
+	transient Role role;
+	int token;
 	
 	public PlayerData(UUID uuid, String name, Role role) {
 		this.uuid = uuid;

@@ -12,37 +12,52 @@ import org.bukkit.entity.Player;
 import com.wbm.plugin.data.PlayerData;
 import com.wbm.plugin.util.config.ConfigurationMember;
 import com.wbm.plugin.util.enums.Role;
+import com.wbm.plugin.util.general.BroadcastTool;
 
 public class PlayerDataManager implements ConfigurationMember
 {
-	Map<UUID, PlayerData> playerList;
+	// online Player만 가지고 있는 데이터
+	Map<UUID, PlayerData> onlinePlayerList;
 	
-	// 실제적인 Role에 상관없이 한 판의 제작자를 가리키는 변수
+	// server 켜질때 config데이터 담긴 데이터
+	// player quit할때 onlinePlayerList에서 데이터를 여기로 저장해주는 데이터 보관소 
+	// (서버 꺼질때 config파일에 데이터 넘겨서 저장)
+	Map<UUID, PlayerData> allPlayerSavigData;
+	
+	// 실제적인 Role에 상관없이 현재 Time의 제작자를 가리키는 변수
+	// Waiting, Making, Testing Time에서는 무조건 있고, 
+	// ChallengingTime에는 있을수도(Challenging일때 나간 경우) 없을수도 있음(Challenge아니었을때 나가서 null인 경우)
 	Player maker;
 	
 	public PlayerDataManager() {
-		this.playerList = new HashMap<UUID, PlayerData>();
+		this.onlinePlayerList = new HashMap<UUID, PlayerData>();
+		this.allPlayerSavigData = new HashMap<UUID, PlayerData>();
 	}
 	
 	public void addPlayerData(PlayerData pData) {
-		this.playerList.put(pData.getUUID(), pData);
+		this.onlinePlayerList.put(pData.getUUID(), pData);
 	}
 	
-//	public void deletePlayerData(UUID uuid) {
-//		if(this.playerList.containsKey(uuid)) {
-//			this.playerList.remove(uuid);
-//		}
-//	}
+	public void saveAndRemovePlayerData(UUID uuid) {
+		// server quit할때 사용
+		if(this.onlinePlayerList.containsKey(uuid)) {
+			// this.allPlayerSavigData에 데이터 저장
+			PlayerData pData = this.onlinePlayerList.get(uuid);
+			this.allPlayerSavigData.put(uuid, pData);
+			
+			// this.onlinePlayerList에서 데이터 삭제
+			this.onlinePlayerList.remove(uuid);
+		}
+	}
 	
 	public PlayerData getPlayerData(UUID uuid) {
-		if(this.playerList.containsKey(uuid)) {
-			return this.playerList.get(uuid);
-		}
-		
-		return null;
+		return this.onlinePlayerList.get(uuid);
 	}
 	
-	// TODO: 메소드 이름 getMakerPlayerData -> getMaeker로 바꾸기 
+	public boolean isFirstJoin(UUID uuid) {
+		return this.allPlayerSavigData.containsKey(uuid);
+	}
+	
 	public Player getMaker() {
 		return this.maker;
 	}
@@ -51,8 +66,16 @@ public class PlayerDataManager implements ConfigurationMember
 		this.maker = p;
 	}
 	
+	public void unregisterMaker() {
+		this.maker = null;
+	}
+	
+	public boolean makerExists() {
+		return (this.maker == null) ? false : true;
+	}
+	
 	public void printAllPlayer() {
-		for(PlayerData pData : this.playerList.values()) {
+		for(PlayerData pData : this.onlinePlayerList.values()) {
 			Bukkit.getServer().broadcastMessage("player: " + pData.getName());
 			Bukkit.getServer().broadcastMessage("role: " + pData.getRole());
 			Bukkit.getServer().broadcastMessage("-----------------------------");
@@ -62,6 +85,12 @@ public class PlayerDataManager implements ConfigurationMember
 	public void changePlayerRole(UUID uuid, Role role) {
 		// gamemode, role바꾸기
 		PlayerData pData = this.getPlayerData(uuid);
+		
+		if(pData == null) {
+			BroadcastTool.printConsleMessage("[Bug]: changePlayerRole()- no player in onlinePlayerList");
+			return;
+		}
+		
 		pData.setRole(role);
 
 		this.setPlayerGameModeWithRole(uuid);
@@ -69,6 +98,10 @@ public class PlayerDataManager implements ConfigurationMember
 	
 	public void setPlayerGameModeWithRole(UUID uuid) {
 		PlayerData pData = this.getPlayerData(uuid);
+		if(pData == null) {
+			return;
+		}
+		
 		Role role = pData.getRole();
 		
 		GameMode mode = GameMode.SURVIVAL;
@@ -119,7 +152,7 @@ public class PlayerDataManager implements ConfigurationMember
 			
 			// TODO: foreach loop: tmp의 Entry로 간단하게 바꾸기
 			for(String uuid : tmp.keySet()) {
-				this.playerList.put(UUID.fromString(uuid), (PlayerData)tmp.get(uuid));
+				this.onlinePlayerList.put(UUID.fromString(uuid), (PlayerData)tmp.get(uuid));
 			}
 //		}
 	}
@@ -130,8 +163,8 @@ public class PlayerDataManager implements ConfigurationMember
 	{
 		// TODO Auto-generated method stub
 		Map<String, PlayerData> tmp = new HashMap<>();
-		for(UUID uuid: this.playerList.keySet()) {
-			tmp.put(uuid.toString(), this.playerList.get(uuid));
+		for(UUID uuid: this.onlinePlayerList.keySet()) {
+			tmp.put(uuid.toString(), this.onlinePlayerList.get(uuid));
 		}
 		
 		Map<String, Object> map=new HashMap<>();

@@ -66,9 +66,22 @@ public class DebugCommand implements CommandExecutor
 			case "time":
 				this.printCurrentRelayTime(p);
 				break;
+			case "finish":
+				this.finishMakingTime(p);
+				break;
 		}
 	}
 	
+	private void finishMakingTime(Player p)
+	{
+		// MakingTime일때 Testing으로 넘어갈 수 있게 해주는 명령어
+		RelayTime time = this.relayManager.getCurrentTime();
+		if(time == RelayTime.MAKING) {
+			this.relayManager.startNextTime();
+		}
+	}
+
+
 	private void printAllDebugInfo(Player p)
 	{
 		// print maker
@@ -87,6 +100,7 @@ public class DebugCommand implements CommandExecutor
 	}
 	
 	void printAllPlayerRole(Player p) {
+		p.sendMessage(ChatColor.BOLD + "[Role]");
 		for(Player each : Bukkit.getOnlinePlayers()) {
 			String eachName = each.getName();
 			// all중에 자신이름일때 색깔 초혹
@@ -95,13 +109,16 @@ public class DebugCommand implements CommandExecutor
 			}
 			PlayerData allData = this.pDataManager.getPlayerData(each.getUniqueId());
 			Role role = allData.getRole();
-			p.sendMessage(eachName + " Role: " + role.name());
+			p.sendMessage(eachName + ": " + role.name());
 		}
+		p.sendMessage("------------------------------");
 	}
 	
 	void printCurrentRelayTime(Player p) {
 		RelayTime time = this.relayManager.getCurrentTime();
-		p.sendMessage("Time: " + time.name());
+		p.sendMessage(ChatColor.BOLD + "[Time]");
+		p.sendMessage(time.name());
+		p.sendMessage("------------------------------");
 	}
 	
 	private void printMaker(Player p)
@@ -111,7 +128,9 @@ public class DebugCommand implements CommandExecutor
 		if(maker!=null) {
 			makerName = maker.getName();
 		}
-		p.sendMessage("Maker: " + ChatColor.RED + makerName);
+		p.sendMessage(ChatColor.BOLD + "[Maker]");
+		p.sendMessage(ChatColor.RED + makerName);
+		p.sendMessage("------------------------------");
 	}
 }
 
