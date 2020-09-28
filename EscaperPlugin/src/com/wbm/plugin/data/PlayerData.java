@@ -1,18 +1,17 @@
 package com.wbm.plugin.data;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import org.bukkit.configuration.serialization.ConfigurationSerializable;
-
 import com.wbm.plugin.util.enums.Role;
 
-public class PlayerData implements ConfigurationSerializable
+public class PlayerData implements Serializable
 {
-	
+	private static final long serialVersionUID=1L;
 	transient UUID uuid;
-	transient String name;
+	String name;
 	transient Role role;
 	int token;
 	
@@ -20,6 +19,7 @@ public class PlayerData implements ConfigurationSerializable
 		this.uuid = uuid;
 		this.name = name;
 		this.role = role;
+		this.token = 0;
 	}
 	
 	public UUID getUUID()
@@ -51,18 +51,22 @@ public class PlayerData implements ConfigurationSerializable
 	{
 		this.role=role;
 	}
-	
+
 	@Override
-	public Map<String, Object> serialize()
+	public String toString()
 	{
-		Map<String, Object> serialData = new HashMap<>();
-		serialData.put("uuid", this.uuid.toString());
-		serialData.put("name", this.name);
-		serialData.put("role", this.role.name());
-		
-		
-		return null;
+		return "PlayerData [name="+name+", token="+token+"]";
 	}
 	
-	
+	// ConfigurationSerializable 용
+//	@Override
+//	public Map<String, Object> serialize()
+//	{
+//		Map<String, Object> serialData = new HashMap<>();
+//		serialData.put("name", this.name);
+//		serialData.put("token", this.token);
+//		
+//		
+//		return serialData;
+//	}
 }

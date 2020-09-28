@@ -1,17 +1,17 @@
 package com.wbm.plugin;
 
 import org.bukkit.Server;
-import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.wbm.plugin.cmd.DebugCommand;
-import com.wbm.plugin.data.PlayerData;
 import com.wbm.plugin.listener.GameManager;
 import com.wbm.plugin.util.PlayerDataManager;
 import com.wbm.plugin.util.RelayManager;
 import com.wbm.plugin.util.RoomManager;
+import com.wbm.plugin.util.config.ConfigTest;
+import com.wbm.plugin.util.config.DataManager;
 
 import net.md_5.bungee.api.ChatColor;
 
@@ -24,14 +24,15 @@ public class Main extends JavaPlugin
 	PlayerDataManager pDataManager;
 	RoomManager roomManager;
 	RelayManager relayManager;
-//	ConfigManager configManager;
+//	ConfigManager2 configManager;
+//	ConfigManager3 configManager;
+	DataManager dataManager;
 	
 	// command executor
 	DebugCommand dCmd;
 	
-	static {
-	    ConfigurationSerialization.registerClass(PlayerData.class);
-	}
+	
+	ConfigTest ct;
 	
 	static Main main;
 	
@@ -42,6 +43,7 @@ public class Main extends JavaPlugin
 	@Override 
 	public void onEnable()
 	{
+//		ConfigurationSerialization.registerClass(PlayerData.class);
 		main = this;
 		
 		try {
@@ -52,8 +54,6 @@ public class Main extends JavaPlugin
 			
 			this.registerListeners();
 			this.registerCommands();
-			
-
 			
 			this.getServer().getConsoleSender().sendMessage(ChatColor.GREEN + "EscaperServerPlugin ON");
 		} catch(Exception e) {
@@ -72,16 +72,22 @@ public class Main extends JavaPlugin
 	}
 	
 	void setupManagers() throws Exception {
-		this.pDataManager = new PlayerDataManager();
+		this.ct = new ConfigTest(this.getDataFolder().getPath());
+		this.dataManager = new DataManager(this.getDataFolder().getPath());
+		this.pDataManager = new PlayerDataManager(this.ct);
 		this.roomManager = new RoomManager();
 		this.relayManager = new RelayManager(this.pDataManager, this.roomManager);
-//		this.configManager = new ConfigManager(this.getDataFolder().getPath());
+//		this.configManager = new ConfigManager3(this.getDataFolder().getPath());
 		this.gManager = new GameManager(this.pDataManager, this.roomManager, this.relayManager);
 		
+//		// register class to config manager
+//		this.configManager.registerMember(this.pDataManager);
+//		
+//		// distribute config data to registered class
+//		this.configManager.distributeEachConfigData();
 		
-//		this.configManager.registerMember("player", this.pDataManager);
-		
-//		this.configManager.installEachConfigData();
+		this.dataManager.registerMember(this.pDataManager);
+		this.dataManager.distributeData();
 	}
 	
 	
@@ -103,7 +109,6 @@ public class Main extends JavaPlugin
 	@Override
 	public void onDisable()
 	{
-		super.onDisable();
 //		try
 //		{
 //			this.configManager.saveFile();
@@ -113,5 +118,25 @@ public class Main extends JavaPlugin
 //			e.printStackTrace();
 //		}
 		
+		
+		
+//		this.pDataManager.saveAllPlayerSavingData();
+//		this.ct.save();
+//		this.ct.printContent();
+		
+		
+		
+		
+//		try
+//		{
+//			this.configManager.saveFile();
+//		}
+//		catch(Exception e)
+//		{
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+		
+		this.dataManager.save();
 	}
 }

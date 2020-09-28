@@ -3,8 +3,6 @@ package com.wbm.plugin.util;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.print.attribute.standard.MediaSize.ISO;
-
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -57,9 +55,6 @@ public class RelayManager
 		this.roomManager = roomManager;
 		this.currentTime = RelayTime.CHALLENGING;
 		this.corePlaced = false;
-		
-		System.out.println(ChatColor.RED + "RelayTime.WAITING: " + RelayTime.WAITING);
-		System.out.println(ChatColor.RED + "isSame TESTING, WAITING: " + RelayTime.WAITING);
 	}
 	
 	// Waiting이 시작하려면 무조건 maker가 등록되어 있어야 함!

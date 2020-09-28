@@ -313,33 +313,33 @@ public class GameManager implements Listener
 	public void onPlayerQuit(PlayerQuitEvent e) {
 		Player p = e.getPlayer();
 		
-		if(! this.pDataManager.makerExists()) {
-			return;
+		if(this.pDataManager.makerExists()) {
+			// Maker가 나갔을 때
+			if(this.pDataManager.isMaker(p)) {
+				RelayTime time = this.relayManager.getCurrentTime();
+				
+				// Time = WAITING, MAKING, TESTING일떄
+				if(time == RelayTime.WAITING
+						|| time == RelayTime.MAKING
+						|| time == RelayTime.TESTING) {
+					// msg보내기
+					BroadcastTool.sendMessageToEveryone("Maker quit server");
+					
+					// reset relay
+					this.relayManager.resetRelay();
+				}
+				
+				
+				// Time = CHALLENGING 일때
+				// -> 재접해서 다시 클리어 방지!
+				else if(time == RelayTime.CHALLENGING) {
+					// PlayerDataManager maker = null 처리하지 않고, 다시 들어올때 maker에 있는 player로 maker판별!
+					// -> 수행할 동작이 없음
+				}
+			}
 		}
 		
-		// Maker가 나갔을 때
-		if(this.pDataManager.isMaker(p)) {
-			RelayTime time = this.relayManager.getCurrentTime();
-			
-			// Time = WAITING, MAKING, TESTING일떄
-			if(time == RelayTime.WAITING
-					|| time == RelayTime.MAKING
-					|| time == RelayTime.TESTING) {
-				// msg보내기
-				BroadcastTool.sendMessageToEveryone("Maker quit server");
-				
-				// reset relay
-				this.relayManager.resetRelay();
-			}
-			
-			
-			// Time = CHALLENGING 일때
-			// -> 재접해서 다시 클리어 방지!
-			else if(time == RelayTime.CHALLENGING) {
-				// PlayerDataManager maker = null 처리하지 않고, 다시 들어올때 maker에 있는 player로 maker판별!
-				// -> 수행할 동작이 없음
-			}
-		}
+		
 		
 		// PlayerDataManager 처리
 		this.pDataManager.saveAndRemovePlayerData(p.getUniqueId());
