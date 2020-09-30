@@ -174,7 +174,7 @@ public class RelayManager
 			this.pDataManager.changePlayerRole(p.getUniqueId(), Role.CHALLENGER);
 		}
 
-		// message 관리
+		// message 관리 
 		BroadcastTool.sendMessageToEveryone(
 				"challengingTime: new challengingTime starts in "+RelayTime.CHALLENGING.getAmount()+" sec");
 
