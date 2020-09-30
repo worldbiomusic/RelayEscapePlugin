@@ -59,18 +59,18 @@ public class ConfigManager3
 
 	public void registerMember(ConfigurationMember member)
 	{
-		BroadcastTool.printConsleMessage("key: "+ChatColor.RED+"registerMember");
+		BroadcastTool.printConsoleMessage("key: "+ChatColor.RED+"registerMember");
 		this.members.put(member.getConfigMemberName(), member);
 
 		File f=new File(this.baseDirPath, member.getConfigMemberName()+".yml");
-		BroadcastTool.printConsleMessage("file size: "+ChatColor.RED+ f.length());
+		BroadcastTool.printConsoleMessage("file size: "+ChatColor.RED+ f.length());
 
 		// make file
 		if(!f.exists())
 		{
 			try
 			{
-				BroadcastTool.printConsleMessage("key: "+ChatColor.RED+"make new file!!!!!!!!!");
+				BroadcastTool.printConsoleMessage("key: "+ChatColor.RED+"make new file!!!!!!!!!");
 				f.createNewFile();
 			}
 			catch(Exception e)
@@ -91,7 +91,7 @@ public class ConfigManager3
 
 		for(String uuid : keys)
 		{
-			BroadcastTool.printConsleMessage("key: "+ChatColor.RED+ uuid);
+			BroadcastTool.printConsoleMessage("key: "+ChatColor.RED+ uuid);
 		}
 	}
 

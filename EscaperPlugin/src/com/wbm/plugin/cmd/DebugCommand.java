@@ -106,7 +106,7 @@ public class DebugCommand implements CommandExecutor
 	}
 	
 	void printAllPlayerRole(Player p) {
-		p.sendMessage(ChatColor.BOLD + "[Challenger]");
+		p.sendMessage(ChatColor.BOLD + "[Role]");
 		for(Player each : Bukkit.getOnlinePlayers()) {
 			String eachName = each.getName();
 			// all중에 자신이름일때 색깔 초혹

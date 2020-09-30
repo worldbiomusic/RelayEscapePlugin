@@ -24,13 +24,10 @@ public class Main extends JavaPlugin
 	PlayerDataManager pDataManager;
 	RoomManager roomManager;
 	RelayManager relayManager;
-//	ConfigManager2 configManager;
-//	ConfigManager3 configManager;
 	DataManager dataManager;
 	
 	// command executor
 	DebugCommand dCmd;
-	
 	
 	ConfigTest ct;
 	
@@ -74,20 +71,19 @@ public class Main extends JavaPlugin
 	void setupManagers() throws Exception {
 		this.ct = new ConfigTest(this.getDataFolder().getPath());
 		this.dataManager = new DataManager(this.getDataFolder().getPath());
+
 		this.pDataManager = new PlayerDataManager(this.ct);
+		this.dataManager.registerMember(this.pDataManager);
+		
 		this.roomManager = new RoomManager();
+		this.dataManager.registerMember(this.roomManager);
+		
+		this.dataManager.distributeData();
+		
 		this.relayManager = new RelayManager(this.pDataManager, this.roomManager);
-//		this.configManager = new ConfigManager3(this.getDataFolder().getPath());
 		this.gManager = new GameManager(this.pDataManager, this.roomManager, this.relayManager);
 		
-//		// register class to config manager
-//		this.configManager.registerMember(this.pDataManager);
-//		
-//		// distribute config data to registered class
-//		this.configManager.distributeEachConfigData();
 		
-		this.dataManager.registerMember(this.pDataManager);
-		this.dataManager.distributeData();
 	}
 	
 	
@@ -109,34 +105,6 @@ public class Main extends JavaPlugin
 	@Override
 	public void onDisable()
 	{
-//		try
-//		{
-//			this.configManager.saveFile();
-//		}
-//		catch(Exception e)
-//		{
-//			e.printStackTrace();
-//		}
-		
-		
-		
-//		this.pDataManager.saveAllPlayerSavingData();
-//		this.ct.save();
-//		this.ct.printContent();
-		
-		
-		
-		
-//		try
-//		{
-//			this.configManager.saveFile();
-//		}
-//		catch(Exception e)
-//		{
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-		
 		this.dataManager.save();
 	}
 }

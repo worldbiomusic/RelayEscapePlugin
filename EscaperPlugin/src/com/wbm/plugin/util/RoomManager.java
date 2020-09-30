@@ -1,58 +1,260 @@
 package com.wbm.plugin.util;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.block.Block;
 
-public class RoomManager
+import com.wbm.plugin.data.BlockData;
+import com.wbm.plugin.data.Room;
+import com.wbm.plugin.util.config.DataMember;
+import com.wbm.plugin.util.general.BroadcastTool;
+
+public class RoomManager implements DataMember
 {
-	public RoomManager() {
-		
+	Room baseRoom;
+	Room mainRoom;
+
+	// key: room.name / value: room
+	Map<String, Room> rooms;
+
+	public RoomManager()
+	{
+		this.rooms=new HashMap<>();
+
+		// server main room loation 범위 설정
+		World world=Bukkit.getWorld("world");
+		Location loc1=new Location(world, 1, 4, 1);
+		Location loc2=new Location(world, 10, 50, 10);
+		Room.setMainRoomSpace(loc1, loc2);
+
+		// register basic rooms
+		this.registerBasicRooms();
 	}
 	
-	public void setPlaceWithBlock(Location loc1, Location loc2, Material mat) {
-		this.loopPlaceBlockWithBlock(loc1, loc2, mat);
+	public void saveRoomData(String makerName) {
+		// TODO: RoomType으로 구별해서 지역별로 data만들기 (argu에 RoomType roomType 추가하기)
+		
+		// main room
+		List<BlockData> blockDatas = this.getRoomBlockDatas();
+		String title = this.getNextTitleWithMaker(makerName);
+		
+		Room room = new Room(title, makerName, blockDatas, 
+				0, 0, LocalDateTime.now());
+		
+		// rooms 에 저장
+		this.rooms.put(title, room);
 	}
 	
-	void loopPlaceBlockWithBlock(Location loc1, Location loc2, Material mat) {
-		int dx = (int)loc2.getX() - (int)loc1.getX();
-		int dy = (int)loc2.getY() - (int)loc1.getY();
-		int dz = (int)loc2.getZ() - (int)loc1.getZ();
+	public String getNextTitleWithMaker(String maker) {
+		// Room title입력안했을시 maker1, maker2, maker3 ... 순으로 title이 저장됨
+		for(int i = 1; i < 1000; i++) {
+			String title = maker + i;
+			if(! (this.rooms.containsKey(title))) {
+				return title;
+			}
+		}
 		
-//		Bukkit.getServer().broadcastMessage("dx: " + dx);
-//		Bukkit.getServer().broadcastMessage("dz: " + dz);
+		// 한 사람이 방을 1000개 초과 만들었을떄 ㄷㄷ
+		return null;
+	}
+	
+	// TODO: RoomType으로 구별해서 지역별로 data만들기 (argu에 RoomType roomType 추가하기)
+	public List<BlockData> getRoomBlockDatas() {
 		
-		for(int x = 0; x <= dx; x++) {
-			for(int z = 0; z <= dz; z++) {
-				for(int y = 0; y <= dy; y++) {
-					Location loc = loc1.clone();
+		// Main room
+		Location loc1=Room.mainRoomLoc1;
+		Location loc2=Room.mainRoomLoc2;
+		
+		
+		int dx=(int)loc2.getX()-(int)loc1.getX();
+		int dy=(int)loc2.getY()-(int)loc1.getY();
+		int dz=(int)loc2.getZ()-(int)loc1.getZ();
+		
+		List<BlockData> blocks = new ArrayList<>();
+		for(int z=0; z<=dz; z++)
+		{
+			for(int y=0; y<=dy; y++)
+			{
+				for(int x=0; x<=dx; x++)
+				{
+					Location loc=loc1.clone();
 					loc.add(x, y, z);
+					Block b = loc.getBlock();
+
+					Material mat = b.getType();
+					@SuppressWarnings("deprecation")
+					Byte data = b.getData();
+					BlockData blockData = new BlockData(mat, data);
 					
-					loc.getBlock().setType(mat);
+					// add to blockData list
+					blocks.add(blockData);
 				}
 			}
 		}
 		
+		return blocks;
 	}
-	
-	
-	
-	public void setEmptyMainRoom() {
-		World world = Bukkit.getWorld("world");
-		Location loc1 = new Location(world, 1, 4, 1);
-		Location loc2 = new Location(world, 10, 50, 10);
-		this.setPlaceWithBlock(loc1, loc2, Material.AIR);
+
+	private void registerBasicRooms()
+	{
+		// empty room
+		List<BlockData> emptyBlocks=new ArrayList<>();
+		for(int i=0; i<(10*10*47); i++)
+		{
+			emptyBlocks.add(new BlockData(Material.AIR, 0));
+		}
+		if(!(this.rooms.containsKey("empty")))
+		{
+			Room emptyRoom=new Room("empty", "wbm", emptyBlocks
+					, 0, 0, LocalDateTime.of(2020, 11, 1, 0, 0));
+			this.rooms.put("empty", emptyRoom);
+		}
+
+		// base room
+		if(!(this.rooms.containsKey("base")))
+		{
+			List<BlockData> baseBlocks=new ArrayList<>();
+			baseBlocks.add(new BlockData(Material.GLOWSTONE, 0));
+			for(int i=0; i<(10*10*47); i++)
+			{
+				baseBlocks.add(new BlockData(Material.AIR, 0));
+			}
+
+			Room baseRoom=new Room("base", "wbm", baseBlocks
+					, 0, 0, LocalDateTime.of(2020, 11, 1, 0, 0));
+			this.rooms.put("base", baseRoom);
+		}
+
 	}
-	
-	public void setBaseMainRoom() {
+
+	public void setMainRoom(Room room)
+//	setRoom()으로 바꾸고, RoomType으로 결정할 수 있게 하기
+	{
+		this.fillSpace(Room.mainRoomLoc1, Room.mainRoomLoc2, room.getBlocks());
+	}
+
+	@SuppressWarnings("deprecation")
+	void fillSpace(Location loc1, Location loc2, List<BlockData> blocks)
+	{
+		int dx=(int)loc2.getX()-(int)loc1.getX();
+		int dy=(int)loc2.getY()-(int)loc1.getY();
+		int dz=(int)loc2.getZ()-(int)loc1.getZ();
+
+		int index=0;
+		for(int z=0; z<=dz; z++)
+		{
+			for(int y=0; y<=dy; y++)
+			{
+				for(int x=0; x<=dx; x++)
+				{
+					Location loc=loc1.clone();
+					loc.add(x, y, z);
+
+					BlockData blockData = blocks.get(index);
+					Material mat = blockData.getMaterial();
+					Byte data = blockData.getData();
+					// set type
+					loc.getBlock().setType(mat);
+					// set data
+					loc.getBlock().setData(data);
+					
+					index++;
+				}
+			}
+		}
+
+	}
+
+	void fillSpaceWithMaterial(Location loc1, Location loc2, List<Material> materials)
+	{
+		int dx=(int)loc2.getX()-(int)loc1.getX();
+		int dy=(int)loc2.getY()-(int)loc1.getY();
+		int dz=(int)loc2.getZ()-(int)loc1.getZ();
+
+//		Bukkit.getServer().broadcastMessage("dx: " + dx);
+//		Bukkit.getServer().broadcastMessage("dz: " + dz);
+
+		int index=0;
+		for(int z=0; z<=dz; z++)
+		{
+			for(int y=0; y<=dy; y++)
+			{
+				for(int x=0; x<=dx; x++)
+				{
+					Location loc=loc1.clone();
+					loc.add(x, y, z);
+
+					loc.getBlock().setType(materials.get(index));
+					index++;
+				}
+			}
+		}
+
+	}
+
+	public void setMainRoomEmpty()
+	{
+		this.setMainRoom(this.rooms.get("empty"));
+	}
+
+	public void setMainRoomToBaseRoom()
+	{
 		// Maker뽑기위해 일단 이전맵을 돌려야 하는 메서드지만 아직 기반이없어서
 		// base room으로 가운에 glowstone하나 설치해서 Maker 한사람 구하기가 목적
-		this.setEmptyMainRoom();
+
+//		this.setMainRoom(this.rooms.get("base"));
 		
-		World world = Bukkit.getWorld("world");
-		Location loc1 = new Location(world, 5, 4, 5);
-		Location loc2 = new Location(world, 5, 4, 5);
-		this.setPlaceWithBlock(loc1, loc2, Material.GLOWSTONE);
+		// TODO: 임시로 base room을 랜덤으로 설정
+		Set<String> keys = this.rooms.keySet();
+		String[] titles = new String[keys.size()];
+		keys.toArray(titles);
+		
+		int r = (int) (Math.random() * titles.length);
+		String title = titles[r];
+		
+		// empty이면 core가 없어 진행이 불가능이므로 base로 교체
+		if(title.equals("empty")) {
+			title = "base";
+		}
+		
+		Room room = this.rooms.get(title);
+		
+		this.setMainRoom(room);
+		
+		BroadcastTool.printConsoleMessage("base room: " + title);
+		BroadcastTool.printConsoleMessage("room count : " + titles.length);
+		
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public void installData(Object obj)
+	{
+		this.rooms=(Map<String, Room>)obj;
+
+		// register basic rooms
+		this.registerBasicRooms();
+	}
+
+	@Override
+	public Object getData()
+	{
+		return this.rooms;
+	}
+
+	@Override
+	public String getDataMemberName()
+	{
+		// TODO Auto-generated method stub
+		return "room";
 	}
 }

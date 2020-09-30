@@ -65,8 +65,8 @@ public class ConfigTest
 		Map<Integer, String> get1=(Map<Integer, String>)load.get("2");
 		Map<Integer, String> get2=(Map<Integer, String>)load.get("3");
 
-		BroadcastTool.printConsleMessage("configTest: "+ChatColor.RED+get1.get(5));
-		BroadcastTool.printConsleMessage("configTest: "+ChatColor.RED+get2.get(9));
+		BroadcastTool.printConsoleMessage("configTest: "+ChatColor.RED+get1.get(5));
+		BroadcastTool.printConsoleMessage("configTest: "+ChatColor.RED+get2.get(9));
 
 	}
 
@@ -109,7 +109,7 @@ public class ConfigTest
 			Map<String, Object> players = (Map<String, Object>)this.config.get("players");
 			for(String key : players.keySet()) {
 				PlayerData pData = (PlayerData)players.get(key);
-				BroadcastTool.printConsleMessage("configTest: "+ChatColor.RED+ pData.getName());
+				BroadcastTool.printConsoleMessage("configTest: "+ChatColor.RED+ pData.getName());
 			}
 		}
 			

@@ -174,16 +174,13 @@ public class GameManager implements Listener
 				this.pDataManager.registerMaker(p);
 				
 				// 3. main room 초기화
-				this.roomManager.setEmptyMainRoom();
+				this.roomManager.setMainRoomEmpty();
 				
 				// 4. block 파괴
 				block.setType(Material.AIR);
 				
 				// 5.next relay 시작
 				this.relayManager.startNextTime();
-				
-				
-			
 			} 
 			// Time: Testing / Role: Tester 
 			else if(role == Role.TESTER) {
