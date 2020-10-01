@@ -70,6 +70,9 @@ public class DebugCommand implements CommandExecutor
 			case "finish":
 				this.finishMakingTime(p);
 				break;
+			case "reset":
+				this.relayManager.resetRelay();
+				break;
 		}
 	}
 	
@@ -100,7 +103,7 @@ public class DebugCommand implements CommandExecutor
 
 
 	void printPlayerRole(Player p) {
-		PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
+		PlayerData pData = this.pDataManager.getOnlinePlayerData(p.getUniqueId());
 		Role role = pData.getRole();
 		p.sendMessage(p.getName() + " Role: " + role.name());
 	}
@@ -113,7 +116,7 @@ public class DebugCommand implements CommandExecutor
 			if(eachName.equals(p.getName())) {
 				eachName = ChatColor.GREEN + eachName + ChatColor.WHITE;
 			}
-			PlayerData allData = this.pDataManager.getPlayerData(each.getUniqueId());
+			PlayerData allData = this.pDataManager.getOnlinePlayerData(each.getUniqueId());
 			Role role = allData.getRole();
 			p.sendMessage(eachName + ": " + role.name());
 		}

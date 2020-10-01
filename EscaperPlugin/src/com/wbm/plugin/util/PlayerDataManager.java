@@ -17,7 +17,7 @@ import com.wbm.plugin.util.general.BroadcastTool;
 
 public class PlayerDataManager implements DataMember
 {
-	// online Player만 가지고 있는 데이터
+	// server켜져있을때 online Player만 가지고 있는 데이터
 	Map<UUID, PlayerData> onlinePlayerList;
 
 	// server 켜질때 config데이터 담긴 데이터
@@ -58,15 +58,19 @@ public class PlayerDataManager implements DataMember
 			this.onlinePlayerList.remove(uuid);
 		}
 	}
+	
+	public PlayerData getSavedPlayerData(UUID uuid) {
+		return this.allPlayerSavigData.get(uuid);
+	}
 
-	public PlayerData getPlayerData(UUID uuid)
+	public PlayerData getOnlinePlayerData(UUID uuid)
 	{
 		return this.onlinePlayerList.get(uuid);
 	}
 
 	public boolean isFirstJoin(UUID uuid)
 	{
-		return this.allPlayerSavigData.containsKey(uuid);
+		return ! (this.allPlayerSavigData.containsKey(uuid));
 	}
 
 	public Player getMaker()
@@ -84,7 +88,7 @@ public class PlayerDataManager implements DataMember
 		this.maker=null;
 	}
 
-	public boolean makerExists()
+	public boolean doesMakerExist()
 	{
 		return (this.maker==null) ? false : true;
 	}
@@ -94,24 +98,22 @@ public class PlayerDataManager implements DataMember
 		return(p.getUniqueId().equals(this.maker.getUniqueId()));
 	}
 
-	public void printAllPlayer()
+	public void printAllOnlinePlayer()
 	{
 		for(PlayerData pData : this.onlinePlayerList.values())
 		{
-			Bukkit.getServer().broadcastMessage("player: "+pData.getName());
-			Bukkit.getServer().broadcastMessage("role: "+pData.getRole());
-			Bukkit.getServer().broadcastMessage("-----------------------------");
+			BroadcastTool.printConsoleMessage(pData.toString());
 		}
 	}
 
 	public void changePlayerRole(UUID uuid, Role role)
 	{
-		// gamemode, role바꾸기
-		PlayerData pData=this.getPlayerData(uuid);
+		// gamemode, role바꾸기: 각 Role에 정해진 Gamemode가 있기 때문
+		PlayerData pData=this.getOnlinePlayerData(uuid);
 
 		if(pData==null)
 		{
-			BroadcastTool.printConsoleMessage("[Bug]: changePlayerRole()- no player in onlinePlayerList");
+			BroadcastTool.printConsoleMessage(ChatColor.RED + "[Bug]: changePlayerRole()- no player in onlinePlayerList");
 			return;
 		}
 
@@ -122,7 +124,7 @@ public class PlayerDataManager implements DataMember
 
 	public void setPlayerGameModeWithRole(UUID uuid)
 	{
-		PlayerData pData=this.getPlayerData(uuid);
+		PlayerData pData=this.getOnlinePlayerData(uuid);
 		if(pData==null)
 		{
 			return;
@@ -183,7 +185,7 @@ public class PlayerDataManager implements DataMember
 
 		for(PlayerData pData : this.allPlayerSavigData.values())
 		{
-			BroadcastTool.printConsoleMessage("Name: "+ChatColor.RED+pData.getName());
+			BroadcastTool.printConsoleMessage(pData.toString());
 		}
 	}
 

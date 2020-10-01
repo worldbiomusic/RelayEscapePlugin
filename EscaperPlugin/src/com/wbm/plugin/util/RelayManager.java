@@ -163,7 +163,7 @@ public class RelayManager
 
 		// maker 관리
 		// if문 넣은이유: Maker가 만들고 나갔을때 위해서
-		if(this.pDataManager.makerExists())
+		if(this.pDataManager.doesMakerExist())
 		{
 			this.pDataManager.changePlayerRole(this.getMaker().getUniqueId(), Role.VIEWER);
 		}
@@ -179,7 +179,7 @@ public class RelayManager
 				"challengingTime: new challengingTime starts in "+RelayTime.CHALLENGING.getAmount()+" sec");
 
 		// main room 저장 (maker가 존재해야지 maker가 만든 room인것을 증명)
-		if(this.pDataManager.makerExists())
+		if(this.pDataManager.doesMakerExist())
 		{
 			this.roomManager.saveRoomData(this.getMaker().getName());
 		}
@@ -204,7 +204,7 @@ public class RelayManager
 		List<Player> challengers=new ArrayList<Player>(Bukkit.getOnlinePlayers());
 
 		// maker가 없을경우
-		if(!this.pDataManager.makerExists())
+		if(!this.pDataManager.doesMakerExist())
 		{
 			return challengers;
 		}

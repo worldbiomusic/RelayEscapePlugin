@@ -15,15 +15,12 @@ public class DataManager
  * 여러개 클래스의 java Serializable로 Object read/write해주는 클래스 여기서 사용되는 클래스들은
  * Serializable을 구현해야 함!
  * 
- * [고민중]
- * 각 member마다 각 파일 저장 vs 한파일에 모든 멤버 map으로 저장 
+ * [고민중] 각 member마다 각 파일 저장 vs 한파일에 모든 멤버 map으로 저장 -> 각 파일 저장: 파일이 커지면 IO시간이 너무
+ * 오래걸릴수 이씀
  */
 {
 	File baseDir;
-	
-	// file에 저장되는 object
-	Map<String, Object> map;
-	
+
 	// member 저장공간
 	Map<String, DataMember> members;
 
@@ -33,59 +30,59 @@ public class DataManager
 		this.baseDir=new File(baseDirPath);
 
 		// init maps
-		this.map=new HashMap<>();
-		this.members = new HashMap<>();
+		this.members=new HashMap<>();
 
-		// load map data
-		this.loadData();
 	}
-	
-	public void registerMember(DataMember member) {
+
+	public void registerMember(DataMember member)
+	{
 		this.members.put(member.getDataMemberName(), member);
 	}
 
 	public void distributeData()
 	{
 		// distribute map data to members
-		for(Entry<String, DataMember> memberEntry : this.members.entrySet()) {
-			String memberName = memberEntry.getKey();
-			DataMember member = memberEntry.getValue();
+		for(Entry<String, DataMember> memberEntry : this.members.entrySet())
+		{
+			DataMember member=memberEntry.getValue();
 			
-			Object data = this.map.get(memberName);
+			// load map data
+			Object loadedData =  this.loadData(member);
+
 			// 없으면 null을 반환하기 때문에 줄 필요가 없음 (member에서는 null처리 안해도 됨, 확실한 데이터가 있을때만 호출되므로)
-			if(this.map.containsKey(memberName)) {
-				member.installData(data);
+			if(loadedData != null)
+			{
+				member.installData(loadedData);
 			}
 		}
 	}
-	
+
 	public void save()
 	{
-		// gether members data to map
-		for(Entry<String, DataMember> memberEntry : this.members.entrySet()) {
-			String memberName = memberEntry.getKey();
-			DataMember member = memberEntry.getValue();
-			Object data = member.getData();
-			
-			this.map.put(memberName, data);
+		// gather members data and save each file
+		for(Entry<String, DataMember> memberEntry : this.members.entrySet())
+		{
+			DataMember member=memberEntry.getValue();
+			Object data=member.getData();
+
+			// save each Object data to file
+			this.saveDataToFile(member, data);
 		}
-		
-		// save to file
-		this.saveDataToFile();
+
 	}
 
-	private void saveDataToFile()
+	private void saveDataToFile(DataMember member, Object data)
 	{
 		try
 		{
 			// write object(map) to file
-			File file=new File(this.baseDir, "allData.dat");
-			
+			File file=new File(this.baseDir, member.getDataMemberName() + ".dat");
+
 			FileOutputStream fos=new FileOutputStream(file);
 			ObjectOutputStream oos=new ObjectOutputStream(fos);
 
-			oos.writeObject(this.map);
-			
+			oos.writeObject(data);
+
 			oos.close();
 			fos.close();
 		}
@@ -95,38 +92,41 @@ public class DataManager
 		}
 	}
 
-	public void loadData()
+	public Object loadData(DataMember member)
 	{
-		FileInputStream fis = null;
-		ObjectInputStream ois = null;
+		Object data = null;
+		
+		FileInputStream fis=null;
+		ObjectInputStream ois=null;
 		try
 		{
 			// make baseDir
-			if(! this.baseDir.exists()) {
+			if(!this.baseDir.exists())
+			{
 				this.baseDir.mkdir();
 			}
-			
-			
+
 			// read
-			File file=new File(this.baseDir, "allData.dat");
-			
+			File file=new File(this.baseDir, member.getDataMemberName() + ".dat");
+
 			// make file
-			if(! file.exists()) {
+			if(!file.exists())
+			{
 				file.createNewFile();
 			}
-			
+
 			fis=new FileInputStream(file);
-			
+
 			// 아무것도 없지 않을때 실행 (아무것도 없는데 object 읽으면 EOFException 발생)
-			if(fis.available() != 0) {
+			if(fis.available()!=0)
+			{
 				ois=new ObjectInputStream(fis);
-				
-				this.map=(Map<String, Object>)ois.readObject();
-				
+
+				data = ois.readObject();
+
 				ois.close();
 			}
-			
-			
+
 			fis.close();
 		}
 		catch(Exception e)
@@ -134,6 +134,8 @@ public class DataManager
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
+		return data;
 	}
 
 }

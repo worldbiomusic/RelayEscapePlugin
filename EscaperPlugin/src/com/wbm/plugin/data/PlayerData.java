@@ -10,16 +10,16 @@ import com.wbm.plugin.util.enums.Role;
 public class PlayerData implements Serializable
 {
 	private static final long serialVersionUID=1L;
-	transient UUID uuid;
+	UUID uuid;
 	String name;
 	transient Role role;
 	int token;
 	
-	public PlayerData(UUID uuid, String name, Role role) {
+	public PlayerData(UUID uuid, String name, Role role, int token) {
 		this.uuid = uuid;
 		this.name = name;
 		this.role = role;
-		this.token = 0;
+		this.token = token;
 	}
 	
 	public UUID getUUID()
@@ -51,12 +51,23 @@ public class PlayerData implements Serializable
 	{
 		this.role=role;
 	}
+	
+	public int getToken()
+	{
+		return token;
+	}
+
+	public void setToken(int token)
+	{
+		this.token=token;
+	}
 
 	@Override
 	public String toString()
 	{
-		return "PlayerData [name="+name+", token="+token+"]";
+		return "PlayerData [uuid="+uuid+"\nname="+name+"\nrole="+role+"\ntoken="+token+"]";
 	}
+
 	
 	// ConfigurationSerializable 용
 //	@Override
