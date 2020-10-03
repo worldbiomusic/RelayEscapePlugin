@@ -5,7 +5,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.bukkit.Location;
-import org.bukkit.block.Block;
 
 public class Room implements Serializable
 {
@@ -21,22 +20,27 @@ public class Room implements Serializable
 //	Room의 List<Block> 이 null이면 모두 Block.Air로 처리
 //	blocks안에 있는 Block들의 위치정보는 사용하면 안됨 (정해진 Room에 순서대로 block들이 정해지는것이기 때문)
 	private List<BlockData> blocks;
-	private int challegeCount;
+	private int challengingCount;
 	private int clearCount;
 	private LocalDateTime birth;
+	private int voted;
+	// min 단위
+	// avgDurationTime = ((allDurationTime * challengingCount) + new DurationTime )/ challengingCount + 1
+	private double avgDurationTime;
 	
 	public Room(String title
 	, String maker
 	, List<BlockData> blocks
-	, int challegeCount
-	, int clearCount
 	, LocalDateTime birth) 
 	{
 		this.title = title;
 		this.maker = maker;
 		this.blocks = blocks;
-		this.challegeCount = challegeCount;
-		this.clearCount = clearCount;
+		this.birth = birth;
+		this.challengingCount = 0;
+		this.clearCount = 0;
+		this.voted = 0;
+		this.avgDurationTime = 0;
 	}
 	
 	public static void setMainRoomSpace(Location loc1, Location loc2) {
@@ -73,21 +77,58 @@ public class Room implements Serializable
 	{
 		this.blocks=blocks;
 	}
-	public int getChallegeCount()
+	public int getChallengingCount()
 	{
-		return challegeCount;
+		return challengingCount;
 	}
-	public void setChallegeCount(int challegeCount)
+
+	public void setChallengingCount(int challengingCount)
 	{
-		this.challegeCount=challegeCount;
+		this.challengingCount=challengingCount;
 	}
+	
+	public void addChallengingCount(int challengingCount) {
+		this.challengingCount += challengingCount;
+	}
+	
+	public void subChallengingCount(int challengingCount) {
+		this.challengingCount -= challengingCount;
+	}
+
 	public int getClearCount()
 	{
 		return clearCount;
 	}
+
 	public void setClearCount(int clearCount)
 	{
 		this.clearCount=clearCount;
+	}
+	
+	public void addClearCount(int clearCount) {
+		this.clearCount += clearCount;
+	}
+	
+	public void subClearCount(int clearCount) {
+		this.clearCount -= clearCount;
+	}
+
+	public int getVoted()
+	{
+		return voted;
+	}
+
+	public void setVoted(int voted)
+	{
+		this.voted=voted;
+	}
+	
+	public void addVoted(int voted) {
+		this.voted += voted;
+	}
+	
+	public void subVoted(int voted) {
+		this.voted -= voted;
 	}
 	public LocalDateTime getBirth()
 	{
@@ -101,14 +142,24 @@ public class Room implements Serializable
 	{
 		return serialVersionUID;
 	}
-	
-	
+
+	public double getAvgDurationTime()
+	{
+		return avgDurationTime;
+	}
+
+	public void setAvgDurationTime(double avgDurationTime)
+	{
+		this.avgDurationTime=avgDurationTime;
+	}
+
 	@Override
 	public String toString()
 	{
-		return "Room [title="+title+", maker="+maker
-				+", blocks="+blocks+", challegeCount="
-				+challegeCount+", clearCount="
-				+clearCount+", birth="+birth+"]";
+		return "Room [title="+title+", maker="+maker+", blocks="+blocks+", challengingCount="+challengingCount
+				+", clearCount="+clearCount+", birth="+birth+", voted="+voted+ ", avgDurationTime="+avgDurationTime+"]";
 	}
+	
+	
+	
 }

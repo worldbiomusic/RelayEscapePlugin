@@ -18,12 +18,12 @@ import com.wbm.plugin.util.general.BroadcastTool;
 public class PlayerDataManager implements DataMember
 {
 	// server켜져있을때 online Player만 가지고 있는 데이터
-	Map<UUID, PlayerData> onlinePlayerList;
+	private Map<UUID, PlayerData> onlinePlayerList;
 
 	// server 켜질때 config데이터 담긴 데이터
 	// player quit할때 onlinePlayerList에서 데이터를 여기로 저장해주는 데이터 보관소
 	// (서버 꺼질때 config파일에 데이터 넘겨서 저장)
-	public Map<UUID, PlayerData> allPlayerSavigData;
+	private Map<UUID, PlayerData> allPlayerSavigData;
 
 	// 실제적인 Role에 상관없이 현재 Time의 제작자를 가리키는 변수
 	// Waiting, Making, Testing Time에서는 무조건 있고,
@@ -98,12 +98,9 @@ public class PlayerDataManager implements DataMember
 		return(p.getUniqueId().equals(this.maker.getUniqueId()));
 	}
 
-	public void printAllOnlinePlayer()
+	public Map<UUID, PlayerData> getAllOnlinePlayers()
 	{
-		for(PlayerData pData : this.onlinePlayerList.values())
-		{
-			BroadcastTool.printConsoleMessage(pData.toString());
-		}
+		return this.onlinePlayerList;
 	}
 
 	public void changePlayerRole(UUID uuid, Role role)

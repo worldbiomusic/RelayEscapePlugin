@@ -20,7 +20,11 @@ import com.wbm.plugin.util.general.BroadcastTool;
 
 public class RoomManager implements DataMember
 {
-	Room baseRoom;
+	/*
+	 * Time		Waiting	Making	Testing	Challenging	Challenging(again)
+	 * Room		"empty"	"empty"	"empty"	new title	random
+	 * 
+	 */
 	Room mainRoom;
 
 	// key: room.name / value: room
@@ -40,18 +44,43 @@ public class RoomManager implements DataMember
 		this.registerBasicRooms();
 	}
 	
-	public void saveRoomData(String makerName) {
+	public void clearMainRoom() {
+		long secDuration = (System.currentTimeMillis() - (long)this.mainRoom.getAvgDurationTime()) / 1000;
+		double newDuration = secDuration / 60;
+		
+		int challengingCount = this.mainRoom.getChallengingCount();
+		double avgDuration = this.mainRoom.getAvgDurationTime();
+		double totalDuration = (challengingCount-1) * avgDuration + newDuration;
+		double totalAvgDuration = totalDuration / challengingCount;   
+		
+		this.mainRoom.setAvgDurationTime(totalAvgDuration);
+	}
+	
+	public void recordRoomDuration() {
+		this.mainRoom.setAvgDurationTime(System.currentTimeMillis());
+	}
+	
+	public Room getMainRoom() {
+		return this.mainRoom;
+	}
+	
+	public Room getRoom(String title) {
+		return this.rooms.get(title);
+	}
+	
+	public String saveRoomData(String makerName) {
 		// TODO: RoomType으로 구별해서 지역별로 data만들기 (argu에 RoomType roomType 추가하기)
 		
 		// main room
 		List<BlockData> blockDatas = this.getRoomBlockDatas();
 		String title = this.getNextTitleWithMaker(makerName);
 		
-		Room room = new Room(title, makerName, blockDatas, 
-				0, 0, LocalDateTime.now());
+		Room room = new Room(title, makerName, blockDatas, LocalDateTime.now());
 		
 		// rooms 에 저장
 		this.rooms.put(title, room);
+		
+		return title;
 	}
 	
 	public String getNextTitleWithMaker(String maker) {
@@ -114,8 +143,7 @@ public class RoomManager implements DataMember
 		}
 		if(!(this.rooms.containsKey("empty")))
 		{
-			Room emptyRoom=new Room("empty", "wbm", emptyBlocks
-					, 0, 0, LocalDateTime.of(2020, 11, 1, 0, 0));
+			Room emptyRoom=new Room("empty", "wbm", emptyBlocks, LocalDateTime.of(2020, 11, 1, 0, 0));
 			this.rooms.put("empty", emptyRoom);
 		}
 
@@ -129,8 +157,7 @@ public class RoomManager implements DataMember
 				baseBlocks.add(new BlockData(Material.AIR, 0));
 			}
 
-			Room baseRoom=new Room("base", "wbm", baseBlocks
-					, 0, 0, LocalDateTime.of(2020, 11, 1, 0, 0));
+			Room baseRoom=new Room("base", "wbm", baseBlocks, LocalDateTime.of(2020, 11, 1, 0, 0));
 			this.rooms.put("base", baseRoom);
 		}
 
@@ -139,6 +166,8 @@ public class RoomManager implements DataMember
 	public void setMainRoom(Room room)
 //	setRoom()으로 바꾸고, RoomType으로 결정할 수 있게 하기
 	{
+		// main room
+		this.mainRoom = room;
 		this.fillSpace(Room.mainRoomLoc1, Room.mainRoomLoc2, room.getBlocks());
 	}
 
@@ -203,16 +232,16 @@ public class RoomManager implements DataMember
 
 	public void setMainRoomEmpty()
 	{
-		this.setMainRoom(this.rooms.get("empty"));
+		this.setMainRoom(this.getRoom("empty"));
 	}
 
 	public void setMainRoomToBaseRoom()
 	{
 		// Maker뽑기위해 일단 이전맵을 돌려야 하는 메서드지만 아직 기반이없어서
 		// base room으로 가운에 glowstone하나 설치해서 Maker 한사람 구하기가 목적
-
-//		this.setMainRoom(this.rooms.get("base"));
 		
+		// rooms에 저장되있는것중 아무거나 하나 선택 (empty 제외)
+
 		// TODO: 임시로 base room을 랜덤으로 설정
 		Set<String> keys = this.rooms.keySet();
 		String[] titles = new String[keys.size()];
@@ -226,7 +255,7 @@ public class RoomManager implements DataMember
 			title = "base";
 		}
 		
-		Room room = this.rooms.get(title);
+		Room room = this.getRoom(title);
 		
 		this.setMainRoom(room);
 		

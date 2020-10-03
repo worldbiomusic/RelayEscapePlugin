@@ -1,8 +1,6 @@
 package com.wbm.plugin.data;
 
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 
 import com.wbm.plugin.util.enums.Role;
@@ -15,11 +13,24 @@ public class PlayerData implements Serializable
 	transient Role role;
 	int token;
 	
-	public PlayerData(UUID uuid, String name, Role role, int token) {
+	int challengingCount;
+	int clearCount;
+	int voted;
+	
+	public PlayerData(UUID uuid, String name, Role role) {
+		this(uuid, name, role, 0, 0, 0, 0);
+	}
+	
+	public PlayerData(
+			UUID uuid, String name, Role role, int token
+			, int challengingCount, int clearCount, int voted ) {
 		this.uuid = uuid;
 		this.name = name;
 		this.role = role;
-		this.token = token;
+		this.token = 0;
+		this.challengingCount = 0;
+		this.clearCount = 0;
+		this.voted = 0;
 	}
 	
 	public UUID getUUID()
@@ -61,23 +72,77 @@ public class PlayerData implements Serializable
 	{
 		this.token=token;
 	}
+	
+	public void addToken(int token) {
+		this.token += token;
+	}
+	
+	public void subToken(int token) {
+		this.token -= token;
+	}
+
+	public int getChallengingCount()
+	{
+		return challengingCount;
+	}
+
+	public void setChallengingCount(int challengingCount)
+	{
+		this.challengingCount=challengingCount;
+	}
+	
+	public void addChallengingCount(int challengingCount) {
+		this.challengingCount += challengingCount;
+	}
+	
+	public void subChallengingCount(int challengingCount) {
+		this.challengingCount -= challengingCount;
+	}
+
+	public int getClearCount()
+	{
+		return clearCount;
+	}
+
+	public void setClearCount(int clearCount)
+	{
+		this.clearCount=clearCount;
+	}
+	
+	public void addClearCount(int clearCount) {
+		this.clearCount += clearCount;
+	}
+	
+	public void subClearCount(int clearCount) {
+		this.clearCount -= clearCount;
+	}
+
+	public int getVoted()
+	{
+		return voted;
+	}
+
+	public void setVoted(int voted)
+	{
+		this.voted=voted;
+	}
+	
+	public void addVoted(int voted) {
+		this.voted += voted;
+	}
+	
+	public void subVoted(int voted) {
+		this.voted -= voted;
+	}
 
 	@Override
 	public String toString()
 	{
-		return "PlayerData [uuid="+uuid+"\nname="+name+"\nrole="+role+"\ntoken="+token+"]";
+		return "PlayerData [\nuuid="+uuid+", \nname="+name+", \ntoken="+token+", \nchallengingCount="+challengingCount
+				+", \nclearCount="+clearCount+", \nvoted="+voted+"]";
 	}
-
 	
-	// ConfigurationSerializable 용
-//	@Override
-//	public Map<String, Object> serialize()
-//	{
-//		Map<String, Object> serialData = new HashMap<>();
-//		serialData.put("name", this.name);
-//		serialData.put("token", this.token);
-//		
-//		
-//		return serialData;
-//	}
+	
+	
+
 }

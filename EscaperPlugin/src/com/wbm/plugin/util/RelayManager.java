@@ -2,6 +2,7 @@ package com.wbm.plugin.util;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -9,6 +10,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
 import com.wbm.plugin.Main;
+import com.wbm.plugin.data.PlayerData;
 import com.wbm.plugin.util.enums.RelayTime;
 import com.wbm.plugin.util.enums.Role;
 import com.wbm.plugin.util.general.BroadcastTool;
@@ -34,15 +36,16 @@ public class RelayManager
 	// 대신 stopTaskAndStartNextTime() or stopCurrentTimeAndStartAnotherTime() 사용하기!
 	// (넘어가기전에 task멈춰야하기 때문)
 
-	PlayerDataManager pDataManager;
-	RoomManager roomManager;
+	private PlayerDataManager pDataManager;
+	private RoomManager roomManager;
 
 	// TODO: RelayTime이름보단 다른것찾아보기 예> RelayTurn ??
-	RelayTime currentTime;
+	private RelayTime currentTime;
 
-	BukkitTask currentCountDownTask;
+	private BukkitTask currentCountDownTask;
 
 	private boolean corePlaced;
+	
 
 	public RelayManager(PlayerDataManager pDataManager, RoomManager roomManager)
 	{
@@ -171,18 +174,19 @@ public class RelayManager
 		// maker제외한 challenger 관리
 		for(Player p : this.getChallengers())
 		{
+			// role 변경
 			this.pDataManager.changePlayerRole(p.getUniqueId(), Role.CHALLENGER);
+			
+			// challengingCount +1
+			UUID uuid = p.getUniqueId();
+			PlayerData pData = this.pDataManager.getOnlinePlayerData(uuid);
+			pData.addChallengingCount(1);
 		}
+		
 
 		// message 관리 
 		BroadcastTool.sendMessageToEveryone(
 				"challengingTime: new challengingTime starts in "+RelayTime.CHALLENGING.getAmount()+" sec");
-
-		// main room 저장 (maker가 존재해야지 maker가 만든 room인것을 증명)
-		if(this.pDataManager.doesMakerExist())
-		{
-			this.roomManager.saveRoomData(this.getMaker().getName());
-		}
 
 		// resetRelay 카운트다운
 		this.currentCountDownTask=Bukkit.getScheduler().runTaskLater(Main.getInstance(), new Runnable()
@@ -203,21 +207,13 @@ public class RelayManager
 	{
 		List<Player> challengers=new ArrayList<Player>(Bukkit.getOnlinePlayers());
 
-		// maker가 없을경우
-		if(!this.pDataManager.doesMakerExist())
+		// maker가 있을때만 maker 제거
+		if(this.pDataManager.doesMakerExist())
 		{
-			return challengers;
+			Player maker = this.getMaker();
+			challengers.remove(maker);
 		}
-
-		for(Player p : challengers)
-		{
-			if(p.getUniqueId().equals(this.getMaker().getUniqueId()))
-			{
-				challengers.remove(p);
-				break;
-			}
-		}
-
+		
 		return challengers;
 	}
 

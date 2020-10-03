@@ -1,5 +1,8 @@
 package com.wbm.plugin.cmd;
 
+import java.util.Map;
+import java.util.UUID;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -55,8 +58,8 @@ public class DebugCommand implements CommandExecutor
 		String second = args[1];
 		
 		switch(second) {
-			case "all":
-				this.printAllDebugInfo(p);
+			case "relay":
+				this.printRelayInfo(p);
 				break;
 			case "role": // print own role
 				this.printPlayerRole(p);
@@ -73,9 +76,30 @@ public class DebugCommand implements CommandExecutor
 			case "reset":
 				this.relayManager.resetRelay();
 				break;
+			case "pdata":
+				this.printPlayerData(p);
+				break;
+			case "allpdata":
+				this.printAllPlayerData(p);
+				break;
 		}
 	}
 	
+	private void printPlayerData(Player p ) {
+		PlayerData pData = this.pDataManager.getOnlinePlayerData(p.getUniqueId());
+		BroadcastTool.sendMessage(p, pData.toString());
+	}
+	
+	private void printAllPlayerData(Player p)
+	{
+		Map<UUID, PlayerData> players = this.pDataManager.getAllOnlinePlayers();
+		for(PlayerData pData : players.values()) {
+			BroadcastTool.sendMessage(p, pData.toString());
+			BroadcastTool.printConsoleMessage(pData.toString());
+		}
+	}
+
+
 	private void finishMakingTime(Player p)
 	{
 		// MakingTime일때 Testing으로 넘어갈 수 있게 해주는 명령어
@@ -91,7 +115,7 @@ public class DebugCommand implements CommandExecutor
 	}
 
 
-	private void printAllDebugInfo(Player p)
+	private void printRelayInfo(Player p)
 	{
 		// print maker
 		this.printMaker(p);

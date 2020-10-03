@@ -12,12 +12,12 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
-import org.bukkit.event.player.PlayerBucketEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 
 import com.wbm.plugin.data.PlayerData;
+import com.wbm.plugin.data.Room;
 import com.wbm.plugin.util.PlayerDataManager;
 import com.wbm.plugin.util.RelayManager;
 import com.wbm.plugin.util.RolePermission;
@@ -79,7 +79,7 @@ public class GameManager implements Listener
 		if(this.pDataManager.isFirstJoin(uuid))
 		{
 			String name=p.getName();
-			pData=new PlayerData(uuid, name, baseRole, 0);
+			pData=new PlayerData(uuid, name, baseRole);
 		}
 		// 전에 들어왔음 (바꿀것은 Role밖에 없음)
 		else
@@ -134,7 +134,7 @@ public class GameManager implements Listener
 		}
 	}
 
-	@EventHandler(priority=EventPriority.HIGH)
+	@EventHandler
 	public void onTesterAndChallengerBreakCore(BlockBreakEvent e)
 	{
 		// Tester, Challenger의 core부수는 상황
@@ -158,34 +158,43 @@ public class GameManager implements Listener
 
 				// 1. 현재 Maker에게 이제 Challenger라는 메세지 전송
 				BroadcastTool.sendMessageToEveryone("core is broken!!!!!!!!!!!!");
-				pData.setToken(pData.getToken()+1);
-
+				
 				// 2. 클리어한 maker는 pDataManager의 maker로 등록
 				this.pDataManager.registerMaker(p);
 
-				// 3. main room 초기화
+				// 3. main room clearCount +1, time측정 후 초기화
+				this.roomManager.getMainRoom().addClearCount(1);
+				this.roomManager.clearMainRoom();
+				
 				this.roomManager.setMainRoomEmpty();
-
-				// 4. block 파괴
-				block.setType(Material.AIR);
-
-				// 5.next relay 시작
+				
+				// 4.next relay 시작
 				this.relayManager.startNextTime();
+				
+				// 5.token +1, clearCount +1
+				pData.addToken(1);
+				pData.addClearCount(1);
 			}
 			// Time: Testing / Role: Tester
 			else if(role==Role.TESTER)
 			{
-				// 1.next relay 시작
+				// 1.save room, set main room, start record time
+				String title = this.roomManager.saveRoomData(p.getName());
+				Room mainRoom = this.roomManager.getRoom(title);
+				this.roomManager.setMainRoom(mainRoom);
+				mainRoom.addChallengingCount(1);
+				this.roomManager.recordRoomDuration();
+				
+				// 2.next relay 시작
 				this.relayManager.startNextTime();
-				// 2.이벤트 취소
-				e.setCancelled(true);
 			}
 		}
 
 	}
 
 	// MakekingTime에서 Maker가 core를 설치했는지 확인 (최대 1개만 설치 가능)
-	@EventHandler
+	// priority HIGH 로 높여서 마지막에 검사하게
+	@EventHandler(priority=EventPriority.HIGH)
 	public void onMakerPlaceCore(BlockPlaceEvent e)
 	{
 		Block core=e.getBlock();
