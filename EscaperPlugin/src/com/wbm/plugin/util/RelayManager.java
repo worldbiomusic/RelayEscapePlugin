@@ -11,8 +11,10 @@ import org.bukkit.scheduler.BukkitTask;
 
 import com.wbm.plugin.Main;
 import com.wbm.plugin.data.PlayerData;
+import com.wbm.plugin.data.Room;
 import com.wbm.plugin.util.enums.RelayTime;
 import com.wbm.plugin.util.enums.Role;
+import com.wbm.plugin.util.enums.RoomType;
 import com.wbm.plugin.util.general.BroadcastTool;
 
 /* TODO: RelayTime의 Making -> Building, Challenging -> Finding으로 변경
@@ -108,6 +110,9 @@ public class RelayManager
 		// message 관리
 		BroadcastTool.sendMessageToEveryone("makingTime: testingTime starts in "+RelayTime.MAKING.getAmount()+" sec");
 
+		Room randomRoom = this.roomManager.getRandomRoomData();
+		this.roomManager.setRoom(RoomType.PRACTICE, randomRoom);
+		
 		// TestingTime 카운트다운
 		this.currentCountDownTask=Bukkit.getScheduler().runTaskLater(Main.getInstance(), new Runnable()
 		{
@@ -188,6 +193,9 @@ public class RelayManager
 		BroadcastTool.sendMessageToEveryone(
 				"challengingTime: new challengingTime starts in "+RelayTime.CHALLENGING.getAmount()+" sec");
 
+		// start room duration time
+		this.roomManager.startMainRoomDurationTime();
+		
 		// resetRelay 카운트다운
 		this.currentCountDownTask=Bukkit.getScheduler().runTaskLater(Main.getInstance(), new Runnable()
 		{
@@ -299,7 +307,8 @@ public class RelayManager
 		BroadcastTool.sendMessageToEveryone("relay reset");
 
 		// Room 초기화
-		this.roomManager.setMainRoomToBaseRoom();
+		Room randomRoom =this.roomManager.getRandomRoomData(); 
+		this.roomManager.setRoom(RoomType.MAIN, randomRoom);
 
 		// RelayTime set to CHALLENGING
 		this.startAnotherTime(RelayTime.CHALLENGING);

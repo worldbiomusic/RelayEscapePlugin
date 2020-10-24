@@ -18,12 +18,14 @@ import org.bukkit.inventory.ItemStack;
 
 import com.wbm.plugin.data.PlayerData;
 import com.wbm.plugin.data.Room;
+import com.wbm.plugin.data.RoomLocation;
 import com.wbm.plugin.util.PlayerDataManager;
 import com.wbm.plugin.util.RelayManager;
 import com.wbm.plugin.util.RolePermission;
 import com.wbm.plugin.util.RoomManager;
 import com.wbm.plugin.util.enums.RelayTime;
 import com.wbm.plugin.util.enums.Role;
+import com.wbm.plugin.util.enums.RoomType;
 import com.wbm.plugin.util.general.BanItemTool;
 import com.wbm.plugin.util.general.BroadcastTool;
 
@@ -90,7 +92,7 @@ public class GameManager implements Listener
 			// -> role을 유지해서 viewer로 겜모를바꿔서 자신이 만든룸을 clear못하게 만들어야 함
 			if(this.pDataManager.doesMakerExist())
 			{
-				Player maker=this.pDataManager.getMaker();
+//				Player maker=this.pDataManager.getMaker();
 				// 들어온사람이 전에 나간 Maker였을때
 				if(this.pDataManager.isMaker(p))
 				{
@@ -133,8 +135,50 @@ public class GameManager implements Listener
 			this.processPlayerData(p);
 		}
 	}
-
+	
 	@EventHandler
+	public void onBlockBreak(BlockBreakEvent e)
+	{
+		// 모든 break event는 여기를 거쳐서 처리됨
+		Player p = e.getPlayer();
+		p.sendMessage("break");
+		
+		// 일단 cancel
+		e.setCancelled(true);
+		
+		// Main Room 체크
+		if(RoomLocation.getRoomTypeWithLocation(p.getLocation()) == RoomType.MAIN) {
+			p.sendMessage("break OK");
+			this.onTesterAndChallengerBreakCore(e);
+			this.onMakerBreakCore(e);
+			this.onPlayerBreakBlock(e);
+		}
+		
+		
+	}
+	
+	@EventHandler
+	public void onBlockPlace(BlockPlaceEvent e)
+	{
+		// 모든 place event는 여기를 거쳐서 처리됨
+		Player p = e.getPlayer();
+		p.sendMessage("place");
+		
+
+		// 일단 cancel
+		e.setCancelled(true);
+		
+		// Main Room 체크
+		if(RoomLocation.getRoomTypeWithLocation(p.getLocation()) == RoomType.MAIN) {
+			p.sendMessage("place OK");
+			this.onPlayerPlaceBlock(e);
+			this.onMakerPlaceCore(e);
+		}
+		
+		
+	}
+
+//	@EventHandler
 	public void onTesterAndChallengerBreakCore(BlockBreakEvent e)
 	{
 		// Tester, Challenger의 core부수는 상황
@@ -146,6 +190,8 @@ public class GameManager implements Listener
 		PlayerData pData=this.pDataManager.getOnlinePlayerData(pUuid);
 		Role role=pData.getRole();
 
+		
+		
 		// core체크
 		if(mat.equals(Material.GLOWSTONE))
 		{
@@ -163,27 +209,26 @@ public class GameManager implements Listener
 				this.pDataManager.registerMaker(p);
 
 				// 3. main room clearCount +1, time측정 후 초기화
-				this.roomManager.getMainRoom().addClearCount(1);
-				this.roomManager.clearMainRoom();
-				
-				this.roomManager.setMainRoomEmpty();
+				this.roomManager.getRoom(RoomType.MAIN).addClearCount(1);
+				this.roomManager.recordMainRoomDurationTime();
+				this.roomManager.setRoomEmpty(RoomType.MAIN);
 				
 				// 4.next relay 시작
 				this.relayManager.startNextTime();
 				
-				// 5.token +1, clearCount +1
+				// 5.player token +1, clearCount +1
 				pData.addToken(1);
 				pData.addClearCount(1);
 			}
 			// Time: Testing / Role: Tester
 			else if(role==Role.TESTER)
 			{
-				// 1.save room, set main room, start record time
-				String title = this.roomManager.saveRoomData(p.getName());
-				Room mainRoom = this.roomManager.getRoom(title);
-				this.roomManager.setMainRoom(mainRoom);
+				// 1.save room, set main room
+				String title = this.roomManager.saveRoomData(RoomType.MAIN, p.getName());
+				Room mainRoom = this.roomManager.getRoomData(title);
+				this.roomManager.setRoom(RoomType.MAIN, mainRoom);
 				mainRoom.addChallengingCount(1);
-				this.roomManager.recordRoomDuration();
+				
 				
 				// 2.next relay 시작
 				this.relayManager.startNextTime();
@@ -194,7 +239,7 @@ public class GameManager implements Listener
 
 	// MakekingTime에서 Maker가 core를 설치했는지 확인 (최대 1개만 설치 가능)
 	// priority HIGH 로 높여서 마지막에 검사하게
-	@EventHandler(priority=EventPriority.HIGH)
+//	@EventHandler(priority=EventPriority.HIGH)
 	public void onMakerPlaceCore(BlockPlaceEvent e)
 	{
 		Block core=e.getBlock();
@@ -223,7 +268,7 @@ public class GameManager implements Listener
 		}
 	}
 
-	@EventHandler
+//	@EventHandler
 	public void onMakerBreakCore(BlockBreakEvent e)
 	{
 		Block core=e.getBlock();
@@ -242,7 +287,7 @@ public class GameManager implements Listener
 		}
 	}
 
-	@EventHandler
+//	@EventHandler
 	public void onPlayerBreakBlock(BlockBreakEvent e)
 	{
 		Player p=e.getPlayer();
@@ -277,7 +322,7 @@ public class GameManager implements Listener
 		e.setCancelled(!permission);
 	}
 
-	@EventHandler
+//	@EventHandler
 	public void onPlayerPlaceBlock(BlockPlaceEvent e)
 	{
 		Player p=e.getPlayer();

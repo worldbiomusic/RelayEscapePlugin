@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-@SuppressWarnings("unchecked")
 public class DataManager
 /*
  * 여러개 클래스의 java Serializable로 Object read/write해주는 클래스 여기서 사용되는 클래스들은

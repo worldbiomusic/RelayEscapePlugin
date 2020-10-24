@@ -4,15 +4,13 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import org.bukkit.Location;
-
 public class Room implements Serializable
 {
 	private static final long serialVersionUID=1L;
 
 	// 서버 main룸 위치
-	public static Location mainRoomLoc1;
-	public static Location mainRoomLoc2;
+//	public static Location mainRoomLoc1;
+//	public static Location mainRoomLoc2;
 	
 	// room member 
 	private String title;
@@ -25,7 +23,8 @@ public class Room implements Serializable
 	private LocalDateTime birth;
 	private int voted;
 	// min 단위
-	// avgDurationTime = ((allDurationTime * challengingCount) + new DurationTime )/ challengingCount + 1
+	// avgDurationTime = 
+	// ((avgDurationTime * clearCount) + new DurationTime )/ challengingCount + 1
 	private double avgDurationTime;
 	
 	public Room(String title
@@ -41,11 +40,6 @@ public class Room implements Serializable
 		this.clearCount = 0;
 		this.voted = 0;
 		this.avgDurationTime = 0;
-	}
-	
-	public static void setMainRoomSpace(Location loc1, Location loc2) {
-		Room.mainRoomLoc1 = loc1;
-		Room.mainRoomLoc2 = loc2;
 	}
 	
 	public String getTitle()
@@ -152,12 +146,20 @@ public class Room implements Serializable
 	{
 		this.avgDurationTime=avgDurationTime;
 	}
+	
+	public void addNewAvgDurationTime(double amount) {
+		double allDurationTime = this.avgDurationTime * (this.clearCount-1);
+		allDurationTime += amount;
+		allDurationTime /= this.clearCount;
+		
+		this.avgDurationTime = allDurationTime;
+	}
 
 	@Override
 	public String toString()
 	{
-		return "Room [title="+title+", maker="+maker+", blocks="+blocks+", challengingCount="+challengingCount
-				+", clearCount="+clearCount+", birth="+birth+", voted="+voted+ ", avgDurationTime="+avgDurationTime+"]";
+		return "Room \n[title="+title+", \nmaker="+maker+", \nchallengingCount="+challengingCount
+				+", \nclearCount="+clearCount+", \nbirth="+birth+", \nvoted="+voted+ ", \navgDurationTime="+avgDurationTime+"]";
 	}
 	
 	
