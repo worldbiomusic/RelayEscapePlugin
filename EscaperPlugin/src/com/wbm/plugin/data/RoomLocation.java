@@ -8,15 +8,9 @@ import com.wbm.plugin.util.enums.RoomType;
 import com.wbm.plugin.util.general.LocationTool;
 import com.wbm.plugin.util.general.MathTool;
 
-
-
-
-
-
-
-
-
-
+/*
+ * 알아둘것!: RoomLocation은 Room의 블럭을 초기화 할 범위, 블럭 break place범위를 나타내는 범위!
+ */
 public class RoomLocation
 {
 	// world

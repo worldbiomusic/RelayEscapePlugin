@@ -18,10 +18,6 @@ public class LocationTool
 		double targetY = target.getY();
 		double targetZ = target.getZ();
 		
-		BroadcastTool.printConsoleMessage(pos1X + " " + targetX + " " + pos2X);
-		BroadcastTool.printConsoleMessage(pos1Y + " " + targetY + " " + pos2Y);
-		BroadcastTool.printConsoleMessage(pos1Z + " " + targetZ + " " + pos2Z);
-		
 		
 		if(MathTool.isIn(pos1X, targetX, pos2X) 
 				&& MathTool.isIn(pos1Y, targetY, pos2Y)

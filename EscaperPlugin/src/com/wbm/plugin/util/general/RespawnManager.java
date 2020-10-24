@@ -9,8 +9,8 @@ import org.bukkit.event.player.PlayerRespawnEvent;
 
 public class RespawnManager implements Listener
 {
-	Location joinLocation;
-	Location respawnLocation;
+	public static Location joinLocation;
+	public static Location respawnLocation;
 
 	public RespawnManager(Location joinLocation, 
 			Location respawnLocation)

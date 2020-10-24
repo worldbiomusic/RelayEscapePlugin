@@ -6,7 +6,10 @@ import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitTask;
 
 import com.wbm.plugin.Main;
@@ -16,6 +19,7 @@ import com.wbm.plugin.util.enums.RelayTime;
 import com.wbm.plugin.util.enums.Role;
 import com.wbm.plugin.util.enums.RoomType;
 import com.wbm.plugin.util.general.BroadcastTool;
+import com.wbm.plugin.util.general.InventoryTool;
 
 /* TODO: RelayTime의 Making -> Building, Challenging -> Finding으로 변경
  * TODO: ROle의 Maker-> Builder, Challenger -> Finder로 변경
@@ -63,6 +67,9 @@ public class RelayManager
 		// RelayTime 관리
 		this.currentTime=RelayTime.WAITING;
 
+		// 모든유저 인벤관리
+		InventoryTool.clearAllPlayerInv();
+		
 		// maker 관리
 		if(this.getMaker()==null)
 		{
@@ -98,8 +105,22 @@ public class RelayManager
 		// RelayTime 관리
 		this.currentTime=RelayTime.MAKING;
 
+		// 모든유저 인벤관리
+		InventoryTool.clearAllPlayerInv();
+				
 		// maker 관리
 		this.pDataManager.changePlayerRole(this.getMaker().getUniqueId(), Role.MAKER);
+		Inventory makerInv = this.getMaker().getInventory();
+		makerInv.addItem(
+				new ItemStack(Material.GLOWSTONE),
+				new ItemStack(Material.DIRT),
+				new ItemStack(Material.GLASS), 
+				new ItemStack(Material.STONE), 
+				new ItemStack(Material.WOOD), 
+				new ItemStack(Material.JACK_O_LANTERN), 
+				new ItemStack(Material.STICK),
+				new ItemStack(Material.WOOD_SWORD),
+				new ItemStack(Material.WATCH));
 
 		// maker제외한 challenger 관리
 		for(Player p : this.getChallengers())
@@ -137,9 +158,17 @@ public class RelayManager
 		// RelayTime 관리
 		this.currentTime=RelayTime.TESTING;
 
+		// 모든유저 인벤관리
+		InventoryTool.clearAllPlayerInv();
+				
+				
 		// maker 관리
 		this.pDataManager.changePlayerRole(this.getMaker().getUniqueId(), Role.TESTER);
-
+		Inventory makerInv = this.getMaker().getInventory();
+		makerInv.addItem(
+				new ItemStack(Material.WOOD_SWORD),
+				new ItemStack(Material.WATCH));
+		
 		// maker제외한 challenger 관리
 		for(Player p : this.getChallengers())
 		{
@@ -169,6 +198,9 @@ public class RelayManager
 		// RelayTime 관리
 		this.currentTime=RelayTime.CHALLENGING;
 
+		// 모든유저 인벤관리
+		InventoryTool.clearAllPlayerInv();
+				
 		// maker 관리
 		// if문 넣은이유: Maker가 만들고 나갔을때 위해서
 		if(this.pDataManager.doesMakerExist())

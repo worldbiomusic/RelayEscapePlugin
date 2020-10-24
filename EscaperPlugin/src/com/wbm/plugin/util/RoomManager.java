@@ -50,6 +50,7 @@ public class RoomManager implements DataMember
 		double minDuration = secDuration / 60;
 		
 		Room mainRoom = this.rooms.get(RoomType.MAIN);
+		// room avgDurationTime 업데이트
 		mainRoom.addNewAvgDurationTime(minDuration);
 	}
 	

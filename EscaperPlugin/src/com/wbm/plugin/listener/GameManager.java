@@ -3,15 +3,17 @@ package com.wbm.plugin.listener;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
@@ -28,6 +30,7 @@ import com.wbm.plugin.util.enums.Role;
 import com.wbm.plugin.util.enums.RoomType;
 import com.wbm.plugin.util.general.BanItemTool;
 import com.wbm.plugin.util.general.BroadcastTool;
+import com.wbm.plugin.util.general.RespawnManager;
 
 public class GameManager implements Listener
 {
@@ -36,13 +39,14 @@ public class GameManager implements Listener
 	RelayManager relayManager;
 	BanItemTool banItems;
 
-	public GameManager(PlayerDataManager pDataManager, RoomManager roomManager, RelayManager relayManager, BanItemTool banItems)
+	public GameManager(PlayerDataManager pDataManager, RoomManager roomManager, RelayManager relayManager,
+			BanItemTool banItems)
 	{
 		this.pDataManager=pDataManager;
 		this.roomManager=roomManager;
 		this.relayManager=relayManager;
-		this.banItems = banItems;
-		
+		this.banItems=banItems;
+
 		// init
 		this.init();
 	}
@@ -135,47 +139,85 @@ public class GameManager implements Listener
 			this.processPlayerData(p);
 		}
 	}
-	
+
 	@EventHandler
-	public void onBlockBreak(BlockBreakEvent e)
+	public void onBlockBreakEvent(BlockBreakEvent e)
 	{
 		// 모든 break event는 여기를 거쳐서 처리됨
-		Player p = e.getPlayer();
+		Player p=e.getPlayer();
 		p.sendMessage("break");
-		
+		Block b=e.getBlock();
+
 		// 일단 cancel
 		e.setCancelled(true);
-		
+
 		// Main Room 체크
-		if(RoomLocation.getRoomTypeWithLocation(p.getLocation()) == RoomType.MAIN) {
-			p.sendMessage("break OK");
+		if(RoomLocation.getRoomTypeWithLocation(b.getLocation())==RoomType.MAIN)
+		{
+			p.sendMessage("break: Main");
 			this.onTesterAndChallengerBreakCore(e);
 			this.onMakerBreakCore(e);
 			this.onPlayerBreakBlock(e);
 		}
-		
-		
+
 	}
-	
+
 	@EventHandler
-	public void onBlockPlace(BlockPlaceEvent e)
+	public void onBlockPlaceEvent(BlockPlaceEvent e)
 	{
 		// 모든 place event는 여기를 거쳐서 처리됨
-		Player p = e.getPlayer();
+		Player p=e.getPlayer();
 		p.sendMessage("place");
-		
+		Block b=e.getBlock();
 
 		// 일단 cancel
 		e.setCancelled(true);
-		
+
 		// Main Room 체크
-		if(RoomLocation.getRoomTypeWithLocation(p.getLocation()) == RoomType.MAIN) {
-			p.sendMessage("place OK");
+		if(RoomLocation.getRoomTypeWithLocation(b.getLocation())==RoomType.MAIN)
+		{
+			p.sendMessage("place: Main");
 			this.onPlayerPlaceBlock(e);
 			this.onMakerPlaceCore(e);
 		}
-		
-		
+	}
+
+	@EventHandler
+	public void onPlayerInteractWithItem(PlayerInteractEvent e)
+	{
+		Player p=e.getPlayer();
+
+		if(RoomLocation.getRoomTypeWithLocation(p.getLocation())==RoomType.MAIN)
+		{
+			if(e.getItem()!=null)
+			{
+				Material mat = e.getItem().getType(); 
+				if(mat==Material.STICK)
+				{
+					if(e.getAction()==Action.RIGHT_CLICK_AIR||e.getAction()==Action.RIGHT_CLICK_BLOCK)
+					{
+						Location loc=p.getLocation();
+						p.getWorld().getBlockAt(loc).setType(Material.STONE);
+					}
+				} else if(mat == Material.WOOD_SWORD) {
+					if(e.getAction()==Action.RIGHT_CLICK_AIR||e.getAction()==Action.RIGHT_CLICK_BLOCK)
+					{
+						p.teleport(RespawnManager.respawnLocation);
+					}
+				} else if(mat == Material.WATCH) {
+					if(e.getAction()==Action.LEFT_CLICK_AIR||e.getAction()==Action.LEFT_CLICK_BLOCK)
+					{
+						// sethome
+						// TODO: 구현하기
+						
+					} else if(e.getAction()==Action.RIGHT_CLICK_AIR||e.getAction()==Action.RIGHT_CLICK_BLOCK)
+					{
+						// gohome
+						// TODO: 구현하기
+					}
+				}
+			}
+		}
 	}
 
 //	@EventHandler
@@ -190,8 +232,6 @@ public class GameManager implements Listener
 		PlayerData pData=this.pDataManager.getOnlinePlayerData(pUuid);
 		Role role=pData.getRole();
 
-		
-		
 		// core체크
 		if(mat.equals(Material.GLOWSTONE))
 		{
@@ -204,7 +244,7 @@ public class GameManager implements Listener
 
 				// 1. 현재 Maker에게 이제 Challenger라는 메세지 전송
 				BroadcastTool.sendMessageToEveryone("core is broken!!!!!!!!!!!!");
-				
+
 				// 2. 클리어한 maker는 pDataManager의 maker로 등록
 				this.pDataManager.registerMaker(p);
 
@@ -212,10 +252,10 @@ public class GameManager implements Listener
 				this.roomManager.getRoom(RoomType.MAIN).addClearCount(1);
 				this.roomManager.recordMainRoomDurationTime();
 				this.roomManager.setRoomEmpty(RoomType.MAIN);
-				
+
 				// 4.next relay 시작
 				this.relayManager.startNextTime();
-				
+
 				// 5.player token +1, clearCount +1
 				pData.addToken(1);
 				pData.addClearCount(1);
@@ -224,12 +264,11 @@ public class GameManager implements Listener
 			else if(role==Role.TESTER)
 			{
 				// 1.save room, set main room
-				String title = this.roomManager.saveRoomData(RoomType.MAIN, p.getName());
-				Room mainRoom = this.roomManager.getRoomData(title);
+				String title=this.roomManager.saveRoomData(RoomType.MAIN, p.getName());
+				Room mainRoom=this.roomManager.getRoomData(title);
 				this.roomManager.setRoom(RoomType.MAIN, mainRoom);
 				mainRoom.addChallengingCount(1);
-				
-				
+
 				// 2.next relay 시작
 				this.relayManager.startNextTime();
 			}
@@ -336,20 +375,20 @@ public class GameManager implements Listener
 		if(role==Role.MAKER)
 		{
 			permission=RolePermission.MAKER_PLACEBLOCK;
-			
+
 			// banItem인지 확인
-			
+
 			// 놓인 block 체크
-			Block block = e.getBlock();
-			Material blockMat = block.getType();
+			Block block=e.getBlock();
+			Material blockMat=block.getType();
 			// mainhand 체크
-			ItemStack item = p.getInventory().getItemInMainHand();
-			
-			if(this.banItems.containsItem(blockMat) || this.banItems.containsItem(item)) {
-				permission = false;
+			ItemStack item=p.getInventory().getItemInMainHand();
+
+			if(this.banItems.containsItem(blockMat)||this.banItems.containsItem(item))
+			{
+				permission=false;
 			}
-			
-			
+
 		}
 		else if(role==Role.CHALLENGER)
 		{
@@ -370,9 +409,10 @@ public class GameManager implements Listener
 
 		e.setCancelled(!permission);
 	}
-	
+
 	@EventHandler
-	public void onPlayerPlaceBucket(PlayerBucketEmptyEvent e) {
+	public void onPlayerPlaceBucket(PlayerBucketEmptyEvent e)
+	{
 		Player p=e.getPlayer();
 		UUID uuid=p.getUniqueId();
 		PlayerData pData=this.pDataManager.getOnlinePlayerData(uuid);
@@ -381,13 +421,14 @@ public class GameManager implements Listener
 		// Role별로 권한 체크
 		if(role==Role.MAKER)
 		{
-			Material mat = e.getBucket();
-			if(this.banItems.containsItem(mat)) {
+			Material mat=e.getBucket();
+			if(this.banItems.containsItem(mat))
+			{
 				e.setCancelled(true);
 			}
 		}
 		p.sendMessage("sdfsdfsdd");
-		
+
 	}
 
 	@EventHandler

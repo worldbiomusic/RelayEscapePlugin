@@ -11,6 +11,7 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.wbm.plugin.cmd.DebugCommand;
+import com.wbm.plugin.listener.CommonListener;
 import com.wbm.plugin.listener.GameManager;
 import com.wbm.plugin.util.PlayerDataManager;
 import com.wbm.plugin.util.RelayManager;
@@ -26,6 +27,7 @@ public class Main extends JavaPlugin
 	PluginManager pluginManager;
 
 	GameManager gManager;
+	CommonListener commonListener;
 	PlayerDataManager pDataManager;
 	RoomManager roomManager;
 	RelayManager relayManager;
@@ -118,8 +120,11 @@ public class Main extends JavaPlugin
 
 	private void registerListeners()
 	{
+		this.commonListener = new CommonListener();
+		
 		this.registerEvent(this.gManager);
 		this.registerEvent(this.respawnManager);
+		this.registerEvent(this.commonListener);
 	}
 
 	void registerEvent(Listener listener)

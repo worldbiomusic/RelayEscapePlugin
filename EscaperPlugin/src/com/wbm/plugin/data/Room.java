@@ -152,14 +152,19 @@ public class Room implements Serializable
 		allDurationTime += amount;
 		allDurationTime /= this.clearCount;
 		
+		// 소수점 첫재짜리까지만 저장
+		allDurationTime = Math.round(allDurationTime * 10) / (double)10;
+		
 		this.avgDurationTime = allDurationTime;
 	}
 
 	@Override
 	public String toString()
 	{
-		return "Room \n[title="+title+", \nmaker="+maker+", \nchallengingCount="+challengingCount
-				+", \nclearCount="+clearCount+", \nbirth="+birth+", \nvoted="+voted+ ", \navgDurationTime="+avgDurationTime+"]";
+		return "Room \n[title="+title+", \nmaker="+maker+
+				", \nchallengingCount="+challengingCount
+				+", \nclearCount="+clearCount+", \nbirth="+
+				birth+", \nvoted="+voted+ ", \navgDurationTime="+avgDurationTime+"]";
 	}
 	
 	
