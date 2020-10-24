@@ -44,7 +44,9 @@ public class RoomLocation
 		int dy = MathTool.getDiff((int)pos1.getY(), (int)pos2.getY());
 		int dz = MathTool.getDiff((int)pos1.getZ(), (int)pos2.getZ());
 		
-		return dx * dy * dz;
+		// +1하는 이유: 만약 (1,1) ~ (3,3) 면적의 블럭을 지정하면 총 9개의 블럭을 가리키는것인데
+		// 위에서 dx, dy, dz를 구할때 차이를 구하므로 3-1 = 2 즉 2칸만을 의미하게 되서 +1을 해줌
+		return (dx+1) * (dy+1) * (dz+1);
 	}
 	
 	public static RoomType getRoomTypeWithLocation(Location loc) {

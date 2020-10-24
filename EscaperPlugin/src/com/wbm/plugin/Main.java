@@ -1,6 +1,7 @@
 package com.wbm.plugin;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Server;
@@ -18,8 +19,6 @@ import com.wbm.plugin.util.config.ConfigTest;
 import com.wbm.plugin.util.config.DataManager;
 import com.wbm.plugin.util.general.BanItemTool;
 import com.wbm.plugin.util.general.RespawnManager;
-
-import net.md_5.bungee.api.ChatColor;
 
 public class Main extends JavaPlugin
 {

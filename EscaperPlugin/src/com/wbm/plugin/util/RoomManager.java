@@ -223,6 +223,10 @@ public class RoomManager implements DataMember
 		int smallZ = MathTool.getSmaller(pos1Z, pos2Z);
 
 		int index=0;
+		/*
+		 * for문에서 <=dx인 이유: 만약 (1,1) ~ (3,3) 면적의 블럭을 지정하면 총 9개의 블럭을 가리키는것인데
+		 * 위에서 dx, dy, dz를 구할때 차이를 구하므로 3-1 = 2 즉 2칸만을 의미하게 되서 <=을 해줘서 3칸을 채우게 함
+		 */
 		for(int z=0; z<=dz; z++)
 		{
 			for(int y=0; y<=dy; y++)
