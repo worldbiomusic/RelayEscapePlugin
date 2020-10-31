@@ -7,6 +7,10 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
+
+import com.wbm.plugin.util.general.SpawnLocationTool;
 
 public class CommonListener implements Listener
 {
@@ -64,7 +68,16 @@ public class CommonListener implements Listener
 		}
 	}
 	
+	@EventHandler
+	public void onPlayerJoin(PlayerJoinEvent e) {
+		Player p = e.getPlayer();
+		p.teleport(SpawnLocationTool.joinLocation);
+	}
 	
+	@EventHandler
+	public void onPlayerRespawn(PlayerRespawnEvent e) {
+		e.setRespawnLocation(SpawnLocationTool.respawnLocation);
+	}
 }
 
 

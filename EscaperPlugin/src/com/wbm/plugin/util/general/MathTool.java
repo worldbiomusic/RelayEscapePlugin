@@ -1,7 +1,5 @@
 package com.wbm.plugin.util.general;
 
-import org.bukkit.Location;
-
 public class MathTool
 {
 //	public static isBetween(int a, int b,int c) {

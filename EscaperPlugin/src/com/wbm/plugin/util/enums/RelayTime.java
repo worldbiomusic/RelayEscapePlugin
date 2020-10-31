@@ -16,4 +16,15 @@ public enum RelayTime
 	public int getAmount() {
 		return this.time;
 	}
+	
+	public static RelayTime getNextTime(RelayTime time) {
+		if(time == RelayTime.MAKING) {
+			return RelayTime.TESTING;
+		} else if(time == RelayTime.TESTING) {
+			return RelayTime.CHALLENGING;
+		} else if(time == RelayTime.CHALLENGING) {
+			return RelayTime.WAITING;
+		} else // if(time == RelayTime.WAITING) {
+			return RelayTime.MAKING;
+	}
 }

@@ -17,6 +17,11 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.scoreboard.DisplaySlot;
+import org.bukkit.scoreboard.Objective;
+import org.bukkit.scoreboard.Score;
+import org.bukkit.scoreboard.Scoreboard;
+import org.bukkit.scoreboard.ScoreboardManager;
 
 import com.wbm.plugin.data.PlayerData;
 import com.wbm.plugin.data.Room;
@@ -30,7 +35,7 @@ import com.wbm.plugin.util.enums.Role;
 import com.wbm.plugin.util.enums.RoomType;
 import com.wbm.plugin.util.general.BanItemTool;
 import com.wbm.plugin.util.general.BroadcastTool;
-import com.wbm.plugin.util.general.RespawnManager;
+import com.wbm.plugin.util.general.SpawnLocationTool;
 
 public class GameManager implements Listener
 {
@@ -185,35 +190,91 @@ public class GameManager implements Listener
 	@EventHandler
 	public void onPlayerInteractWithItem(PlayerInteractEvent e)
 	{
+		/*
+		 * 정확히 하려연, Room, RelayTime, Role 3개를 다 체크해야 함
+		 * 
+		 * 템 목록: 
+		 * [Maker]
+		 * stick(발아래 돌 생성)
+		 * wood_sword(리스폰)
+		 * ACACIA_DOOR_ITEM(home기능)
+		 * 
+		 * [Tester]
+		 * wood_sword(리스폰)
+		 * ACACIA_DOOR_ITEM(home기능)
+		 * 
+		 * [Challenger]
+		 * watch(시간 단축)
+		 */
 		Player p=e.getPlayer();
+		RelayTime relayTime = this.relayManager.getCurrentTime();
+		PlayerData pData = this.pDataManager.getOnlinePlayerData(p.getUniqueId());
+		Role role = pData.getRole();
 
+		ItemStack item = e.getItem();
+		Material mat = null;
+		if(item != null) {
+			mat = item.getType();
+		}
+		
+		// Main room
 		if(RoomLocation.getRoomTypeWithLocation(p.getLocation())==RoomType.MAIN)
 		{
-			if(e.getItem()!=null)
-			{
-				Material mat = e.getItem().getType(); 
-				if(mat==Material.STICK)
-				{
-					if(e.getAction()==Action.RIGHT_CLICK_AIR||e.getAction()==Action.RIGHT_CLICK_BLOCK)
+			// making time
+			if(relayTime == RelayTime.MAKING || relayTime == RelayTime.TESTING) {
+				// maker
+				if(role == Role.MAKER || role == Role.TESTER) {
+					if(item!=null)
 					{
-						Location loc=p.getLocation();
-						p.getWorld().getBlockAt(loc).setType(Material.STONE);
+						// maker
+						if(mat==Material.STICK && role == Role.MAKER)
+						{
+							if(e.getAction()==Action.RIGHT_CLICK_AIR||e.getAction()==Action.RIGHT_CLICK_BLOCK)
+							{
+								Location loc=p.getLocation();
+								p.getWorld().getBlockAt(loc).setType(Material.STONE);
+							}
+						} 
+						// maker or tester
+						else if(mat == Material.WOOD_SWORD) {
+							if(e.getAction()==Action.RIGHT_CLICK_AIR||e.getAction()==Action.RIGHT_CLICK_BLOCK)
+							{
+								p.teleport(SpawnLocationTool.respawnLocation);
+							}
+						} 
+						// maker or tester
+						else if(mat == Material.ACACIA_DOOR_ITEM) {
+							if(e.getAction()==Action.LEFT_CLICK_AIR||e.getAction()==Action.LEFT_CLICK_BLOCK)
+							{
+								// sethome
+								// TODO: 구현하기
+								
+							} else if(e.getAction()==Action.RIGHT_CLICK_AIR||e.getAction()==Action.RIGHT_CLICK_BLOCK)
+							{
+								// gohome
+								// TODO: 구현하기
+							}
+						}
 					}
-				} else if(mat == Material.WOOD_SWORD) {
-					if(e.getAction()==Action.RIGHT_CLICK_AIR||e.getAction()==Action.RIGHT_CLICK_BLOCK)
-					{
-						p.teleport(RespawnManager.respawnLocation);
-					}
-				} else if(mat == Material.WATCH) {
-					if(e.getAction()==Action.LEFT_CLICK_AIR||e.getAction()==Action.LEFT_CLICK_BLOCK)
-					{
-						// sethome
-						// TODO: 구현하기
-						
-					} else if(e.getAction()==Action.RIGHT_CLICK_AIR||e.getAction()==Action.RIGHT_CLICK_BLOCK)
-					{
-						// gohome
-						// TODO: 구현하기
+				}
+			}
+			else if(relayTime == RelayTime.CHALLENGING) {
+				if(role == Role.CHALLENGER) {
+					if(item != null) {
+						if(mat == Material.WATCH) {
+							if(e.getAction()==Action.RIGHT_CLICK_AIR||e.getAction()==Action.RIGHT_CLICK_BLOCK)
+							{
+								// ChallengingTime 남은 시간(1/(player수+1)) 단축
+								int leftTime = this.relayManager.getLeftTime();
+								int reductionTime = leftTime / (Bukkit.getOnlinePlayers().size() + 1);
+								this.relayManager.reduceTime(reductionTime);
+								
+								// 사용한후에 삭제
+								p.getInventory().remove(item);
+								
+								BroadcastTool.sendMessageToEveryone(reductionTime + " sec reduced by " + p.getName());
+							}
+						}
 					}
 				}
 			}
@@ -439,6 +500,34 @@ public class GameManager implements Listener
 
 		// PlayerData 처리
 		this.processPlayerData(p);
+		
+//		// scoreboard
+//		this.addScoreboardToPlayer(p);
+	}
+	
+	void addScoreboardToPlayer(Player p) {
+		PlayerData pData = this.pDataManager.getOnlinePlayerData(p.getUniqueId());
+		
+		ScoreboardManager manager = Bukkit.getScoreboardManager();
+		Scoreboard board = manager.getNewScoreboard();
+		
+		Objective objective = board.registerNewObjective("test text", "dummy");
+		objective.setDisplaySlot(DisplaySlot.SIDEBAR);
+		objective.setDisplayName("=====INFO=====");
+		
+		Score score2 = objective.getScore("Token: " + pData.getToken());
+		score2.setScore(9);
+		
+		Score score3 = objective.getScore("RelayTime: " + this.relayManager.getCurrentTime().name());
+		score3.setScore(8);
+		
+//		Score score4 = objective.getScore("Room: " + this.roomManager.);
+//		score4.setScore(7);
+		
+		Score score5 = objective.getScore(": ");
+		score5.setScore(6);
+		
+		p.setScoreboard(board);
 	}
 
 	@EventHandler

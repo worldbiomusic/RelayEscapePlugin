@@ -19,12 +19,16 @@ import com.wbm.plugin.util.enums.RelayTime;
 import com.wbm.plugin.util.enums.Role;
 import com.wbm.plugin.util.enums.RoomType;
 import com.wbm.plugin.util.general.BroadcastTool;
+import com.wbm.plugin.util.general.Counter;
 import com.wbm.plugin.util.general.InventoryTool;
+import com.wbm.plugin.util.general.KitTool;
+import com.wbm.plugin.util.general.SpawnLocationTool;
+import com.wbm.plugin.util.general.TeleportTool;
 
 /* TODO: RelayTime의 Making -> Building, Challenging -> Finding으로 변경
  * TODO: ROle의 Maker-> Builder, Challenger -> Finder로 변경
  * 
- * 중요) 기본적인 maker는 PlayerDataManager에 변수로 등록해놓음
+ * 중요) 기본적인 maker는 PlayerDataManager에 변수로 등록해놓음  
  * 
  * [시간에 따른 Maker와 Challenger의 역할 변화]
  * Role: Maker, Tester, Challenger, Viewer, Waiter
@@ -52,6 +56,11 @@ public class RelayManager
 
 	private boolean corePlaced;
 	
+	private Counter timer;
+	private int timerTask;
+	
+	private BukkitTask reservationTask;
+	
 
 	public RelayManager(PlayerDataManager pDataManager, RoomManager roomManager)
 	{
@@ -59,6 +68,7 @@ public class RelayManager
 		this.roomManager=roomManager;
 		this.currentTime=RelayTime.CHALLENGING;
 		this.corePlaced=false;
+		this.timer = new Counter();
 	}
 
 	// Waiting이 시작하려면 무조건 maker가 등록되어 있어야 함!
@@ -88,17 +98,19 @@ public class RelayManager
 		BroadcastTool.sendMessageToEveryone("waitingTime: makingTime starts in "+RelayTime.WAITING.getAmount()+" sec");
 
 		// MakingTime 카운트다운
-		this.currentCountDownTask=Bukkit.getScheduler().runTaskLater(Main.getInstance(), new Runnable()
-		{
-
-			@Override
-			public void run()
-			{
-//				startMaking();
-				startNextTime();
-			}
-		}, 20*RelayTime.WAITING.getAmount());
+//		this.currentCountDownTask=Bukkit.getScheduler().runTaskLater(Main.getInstance(), new Runnable()
+//		{
+//
+//			@Override
+//			public void run()
+//			{
+//				startNextTime();
+//			}
+//		}, 20*RelayTime.WAITING.getAmount());
+		reserveNextTask(this.getCurrentTime().getAmount());
 	}
+	
+	
 
 	private void startMaking()
 	{
@@ -111,16 +123,7 @@ public class RelayManager
 		// maker 관리
 		this.pDataManager.changePlayerRole(this.getMaker().getUniqueId(), Role.MAKER);
 		Inventory makerInv = this.getMaker().getInventory();
-		makerInv.addItem(
-				new ItemStack(Material.GLOWSTONE),
-				new ItemStack(Material.DIRT),
-				new ItemStack(Material.GLASS), 
-				new ItemStack(Material.STONE), 
-				new ItemStack(Material.WOOD), 
-				new ItemStack(Material.JACK_O_LANTERN), 
-				new ItemStack(Material.STICK),
-				new ItemStack(Material.WOOD_SWORD),
-				new ItemStack(Material.WATCH));
+		makerInv.addItem((KitTool.getKitArray("maker")));
 
 		// maker제외한 challenger 관리
 		for(Player p : this.getChallengers())
@@ -135,22 +138,23 @@ public class RelayManager
 		this.roomManager.setRoom(RoomType.PRACTICE, randomRoom);
 		
 		// TestingTime 카운트다운
-		this.currentCountDownTask=Bukkit.getScheduler().runTaskLater(Main.getInstance(), new Runnable()
-		{
-
-			@Override
-			public void run()
-			{
-				if(!isCorePlaced())
-				{
-					resetRelay();
-				}
-				else
-				{
-					startNextTime();
-				}
-			}
-		}, 20*RelayTime.MAKING.getAmount());
+//		this.currentCountDownTask=Bukkit.getScheduler().runTaskLater(Main.getInstance(), new Runnable()
+//		{
+//
+//			@Override
+//			public void run()
+//			{
+//				if(!isCorePlaced())
+//				{
+//					resetRelay();
+//				}
+//				else
+//				{
+//					startNextTime();
+//				}
+//			}
+//		}, 20*RelayTime.MAKING.getAmount());
+		reserveNextTask(this.getCurrentTime().getAmount());
 	}
 
 	private void startTesting()
@@ -165,9 +169,8 @@ public class RelayManager
 		// maker 관리
 		this.pDataManager.changePlayerRole(this.getMaker().getUniqueId(), Role.TESTER);
 		Inventory makerInv = this.getMaker().getInventory();
-		makerInv.addItem(
-				new ItemStack(Material.WOOD_SWORD),
-				new ItemStack(Material.WATCH));
+		makerInv.addItem((KitTool.getKitArray("tester")));
+		this.getMaker().teleport(SpawnLocationTool.respawnLocation);
 		
 		// maker제외한 challenger 관리
 		for(Player p : this.getChallengers())
@@ -180,17 +183,18 @@ public class RelayManager
 				.sendMessageToEveryone("testTime: challengingTime starts in "+RelayTime.TESTING.getAmount()+" sec");
 
 		// resetRelay 카운트다운
-		this.currentCountDownTask=Bukkit.getScheduler().runTaskLater(Main.getInstance(), new Runnable()
-		{
-			// TestingTime에서 시간이 다되었다는것은 통과를 못했다는 뜻 -> restRelay
-			@Override
-			public void run()
-			{
-				// reset relay
-				BroadcastTool.sendMessageToEveryone("Maker couldn't pass the test");
-				resetRelay();
-			}
-		}, 20*RelayTime.TESTING.getAmount());
+//		this.currentCountDownTask=Bukkit.getScheduler().runTaskLater(Main.getInstance(), new Runnable()
+//		{
+//			// TestingTime에서 시간이 다되었다는것은 통과를 못했다는 뜻 -> restRelay
+//			@Override
+//			public void run()
+//			{
+//				// reset relay
+//				BroadcastTool.sendMessageToEveryone("Maker couldn't pass the test");
+//				resetRelay();
+//			}
+//		}, 20*RelayTime.TESTING.getAmount());
+		reserveNextTask(this.getCurrentTime().getAmount());
 	}
 
 	private void startChallenging()
@@ -200,6 +204,7 @@ public class RelayManager
 
 		// 모든유저 인벤관리
 		InventoryTool.clearAllPlayerInv();
+		
 				
 		// maker 관리
 		// if문 넣은이유: Maker가 만들고 나갔을때 위해서
@@ -218,7 +223,17 @@ public class RelayManager
 			UUID uuid = p.getUniqueId();
 			PlayerData pData = this.pDataManager.getOnlinePlayerData(uuid);
 			pData.addChallengingCount(1);
+			
+			// Tool 제공
+			Inventory inv = p.getInventory();
+			inv.addItem((KitTool.getKitArray("challenger")));
 		}
+		
+		
+		// 모두 respawn으로 tp
+		List<Player> maker = new ArrayList<>();
+		maker.add(this.getMaker());
+		TeleportTool.allTpToLocationWithoutThem(SpawnLocationTool.respawnLocation, maker);
 		
 
 		// message 관리 
@@ -229,18 +244,57 @@ public class RelayManager
 		this.roomManager.startMainRoomDurationTime();
 		
 		// resetRelay 카운트다운
-		this.currentCountDownTask=Bukkit.getScheduler().runTaskLater(Main.getInstance(), new Runnable()
+//		this.currentCountDownTask=Bukkit.getScheduler().runTaskLater(Main.getInstance(), new Runnable()
+//		{
+//			// ChallengingTime에서 시간이 다되었다는것은 사람이 없거나 난이도가 어렵다는 뜻 -> resetRelay
+//			@Override
+//			public void run()
+//			{
+//				// reset relay
+//				resetRelay();
+//			}
+//		}, 20*RelayTime.CHALLENGING.getAmount());
+		reserveNextTask(this.getCurrentTime().getAmount());
+
+	}
+	
+	private void reserveNextTask(int durationTime) {
+		this.reservationTask = this.currentCountDownTask=Bukkit.getScheduler().runTaskLater(Main.getInstance(), new Runnable()
 		{
-			// ChallengingTime에서 시간이 다되었다는것은 사람이 없거나 난이도가 어렵다는 뜻 -> resetRelay
+
 			@Override
 			public void run()
 			{
-				// reset relay
-				BroadcastTool.sendMessageToEveryone("no one pass the room");
-				resetRelay();
-			}
-		}, 20*RelayTime.CHALLENGING.getAmount());
+				RelayTime currentTime = getCurrentTime();
+				if(currentTime==RelayTime.WAITING)
+				{
+					startNextTime();
+				}
+				else if(currentTime==RelayTime.MAKING)
+				{
+					if(!isCorePlaced())
+					{
+						resetRelay();
+					}
+					else
+					{
+						startNextTime();
+					}
+				}
+				else if(currentTime==RelayTime.TESTING)
+				{
+					// reset relay
+					BroadcastTool.sendMessageToEveryone("Maker couldn't pass the test");
+					resetRelay();
+				}
+				else if(currentTime==RelayTime.CHALLENGING)
+				{
+					BroadcastTool.sendMessageToEveryone("No one pass the room");
 
+					resetRelay();
+				}
+			}
+		}, 20 * durationTime);
 	}
 
 	public List<Player> getChallengers()
@@ -270,7 +324,7 @@ public class RelayManager
 //		this.pDataManager.registerMaker(maker);
 //	}
 
-	void stopCurrentTime()
+	private void stopCurrentTime()
 	{
 		if(this.currentCountDownTask!=null)
 		{
@@ -285,25 +339,27 @@ public class RelayManager
 		// 먼저 현재 time task 중지
 		this.stopCurrentTime();
 
-		RelayTime t=this.currentTime;
+		RelayTime time=this.currentTime;
 
-		if(t==RelayTime.WAITING)
+		if(time==RelayTime.WAITING)
 		{
 			this.startMaking();
 		}
-		else if(t==RelayTime.MAKING)
+		else if(time==RelayTime.MAKING)
 		{
 			this.startTesting();
 		}
-		else if(t==RelayTime.TESTING)
+		else if(time==RelayTime.TESTING)
 		{
 			// core부수면 바로 시작
 			this.startChallenging();
 		}
-		else if(t==RelayTime.CHALLENGING)
+		else if(time==RelayTime.CHALLENGING)
 		{
 			this.startWaiting();
 		}
+		
+		this.startNewCountDownTimer(RelayTime.getNextTime(time));
 	}
 
 	// 예외적인 상황이 발생했을 때 사용 (Maker가 방을 중간에 나가거나 or 조건이 불만족되었을때)
@@ -328,6 +384,8 @@ public class RelayManager
 		{
 			this.startChallenging();
 		}
+		
+		this.startNewCountDownTimer(anotherTime);
 	}
 
 	public void resetRelay()
@@ -384,5 +442,51 @@ public class RelayManager
 	{
 		this.corePlaced=corePlaced;
 	}
+	
+	public int getLeftTime() {
+		return this.timer.getCount();
+	}
 
+	private void startNewCountDownTimer(RelayTime newTime) {
+		// stop current timer 
+		Bukkit.getScheduler().cancelTask(this.timerTask);
+		
+		this.timer.setCount(newTime.getAmount());
+		
+		this.timerTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(Main.getInstance(), new Runnable()
+		{
+			@Override 
+			public void run()
+			{
+				timer.removeCount(1);
+			}
+		}, 0, 20 * 1);
+	}
+	
+	public void reduceTime(int reductionTime) {
+		this.reservationTask.cancel();
+		this.reserveNextTask(this.timer.getCount() - reductionTime);
+		
+		this.timer.removeCount(reductionTime);
+	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
