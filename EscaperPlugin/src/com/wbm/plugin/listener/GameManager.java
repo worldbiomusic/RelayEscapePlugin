@@ -17,11 +17,6 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.scoreboard.DisplaySlot;
-import org.bukkit.scoreboard.Objective;
-import org.bukkit.scoreboard.Score;
-import org.bukkit.scoreboard.Scoreboard;
-import org.bukkit.scoreboard.ScoreboardManager;
 
 import com.wbm.plugin.data.PlayerData;
 import com.wbm.plugin.data.Room;
@@ -501,35 +496,8 @@ public class GameManager implements Listener
 		// PlayerData 처리
 		this.processPlayerData(p);
 		
-//		// scoreboard
-//		this.addScoreboardToPlayer(p);
 	}
 	
-	void addScoreboardToPlayer(Player p) {
-		PlayerData pData = this.pDataManager.getOnlinePlayerData(p.getUniqueId());
-		
-		ScoreboardManager manager = Bukkit.getScoreboardManager();
-		Scoreboard board = manager.getNewScoreboard();
-		
-		Objective objective = board.registerNewObjective("test text", "dummy");
-		objective.setDisplaySlot(DisplaySlot.SIDEBAR);
-		objective.setDisplayName("=====INFO=====");
-		
-		Score score2 = objective.getScore("Token: " + pData.getToken());
-		score2.setScore(9);
-		
-		Score score3 = objective.getScore("RelayTime: " + this.relayManager.getCurrentTime().name());
-		score3.setScore(8);
-		
-//		Score score4 = objective.getScore("Room: " + this.roomManager.);
-//		score4.setScore(7);
-		
-		Score score5 = objective.getScore(": ");
-		score5.setScore(6);
-		
-		p.setScoreboard(board);
-	}
-
 	@EventHandler
 	public void onPlayerQuit(PlayerQuitEvent e)
 	{

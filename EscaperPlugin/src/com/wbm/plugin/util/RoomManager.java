@@ -10,10 +10,12 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.inventory.ItemStack;
 
 import com.wbm.plugin.data.BlockData;
 import com.wbm.plugin.data.Room;
 import com.wbm.plugin.data.RoomLocation;
+import com.wbm.plugin.data.RoomLocker;
 import com.wbm.plugin.util.config.DataMember;
 import com.wbm.plugin.util.enums.RoomType;
 import com.wbm.plugin.util.general.BroadcastTool;
@@ -29,6 +31,7 @@ public class RoomManager implements DataMember
 	 */
 	
 	// 단순한 Room 데이터들
+	// title, room
 	Map<String, Room> roomData;
 	
 	// MainRoom, PracticeRoom
@@ -251,30 +254,15 @@ public class RoomManager implements DataMember
 		}
 
 	}
+	
+	void fillBlocks(List<Location> locs, ItemStack item) {
+		for(Location loc : locs) {
+			loc.getBlock().setType(item.getType());
+			loc.getBlock().getState().setData(item.getData());
+			loc.getBlock().getState().update();
+		}
+	}
 
-//	void fillSpaceWithMaterial(Location loc1, Location loc2, List<Material> materials)
-//	{
-//		int dx=(int)loc2.getX()-(int)loc1.getX();
-//		int dy=(int)loc2.getY()-(int)loc1.getY();
-//		int dz=(int)loc2.getZ()-(int)loc1.getZ();
-//
-//		int index=0;
-//		for(int z=0; z<=dz; z++)
-//		{
-//			for(int y=0; y<=dy; y++)
-//			{
-//				for(int x=0; x<=dx; x++)
-//				{
-//					Location loc=loc1.clone();
-//					loc.add(x, y, z);
-//
-//					loc.getBlock().setType(materials.get(index));
-//					index++;
-//				}
-//			}
-//		}
-//
-//	}
 
 	public void setRoomEmpty(RoomType roomType)
 	{
@@ -299,6 +287,41 @@ public class RoomManager implements DataMember
 		}
 		return randomRoom;
 	}
+	
+	public void lockRoom(RoomType roomType) {
+		// lock room with some blocks
+		if(roomType == RoomType.MAIN) {
+			this.fillBlocks(RoomLocker.mainLocker, RoomLocker.mainLockerItem);
+		}
+	}
+	
+	public void unlockRoom(RoomType roomType) {
+		if(roomType == RoomType.MAIN) {
+			this.fillBlocks(RoomLocker.mainLocker, RoomLocker.air);
+		}
+	}
+	
+	public List<Room> getOwnRooms(String maker) {
+		List<Room> rooms = new ArrayList<>();
+		for(Room room : this.roomData.values()) {
+			if(room.getMaker().equals(maker)) {
+				rooms.add(room);
+			}
+		}
+		return rooms;
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 
 	@SuppressWarnings("unchecked")
 	@Override

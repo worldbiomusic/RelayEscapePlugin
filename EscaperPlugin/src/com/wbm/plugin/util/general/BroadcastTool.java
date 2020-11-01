@@ -1,10 +1,12 @@
 package com.wbm.plugin.util.general;
 
 import java.util.List;
+import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
+
 
 public class BroadcastTool
 {
@@ -70,6 +72,10 @@ public class BroadcastTool
 	// Console 전용
 	public static void printConsoleMessage(String msg) {
 		Bukkit.getConsoleSender().sendMessage(msg);
+	}
+	
+	public static void log(String msg) {
+		Bukkit.getLogger().log(Level.INFO, msg);
 	}
 	
 	public static void debug(String msg) {

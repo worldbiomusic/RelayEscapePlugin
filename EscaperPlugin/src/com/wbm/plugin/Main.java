@@ -1,8 +1,5 @@
 package com.wbm.plugin;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -149,7 +146,7 @@ public class Main extends JavaPlugin
 
 	private void registerCommands()
 	{
-		this.dCmd=new DebugCommand(this.pDataManager, this.relayManager);
+		this.dCmd=new DebugCommand(this.pDataManager, this.relayManager, this.roomManager);
 		this.getCommand("re").setExecutor(dCmd);
 	}
 	

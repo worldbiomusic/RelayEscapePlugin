@@ -1,5 +1,7 @@
 package com.wbm.plugin.cmd;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -11,10 +13,13 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import com.wbm.plugin.data.PlayerData;
+import com.wbm.plugin.data.Room;
 import com.wbm.plugin.util.PlayerDataManager;
 import com.wbm.plugin.util.RelayManager;
+import com.wbm.plugin.util.RoomManager;
 import com.wbm.plugin.util.enums.RelayTime;
 import com.wbm.plugin.util.enums.Role;
+import com.wbm.plugin.util.enums.RoomType;
 import com.wbm.plugin.util.general.BroadcastTool;
 
 
@@ -22,14 +27,16 @@ public class DebugCommand implements CommandExecutor
 {
 	PlayerDataManager pDataManager;
 	RelayManager relayManager;
-	
+	RoomManager roomManager;
 	
 	public DebugCommand(
 			PlayerDataManager pDataManager,
-			RelayManager relayManager)
+			RelayManager relayManager,
+			RoomManager roomManager)
 	{
 		this.pDataManager = pDataManager;
 		this.relayManager = relayManager;
+		this.roomManager = roomManager;
 	}
 	
 
@@ -49,12 +56,82 @@ public class DebugCommand implements CommandExecutor
 				p.sendMessage("==========debug cmd=============");
 				this.debug(p, args);
 				break;
+			case "room":
+				this.room(p, args);
+				break;
 		}
 		
 		return true;
 	}
 	
-	void debug(Player p, String[] args) {
+	private void room(Player p, String[] args)
+	{	
+		BroadcastTool.debug("room");
+		
+		// TODO: 밑의 if문 조건을 통과 못할때가 있음 (player의 위치때문에 RoomType이 잘 안되는거같음)
+		// Main room, RelayTime.Making, Role Maker 체크
+		if(this.relayManager.checkRoomAndRelayTimeAndRoleAboutPlayer(
+				p, RoomType.MAIN, RelayTime.MAKING, Role.MAKER)) {
+			String second = args[1];
+			
+			switch(second) {
+				case "load":
+					this.loadRoom(p, args);
+					break;
+				case "empty":
+					this.emtpyRoom(p, args);
+					break;
+				case "print":
+					this.printRoom(p, args);
+					break;
+			}
+		}
+	}
+
+	private void loadRoom(Player p, String[] args)
+	{
+		BroadcastTool.debug("load");
+		// re room load [title]
+		String title = args[2];
+		Room room = this.roomManager.getRoomData(title);
+		
+		// room maker가 아닐시 반환
+		if(!room.getMaker().equals(p.getName())) {
+			BroadcastTool.sendMessage(p, "You are not Maker of " + title + " room");
+			return;
+		}
+		
+		// set room 
+		this.roomManager.setRoom(RoomType.MAIN, room);
+		BroadcastTool.sendMessage(p, title + " room is loading...");
+	}
+	
+	private void emtpyRoom(Player p, String[] args)
+	{
+		// re room empty
+		this.roomManager.setRoomEmpty(RoomType.MAIN);
+	}
+	
+	private void printRoom(Player p, String[] args)
+	{
+		BroadcastTool.debug("print");
+		// re room print
+		List<Room> rooms = this.roomManager.getOwnRooms(p.getName());
+		
+		BroadcastTool.sendMessage(p, "=====[Room List]=====");
+		for(Room room : rooms) {
+			// 예. [2020-12-12] wbm's first room
+			LocalDateTime b = room.getBirth();
+			String date = String.format("%d/%d/%d-%dH:%dM", b.getYear(), b.getMonthValue(), b.getDayOfMonth(),
+					b.getHour(), b.getMinute());
+			String roomInfo = String.format(ChatColor.BLUE + "Date" + ChatColor.WHITE + 
+					": %s \t " + ChatColor.RED +"Title" + ChatColor.WHITE + ": %s", date, room.getTitle());
+			BroadcastTool.sendMessage(p, roomInfo);
+		}
+	}
+
+
+	private void debug(Player p, String[] args) {
 		String second = args[1];
 		
 		switch(second) {

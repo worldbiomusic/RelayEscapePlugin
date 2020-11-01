@@ -6,15 +6,14 @@ import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitTask;
 
 import com.wbm.plugin.Main;
 import com.wbm.plugin.data.PlayerData;
 import com.wbm.plugin.data.Room;
+import com.wbm.plugin.data.RoomLocation;
 import com.wbm.plugin.util.enums.RelayTime;
 import com.wbm.plugin.util.enums.Role;
 import com.wbm.plugin.util.enums.RoomType;
@@ -76,6 +75,9 @@ public class RelayManager
 	{
 		// RelayTime 관리
 		this.currentTime=RelayTime.WAITING;
+		
+		// unlock main room
+		this.roomManager.unlockRoom(RoomType.MAIN);
 
 		// 모든유저 인벤관리
 		InventoryTool.clearAllPlayerInv();
@@ -202,6 +204,9 @@ public class RelayManager
 		// RelayTime 관리
 		this.currentTime=RelayTime.CHALLENGING;
 
+		// Main Room Locker
+		this.roomManager.lockRoom(RoomType.MAIN);
+		
 		// 모든유저 인벤관리
 		InventoryTool.clearAllPlayerInv();
 		
@@ -468,6 +473,20 @@ public class RelayManager
 		this.reserveNextTask(this.timer.getCount() - reductionTime);
 		
 		this.timer.removeCount(reductionTime);
+	}
+	
+	public boolean checkRoomAndRelayTimeAndRoleAboutPlayer(Player p, RoomType roomType, RelayTime relayTime, Role role) {
+		RoomType room = RoomLocation.getRoomTypeWithLocation(p.getLocation());
+		RelayTime time = this.getCurrentTime();
+		PlayerData pData = this.pDataManager.getOnlinePlayerData(p.getUniqueId());
+		
+		if(room == roomType
+				&& time == relayTime
+				&& pData.getRole() == role) {
+			return true;
+		}
+		
+		return false;
 	}
 }
 
