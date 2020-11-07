@@ -1,12 +1,21 @@
 package com.wbm.plugin.data;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import com.wbm.plugin.util.enums.Role;
 
 public class PlayerData implements Serializable
 {
+	/*
+	 * 속성 추가할때 고칠것
+	 * 1.get, set method
+	 * 2.toString()에 추가
+	 * 3.constructor 관리
+	 * 4.data저장하는것이면 data부분도 관리
+	 */
 	private static final long serialVersionUID=1L;
 	UUID uuid;
 	String name;
@@ -16,6 +25,8 @@ public class PlayerData implements Serializable
 	int challengingCount;
 	int clearCount;
 	int voted;
+	
+	List<ShopGoods> goods;
 	
 	public PlayerData(UUID uuid, String name, Role role) {
 		this(uuid, name, role, 0, 0, 0, 0);
@@ -27,10 +38,12 @@ public class PlayerData implements Serializable
 		this.uuid = uuid;
 		this.name = name;
 		this.role = role;
-		this.token = 0;
-		this.challengingCount = 0;
-		this.clearCount = 0;
-		this.voted = 0;
+		this.token = token;
+		this.challengingCount = challengingCount;
+		this.clearCount = clearCount;
+		this.voted = voted;
+		
+		this.goods = new ArrayList<>();
 	}
 	
 	public UUID getUUID()
@@ -135,11 +148,37 @@ public class PlayerData implements Serializable
 		this.voted -= voted;
 	}
 
+
+	public List<ShopGoods> getGoods()
+	{
+		return goods;
+	}
+
+	public void setGoods(List<ShopGoods> makingGoods)
+	{
+		this.goods=makingGoods;
+	}
+	
+	public void addGoods(ShopGoods goods) {
+		this.goods.add(goods);
+	}
+
+	public boolean doesHaveGoods(ShopGoods goods) {
+		return this.goods.contains(goods);
+	}
+	
+	
 	@Override
 	public String toString()
 	{
-		return "PlayerData [\nuuid="+uuid+", \nname="+name+", \ntoken="+token+", \nchallengingCount="+challengingCount
-				+", \nclearCount="+clearCount+", \nvoted="+voted+"]";
+		return "PlayerData " + 
+				", \nuuid="+this.uuid+
+				", \nname="+this.name+
+				", \ntoken="+this.token+
+				", \nchallengingCount="+this.challengingCount +
+				", \nclearCount="+this.clearCount+
+				", \nvoted="+this.voted + 
+				", \ngoods: " + this.goods;
 	}
 	
 	

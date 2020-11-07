@@ -18,11 +18,13 @@ import org.bukkit.scoreboard.ScoreboardManager;
 
 import com.wbm.plugin.cmd.DebugCommand;
 import com.wbm.plugin.data.PlayerData;
+import com.wbm.plugin.data.ShopGoods;
 import com.wbm.plugin.listener.CommonListener;
 import com.wbm.plugin.listener.GameManager;
 import com.wbm.plugin.util.PlayerDataManager;
 import com.wbm.plugin.util.RelayManager;
 import com.wbm.plugin.util.RoomManager;
+import com.wbm.plugin.util.ShopManager;
 import com.wbm.plugin.util.config.ConfigTest;
 import com.wbm.plugin.util.config.DataManager;
 import com.wbm.plugin.util.general.BanItemTool;
@@ -40,6 +42,7 @@ public class Main extends JavaPlugin
 	RoomManager roomManager;
 	RelayManager relayManager;
 	DataManager dataManager;
+	ShopManager shopManager;
 
 	// command executor
 	DebugCommand dCmd;
@@ -129,11 +132,12 @@ public class Main extends JavaPlugin
 		this.relayManager=new RelayManager(this.pDataManager, this.roomManager);
 		this.gManager=new GameManager(this.pDataManager, this.roomManager, this.relayManager, this.banItems);
 
+		this.shopManager = new ShopManager(this.pDataManager);
 	}
 
 	private void registerListeners()
 	{
-		this.commonListener = new CommonListener();
+		this.commonListener = new CommonListener(this.pDataManager, this.shopManager);
 		
 		this.registerEvent(this.gManager);
 		this.registerEvent(this.commonListener);
@@ -193,14 +197,17 @@ public class Main extends JavaPlugin
 				new ItemStack(Material.STONE), 
 				new ItemStack(Material.WOOD), 
 				new ItemStack(Material.JACK_O_LANTERN), 
-				new ItemStack(Material.STICK),
-				new ItemStack(Material.WOOD_SWORD));
+				ShopGoods.UNDER_BLOCK.getGoods(),
+				ShopGoods.SPAWN.getGoods(),
+				ShopGoods.ROOM_MANAGER.getGoods());
 		
-		KitTool.addKit("tester", new ItemStack(Material.WOOD_SWORD));
+		KitTool.addKit("tester", ShopGoods.SPAWN.getGoods());
 		
-		KitTool.addKit("challenger", new ItemStack(Material.WATCH));
+		KitTool.addKit("challenger", ShopGoods.HALF_TIME.getGoods());
 		
+		KitTool.addKit("viewer", ShopGoods.GHOST.getGoods());
 		
+//		KitTool.addKit("waiter", ShopGoods.GHOST.getGoods());
 	}
 
 	@Override

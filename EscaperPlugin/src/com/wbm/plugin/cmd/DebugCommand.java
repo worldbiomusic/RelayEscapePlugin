@@ -1,7 +1,5 @@
 package com.wbm.plugin.cmd;
 
-import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -14,6 +12,7 @@ import org.bukkit.entity.Player;
 
 import com.wbm.plugin.data.PlayerData;
 import com.wbm.plugin.data.Room;
+import com.wbm.plugin.data.ShopGoods;
 import com.wbm.plugin.util.PlayerDataManager;
 import com.wbm.plugin.util.RelayManager;
 import com.wbm.plugin.util.RoomManager;
@@ -66,12 +65,15 @@ public class DebugCommand implements CommandExecutor
 	
 	private void room(Player p, String[] args)
 	{	
-		BroadcastTool.debug("room");
-		
+		PlayerData pData = this.pDataManager.getOnlinePlayerData(p.getUniqueId());
+		if(! pData.doesHaveGoods(ShopGoods.ROOM_MANAGER) ) {
+			BroadcastTool.sendMessage(p, "you need \"ROOM_MANAGER\" for this command");
+			return;
+		}
 		// TODO: 밑의 if문 조건을 통과 못할때가 있음 (player의 위치때문에 RoomType이 잘 안되는거같음)
 		// Main room, RelayTime.Making, Role Maker 체크
-		if(this.relayManager.checkRoomAndRelayTimeAndRoleAboutPlayer(
-				p, RoomType.MAIN, RelayTime.MAKING, Role.MAKER)) {
+		if(this.relayManager.checkRoomAndRelayTimeAndRole(
+				RoomType.MAIN, RelayTime.MAKING, Role.MAKER, p)) {
 			String second = args[1];
 			
 			switch(second) {
@@ -81,8 +83,8 @@ public class DebugCommand implements CommandExecutor
 				case "empty":
 					this.emtpyRoom(p, args);
 					break;
-				case "print":
-					this.printRoom(p, args);
+				case "list":
+					this.printRoomList(p, args);
 					break;
 			}
 		}
@@ -90,7 +92,6 @@ public class DebugCommand implements CommandExecutor
 
 	private void loadRoom(Player p, String[] args)
 	{
-		BroadcastTool.debug("load");
 		// re room load [title]
 		String title = args[2];
 		Room room = this.roomManager.getRoomData(title);
@@ -100,6 +101,10 @@ public class DebugCommand implements CommandExecutor
 			BroadcastTool.sendMessage(p, "You are not Maker of " + title + " room");
 			return;
 		}
+		
+		// set corePlaced TRUE! (이전room은 모두 test통과했으므로 core가 무조건 있음)
+		this.relayManager.setCorePlaced(true);
+		
 		
 		// set room 
 		this.roomManager.setRoom(RoomType.MAIN, room);
@@ -112,22 +117,10 @@ public class DebugCommand implements CommandExecutor
 		this.roomManager.setRoomEmpty(RoomType.MAIN);
 	}
 	
-	private void printRoom(Player p, String[] args)
+	private void printRoomList(Player p, String[] args)
 	{
-		BroadcastTool.debug("print");
-		// re room print
-		List<Room> rooms = this.roomManager.getOwnRooms(p.getName());
-		
-		BroadcastTool.sendMessage(p, "=====[Room List]=====");
-		for(Room room : rooms) {
-			// 예. [2020-12-12] wbm's first room
-			LocalDateTime b = room.getBirth();
-			String date = String.format("%d/%d/%d-%dH:%dM", b.getYear(), b.getMonthValue(), b.getDayOfMonth(),
-					b.getHour(), b.getMinute());
-			String roomInfo = String.format(ChatColor.BLUE + "Date" + ChatColor.WHITE + 
-					": %s \t " + ChatColor.RED +"Title" + ChatColor.WHITE + ": %s", date, room.getTitle());
-			BroadcastTool.sendMessage(p, roomInfo);
-		}
+		// print room list
+		this.roomManager.printRoomList(p);
 	}
 
 

@@ -7,20 +7,19 @@ import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.scheduler.BukkitTask;
 
 import com.wbm.plugin.Main;
 import com.wbm.plugin.data.PlayerData;
 import com.wbm.plugin.data.Room;
 import com.wbm.plugin.data.RoomLocation;
+import com.wbm.plugin.data.ShopGoods;
 import com.wbm.plugin.util.enums.RelayTime;
 import com.wbm.plugin.util.enums.Role;
 import com.wbm.plugin.util.enums.RoomType;
 import com.wbm.plugin.util.general.BroadcastTool;
 import com.wbm.plugin.util.general.Counter;
 import com.wbm.plugin.util.general.InventoryTool;
-import com.wbm.plugin.util.general.KitTool;
 import com.wbm.plugin.util.general.SpawnLocationTool;
 import com.wbm.plugin.util.general.TeleportTool;
 
@@ -79,21 +78,22 @@ public class RelayManager
 		// unlock main room
 		this.roomManager.unlockRoom(RoomType.MAIN);
 
-		// 모든유저 인벤관리
-		InventoryTool.clearAllPlayerInv();
-		
-		// maker 관리
+		// maker(waiter) 관리
 		if(this.getMaker()==null)
 		{
 			BroadcastTool.printConsoleMessage(ChatColor.RED+"[Bug] No Maker in WaitingTime!!!!");
 		}
 		this.getMaker().sendMessage("you are now Maker");
 		this.pDataManager.changePlayerRole(this.getMaker().getUniqueId(), Role.WAITER);
+		// Goods제공 (role변경후 호출되야함)
+		giveGoodsToPlayer(this.getMaker());
 
-		// maker제외한 challenger 관리
+		// maker제외한 challenger(waiter) 관리
 		for(Player p : this.getChallengers())
 		{
 			this.pDataManager.changePlayerRole(p.getUniqueId(), Role.WAITER);
+			// Goods제공 (role변경후 호출되야함)
+			giveGoodsToPlayer(p);
 		}
 
 		// message 관리
@@ -119,18 +119,18 @@ public class RelayManager
 		// RelayTime 관리
 		this.currentTime=RelayTime.MAKING;
 
-		// 모든유저 인벤관리
-		InventoryTool.clearAllPlayerInv();
-				
-		// maker 관리
+		// maker(maker) 관리
 		this.pDataManager.changePlayerRole(this.getMaker().getUniqueId(), Role.MAKER);
-		Inventory makerInv = this.getMaker().getInventory();
-		makerInv.addItem((KitTool.getKitArray("maker")));
+		// Goods제공 (role변경후 호출되야함)
+		giveGoodsToPlayer(this.getMaker());
+		
 
-		// maker제외한 challenger 관리
+		// maker제외한 challenger(waiter) 관리
 		for(Player p : this.getChallengers())
 		{
 			this.pDataManager.changePlayerRole(p.getUniqueId(), Role.WAITER);
+			// Goods제공 (role변경후 호출되야함)
+			giveGoodsToPlayer(p);
 		}
 
 		// message 관리
@@ -164,20 +164,18 @@ public class RelayManager
 		// RelayTime 관리
 		this.currentTime=RelayTime.TESTING;
 
-		// 모든유저 인벤관리
-		InventoryTool.clearAllPlayerInv();
-				
-				
-		// maker 관리
+		// maker(tester) 관리
 		this.pDataManager.changePlayerRole(this.getMaker().getUniqueId(), Role.TESTER);
-		Inventory makerInv = this.getMaker().getInventory();
-		makerInv.addItem((KitTool.getKitArray("tester")));
+		// Goods제공 (role변경후 호출되야함)
+		giveGoodsToPlayer(this.getMaker());
 		this.getMaker().teleport(SpawnLocationTool.respawnLocation);
 		
-		// maker제외한 challenger 관리
+		// maker제외한 challenger(waiter) 관리
 		for(Player p : this.getChallengers())
 		{
 			this.pDataManager.changePlayerRole(p.getUniqueId(), Role.WAITER);
+			// Goods제공 (role변경후 호출되야함)
+			giveGoodsToPlayer(p);
 		}
 
 		// message 관리
@@ -207,18 +205,16 @@ public class RelayManager
 		// Main Room Locker
 		this.roomManager.lockRoom(RoomType.MAIN);
 		
-		// 모든유저 인벤관리
-		InventoryTool.clearAllPlayerInv();
-		
-				
-		// maker 관리
-		// if문 넣은이유: Maker가 만들고 나갔을때 위해서
+		// maker(viewer) 관리
+		// if문 넣은이유: Maker가 만들고 나갔을때 위해서 or 처음시작시 maker가없기 때문
 		if(this.pDataManager.doesMakerExist())
 		{
 			this.pDataManager.changePlayerRole(this.getMaker().getUniqueId(), Role.VIEWER);
+			// Goods제공 (role변경후 호출되야함)
+			giveGoodsToPlayer(this.getMaker());
 		}
-
-		// maker제외한 challenger 관리
+		
+		// maker제외한 challenger(challenger) 관리
 		for(Player p : this.getChallengers())
 		{
 			// role 변경
@@ -229,9 +225,8 @@ public class RelayManager
 			PlayerData pData = this.pDataManager.getOnlinePlayerData(uuid);
 			pData.addChallengingCount(1);
 			
-			// Tool 제공
-			Inventory inv = p.getInventory();
-			inv.addItem((KitTool.getKitArray("challenger")));
+			// Goods제공 (role변경후 호출되야함)
+			giveGoodsToPlayer(p);
 		}
 		
 		
@@ -270,6 +265,10 @@ public class RelayManager
 			@Override
 			public void run()
 			{
+				// 모든유저 인벤관리
+				InventoryTool.clearAllPlayerInv();
+				
+				// time에 따른 실행
 				RelayTime currentTime = getCurrentTime();
 				if(currentTime==RelayTime.WAITING)
 				{
@@ -399,7 +398,7 @@ public class RelayManager
 		this.resetRelaySetting();
 
 		// reset message
-		BroadcastTool.sendMessageToEveryone("relay reset");
+		BroadcastTool.sendMessageToEveryone(ChatColor.RED + "SERVER relay reset!");
 
 		// Room 초기화
 		Room randomRoom =this.roomManager.getRandomRoomData(); 
@@ -416,6 +415,9 @@ public class RelayManager
 
 		// PlayerDataManager maker = null 처리
 		this.pDataManager.unregisterMaker();
+		
+		// Inventory clear
+		InventoryTool.clearAllPlayerInv();
 	}
 
 	public RelayTime getCurrentTime()
@@ -475,18 +477,40 @@ public class RelayManager
 		this.timer.removeCount(reductionTime);
 	}
 	
-	public boolean checkRoomAndRelayTimeAndRoleAboutPlayer(Player p, RoomType roomType, RelayTime relayTime, Role role) {
-		RoomType room = RoomLocation.getRoomTypeWithLocation(p.getLocation());
-		RelayTime time = this.getCurrentTime();
+	public boolean checkRoomAndRelayTimeAndRole(RoomType roomType, RelayTime relayTime, Role role, Player p) {
+		/*
+		 * 이 메소드를 사용하는 입장에서는 현재 RoomType, RelayTime, Role을 검사를 받는것이기 때문에 밑의 예시처럼 사용해야 함
+		 * checkRoomAndRelayTimeAndRole(RoomType.MAIN, RelayTime.MAKING, Role.MAKER, p)
+		 * = 지금 p가 MAIN room인지 MakingTime인지, p의 role이 MAKER인지?
+		 */
+		RoomType currentRoom = RoomLocation.getRoomTypeWithLocation(p.getLocation());
+		RelayTime currentTime = this.getCurrentTime();
 		PlayerData pData = this.pDataManager.getOnlinePlayerData(p.getUniqueId());
 		
-		if(room == roomType
-				&& time == relayTime
+		if(currentRoom == roomType
+				&& currentTime == relayTime
 				&& pData.getRole() == role) {
 			return true;
 		}
 		
 		return false;
+	}
+	
+	private List<ShopGoods> getPlayerGoods(Player p) {
+		return this.pDataManager.getOnlinePlayerData(p.getUniqueId()).getGoods();
+	}
+	
+	private void giveGoodsToPlayer(Player p) {
+		/*
+		 * playerData가 가지고 있는 good중 해당 role에 맞는 good만을 인벤토리에 추가함
+		 * 이 메소드가 실행되기 전에 선행되야 하는 것: player role 변경! 
+		 */
+		for(ShopGoods goods : this.getPlayerGoods(p)) {
+			PlayerData pData = this.pDataManager.getOnlinePlayerData(p.getUniqueId());
+			if(ShopGoods.isRoleGoods(pData.getRole(), goods)) {
+				InventoryTool.addItemToPlayer(p, goods.getGoods());
+			}
+		}
 	}
 }
 

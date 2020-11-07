@@ -21,6 +21,7 @@ import org.bukkit.inventory.ItemStack;
 import com.wbm.plugin.data.PlayerData;
 import com.wbm.plugin.data.Room;
 import com.wbm.plugin.data.RoomLocation;
+import com.wbm.plugin.data.ShopGoods;
 import com.wbm.plugin.util.PlayerDataManager;
 import com.wbm.plugin.util.RelayManager;
 import com.wbm.plugin.util.RolePermission;
@@ -30,10 +31,16 @@ import com.wbm.plugin.util.enums.Role;
 import com.wbm.plugin.util.enums.RoomType;
 import com.wbm.plugin.util.general.BanItemTool;
 import com.wbm.plugin.util.general.BroadcastTool;
+import com.wbm.plugin.util.general.ItemStackTool;
 import com.wbm.plugin.util.general.SpawnLocationTool;
 
 public class GameManager implements Listener
 {
+	/*
+	 * class 설명:
+	 * 어디서인지(Room), 언제인지(RelayTime), 역할이 누구인지(Role)이 3단계를 거치고
+	 * 실행되야 하는 리스너들
+	 */
 	PlayerDataManager pDataManager;
 	RoomManager roomManager;
 	RelayManager relayManager;
@@ -202,78 +209,75 @@ public class GameManager implements Listener
 		 * watch(시간 단축)
 		 */
 		Player p=e.getPlayer();
-		RelayTime relayTime = this.relayManager.getCurrentTime();
 		PlayerData pData = this.pDataManager.getOnlinePlayerData(p.getUniqueId());
-		Role role = pData.getRole();
 
 		ItemStack item = e.getItem();
-		Material mat = null;
-		if(item != null) {
-			mat = item.getType();
+		
+		// TODO: ItemUsingManager 클래스로 관리하기
+		// Main room, making time, maker
+		if(this.relayManager.checkRoomAndRelayTimeAndRole(RoomType.MAIN, RelayTime.MAKING, Role.MAKER, p)) 
+		{
+			if(ItemStackTool.isSameWithMateiralNDisplay(item, ShopGoods.UNDER_BLOCK.getGoods()))
+			{
+				if(e.getAction()==Action.RIGHT_CLICK_AIR||e.getAction()==Action.RIGHT_CLICK_BLOCK)
+				{
+					if(pData.doesHaveGoods(ShopGoods.UNDER_BLOCK)) {
+						Location loc=p.getLocation();
+						p.getWorld().getBlockAt(loc).setType(Material.STONE);
+					}
+				}
+			} 
+			// maker or tester
+			else if(ItemStackTool.isSameWithMateiralNDisplay(item, ShopGoods.SPAWN.getGoods())) {
+				if(e.getAction()==Action.RIGHT_CLICK_AIR||e.getAction()==Action.RIGHT_CLICK_BLOCK)
+				{
+					if(pData.doesHaveGoods(ShopGoods.SPAWN)) {
+						p.teleport(SpawnLocationTool.respawnLocation);
+					}
+				}
+			} 
+			else if(ItemStackTool.isSameWithMateiralNDisplay(item, ShopGoods.ROOM_MANAGER.getGoods())) {
+				if(e.getAction()==Action.RIGHT_CLICK_AIR||e.getAction()==Action.RIGHT_CLICK_BLOCK)
+				{
+					if(pData.doesHaveGoods(ShopGoods.ROOM_MANAGER)) {
+						this.roomManager.printRoomList(p);
+					}
+				}
+			} 
+			// maker or tester
+//			else if(mat == Material.ACACIA_DOOR_ITEM) {
+//				if(e.getAction()==Action.LEFT_CLICK_AIR||e.getAction()==Action.LEFT_CLICK_BLOCK)
+//				{
+//					// sethome
+//					// TODO: 구현하기
+//					
+//				} else if(e.getAction()==Action.RIGHT_CLICK_AIR||e.getAction()==Action.RIGHT_CLICK_BLOCK)
+//				{
+//					// gohome
+//					// TODO: 구현하기
+//				}
+//			}
+		}
+		// Main room, challenging time, challneger
+		else if(this.relayManager.checkRoomAndRelayTimeAndRole(RoomType.MAIN, RelayTime.CHALLENGING, Role.CHALLENGER, p)) {
+			if(ItemStackTool.isSameWithMateiralNDisplay(item, ShopGoods.HALF_TIME.getGoods())) {
+				if(e.getAction()==Action.RIGHT_CLICK_AIR||e.getAction()==Action.RIGHT_CLICK_BLOCK)
+				{
+					if(pData.doesHaveGoods(ShopGoods.HALF_TIME)) {
+						// ChallengingTime 남은 시간(1/(player수+1)) 단축
+						int leftTime = this.relayManager.getLeftTime();
+						int reductionTime = leftTime / (Bukkit.getOnlinePlayers().size() + 1);
+						this.relayManager.reduceTime(reductionTime);
+						
+						// 사용한후에 삭제
+						p.getInventory().remove(item);
+						
+						BroadcastTool.sendMessageToEveryone(reductionTime + " sec reduced by " + p.getName());
+					}
+				}
+			}
 		}
 		
-		// Main room
-		if(RoomLocation.getRoomTypeWithLocation(p.getLocation())==RoomType.MAIN)
-		{
-			// making time
-			if(relayTime == RelayTime.MAKING || relayTime == RelayTime.TESTING) {
-				// maker
-				if(role == Role.MAKER || role == Role.TESTER) {
-					if(item!=null)
-					{
-						// maker
-						if(mat==Material.STICK && role == Role.MAKER)
-						{
-							if(e.getAction()==Action.RIGHT_CLICK_AIR||e.getAction()==Action.RIGHT_CLICK_BLOCK)
-							{
-								Location loc=p.getLocation();
-								p.getWorld().getBlockAt(loc).setType(Material.STONE);
-							}
-						} 
-						// maker or tester
-						else if(mat == Material.WOOD_SWORD) {
-							if(e.getAction()==Action.RIGHT_CLICK_AIR||e.getAction()==Action.RIGHT_CLICK_BLOCK)
-							{
-								p.teleport(SpawnLocationTool.respawnLocation);
-							}
-						} 
-						// maker or tester
-						else if(mat == Material.ACACIA_DOOR_ITEM) {
-							if(e.getAction()==Action.LEFT_CLICK_AIR||e.getAction()==Action.LEFT_CLICK_BLOCK)
-							{
-								// sethome
-								// TODO: 구현하기
-								
-							} else if(e.getAction()==Action.RIGHT_CLICK_AIR||e.getAction()==Action.RIGHT_CLICK_BLOCK)
-							{
-								// gohome
-								// TODO: 구현하기
-							}
-						}
-					}
-				}
-			}
-			else if(relayTime == RelayTime.CHALLENGING) {
-				if(role == Role.CHALLENGER) {
-					if(item != null) {
-						if(mat == Material.WATCH) {
-							if(e.getAction()==Action.RIGHT_CLICK_AIR||e.getAction()==Action.RIGHT_CLICK_BLOCK)
-							{
-								// ChallengingTime 남은 시간(1/(player수+1)) 단축
-								int leftTime = this.relayManager.getLeftTime();
-								int reductionTime = leftTime / (Bukkit.getOnlinePlayers().size() + 1);
-								this.relayManager.reduceTime(reductionTime);
-								
-								// 사용한후에 삭제
-								p.getInventory().remove(item);
-								
-								BroadcastTool.sendMessageToEveryone(reductionTime + " sec reduced by " + p.getName());
-							}
-						}
-					}
-				}
-			}
-		}
 	}
 
 //	@EventHandler

@@ -7,9 +7,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import com.wbm.plugin.data.BlockData;
@@ -313,8 +315,25 @@ public class RoomManager implements DataMember
 	
 	
 	
-	
-	
+	public void printRoomList(Player p)
+	{
+		/*
+		 * room info 출력
+		 * 예. Data: 2020/12/22 10:11       Title: wbm's room
+		 */
+		List<Room> rooms = this.getOwnRooms(p.getName());
+		
+		BroadcastTool.sendMessage(p, "=====[Room List]=====");
+		for(Room room : rooms) {
+			LocalDateTime b = room.getBirth();
+			String date = String.format("%d/%d/%d-%dH:%dM", b.getYear(), b.getMonthValue(), b.getDayOfMonth(),
+					b.getHour(), b.getMinute());
+			String roomInfo = String.format(ChatColor.BLUE + "Date" + ChatColor.WHITE + 
+					": %s       " + ChatColor.RED +"Title" + ChatColor.WHITE + ": %s", date, room.getTitle());
+
+			BroadcastTool.sendMessage(p, roomInfo);
+		}
+	}
 	
 	
 	
