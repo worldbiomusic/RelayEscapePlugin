@@ -3,61 +3,55 @@ package com.wbm.plugin.listener;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.inventory.ItemStack;
 
 import com.wbm.plugin.data.PlayerData;
 import com.wbm.plugin.data.Room;
 import com.wbm.plugin.data.RoomLocation;
-import com.wbm.plugin.data.ShopGoods;
 import com.wbm.plugin.util.PlayerDataManager;
 import com.wbm.plugin.util.RelayManager;
-import com.wbm.plugin.util.RolePermission;
 import com.wbm.plugin.util.RoomManager;
 import com.wbm.plugin.util.enums.RelayTime;
 import com.wbm.plugin.util.enums.Role;
 import com.wbm.plugin.util.enums.RoomType;
 import com.wbm.plugin.util.general.BanItemTool;
 import com.wbm.plugin.util.general.BroadcastTool;
-import com.wbm.plugin.util.general.ItemStackTool;
+import com.wbm.plugin.util.general.InventoryTool;
 import com.wbm.plugin.util.general.SpawnLocationTool;
+import com.wbm.plugin.util.general.shop.ShopGoods;
 
 public class GameManager implements Listener
 {
 	/*
 	 * class 설명:
 	 * 어디서인지(Room), 언제인지(RelayTime), 역할이 누구인지(Role)이 3단계를 거치고
-	 * 실행되야 하는 리스너들
+	 * 실행되야 하는 리스너들(RelayManager에 검사 메소드 있음)
 	 */
 	PlayerDataManager pDataManager;
 	RoomManager roomManager;
 	RelayManager relayManager;
 	BanItemTool banItems;
 
-	public GameManager(PlayerDataManager pDataManager, RoomManager roomManager, RelayManager relayManager,
-			BanItemTool banItems)
+	public GameManager(PlayerDataManager pDataManager, RoomManager roomManager, RelayManager relayManager)
 	{
 		this.pDataManager=pDataManager;
 		this.roomManager=roomManager;
 		this.relayManager=relayManager;
-		this.banItems=banItems;
 
 		// init
 		this.init();
 	}
 	// 55KB = 55000Byte = 10 * 10 47 = 4700
+	
 
 	void init()
 	{
@@ -143,12 +137,27 @@ public class GameManager implements Listener
 	{
 		for(Player p : Bukkit.getOnlinePlayers())
 		{
-			this.processPlayerData(p);
+			TODOListWhenplayerJoinServer(p);
+		}
+	}
+	
+	public void TODOListWhenplayerJoinServer(Player p) {
+		this.processPlayerData(p);
+		p.teleport(SpawnLocationTool.joinLocation);
+		InventoryTool.clearPlayerInv(p);
+		// 기본 굿즈 제공
+		this.giveBasicGoods(p);
+	}
+	
+	void giveBasicGoods(Player p) {
+		PlayerData pData = this.pDataManager.getOnlinePlayerData(p.getUniqueId());
+		if(!pData.doesHaveGoods(ShopGoods.BLOCKS)) {
+			pData.addGoods(ShopGoods.BLOCKS);
 		}
 	}
 
 	@EventHandler
-	public void onBlockBreakEvent(BlockBreakEvent e)
+	public void onPlayerBreakBlock(BlockBreakEvent e)
 	{
 		// 모든 break event는 여기를 거쳐서 처리됨
 		Player p=e.getPlayer();
@@ -163,14 +172,14 @@ public class GameManager implements Listener
 		{
 			p.sendMessage("break: Main");
 			this.onTesterAndChallengerBreakCore(e);
-			this.onMakerBreakCore(e);
-			this.onPlayerBreakBlock(e);
+			this.onPlayerBreakBlockInMainRoom(e);
+//			this.onPlayerBreakBlockInMainRoom(e);
 		}
 
 	}
 
 	@EventHandler
-	public void onBlockPlaceEvent(BlockPlaceEvent e)
+	public void onPlayerPlaceBlock(BlockPlaceEvent e)
 	{
 		// 모든 place event는 여기를 거쳐서 처리됨
 		Player p=e.getPlayer();
@@ -184,100 +193,9 @@ public class GameManager implements Listener
 		if(RoomLocation.getRoomTypeWithLocation(b.getLocation())==RoomType.MAIN)
 		{
 			p.sendMessage("place: Main");
-			this.onPlayerPlaceBlock(e);
-			this.onMakerPlaceCore(e);
+//			this.onPlayerPlaceBlockInMainRoom(e);
+			this.onPlayerPlaceBlockInMainRoom(e);
 		}
-	}
-
-	@EventHandler
-	public void onPlayerInteractWithItem(PlayerInteractEvent e)
-	{
-		/*
-		 * 정확히 하려연, Room, RelayTime, Role 3개를 다 체크해야 함
-		 * 
-		 * 템 목록: 
-		 * [Maker]
-		 * stick(발아래 돌 생성)
-		 * wood_sword(리스폰)
-		 * ACACIA_DOOR_ITEM(home기능)
-		 * 
-		 * [Tester]
-		 * wood_sword(리스폰)
-		 * ACACIA_DOOR_ITEM(home기능)
-		 * 
-		 * [Challenger]
-		 * watch(시간 단축)
-		 */
-		Player p=e.getPlayer();
-		PlayerData pData = this.pDataManager.getOnlinePlayerData(p.getUniqueId());
-
-		ItemStack item = e.getItem();
-		
-		// TODO: ItemUsingManager 클래스로 관리하기
-		// Main room, making time, maker
-		if(this.relayManager.checkRoomAndRelayTimeAndRole(RoomType.MAIN, RelayTime.MAKING, Role.MAKER, p)) 
-		{
-			if(ItemStackTool.isSameWithMateiralNDisplay(item, ShopGoods.UNDER_BLOCK.getGoods()))
-			{
-				if(e.getAction()==Action.RIGHT_CLICK_AIR||e.getAction()==Action.RIGHT_CLICK_BLOCK)
-				{
-					if(pData.doesHaveGoods(ShopGoods.UNDER_BLOCK)) {
-						Location loc=p.getLocation();
-						p.getWorld().getBlockAt(loc).setType(Material.STONE);
-					}
-				}
-			} 
-			// maker or tester
-			else if(ItemStackTool.isSameWithMateiralNDisplay(item, ShopGoods.SPAWN.getGoods())) {
-				if(e.getAction()==Action.RIGHT_CLICK_AIR||e.getAction()==Action.RIGHT_CLICK_BLOCK)
-				{
-					if(pData.doesHaveGoods(ShopGoods.SPAWN)) {
-						p.teleport(SpawnLocationTool.respawnLocation);
-					}
-				}
-			} 
-			else if(ItemStackTool.isSameWithMateiralNDisplay(item, ShopGoods.ROOM_MANAGER.getGoods())) {
-				if(e.getAction()==Action.RIGHT_CLICK_AIR||e.getAction()==Action.RIGHT_CLICK_BLOCK)
-				{
-					if(pData.doesHaveGoods(ShopGoods.ROOM_MANAGER)) {
-						this.roomManager.printRoomList(p);
-					}
-				}
-			} 
-			// maker or tester
-//			else if(mat == Material.ACACIA_DOOR_ITEM) {
-//				if(e.getAction()==Action.LEFT_CLICK_AIR||e.getAction()==Action.LEFT_CLICK_BLOCK)
-//				{
-//					// sethome
-//					// TODO: 구현하기
-//					
-//				} else if(e.getAction()==Action.RIGHT_CLICK_AIR||e.getAction()==Action.RIGHT_CLICK_BLOCK)
-//				{
-//					// gohome
-//					// TODO: 구현하기
-//				}
-//			}
-		}
-		// Main room, challenging time, challneger
-		else if(this.relayManager.checkRoomAndRelayTimeAndRole(RoomType.MAIN, RelayTime.CHALLENGING, Role.CHALLENGER, p)) {
-			if(ItemStackTool.isSameWithMateiralNDisplay(item, ShopGoods.HALF_TIME.getGoods())) {
-				if(e.getAction()==Action.RIGHT_CLICK_AIR||e.getAction()==Action.RIGHT_CLICK_BLOCK)
-				{
-					if(pData.doesHaveGoods(ShopGoods.HALF_TIME)) {
-						// ChallengingTime 남은 시간(1/(player수+1)) 단축
-						int leftTime = this.relayManager.getLeftTime();
-						int reductionTime = leftTime / (Bukkit.getOnlinePlayers().size() + 1);
-						this.relayManager.reduceTime(reductionTime);
-						
-						// 사용한후에 삭제
-						p.getInventory().remove(item);
-						
-						BroadcastTool.sendMessageToEveryone(reductionTime + " sec reduced by " + p.getName());
-					}
-				}
-			}
-		}
-		
 	}
 
 //	@EventHandler
@@ -317,7 +235,7 @@ public class GameManager implements Listener
 				this.relayManager.startNextTime();
 
 				// 5.player token +1, clearCount +1
-				pData.addToken(1);
+				pData.addToken(10000);
 				pData.addClearCount(1);
 			}
 			// Time: Testing / Role: Tester
@@ -336,48 +254,24 @@ public class GameManager implements Listener
 
 	}
 
-	// MakekingTime에서 Maker가 core를 설치했는지 확인 (최대 1개만 설치 가능)
-	// priority HIGH 로 높여서 마지막에 검사하게
-//	@EventHandler(priority=EventPriority.HIGH)
-	public void onMakerPlaceCore(BlockPlaceEvent e)
-	{
-		Block core=e.getBlock();
-		if(core.getType()==Material.GLOWSTONE)
-		{
-			RelayTime time=this.relayManager.getCurrentTime();
-			if(time==RelayTime.MAKING)
-			{
-				Player p=e.getPlayer();
-				if(this.pDataManager.isMaker(p))
-				{
-					// 이미 설치되어 있을때
-					if(this.relayManager.isCorePlaced())
-					{
-						BroadcastTool.sendMessage(p, "core is already placed");
-						e.setCancelled(true);
-					}
-					else
-					{
-						// 설치 x 있을때
-						BroadcastTool.sendMessage(p, "core is placed (max: 1)");
-						this.relayManager.setCorePlaced(true);
-					}
-				}
-			}
-		}
-	}
 
 //	@EventHandler
-	public void onMakerBreakCore(BlockBreakEvent e)
+	public void onPlayerBreakBlockInMainRoom(BlockBreakEvent e)
 	{
 		Block core=e.getBlock();
-		if(core.getType()==Material.GLOWSTONE)
+		RelayTime time=this.relayManager.getCurrentTime();
+		// making time
+		if(time==RelayTime.MAKING)
 		{
-			RelayTime time=this.relayManager.getCurrentTime();
-			if(time==RelayTime.MAKING)
+			Player p=e.getPlayer();
+			// maker
+			if(this.pDataManager.isMaker(p))
 			{
-				Player p=e.getPlayer();
-				if(this.pDataManager.isMaker(p))
+				// 기본적으로 부술 수 있게
+				e.setCancelled(false);
+				
+				// core검사
+				if(core.getType()==Material.GLOWSTONE)
 				{
 					BroadcastTool.sendMessage(p, "core is broken");
 					this.relayManager.setCorePlaced(false);
@@ -385,90 +279,117 @@ public class GameManager implements Listener
 			}
 		}
 	}
-
-//	@EventHandler
-	public void onPlayerBreakBlock(BlockBreakEvent e)
+	
+	// MakekingTime에서 Maker가 core를 설치했는지 확인 (최대 1개만 설치 가능)
+	// priority HIGH 로 높여서 마지막에 검사하게
+//	@EventHandler(priority=EventPriority.HIGH)
+	public void onPlayerPlaceBlockInMainRoom(BlockPlaceEvent e)
 	{
-		Player p=e.getPlayer();
-		UUID uuid=p.getUniqueId();
-		PlayerData pData=this.pDataManager.getOnlinePlayerData(uuid);
-		Role role=pData.getRole();
-
-		boolean permission=false;
-
-		// Role별로 권한 체크
-		if(role==Role.MAKER)
-		{
-			permission=RolePermission.MAKER_BREAKBLOCK;
-		}
-		else if(role==Role.CHALLENGER)
-		{
-			permission=RolePermission.CHALLENGER_BREAKBLOCK;
-		}
-		else if(role==Role.TESTER)
-		{
-			permission=RolePermission.TESTER_BREAKBLOCK;
-		}
-		else if(role==Role.VIEWER)
-		{
-			permission=RolePermission.VIEWER_BREAKBLOCK;
-		}
-		else if(role==Role.WAITER)
-		{
-			permission=RolePermission.WAITER_BREAKBLOCK;
-		}
-
-		e.setCancelled(!permission);
-	}
-
-//	@EventHandler
-	public void onPlayerPlaceBlock(BlockPlaceEvent e)
-	{
-		Player p=e.getPlayer();
-		UUID uuid=p.getUniqueId();
-		PlayerData pData=this.pDataManager.getOnlinePlayerData(uuid);
-		Role role=pData.getRole();
-
-		boolean permission=false;
-
-		// Role별로 권한 체크
-		if(role==Role.MAKER)
-		{
-			permission=RolePermission.MAKER_PLACEBLOCK;
-
-			// banItem인지 확인
-
-			// 놓인 block 체크
-			Block block=e.getBlock();
-			Material blockMat=block.getType();
-			// mainhand 체크
-			ItemStack item=p.getInventory().getItemInMainHand();
-
-			if(this.banItems.containsItem(blockMat)||this.banItems.containsItem(item))
+		Block core=e.getBlock();
+		
+			RelayTime time=this.relayManager.getCurrentTime();
+			// making time
+			if(time==RelayTime.MAKING)
 			{
-				permission=false;
+				Player p=e.getPlayer();
+				// maker
+				if(this.pDataManager.isMaker(p))
+				{
+					// 기본적으로 설치할수있게
+					e.setCancelled(false);
+					
+					// core관련 if문
+					// 이미 설치되어 있을때
+					if(core.getType()==Material.GLOWSTONE)
+					{
+						if(this.relayManager.isCorePlaced())
+						{
+							BroadcastTool.sendMessage(p, "core is already placed");
+							e.setCancelled(true);
+						}
+						else
+						{
+							// 설치 x 있을때
+							BroadcastTool.sendMessage(p, "core is placed (max: 1)");
+							this.relayManager.setCorePlaced(true);
+						}
+					}
+				}
 			}
-
-		}
-		else if(role==Role.CHALLENGER)
-		{
-			permission=RolePermission.CHALLENGER_PLACEBLOCK;
-		}
-		else if(role==Role.TESTER)
-		{
-			permission=RolePermission.TESTER_PLACEBLOCK;
-		}
-		else if(role==Role.VIEWER)
-		{
-			permission=RolePermission.VIEWER_PLACEBLOCK;
-		}
-		else if(role==Role.WAITER)
-		{
-			permission=RolePermission.WAITER_PLACEBLOCK;
-		}
-
-		e.setCancelled(!permission);
 	}
+
+
+//	@EventHandler
+//	public void onPlayerBreakBlockInMainRoom(BlockBreakEvent e)
+//	{
+//		// 생각해보니까 Maker일때만 break할때  체크해주면 됨(다른때는  다 그냥 cancel true로 !
+//		Player p=e.getPlayer();
+//		UUID uuid=p.getUniqueId();
+//		PlayerData pData=this.pDataManager.getOnlinePlayerData(uuid);
+//		Role role=pData.getRole();
+//
+//		boolean permission=false;
+//
+//		// Role별로 권한 체크
+//		if(role==Role.MAKER)
+//		{
+//			permission=RolePermission.MAKER_BREAKBLOCK;
+//		}
+//		else if(role==Role.CHALLENGER)
+//		{
+//			permission=RolePermission.CHALLENGER_BREAKBLOCK;
+//		}
+//		else if(role==Role.TESTER)
+//		{
+//			permission=RolePermission.TESTER_BREAKBLOCK;
+//		}
+//		else if(role==Role.VIEWER)
+//		{
+//			permission=RolePermission.VIEWER_BREAKBLOCK;
+//		}
+//		else if(role==Role.WAITER)
+//		{
+//			permission=RolePermission.WAITER_BREAKBLOCK;
+//		}
+//
+//		e.setCancelled(!permission);
+//	}
+
+//	@EventHandler
+//	public void onPlayerPlaceBlockInMainRoom(BlockPlaceEvent e)
+//	{
+//		// 생각해보니까 Maker일때만 break할때  체크해주면 됨(다른때는  다 그냥 cancel true로 !
+//		Player p=e.getPlayer();
+//		UUID uuid=p.getUniqueId();
+//		PlayerData pData=this.pDataManager.getOnlinePlayerData(uuid);
+//		Role role=pData.getRole();
+//
+//		boolean permission=false;
+//
+//		// Role별로 권한 체크
+//		if(role==Role.MAKER)
+//		{
+//			permission=RolePermission.MAKER_PLACEBLOCK;
+//		}
+//		else if(role==Role.CHALLENGER)
+//		{
+//			permission=RolePermission.CHALLENGER_PLACEBLOCK;
+//		}
+//		else if(role==Role.TESTER)
+//		{
+//			permission=RolePermission.TESTER_PLACEBLOCK;
+//		}
+//		else if(role==Role.VIEWER)
+//		{
+//			permission=RolePermission.VIEWER_PLACEBLOCK;
+//		}
+//		else if(role==Role.WAITER)
+//		{
+//			permission=RolePermission.WAITER_PLACEBLOCK;
+//		}
+//
+//		e.setCancelled(!permission);
+//	}
 
 	@EventHandler
 	public void onPlayerPlaceBucket(PlayerBucketEmptyEvent e)
@@ -498,8 +419,7 @@ public class GameManager implements Listener
 		p.sendMessage("welcome to RelayEscape server!");
 
 		// PlayerData 처리
-		this.processPlayerData(p);
-		
+		this.TODOListWhenplayerJoinServer(p);
 	}
 	
 	@EventHandler
@@ -537,4 +457,30 @@ public class GameManager implements Listener
 		// PlayerDataManager 처리
 		this.pDataManager.saveAndRemovePlayerData(p.getUniqueId());
 	}
+	
+	
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -3,11 +3,9 @@ package com.wbm.plugin;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.Server;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scoreboard.DisplaySlot;
@@ -18,18 +16,18 @@ import org.bukkit.scoreboard.ScoreboardManager;
 
 import com.wbm.plugin.cmd.DebugCommand;
 import com.wbm.plugin.data.PlayerData;
-import com.wbm.plugin.data.ShopGoods;
 import com.wbm.plugin.listener.CommonListener;
 import com.wbm.plugin.listener.GameManager;
+import com.wbm.plugin.util.ItemUsingManager;
 import com.wbm.plugin.util.PlayerDataManager;
 import com.wbm.plugin.util.RelayManager;
 import com.wbm.plugin.util.RoomManager;
-import com.wbm.plugin.util.ShopManager;
 import com.wbm.plugin.util.config.ConfigTest;
 import com.wbm.plugin.util.config.DataManager;
 import com.wbm.plugin.util.general.BanItemTool;
-import com.wbm.plugin.util.general.KitTool;
 import com.wbm.plugin.util.general.SpawnLocationTool;
+import com.wbm.plugin.util.general.shop.ShopGoods;
+import com.wbm.plugin.util.general.shop.ShopManager;
 
 public class Main extends JavaPlugin
 {
@@ -43,6 +41,7 @@ public class Main extends JavaPlugin
 	RelayManager relayManager;
 	DataManager dataManager;
 	ShopManager shopManager;
+	ItemUsingManager itemUsingManager;
 
 	// command executor
 	DebugCommand dCmd;
@@ -81,6 +80,10 @@ public class Main extends JavaPlugin
 
 			this.getServer().getConsoleSender().sendMessage(ChatColor.GREEN+"EscaperServerPlugin ON");
 			
+//			// reRegister all player (이미 서버에 있는데 reload했을경우) 
+			// GameManager에서 생성자에서 불려야 플레이어데이터가 올라가서 정상작동함 (여기서 하면 안됨)
+//			this.gManager.reRegisterAllPlayer();
+			
 			// update scoreboard every 1 sec
 			this.loopUpdatingScoreboard();
 		}
@@ -94,20 +97,18 @@ public class Main extends JavaPlugin
 	{
 		// respawn manager
 		Location loc=new Location(Bukkit.getWorld("world"), 9.5, 4, 5.5, 90, 0);
-		this.respawnManager=new SpawnLocationTool(loc, loc);
+		Location lobby=new Location(Bukkit.getWorld("world"), 16, 4, 16, 90, 0);
+		this.respawnManager=new SpawnLocationTool(loc, loc, lobby);
 		
 		// banItem (후원 banItems는 따로 만들기)
 		this.banItems = new BanItemTool();
 		this.banItems.banAllItem();
-		this.banItems.unbanItem(Material.DIRT);
-		this.banItems.unbanItem(Material.STONE);
-		this.banItems.unbanItem(Material.WOOD);
-		this.banItems.unbanItem(Material.GLOWSTONE);
-		this.banItems.unbanItem(Material.GLASS);
-		this.banItems.unbanItem(Material.JACK_O_LANTERN);
+		for(ShopGoods goods : ShopGoods.values()) {
+			this.banItems.unbanItem(goods.getGoods().getType());
+		}
 		
 		// kits
-		this.makeKits();
+//		this.makeKits();
 	}
 
 	void setupMain()
@@ -126,21 +127,28 @@ public class Main extends JavaPlugin
 
 		this.roomManager=new RoomManager();
 		this.dataManager.registerMember(this.roomManager);
+//		// distribute datas (이 메소드는 this.dataManager.registerMember <- 이 메소드들이
+//		// 마지막다음에 바로 실행되어야 함
+//		this.dataManager.distributeData();
 
-		this.dataManager.distributeData();
 
 		this.relayManager=new RelayManager(this.pDataManager, this.roomManager);
-		this.gManager=new GameManager(this.pDataManager, this.roomManager, this.relayManager, this.banItems);
-
+		this.gManager=new GameManager(this.pDataManager, this.roomManager, this.relayManager);
+		this.itemUsingManager = new ItemUsingManager(this.pDataManager, this.roomManager, this.relayManager);
 		this.shopManager = new ShopManager(this.pDataManager);
+		
+		
+		
+		
 	}
 
 	private void registerListeners()
 	{
-		this.commonListener = new CommonListener(this.pDataManager, this.shopManager);
+		this.commonListener = new CommonListener(this.pDataManager, this.shopManager, this.banItems);
 		
 		this.registerEvent(this.gManager);
 		this.registerEvent(this.commonListener);
+		this.registerEvent(this.itemUsingManager);
 	}
 
 	void registerEvent(Listener listener)
@@ -189,26 +197,26 @@ public class Main extends JavaPlugin
 		
 	}
 	
-	void makeKits() {
-		KitTool.addKit("maker", 
-				new ItemStack(Material.GLOWSTONE),
-				new ItemStack(Material.DIRT),
-				new ItemStack(Material.GLASS), 
-				new ItemStack(Material.STONE), 
-				new ItemStack(Material.WOOD), 
-				new ItemStack(Material.JACK_O_LANTERN), 
-				ShopGoods.UNDER_BLOCK.getGoods(),
-				ShopGoods.SPAWN.getGoods(),
-				ShopGoods.ROOM_MANAGER.getGoods());
-		
-		KitTool.addKit("tester", ShopGoods.SPAWN.getGoods());
-		
-		KitTool.addKit("challenger", ShopGoods.HALF_TIME.getGoods());
-		
-		KitTool.addKit("viewer", ShopGoods.GHOST.getGoods());
-		
-//		KitTool.addKit("waiter", ShopGoods.GHOST.getGoods());
-	}
+//	void makeKits() {
+//		KitTool.addKit("maker", 
+//				new ItemStack(Material.GLOWSTONE),
+//				new ItemStack(Material.DIRT),
+//				new ItemStack(Material.GLASS), 
+//				new ItemStack(Material.STONE), 
+//				new ItemStack(Material.WOOD), 
+//				new ItemStack(Material.JACK_O_LANTERN), 
+//				ShopGoods.UNDER_BLOCK.getGoods(),
+//				ShopGoods.SPAWN.getGoods(),
+//				ShopGoods.ROOM_MANAGER.getGoods());
+//		
+//		KitTool.addKit("tester", ShopGoods.SPAWN.getGoods());
+//		
+//		KitTool.addKit("challenger", ShopGoods.HALF_TIME.getGoods());
+//		
+//		KitTool.addKit("viewer", ShopGoods.GHOST.getGoods());
+//		
+////		KitTool.addKit("waiter", ShopGoods.GHOST.getGoods());
+//	}
 
 	@Override
 	public void onDisable()
@@ -221,5 +229,16 @@ public class Main extends JavaPlugin
 
 		// file save
 		this.dataManager.save();
+		
+		// 파일 세이브 기다리기
+		try
+		{
+			Thread.sleep(1000 * 5);
+		}
+		catch(InterruptedException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }

@@ -12,7 +12,6 @@ import org.bukkit.entity.Player;
 
 import com.wbm.plugin.data.PlayerData;
 import com.wbm.plugin.data.Room;
-import com.wbm.plugin.data.ShopGoods;
 import com.wbm.plugin.util.PlayerDataManager;
 import com.wbm.plugin.util.RelayManager;
 import com.wbm.plugin.util.RoomManager;
@@ -20,6 +19,7 @@ import com.wbm.plugin.util.enums.RelayTime;
 import com.wbm.plugin.util.enums.Role;
 import com.wbm.plugin.util.enums.RoomType;
 import com.wbm.plugin.util.general.BroadcastTool;
+import com.wbm.plugin.util.general.shop.ShopGoods;
 
 
 public class DebugCommand implements CommandExecutor

@@ -1,9 +1,9 @@
-package com.wbm.plugin.util;
+package com.wbm.plugin.util.general.shop;
 
 import org.bukkit.entity.Player;
 
 import com.wbm.plugin.data.PlayerData;
-import com.wbm.plugin.data.ShopGoods;
+import com.wbm.plugin.util.PlayerDataManager;
 import com.wbm.plugin.util.general.BroadcastTool;
 
 public class ShopManager

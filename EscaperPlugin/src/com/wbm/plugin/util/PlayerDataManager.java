@@ -145,7 +145,7 @@ public class PlayerDataManager implements DataMember
 		}
 		else if(role==Role.VIEWER)
 		{
-			mode=GameMode.SPECTATOR;
+			mode=GameMode.CREATIVE;
 		}
 		else if(role==Role.WAITER)
 		{

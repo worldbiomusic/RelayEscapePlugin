@@ -36,6 +36,8 @@ public class DataManager
 	public void registerMember(DataMember member)
 	{
 		this.members.put(member.getDataMemberName(), member);
+		// 바로 distribute 실행
+		this.distributeData();
 	}
 
 	public void distributeData()

@@ -13,7 +13,6 @@ import com.wbm.plugin.Main;
 import com.wbm.plugin.data.PlayerData;
 import com.wbm.plugin.data.Room;
 import com.wbm.plugin.data.RoomLocation;
-import com.wbm.plugin.data.ShopGoods;
 import com.wbm.plugin.util.enums.RelayTime;
 import com.wbm.plugin.util.enums.Role;
 import com.wbm.plugin.util.enums.RoomType;
@@ -22,6 +21,7 @@ import com.wbm.plugin.util.general.Counter;
 import com.wbm.plugin.util.general.InventoryTool;
 import com.wbm.plugin.util.general.SpawnLocationTool;
 import com.wbm.plugin.util.general.TeleportTool;
+import com.wbm.plugin.util.general.shop.ShopGoods;
 
 /* TODO: RelayTime의 Making -> Building, Challenging -> Finding으로 변경
  * TODO: ROle의 Maker-> Builder, Challenger -> Finder로 변경
@@ -118,11 +118,17 @@ public class RelayManager
 	{
 		// RelayTime 관리
 		this.currentTime=RelayTime.MAKING;
+		
+		// Main Room Locker
+		this.roomManager.lockRoom(RoomType.MAIN);
 
 		// maker(maker) 관리
 		this.pDataManager.changePlayerRole(this.getMaker().getUniqueId(), Role.MAKER);
 		// Goods제공 (role변경후 호출되야함)
-		giveGoodsToPlayer(this.getMaker());
+		this.giveGoodsToPlayer(this.getMaker());
+		
+		// teleport
+		TeleportTool.tp(this.getMaker(), SpawnLocationTool.joinLocation);
 		
 
 		// maker제외한 challenger(waiter) 관리
@@ -130,7 +136,9 @@ public class RelayManager
 		{
 			this.pDataManager.changePlayerRole(p.getUniqueId(), Role.WAITER);
 			// Goods제공 (role변경후 호출되야함)
-			giveGoodsToPlayer(p);
+			this.giveGoodsToPlayer(p);
+			// teleport
+			TeleportTool.tp(p, SpawnLocationTool.lobby);
 		}
 
 		// message 관리
@@ -168,7 +176,9 @@ public class RelayManager
 		this.pDataManager.changePlayerRole(this.getMaker().getUniqueId(), Role.TESTER);
 		// Goods제공 (role변경후 호출되야함)
 		giveGoodsToPlayer(this.getMaker());
-		this.getMaker().teleport(SpawnLocationTool.respawnLocation);
+		// teleport
+		TeleportTool.tp(this.getMaker(), SpawnLocationTool.joinLocation);
+				
 		
 		// maker제외한 challenger(waiter) 관리
 		for(Player p : this.getChallengers())
@@ -202,8 +212,6 @@ public class RelayManager
 		// RelayTime 관리
 		this.currentTime=RelayTime.CHALLENGING;
 
-		// Main Room Locker
-		this.roomManager.lockRoom(RoomType.MAIN);
 		
 		// maker(viewer) 관리
 		// if문 넣은이유: Maker가 만들고 나갔을때 위해서 or 처음시작시 maker가없기 때문
@@ -211,7 +219,9 @@ public class RelayManager
 		{
 			this.pDataManager.changePlayerRole(this.getMaker().getUniqueId(), Role.VIEWER);
 			// Goods제공 (role변경후 호출되야함)
-			giveGoodsToPlayer(this.getMaker());
+			this.giveGoodsToPlayer(this.getMaker());
+			// teleport
+			TeleportTool.tp(this.getMaker(), SpawnLocationTool.joinLocation);
 		}
 		
 		// maker제외한 challenger(challenger) 관리
@@ -227,6 +237,9 @@ public class RelayManager
 			
 			// Goods제공 (role변경후 호출되야함)
 			giveGoodsToPlayer(p);
+			
+			// teleport
+			TeleportTool.tp(p, SpawnLocationTool.joinLocation);
 		}
 		
 		
@@ -398,7 +411,7 @@ public class RelayManager
 		this.resetRelaySetting();
 
 		// reset message
-		BroadcastTool.sendMessageToEveryone(ChatColor.RED + "SERVER relay reset!");
+		BroadcastTool.sendMessageToEveryone(ChatColor.RED + "relay reset!");
 
 		// Room 초기화
 		Room randomRoom =this.roomManager.getRandomRoomData(); 

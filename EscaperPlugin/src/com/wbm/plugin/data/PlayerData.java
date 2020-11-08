@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.UUID;
 
 import com.wbm.plugin.util.enums.Role;
+import com.wbm.plugin.util.general.shop.ShopGoods;
 
 public class PlayerData implements Serializable
 {

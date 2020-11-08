@@ -6,4 +6,42 @@ description: made by LLLJH (discord -> arong#7075)
 commands:
   re:
     description: relay escaper plugin command
-    usage: re d
+    usage: /re [d/room]
+
+permissions:
+  re.*:
+    description: super permission
+    default: op
+
+  re.admin:
+    description: admin permission
+    
+  re.user:
+    description: general player
+    default: true
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
