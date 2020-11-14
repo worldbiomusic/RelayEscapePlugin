@@ -13,6 +13,7 @@ import org.bukkit.entity.Player;
 import com.wbm.plugin.data.PlayerData;
 import com.wbm.plugin.data.Room;
 import com.wbm.plugin.util.PlayerDataManager;
+import com.wbm.plugin.util.RankManager;
 import com.wbm.plugin.util.RelayManager;
 import com.wbm.plugin.util.RoomManager;
 import com.wbm.plugin.util.enums.RelayTime;
@@ -27,15 +28,18 @@ public class DebugCommand implements CommandExecutor
 	PlayerDataManager pDataManager;
 	RelayManager relayManager;
 	RoomManager roomManager;
+	RankManager rankManager;
 	
 	public DebugCommand(
 			PlayerDataManager pDataManager,
 			RelayManager relayManager,
-			RoomManager roomManager)
+			RoomManager roomManager,
+			RankManager rankManager)
 	{
 		this.pDataManager = pDataManager;
 		this.relayManager = relayManager;
 		this.roomManager = roomManager;
+		this.rankManager = rankManager;
 	}
 	
 
@@ -57,12 +61,17 @@ public class DebugCommand implements CommandExecutor
 					return this.debug(p, args);
 				case "room":
 					return this.room(p, args);
+				case "rank":
+					return this.rank(p, args);
 			}
 		}
 		
 		return false;
 	}
 	
+	
+
+
 	private boolean room(Player p, String[] args)
 	{	
 		// TODO: 밑의 if문 조건을 통과 못할때가 있음 (player의 위치때문에 RoomType이 잘 안되는거같음)
@@ -161,7 +170,7 @@ public class DebugCommand implements CommandExecutor
 		/*
 		 * ROOM_MANAGER goods 가지고 있는지 검사
 		 */
-		PlayerData pData = this.pDataManager.getOnlinePlayerData(p.getUniqueId());
+		PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
 		if(pData.doesHaveGoods(ShopGoods.ROOM_MANAGER) ) {
 			BroadcastTool.sendMessage(p, "you need \"ROOM_MANAGER\" for this command");
 			return true;
@@ -199,6 +208,7 @@ public class DebugCommand implements CommandExecutor
 				case "allpdata":
 					this.printAllPlayerData(p);
 					break;
+				
 			}
 			return true;
 		}
@@ -206,13 +216,13 @@ public class DebugCommand implements CommandExecutor
 	}
 	
 	private void printPlayerData(Player p ) {
-		PlayerData pData = this.pDataManager.getOnlinePlayerData(p.getUniqueId());
+		PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
 		BroadcastTool.sendMessage(p, pData.toString());
 	}
 	
 	private void printAllPlayerData(Player p)
 	{
-		Map<UUID, PlayerData> players = this.pDataManager.getAllOnlinePlayers();
+		Map<UUID, PlayerData> players = this.pDataManager.getOnlyOnlinePlayerData();
 		for(PlayerData pData : players.values()) {
 			BroadcastTool.sendMessage(p, pData.toString());
 			BroadcastTool.printConsoleMessage(pData.toString());
@@ -247,7 +257,7 @@ public class DebugCommand implements CommandExecutor
 
 
 	void printPlayerRole(Player p) {
-		PlayerData pData = this.pDataManager.getOnlinePlayerData(p.getUniqueId());
+		PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
 		Role role = pData.getRole();
 		p.sendMessage(p.getName() + " Role: " + role.name());
 	}
@@ -260,7 +270,7 @@ public class DebugCommand implements CommandExecutor
 			if(eachName.equals(p.getName())) {
 				eachName = ChatColor.GREEN + eachName + ChatColor.WHITE;
 			}
-			PlayerData allData = this.pDataManager.getOnlinePlayerData(each.getUniqueId());
+			PlayerData allData = this.pDataManager.getPlayerData(each.getUniqueId());
 			Role role = allData.getRole();
 			p.sendMessage(eachName + ": " + role.name());
 		}
@@ -284,6 +294,42 @@ public class DebugCommand implements CommandExecutor
 		p.sendMessage(ChatColor.BOLD + "[Maker]");
 		p.sendMessage(ChatColor.RED + makerName);
 		p.sendMessage("------------------------------");
+	}
+	
+	
+	private boolean rank(Player p, String[] args)
+	{
+		// /re rank [options]
+		if(args.length == 2) {
+			String list = args[1];
+			switch(list) {
+				case "tokenrank":
+					for(PlayerData pData : this.rankManager.getTokenRankList()) {
+						BroadcastTool.sendMessage(p, pData.getName() + ": " + pData.getToken());
+					}
+					break;
+				case "challengingrank":
+					for(PlayerData pData : this.rankManager.getChallengingCountRankList()) {
+						BroadcastTool.sendMessage(p, pData.getName() + ": " + pData.getChallengingCount());
+					}
+					break;
+				case "clearrank":
+					for(PlayerData pData : this.rankManager.getClearCountRankList()) {
+						BroadcastTool.sendMessage(p, pData.getName() + ": " + pData.getClearCount());
+					}
+					break;
+				case "roomcountrank":
+					for(PlayerData pData : this.rankManager.getRoomCountRankList()) {
+						BroadcastTool.sendMessage(p, pData.getName() + ": " + this.roomManager.getOwnRooms(pData.getName()).size());
+					}
+					break;
+				default:
+					return false;
+			}
+			
+			return true;
+		}
+		return false;
 	}
 }
 

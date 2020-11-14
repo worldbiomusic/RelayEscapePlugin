@@ -20,6 +20,7 @@ import com.wbm.plugin.listener.CommonListener;
 import com.wbm.plugin.listener.GameManager;
 import com.wbm.plugin.util.ItemUsingManager;
 import com.wbm.plugin.util.PlayerDataManager;
+import com.wbm.plugin.util.RankManager;
 import com.wbm.plugin.util.RelayManager;
 import com.wbm.plugin.util.RoomManager;
 import com.wbm.plugin.util.config.ConfigTest;
@@ -43,6 +44,7 @@ public class Main extends JavaPlugin
 	DataManager dataManager;
 	ShopManager shopManager;
 	ItemUsingManager itemUsingManager;
+	RankManager rankManager;
 
 	// command executor
 	DebugCommand dCmd;
@@ -132,7 +134,8 @@ public class Main extends JavaPlugin
 		this.roomManager=new RoomManager();
 		this.dataManager.registerMember(this.roomManager);
 //		// distribute datas (이 메소드는 this.dataManager.registerMember <- 이 메소드들이
-//		// 마지막다음에 바로 실행되어야 함
+//		// 마지막다음에 바로 실행되어야 함 
+		// -> 그냥 register에 넣어버림
 //		this.dataManager.distributeData();
 
 
@@ -140,10 +143,7 @@ public class Main extends JavaPlugin
 		this.gManager=new GameManager(this.pDataManager, this.roomManager, this.relayManager);
 		this.itemUsingManager = new ItemUsingManager(this.pDataManager, this.roomManager, this.relayManager);
 		this.shopManager = new ShopManager(this.pDataManager);
-		
-		
-		
-		
+		this.rankManager = new RankManager(this.pDataManager, this.roomManager);
 	}
 
 	private void registerListeners()
@@ -162,7 +162,7 @@ public class Main extends JavaPlugin
 
 	private void registerCommands()
 	{
-		this.dCmd=new DebugCommand(this.pDataManager, this.relayManager, this.roomManager);
+		this.dCmd=new DebugCommand(this.pDataManager, this.relayManager, this.roomManager, this.rankManager);
 		this.getCommand("re").setExecutor(dCmd);
 	}
 	
@@ -173,7 +173,7 @@ public class Main extends JavaPlugin
 			public void run()
 			{
 				for(Player p : Bukkit.getOnlinePlayers()) {
-					PlayerData pData = pDataManager.getOnlinePlayerData(p.getUniqueId());
+					PlayerData pData = pDataManager.getPlayerData(p.getUniqueId());
 					
 					ScoreboardManager manager = Bukkit.getScoreboardManager();
 					Scoreboard board = manager.getNewScoreboard();
@@ -228,10 +228,11 @@ public class Main extends JavaPlugin
 	public void onDisable()
 	{
 		// reload대비 처리 (다 나간것으로 처리해서 데이터 save)
-		for(Player p : Bukkit.getOnlinePlayers())
-		{
-			this.pDataManager.saveAndRemovePlayerData(p.getUniqueId());
-		}
+		// 구조 바꿔서 할 필요 없어짐
+//		for(Player p : Bukkit.getOnlinePlayers())
+//		{
+//			this.pDataManager.saveAndRemovePlayerData(p.getUniqueId());
+//		}
 
 		// file save
 		this.dataManager.save();

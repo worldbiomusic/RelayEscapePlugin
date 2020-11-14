@@ -92,7 +92,7 @@ public class GameManager implements Listener
 		// 전에 들어왔음 (바꿀것은 Role밖에 없음)
 		else
 		{
-			pData=this.pDataManager.getSavedPlayerData(uuid);
+			pData=this.pDataManager.getPlayerData(uuid);
 
 			// maker가 남아있는경우는 Maker가 ChallengingTime일떄 나간경우임!
 			// -> role을 유지해서 viewer로 겜모를바꿔서 자신이 만든룸을 clear못하게 만들어야 함
@@ -151,7 +151,7 @@ public class GameManager implements Listener
 	}
 	
 	void giveBasicGoods(Player p) {
-		PlayerData pData = this.pDataManager.getOnlinePlayerData(p.getUniqueId());
+		PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
 		if(!pData.doesHaveGoods(ShopGoods.BLOCKS)) {
 			pData.addGoods(ShopGoods.BLOCKS);
 		}
@@ -202,7 +202,7 @@ public class GameManager implements Listener
 
 		Player p=e.getPlayer();
 		UUID pUuid=p.getUniqueId();
-		PlayerData pData=this.pDataManager.getOnlinePlayerData(pUuid);
+		PlayerData pData=this.pDataManager.getPlayerData(pUuid);
 		Role role=pData.getRole();
 
 		// core체크
@@ -392,7 +392,7 @@ public class GameManager implements Listener
 	{
 		Player p=e.getPlayer();
 		UUID uuid=p.getUniqueId();
-		PlayerData pData=this.pDataManager.getOnlinePlayerData(uuid);
+		PlayerData pData=this.pDataManager.getPlayerData(uuid);
 		Role role=pData.getRole();
 
 		// Role별로 권한 체크
@@ -450,7 +450,8 @@ public class GameManager implements Listener
 		}
 
 		// PlayerDataManager 처리
-		this.pDataManager.saveAndRemovePlayerData(p.getUniqueId());
+		// 구조 바꿔서 할 필요 없어짐
+//		this.pDataManager.saveAndRemovePlayerData(p.getUniqueId());
 	}
 	
 	

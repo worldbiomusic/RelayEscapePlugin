@@ -243,7 +243,7 @@ public class RelayManager
 			
 			// challengingCount +1
 			UUID uuid = p.getUniqueId();
-			PlayerData pData = this.pDataManager.getOnlinePlayerData(uuid);
+			PlayerData pData = this.pDataManager.getPlayerData(uuid);
 			pData.addChallengingCount(1);
 			
 			// Goods제공 (role변경후 호출되야함)
@@ -522,7 +522,7 @@ public class RelayManager
 		 */
 		RoomType currentRoom = RoomLocation.getRoomTypeWithLocation(p.getLocation());
 		RelayTime currentTime = this.getCurrentTime();
-		PlayerData pData = this.pDataManager.getOnlinePlayerData(p.getUniqueId());
+		PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
 		
 		if(currentRoom == roomType
 				&& currentTime == relayTime
@@ -534,7 +534,7 @@ public class RelayManager
 	}
 	
 	private List<ShopGoods> getPlayerGoods(Player p) {
-		return this.pDataManager.getOnlinePlayerData(p.getUniqueId()).getGoods();
+		return this.pDataManager.getPlayerData(p.getUniqueId()).getGoods();
 	}
 	
 	private void giveGoodsToPlayer(Player p) {
@@ -543,7 +543,7 @@ public class RelayManager
 		 * 이 메소드가 실행되기 전에 선행되야 하는 것: player role 변경! 
 		 */
 		for(ShopGoods goods : this.getPlayerGoods(p)) {
-			PlayerData pData = this.pDataManager.getOnlinePlayerData(p.getUniqueId());
+			PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
 			if(ShopGoods.isRoleGoods(pData.getRole(), goods)) {
 				InventoryTool.addItemToPlayer(p, goods.getGoods());
 			}

@@ -19,7 +19,7 @@ public class ShopManager
 		this.pDataManager = pDataManager;
 	}
 	public void purchase(Player p, String goods, int cost) {
-		PlayerData pData = this.pDataManager.getOnlinePlayerData(p.getUniqueId());
+		PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
 		
 		// check cost
 		if(pData.getToken() < cost) {

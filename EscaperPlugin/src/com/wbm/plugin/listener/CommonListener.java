@@ -1,8 +1,5 @@
 package com.wbm.plugin.listener;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -28,7 +25,6 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 
 import com.wbm.plugin.Main;
@@ -202,7 +198,7 @@ public class CommonListener implements Listener
 		String invTitle= e.getInventory().getTitle();
 		p.sendMessage("invTitle: " +invTitle);
 		
-		Role role = this.pDataManager.getOnlinePlayerData(p.getUniqueId()).getRole();
+		Role role = this.pDataManager.getPlayerData(p.getUniqueId()).getRole();
 		if(role == Role.MAKER) {
 			if(!invTitle.equals(ShopGoods.BLOCKS.name())) {
 				p.sendMessage("only BLOCKS inv is OK");
