@@ -17,17 +17,21 @@ public class BroadcastTool
 		serverName = name;
 	}
 	
+	private static String addPrefix(String msg) {
+		return serverName + msg;
+	}
+	
 	// sendMessage
 	public static void sendMessage(Player p, String msg)
 	{
-		p.sendMessage(msg);
+		p.sendMessage(addPrefix(msg));
 	}
 
 	public static void sendMessage(List<Player> many, String msg)
 	{
 		for(Player p : many)
 		{
-			p.sendMessage(msg);
+			p.sendMessage(addPrefix(msg));
 		}
 	}
 
@@ -35,7 +39,7 @@ public class BroadcastTool
 	{
 		for(Player p : Bukkit.getOnlinePlayers())
 		{
-			p.sendMessage(msg);
+			p.sendMessage(addPrefix(msg));
 		}
 	}
 

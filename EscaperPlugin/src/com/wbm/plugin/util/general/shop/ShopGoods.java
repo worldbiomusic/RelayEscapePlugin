@@ -25,6 +25,14 @@ public enum ShopGoods
 	FENCE(ItemStackTool.item(Material.FENCE)),
 	WHITE_WOOL(ItemStackTool.item(Material.WOOL, (byte)0)),
 	BLACK_WOOL(ItemStackTool.item(Material.WOOL, (byte)15)),
+	// event making block
+	JUMPING(ItemStackTool.item(Material.STAINED_GLASS, 1, (short)1, (byte)0, "JUMPING", "super jump event block")),
+	RESPAWN(ItemStackTool.item(Material.STAINED_GLASS, 1, (short)1, (byte)1, "RESPAWN", "respawn event block")),
+	TRAP(ItemStackTool.item(Material.STAINED_GLASS, 1, (short)1, (byte)2, "TRAP", "random trap event block")),
+	FLICKING(ItemStackTool.item(Material.STAINED_GLASS, 1, (short)1, (byte)3, "FLICKING", "flicking event block")),
+	SOUND_TERROR(ItemStackTool.item(Material.STAINED_GLASS, 1, (short)1, (byte)4, "SOUND_TERROR", "sound terror event block")),
+	TERRORIST(ItemStackTool.item(Material.STAINED_GLASS, 1, (short)1, (byte)5, "TERRORIST", "terror to all player event block")),
+	
 	
 	// makingTool
 	// 이 템으로 클릭시 list나오고 명령어로 가능하게 하기(명령어에서 이 템 가지고 있나 체크)
@@ -50,6 +58,7 @@ public enum ShopGoods
 	ShopGoods(ItemStack item) {
 		this.item = item;
 //		ItemStackTool.item(Material.WOOD_SWORD, "Spawn", "teleport to spawn")
+//		Material.STAINED_GLASS
 	}
 	
 	public ItemStack getGoods() {
@@ -85,7 +94,7 @@ public enum ShopGoods
 	}
 	
 	public static List<ShopGoods> getMakerGoods() {
-		List<ShopGoods> goods = getMakingBlocks();
+		List<ShopGoods> goods = new ArrayList<>();
 		goods.add(ShopGoods.ROOM_MANAGER);
 		goods.add(ShopGoods.UNDER_BLOCK);
 		goods.add(ShopGoods.SPAWN);
@@ -113,6 +122,14 @@ public enum ShopGoods
 		blocks.add(ShopGoods.FENCE);
 		blocks.add(ShopGoods.WHITE_WOOL);
 		blocks.add(ShopGoods.BLACK_WOOL);
+		
+		// event blocks
+		blocks.add(ShopGoods.JUMPING);
+		blocks.add(ShopGoods.RESPAWN);
+		blocks.add(ShopGoods.TRAP);
+		blocks.add(ShopGoods.FLICKING);
+		blocks.add(ShopGoods.SOUND_TERROR);
+		blocks.add(ShopGoods.TERRORIST);
 		
 		return blocks;
 	}

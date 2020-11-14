@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -74,6 +75,21 @@ public class ItemStackTool
 		}
 		
 		return false;
+	}
+	
+	public static boolean isSameWithMaterialNData(ItemStack item1, ItemStack item2) {
+		if(item1 != null && item2 != null ) {
+			if(item1.getType().equals(item2.getType())) {
+				if(item1.getData().equals(item2.getData())) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
+	public static ItemStack block2ItemStack(Block b) {
+		return new ItemStack(ItemStackTool.item(b.getType(), b.getData()));
 	}
 }
 

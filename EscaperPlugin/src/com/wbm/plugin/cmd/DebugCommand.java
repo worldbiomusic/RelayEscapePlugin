@@ -48,28 +48,23 @@ public class DebugCommand implements CommandExecutor
 		
 		Player p = (Player) sender;
 		
-		String first = args[0];
-		
-		switch(first) {
-			case "d":  // debug
-				p.sendMessage("==========debug cmd=============");
-				this.debug(p, args);
-				break;
-			case "room":
-				this.room(p, args);
-				break;
+		if(args.length >= 1) {
+			String first = args[0];
+			
+			switch(first) {
+				case "d":  // debug
+					BroadcastTool.sendMessage(p, "==========debug cmd=============");
+					return this.debug(p, args);
+				case "room":
+					return this.room(p, args);
+			}
 		}
 		
-		return true;
+		return false;
 	}
 	
-	private void room(Player p, String[] args)
+	private boolean room(Player p, String[] args)
 	{	
-		PlayerData pData = this.pDataManager.getOnlinePlayerData(p.getUniqueId());
-		if(! pData.doesHaveGoods(ShopGoods.ROOM_MANAGER) ) {
-			BroadcastTool.sendMessage(p, "you need \"ROOM_MANAGER\" for this command");
-			return;
-		}
 		// TODO: 밑의 if문 조건을 통과 못할때가 있음 (player의 위치때문에 RoomType이 잘 안되는거같음)
 		// Main room, RelayTime.Making, Role Maker 체크
 		if(this.relayManager.checkRoomAndRelayTimeAndRole(
@@ -77,29 +72,40 @@ public class DebugCommand implements CommandExecutor
 			String second = args[1];
 			
 			switch(second) {
+				// re room load [title]
 				case "load":
-					this.loadRoom(p, args);
-					break;
+					return this.loadRoom(p, args);
+				// re room empty
 				case "empty":
-					this.emtpyRoom(p, args);
-					break;
+					return this.emtpyRoom(p, args);
+				// re room list
 				case "list":
-					this.printRoomList(p, args);
-					break;
+					return this.printRoomList(p, args);
+				// re room title [title]
+				case "title":
+					return this.setRoomTitle(p, args);
 			}
 		}
+		BroadcastTool.sendMessage(p, "this command is for Maker");
+		return true;
 	}
 
-	private void loadRoom(Player p, String[] args)
+	private boolean loadRoom(Player p, String[] args)
 	{
 		// re room load [title]
+		if(args.length != 3) {
+			return false;
+		}
+		if(! this.hasRoomManagerItem(p)) {
+			return true;
+		}
 		String title = args[2];
 		Room room = this.roomManager.getRoomData(title);
 		
 		// room maker가 아닐시 반환
 		if(!room.getMaker().equals(p.getName())) {
 			BroadcastTool.sendMessage(p, "You are not Maker of " + title + " room");
-			return;
+			return true;
 		}
 		
 		// set corePlaced TRUE! (이전room은 모두 test통과했으므로 core가 무조건 있음)
@@ -109,50 +115,94 @@ public class DebugCommand implements CommandExecutor
 		// set room 
 		this.roomManager.setRoom(RoomType.MAIN, room);
 		BroadcastTool.sendMessage(p, title + " room is loading...");
+		
+		return true;
 	}
 	
-	private void emtpyRoom(Player p, String[] args)
+	private boolean emtpyRoom(Player p, String[] args)
 	{
 		// re room empty
+		if(args.length != 2) {
+			return false;
+		}
+		if(! this.hasRoomManagerItem(p)) {
+			return true;
+		}
 		this.roomManager.setRoomEmpty(RoomType.MAIN);
+		return true;
 	}
 	
-	private void printRoomList(Player p, String[] args)
+	private boolean printRoomList(Player p, String[] args)
 	{
 		// print room list
+		if(args.length != 2) {
+			return false;
+		}
+		if(! this.hasRoomManagerItem(p)) {
+			return true;
+		}
 		this.roomManager.printRoomList(p);
+		return true;
+	}
+	
+	private boolean setRoomTitle(Player p, String[] args) {
+		// /re room title "EXAMPLE"
+		if(args.length != 3 ) {
+			return false;
+		}
+		if(this.relayManager.checkRoomAndRelayTimeAndRole(RoomType.MAIN, RelayTime.MAKING, Role.MAKER, p)) {
+			String title = args[2];
+			this.relayManager.setRoomTitle(title);
+		}
+		return true;
+	}
+	
+	private boolean hasRoomManagerItem(Player p) {
+		/*
+		 * ROOM_MANAGER goods 가지고 있는지 검사
+		 */
+		PlayerData pData = this.pDataManager.getOnlinePlayerData(p.getUniqueId());
+		if(pData.doesHaveGoods(ShopGoods.ROOM_MANAGER) ) {
+			BroadcastTool.sendMessage(p, "you need \"ROOM_MANAGER\" for this command");
+			return true;
+		}
+		return false;
 	}
 
 
-	private void debug(Player p, String[] args) {
-		String second = args[1];
-		
-		switch(second) {
-			case "relay":
-				this.printRelayInfo(p);
-				break;
-			case "role": // print own role
-				this.printPlayerRole(p);
-				break;
-			case "roles": // print all player role
-				this.printAllPlayerRole(p);
-				break;
-			case "time":
-				this.printCurrentRelayTime(p);
-				break;
-			case "finish":
-				this.finishMakingTime(p);
-				break;
-			case "reset":
-				this.relayManager.resetRelay();
-				break;
-			case "pdata":
-				this.printPlayerData(p);
-				break;
-			case "allpdata":
-				this.printAllPlayerData(p);
-				break;
+	private boolean debug(Player p, String[] args) {
+		if(args.length >= 2) {
+			String second = args[1];
+			
+			switch(second) {
+				case "relay":
+					this.printRelayInfo(p);
+					break;
+				case "role": // print own role
+					this.printPlayerRole(p);
+					break;
+				case "roles": // print all player role
+					this.printAllPlayerRole(p);
+					break;
+				case "time":
+					this.printCurrentRelayTime(p);
+					break;
+				case "finish":
+					this.finishMakingTime(p);
+					break;
+				case "reset":
+					this.relayManager.resetRelay();
+					break;
+				case "pdata":
+					this.printPlayerData(p);
+					break;
+				case "allpdata":
+					this.printAllPlayerData(p);
+					break;
+			}
+			return true;
 		}
+		return false;
 	}
 	
 	private void printPlayerData(Player p ) {

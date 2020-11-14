@@ -6,8 +6,11 @@ description: made by LLLJH (discord -> arong#7075)
 commands:
   re:
     description: relay escaper plugin command
-    usage: /re [d/room]
-
+    usage:  |  
+          /re d [role | roles | time | finish | reset | pdata | allpdata]
+          /re room [load | title] <title>
+          /re room [empty | list]
+      
 permissions:
   re.*:
     description: super permission

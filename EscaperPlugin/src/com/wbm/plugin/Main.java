@@ -25,6 +25,7 @@ import com.wbm.plugin.util.RoomManager;
 import com.wbm.plugin.util.config.ConfigTest;
 import com.wbm.plugin.util.config.DataManager;
 import com.wbm.plugin.util.general.BanItemTool;
+import com.wbm.plugin.util.general.BroadcastTool;
 import com.wbm.plugin.util.general.SpawnLocationTool;
 import com.wbm.plugin.util.general.shop.ShopGoods;
 import com.wbm.plugin.util.general.shop.ShopManager;
@@ -95,6 +96,9 @@ public class Main extends JavaPlugin
 
 	private void setupTools()
 	{
+		// BroadcastTool
+		BroadcastTool.setServerNamePrefix("" + ChatColor.RED + ChatColor.BOLD + "[i] " + ChatColor.WHITE);
+		
 		// respawn manager
 		Location loc=new Location(Bukkit.getWorld("world"), 9.5, 4, 5.5, 90, 0);
 		Location lobby=new Location(Bukkit.getWorld("world"), 16, 4, 16, 90, 0);
@@ -184,8 +188,10 @@ public class Main extends JavaPlugin
 					Score token = obj.getScore("Token: " + pData.getToken());
 					token.setScore(9);
 					
-					Score relayTime = obj.getScore("RelayTime: " + relayManager.getCurrentTime().name()
-							+ "(" + relayManager.getLeftTime() + ")");
+					String leftTime = "" + ChatColor.RED + ChatColor.BOLD + relayManager.getLeftTime() + ChatColor.WHITE;
+					Score relayTime = obj.getScore("RelayTime: " 
+					+ relayManager.getCurrentTime().name() 
+					+ "(" + leftTime + ")");
 					relayTime.setScore(8);
 					
 

@@ -19,6 +19,7 @@ import com.wbm.plugin.util.enums.RoomType;
 import com.wbm.plugin.util.general.BroadcastTool;
 import com.wbm.plugin.util.general.Counter;
 import com.wbm.plugin.util.general.InventoryTool;
+import com.wbm.plugin.util.general.PlayerTool;
 import com.wbm.plugin.util.general.SpawnLocationTool;
 import com.wbm.plugin.util.general.TeleportTool;
 import com.wbm.plugin.util.general.shop.ShopGoods;
@@ -53,6 +54,7 @@ public class RelayManager
 	private BukkitTask currentCountDownTask;
 
 	private boolean corePlaced;
+	private String roomTitle;
 	
 	private Counter timer;
 	private int timerTask;
@@ -83,7 +85,7 @@ public class RelayManager
 		{
 			BroadcastTool.printConsoleMessage(ChatColor.RED+"[Bug] No Maker in WaitingTime!!!!");
 		}
-		this.getMaker().sendMessage("you are now Maker");
+		BroadcastTool.sendMessage(this.getMaker(), "you are now Maker");
 		this.pDataManager.changePlayerRole(this.getMaker().getUniqueId(), Role.WAITER);
 		// Goods제공 (role변경후 호출되야함)
 		giveGoodsToPlayer(this.getMaker());
@@ -130,6 +132,9 @@ public class RelayManager
 		// teleport
 		TeleportTool.tp(this.getMaker(), SpawnLocationTool.joinLocation);
 		
+		// room title 을 "maker이름 + n"으로 설정
+		this.roomTitle = this.roomManager.getNextTitleWithMakerName(this.getMaker().getName());
+		
 
 		// maker제외한 challenger(waiter) 관리
 		for(Player p : this.getChallengers())
@@ -142,6 +147,9 @@ public class RelayManager
 		}
 
 		// message 관리
+		BroadcastTool.sendMessage(this.getMaker(), "Enter you room title with "
+				+ "/re room title [title] "
+				+ "\n(base title: " + this.roomTitle + ")");
 		BroadcastTool.sendMessageToEveryone("makingTime: testingTime starts in "+RelayTime.MAKING.getAmount()+" sec");
 
 		Room randomRoom = this.roomManager.getRandomRoomData();
@@ -212,6 +220,8 @@ public class RelayManager
 		// RelayTime 관리
 		this.currentTime=RelayTime.CHALLENGING;
 
+		// room challeningCount + 1
+		this.roomManager.getRoom(RoomType.MAIN).addChallengingCount(1);
 		
 		// maker(viewer) 관리
 		// if문 넣은이유: Maker가 만들고 나갔을때 위해서 or 처음시작시 maker가없기 때문
@@ -222,6 +232,7 @@ public class RelayManager
 			this.giveGoodsToPlayer(this.getMaker());
 			// teleport
 			TeleportTool.tp(this.getMaker(), SpawnLocationTool.joinLocation);
+			
 		}
 		
 		// maker제외한 challenger(challenger) 관리
@@ -240,6 +251,9 @@ public class RelayManager
 			
 			// teleport
 			TeleportTool.tp(p, SpawnLocationTool.joinLocation);
+			
+			// heal
+			PlayerTool.heal(p);
 		}
 		
 		
@@ -463,6 +477,16 @@ public class RelayManager
 		this.corePlaced=corePlaced;
 	}
 	
+	public String getRoomTitle()
+	{
+		return roomTitle;
+	}
+
+	public void setRoomTitle(String roomTitle)
+	{
+		this.roomTitle=roomTitle;
+	}
+
 	public int getLeftTime() {
 		return this.timer.getCount();
 	}

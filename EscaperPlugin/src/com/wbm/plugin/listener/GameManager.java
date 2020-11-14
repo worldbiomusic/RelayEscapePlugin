@@ -26,6 +26,7 @@ import com.wbm.plugin.util.enums.RoomType;
 import com.wbm.plugin.util.general.BanItemTool;
 import com.wbm.plugin.util.general.BroadcastTool;
 import com.wbm.plugin.util.general.InventoryTool;
+import com.wbm.plugin.util.general.PlayerTool;
 import com.wbm.plugin.util.general.SpawnLocationTool;
 import com.wbm.plugin.util.general.shop.ShopGoods;
 
@@ -101,7 +102,7 @@ public class GameManager implements Listener
 				// 들어온사람이 전에 나간 Maker였을때
 				if(this.pDataManager.isMaker(p))
 				{
-					p.sendMessage("you are Viewer in your room(structure)");
+					BroadcastTool.sendMessage(p, "you are Viewer in your room(structure)");
 					baseRole=Role.VIEWER;
 				}
 			}
@@ -160,8 +161,6 @@ public class GameManager implements Listener
 	public void onPlayerBreakBlock(BlockBreakEvent e)
 	{
 		// 모든 break event는 여기를 거쳐서 처리됨
-		Player p=e.getPlayer();
-		p.sendMessage("break");
 		Block b=e.getBlock();
 
 		// 일단 cancel
@@ -170,7 +169,6 @@ public class GameManager implements Listener
 		// Main Room 체크
 		if(RoomLocation.getRoomTypeWithLocation(b.getLocation())==RoomType.MAIN)
 		{
-			p.sendMessage("break: Main");
 			this.onTesterAndChallengerBreakCore(e);
 			this.onPlayerBreakBlockInMainRoom(e);
 //			this.onPlayerBreakBlockInMainRoom(e);
@@ -182,8 +180,6 @@ public class GameManager implements Listener
 	public void onPlayerPlaceBlock(BlockPlaceEvent e)
 	{
 		// 모든 place event는 여기를 거쳐서 처리됨
-		Player p=e.getPlayer();
-		p.sendMessage("place");
 		Block b=e.getBlock();
 
 		// 일단 cancel
@@ -192,7 +188,6 @@ public class GameManager implements Listener
 		// Main Room 체크
 		if(RoomLocation.getRoomTypeWithLocation(b.getLocation())==RoomType.MAIN)
 		{
-			p.sendMessage("place: Main");
 //			this.onPlayerPlaceBlockInMainRoom(e);
 			this.onPlayerPlaceBlockInMainRoom(e);
 		}
@@ -221,7 +216,7 @@ public class GameManager implements Listener
 				this.relayManager.resetRelaySetting();
 
 				// 1. 현재 Maker에게 이제 Challenger라는 메세지 전송
-				BroadcastTool.sendMessageToEveryone("core is broken!!!!!!!!!!!!");
+				BroadcastTool.sendMessageToEveryone("core is broken!");
 
 				// 2. 클리어한 maker는 pDataManager의 maker로 등록
 				this.pDataManager.registerMaker(p);
@@ -235,17 +230,18 @@ public class GameManager implements Listener
 				this.relayManager.startNextTime();
 
 				// 5.player token +1, clearCount +1
-				pData.addToken(10000);
+				int token = PlayerTool.onlinePlayersCount();
+				pData.addToken(token);
 				pData.addClearCount(1);
 			}
 			// Time: Testing / Role: Tester
 			else if(role==Role.TESTER)
 			{
 				// 1.save room, set main room
-				String title=this.roomManager.saveRoomData(RoomType.MAIN, p.getName());
+				String title = this.relayManager.getRoomTitle();
+				this.roomManager.saveRoomData(RoomType.MAIN, p, title);
 				Room mainRoom=this.roomManager.getRoomData(title);
 				this.roomManager.setRoom(RoomType.MAIN, mainRoom);
-				mainRoom.addChallengingCount(1);
 
 				// 2.next relay 시작
 				this.relayManager.startNextTime();
@@ -408,7 +404,6 @@ public class GameManager implements Listener
 				e.setCancelled(true);
 			}
 		}
-		p.sendMessage("sdfsdfsdd");
 
 	}
 
@@ -416,14 +411,14 @@ public class GameManager implements Listener
 	public void onPlayerJoin(PlayerJoinEvent e)
 	{
 		Player p=e.getPlayer();
-		p.sendMessage("welcome to RelayEscape server!");
+		BroadcastTool.sendMessage(p, "welcome to RelayEscape server!");
 
 		// PlayerData 처리
 		this.TODOListWhenplayerJoinServer(p);
 	}
 	
 	@EventHandler
-	public void onPlayerQuit(PlayerQuitEvent e)
+	public void onMakerQuit(PlayerQuitEvent e)
 	{
 		Player p=e.getPlayer();
 
@@ -449,7 +444,7 @@ public class GameManager implements Listener
 				else if(time==RelayTime.CHALLENGING)
 				{
 					// PlayerDataManager maker = null 처리하지 않고, 다시 들어올때 maker에 있는 player로 maker판별!
-					// -> 수행할 동작이 없음
+					// -> join event에서 막아주기 때문에수행할 동작이 없음
 				}
 			}
 		}

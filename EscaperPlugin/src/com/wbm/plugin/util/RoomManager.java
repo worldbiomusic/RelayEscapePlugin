@@ -71,21 +71,20 @@ public class RoomManager implements DataMember
 		return this.roomData.get(title);
 	}
 	
-	public String saveRoomData(RoomType roomType, String makerName) {
+	public String saveRoomData(RoomType roomType, Player p, String roomTitle) {
 		
 		// main room
 		List<BlockData> blockDatas = this.getRoomBlockDatas(roomType);
-		String title = this.getNextTitleWithMaker(makerName);
 		
-		Room room = new Room(title, makerName, blockDatas, LocalDateTime.now());
+		Room room = new Room(roomTitle, p.getName(), blockDatas, LocalDateTime.now());
 		
 		// rooms 에 저장
-		this.roomData.put(title, room);
+		this.roomData.put(roomTitle, room);
 		
-		return title;
+		return roomTitle;
 	}
 	
-	public String getNextTitleWithMaker(String maker) {
+	public String getNextTitleWithMakerName(String maker) {
 		// Room title입력안했을시 maker1, maker2, maker3 ... 순으로 title이 저장됨
 		for(int i = 1; i < 10000; i++) {
 			String title = maker + i;
@@ -194,7 +193,7 @@ public class RoomManager implements DataMember
 		
 		// room state 알림
 		BroadcastTool.sendMessageToEveryone("Main room: " + room.getTitle());
-		BroadcastTool.sendMessageToEveryone("roomData count : " + this.roomData.size());
+		BroadcastTool.debug("roomData count : " + this.roomData.size());
 	}
 
 	@SuppressWarnings("deprecation")

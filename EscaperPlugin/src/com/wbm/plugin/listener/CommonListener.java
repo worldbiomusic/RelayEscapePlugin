@@ -1,7 +1,12 @@
 package com.wbm.plugin.listener;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
@@ -19,14 +24,23 @@ import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
+import org.bukkit.util.Vector;
 
+import com.wbm.plugin.Main;
 import com.wbm.plugin.util.PlayerDataManager;
 import com.wbm.plugin.util.enums.Role;
 import com.wbm.plugin.util.general.BanItemTool;
 import com.wbm.plugin.util.general.BroadcastTool;
+import com.wbm.plugin.util.general.ItemStackTool;
+import com.wbm.plugin.util.general.PotionEffectTool;
+import com.wbm.plugin.util.general.SoundTool;
 import com.wbm.plugin.util.general.SpawnLocationTool;
+import com.wbm.plugin.util.general.TeleportTool;
 import com.wbm.plugin.util.general.shop.ShopGoods;
 import com.wbm.plugin.util.general.shop.ShopManager;
 
@@ -98,19 +112,21 @@ public class CommonListener implements Listener
 	public void onPlayerUseCommand(PlayerCommandPreprocessEvent e)
 	{
 		Player p = e.getPlayer();
-		p.sendMessage("commmand");
 		// check command
 		String msg = e.getMessage();
 		
-		// LLLJH제외
-		if(p.getName().equals("LLLJH")) {
+//		// LLLJH제외
+//		if(p.getName().equals("LLLJH")) {
+//			return;
+//		}
+		if(p.isOp()) {
 			return;
 		}
 		
 		// re명령어 빼고 모두 막기 (일반유저)
 		if(msg.startsWith("/")) {
 			if(!msg.startsWith("/re")) {
-				BroadcastTool.sendMessage(p, ChatColor.RED + "you can only use \"re\"");
+				BroadcastTool.sendMessage(p, ChatColor.RED + "you can only use \"/re\"");
 				e.setCancelled(true);
 			}
 		}
@@ -205,12 +221,90 @@ public class CommonListener implements Listener
 		// mainhand 체크
 		ItemStack item=p.getInventory().getItemInMainHand();
 
-		if(this.banItems.containsItem(blockMat)||this.banItems.containsItem(item))
+		if(this.banItems.containsItem(blockMat)
+				||this.banItems.containsItem(item)
+				|| blockMat.equals(Material.CHEST))
 		{
 			BroadcastTool.sendMessage(p, "banned item");
 			e.setCancelled(true);
 			return;
 		}
+	}
+	
+	@EventHandler
+	public void onPlayerInteractingWithEventBlock(PlayerMoveEvent e) {
+		Player p = e.getPlayer();
+		Block b = p.getLocation().subtract(0, 1, 0).getBlock();
+		
+		if(ItemStackTool.isSameWithMaterialNData(ItemStackTool.block2ItemStack(b), ShopGoods.JUMPING.getGoods())) {
+//			p.sendMessage("JUMPING");
+			p.setVelocity(new Vector(0, 0.5, 0));
+		}
+		else if(ItemStackTool.isSameWithMaterialNData(ItemStackTool.block2ItemStack(b), ShopGoods.RESPAWN.getGoods())) {
+//			p.sendMessage("RESPAWN");
+			TeleportTool.tp(p, SpawnLocationTool.respawnLocation);
+		}
+		else if(ItemStackTool.isSameWithMaterialNData(ItemStackTool.block2ItemStack(b), ShopGoods.TRAP.getGoods())) {
+//			p.sendMessage("TRAP");
+			
+			if(p.getActivePotionEffects().size() >= 1) {
+				return;
+			}
+			
+			PotionEffect potion = PotionEffectTool.getRandomDebuffPotionEffect();
+			p.addPotionEffect(potion);
+		}
+		else if(ItemStackTool.isSameWithMaterialNData(ItemStackTool.block2ItemStack(b), ShopGoods.FLICKING.getGoods())) {
+//			p.sendMessage("FLICKING");
+			
+			Material mat = b.getType();
+			@SuppressWarnings("deprecation")
+			byte data = b.getData();
+			
+			// 3초후 사라짐
+			Bukkit.getScheduler().runTaskLater(Main.getInstance(), new Runnable()
+			{
+				
+				@Override
+				public void run()
+				{
+					b.setType(Material.AIR);
+				}
+			}, 20 * 3);
+			
+			// 6초후 나타남
+			Bukkit.getScheduler().runTaskLater(Main.getInstance(), new Runnable()
+			{
+				
+				@SuppressWarnings("deprecation")
+				@Override
+				public void run()
+				{
+					b.setType(mat);
+					b.setData(data);
+				}
+			}, 20 * 6);
+		}
+		else if(ItemStackTool.isSameWithMaterialNData(ItemStackTool.block2ItemStack(b), ShopGoods.SOUND_TERROR.getGoods())) {
+//			p.sendMessage("RESPAWN");
+			p.playSound(p.getLocation(), Sound.ENTITY_ZOMBIE_AMBIENT, 10, 1);
+		}
+		else if(ItemStackTool.isSameWithMaterialNData(ItemStackTool.block2ItemStack(b), ShopGoods.TERRORIST.getGoods())) {
+//			p.sendMessage("RESPAWN");
+			int r = (int)(Math.random() * 3);
+			if(r==1) {
+				TeleportTool.allTpToLocation(SpawnLocationTool.respawnLocation);
+			} else if(r==2) {
+				PotionEffect effect = PotionEffectTool.getRandomDebuffPotionEffect();
+				PotionEffectTool.addPotionEffectToAll(effect);
+			} else if(r==3) {
+				SoundTool.playSound(p, Sound.ENTITY_ZOMBIE_AMBIENT);
+			}
+			
+			// 일회성
+			b.setType(Material.DIRT);
+		}
+		
 	}
 }
 
