@@ -154,6 +154,8 @@ public class PlayerDataManager implements DataMember
 		// TODO Auto-generated method stub
 		this.playerData=(Map<UUID, PlayerData>)obj;
 
+		// print console
+		BroadcastTool.debug("==================PlayerData==================");
 		for(PlayerData pData : this.playerData.values())
 		{
 			BroadcastTool.printConsoleMessage(pData.toString());

@@ -47,6 +47,7 @@ public class RelayManager
 
 	private PlayerDataManager pDataManager;
 	private RoomManager roomManager;
+	private StageManager stageManager;
 
 	// TODO: RelayTime이름보단 다른것찾아보기 예> RelayTurn ??
 	private RelayTime currentTime;
@@ -62,10 +63,13 @@ public class RelayManager
 	private BukkitTask reservationTask;
 	
 
-	public RelayManager(PlayerDataManager pDataManager, RoomManager roomManager)
+	public RelayManager(PlayerDataManager pDataManager, RoomManager roomManager,
+			StageManager stageManager)
 	{
 		this.pDataManager=pDataManager;
 		this.roomManager=roomManager;
+		this.stageManager = stageManager;
+		
 		this.currentTime=RelayTime.CHALLENGING;
 		this.corePlaced=false;
 		this.timer = new Counter();
@@ -101,6 +105,10 @@ public class RelayManager
 		// message 관리
 		BroadcastTool.sendMessageToEveryone("waitingTime: makingTime starts in "+RelayTime.WAITING.getAmount()+" sec");
 
+		// ranking system(stage) 업데이트
+		this.stageManager.updateAllStage();
+		
+		
 		// MakingTime 카운트다운
 //		this.currentCountDownTask=Bukkit.getScheduler().runTaskLater(Main.getInstance(), new Runnable()
 //		{

@@ -20,67 +20,68 @@ import com.wbm.plugin.util.enums.RelayTime;
 import com.wbm.plugin.util.enums.Role;
 import com.wbm.plugin.util.enums.RoomType;
 import com.wbm.plugin.util.general.BroadcastTool;
+import com.wbm.plugin.util.general.NPCManager;
 import com.wbm.plugin.util.general.shop.ShopGoods;
 
-
-public class DebugCommand implements CommandExecutor
+public class Commands implements CommandExecutor
 {
 	PlayerDataManager pDataManager;
 	RelayManager relayManager;
 	RoomManager roomManager;
 	RankManager rankManager;
-	
-	public DebugCommand(
-			PlayerDataManager pDataManager,
-			RelayManager relayManager,
-			RoomManager roomManager,
-			RankManager rankManager)
+	NPCManager npc;
+
+	public Commands(PlayerDataManager pDataManager, RelayManager relayManager, RoomManager roomManager,
+			RankManager rankManager, NPCManager npc)
 	{
-		this.pDataManager = pDataManager;
-		this.relayManager = relayManager;
-		this.roomManager = roomManager;
-		this.rankManager = rankManager;
+		this.pDataManager=pDataManager;
+		this.relayManager=relayManager;
+		this.roomManager=roomManager;
+		this.rankManager=rankManager;
+		this.npc = npc;
 	}
-	
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args)
 	{
-		if(!(sender instanceof Player )) {
+		if(!(sender instanceof Player))
+		{
 			sender.sendMessage("only player");
 		}
-		
-		Player p = (Player) sender;
-		
-		if(args.length >= 1) {
-			String first = args[0];
-			
-			switch(first) {
-				case "d":  // debug
+
+		Player p=(Player)sender;
+
+		if(args.length>=1)
+		{
+			String first=args[0];
+
+			switch (first)
+			{
+				case "d": // debug
 					BroadcastTool.sendMessage(p, "==========debug cmd=============");
 					return this.debug(p, args);
 				case "room":
 					return this.room(p, args);
 				case "rank":
 					return this.rank(p, args);
+				case "npc":
+					return this.npc(p, args);
 			}
 		}
-		
+
 		return false;
 	}
-	
-	
-
 
 	private boolean room(Player p, String[] args)
-	{	
+	{
 		// TODO: 밑의 if문 조건을 통과 못할때가 있음 (player의 위치때문에 RoomType이 잘 안되는거같음)
 		// Main room, RelayTime.Making, Role Maker 체크
-		if(this.relayManager.checkRoomAndRelayTimeAndRole(
-				RoomType.MAIN, RelayTime.MAKING, Role.MAKER, p)) {
-			String second = args[1];
-			
-			switch(second) {
+		if(this.relayManager.checkRoomAndRelayTimeAndRole(RoomType.MAIN, RelayTime.MAKING, Role.MAKER, p))
+		{
+			String second=args[1];
+
+			switch (second)
+			{
 				// re room load [title]
 				case "load":
 					return this.loadRoom(p, args);
@@ -102,88 +103,101 @@ public class DebugCommand implements CommandExecutor
 	private boolean loadRoom(Player p, String[] args)
 	{
 		// re room load [title]
-		if(args.length != 3) {
+		if(args.length!=3)
+		{
 			return false;
 		}
-		if(! this.hasRoomManagerItem(p)) {
+		if(!this.hasRoomManagerItem(p))
+		{
 			return true;
 		}
-		String title = args[2];
-		Room room = this.roomManager.getRoomData(title);
-		
+		String title=args[2];
+		Room room=this.roomManager.getRoomData(title);
+
 		// room maker가 아닐시 반환
-		if(!room.getMaker().equals(p.getName())) {
-			BroadcastTool.sendMessage(p, "You are not Maker of " + title + " room");
+		if(!room.getMaker().equals(p.getName()))
+		{
+			BroadcastTool.sendMessage(p, "You are not Maker of "+title+" room");
 			return true;
 		}
-		
+
 		// set corePlaced TRUE! (이전room은 모두 test통과했으므로 core가 무조건 있음)
 		this.relayManager.setCorePlaced(true);
-		
-		
-		// set room 
+
+		// set room
 		this.roomManager.setRoom(RoomType.MAIN, room);
-		BroadcastTool.sendMessage(p, title + " room is loading...");
-		
+		BroadcastTool.sendMessage(p, title+" room is loading...");
+
 		return true;
 	}
-	
+
 	private boolean emtpyRoom(Player p, String[] args)
 	{
 		// re room empty
-		if(args.length != 2) {
+		if(args.length!=2)
+		{
 			return false;
 		}
-		if(! this.hasRoomManagerItem(p)) {
+		if(!this.hasRoomManagerItem(p))
+		{
 			return true;
 		}
 		this.roomManager.setRoomEmpty(RoomType.MAIN);
 		return true;
 	}
-	
+
 	private boolean printRoomList(Player p, String[] args)
 	{
 		// print room list
-		if(args.length != 2) {
+		if(args.length!=2)
+		{
 			return false;
 		}
-		if(! this.hasRoomManagerItem(p)) {
+		if(!this.hasRoomManagerItem(p))
+		{
 			return true;
 		}
 		this.roomManager.printRoomList(p);
 		return true;
 	}
-	
-	private boolean setRoomTitle(Player p, String[] args) {
+
+	private boolean setRoomTitle(Player p, String[] args)
+	{
 		// /re room title "EXAMPLE"
-		if(args.length != 3 ) {
+		if(args.length!=3)
+		{
 			return false;
 		}
-		if(this.relayManager.checkRoomAndRelayTimeAndRole(RoomType.MAIN, RelayTime.MAKING, Role.MAKER, p)) {
-			String title = args[2];
+		if(this.relayManager.checkRoomAndRelayTimeAndRole(RoomType.MAIN, RelayTime.MAKING, Role.MAKER, p))
+		{
+			String title=args[2];
 			this.relayManager.setRoomTitle(title);
 		}
 		return true;
 	}
-	
-	private boolean hasRoomManagerItem(Player p) {
+
+	private boolean hasRoomManagerItem(Player p)
+	{
 		/*
 		 * ROOM_MANAGER goods 가지고 있는지 검사
 		 */
-		PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
-		if(pData.doesHaveGoods(ShopGoods.ROOM_MANAGER) ) {
+		PlayerData pData=this.pDataManager.getPlayerData(p.getUniqueId());
+		if(pData.doesHaveGoods(ShopGoods.ROOM_MANAGER))
+		{
 			BroadcastTool.sendMessage(p, "you need \"ROOM_MANAGER\" for this command");
 			return true;
 		}
 		return false;
 	}
 
+	private boolean debug(Player p, String[] args)
+	{
+		if(args.length>=2)
+		{
+			String second=args[1];
 
-	private boolean debug(Player p, String[] args) {
-		if(args.length >= 2) {
-			String second = args[1];
-			
-			switch(second) {
+			switch (second)
+			{
 				case "relay":
 					this.printRelayInfo(p);
 					break;
@@ -208,42 +222,46 @@ public class DebugCommand implements CommandExecutor
 				case "allpdata":
 					this.printAllPlayerData(p);
 					break;
-				
+
 			}
 			return true;
 		}
 		return false;
 	}
-	
-	private void printPlayerData(Player p ) {
-		PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
+
+	private void printPlayerData(Player p)
+	{
+		PlayerData pData=this.pDataManager.getPlayerData(p.getUniqueId());
 		BroadcastTool.sendMessage(p, pData.toString());
 	}
-	
+
 	private void printAllPlayerData(Player p)
 	{
-		Map<UUID, PlayerData> players = this.pDataManager.getOnlyOnlinePlayerData();
-		for(PlayerData pData : players.values()) {
+		Map<UUID, PlayerData> players=this.pDataManager.getOnlyOnlinePlayerData();
+		for(PlayerData pData : players.values())
+		{
 			BroadcastTool.sendMessage(p, pData.toString());
 			BroadcastTool.printConsoleMessage(pData.toString());
 		}
 	}
 
-
 	private void finishMakingTime(Player p)
 	{
 		// MakingTime일때 Testing으로 넘어갈 수 있게 해주는 명령어
-		RelayTime time = this.relayManager.getCurrentTime();
-		if(time == RelayTime.MAKING) {
-			if(! this.relayManager.isCorePlaced()) {
+		RelayTime time=this.relayManager.getCurrentTime();
+		if(time==RelayTime.MAKING)
+		{
+			if(!this.relayManager.isCorePlaced())
+			{
 				BroadcastTool.sendMessage(p, "core is not placed");
-			} else {
+			}
+			else
+			{
 				this.relayManager.startNextTime();
 			}
-			
+
 		}
 	}
-
 
 	private void printRelayInfo(Player p)
 	{
@@ -255,103 +273,132 @@ public class DebugCommand implements CommandExecutor
 		this.printCurrentRelayTime(p);
 	}
 
-
-	void printPlayerRole(Player p) {
-		PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
-		Role role = pData.getRole();
-		p.sendMessage(p.getName() + " Role: " + role.name());
+	void printPlayerRole(Player p)
+	{
+		PlayerData pData=this.pDataManager.getPlayerData(p.getUniqueId());
+		Role role=pData.getRole();
+		p.sendMessage(p.getName()+" Role: "+role.name());
 	}
-	
-	void printAllPlayerRole(Player p) {
-		p.sendMessage(ChatColor.BOLD + "[Role]");
-		for(Player each : Bukkit.getOnlinePlayers()) {
-			String eachName = each.getName();
+
+	void printAllPlayerRole(Player p)
+	{
+		p.sendMessage(ChatColor.BOLD+"[Role]");
+		for(Player each : Bukkit.getOnlinePlayers())
+		{
+			String eachName=each.getName();
 			// all중에 자신이름일때 색깔 초혹
-			if(eachName.equals(p.getName())) {
-				eachName = ChatColor.GREEN + eachName + ChatColor.WHITE;
+			if(eachName.equals(p.getName()))
+			{
+				eachName=ChatColor.GREEN+eachName+ChatColor.WHITE;
 			}
-			PlayerData allData = this.pDataManager.getPlayerData(each.getUniqueId());
-			Role role = allData.getRole();
-			p.sendMessage(eachName + ": " + role.name());
+			PlayerData allData=this.pDataManager.getPlayerData(each.getUniqueId());
+			Role role=allData.getRole();
+			p.sendMessage(eachName+": "+role.name());
 		}
 		p.sendMessage("------------------------------");
 	}
-	
-	void printCurrentRelayTime(Player p) {
-		RelayTime time = this.relayManager.getCurrentTime();
-		p.sendMessage(ChatColor.BOLD + "[Time]");
+
+	void printCurrentRelayTime(Player p)
+	{
+		RelayTime time=this.relayManager.getCurrentTime();
+		p.sendMessage(ChatColor.BOLD+"[Time]");
 		p.sendMessage(time.name());
 		p.sendMessage("------------------------------");
 	}
-	
+
 	private void printMaker(Player p)
 	{
-		String makerName = "";
-		Player maker = this.pDataManager.getMaker();
-		if(maker!=null) {
-			makerName = maker.getName();
+		String makerName="";
+		Player maker=this.pDataManager.getMaker();
+		if(maker!=null)
+		{
+			makerName=maker.getName();
 		}
-		p.sendMessage(ChatColor.BOLD + "[Maker]");
-		p.sendMessage(ChatColor.RED + makerName);
+		p.sendMessage(ChatColor.BOLD+"[Maker]");
+		p.sendMessage(ChatColor.RED+makerName);
 		p.sendMessage("------------------------------");
 	}
-	
-	
+
 	private boolean rank(Player p, String[] args)
 	{
 		// /re rank [options]
-		if(args.length == 2) {
-			String list = args[1];
-			switch(list) {
+		if(args.length==2)
+		{
+			String list=args[1];
+			switch (list)
+			{
 				case "tokenrank":
-					for(PlayerData pData : this.rankManager.getTokenRankList()) {
-						BroadcastTool.sendMessage(p, pData.getName() + ": " + pData.getToken());
+					for(PlayerData pData : this.rankManager.getTokenRankList())
+					{
+						BroadcastTool.sendMessage(p, pData.getName()+": "+pData.getToken());
 					}
 					break;
 				case "challengingrank":
-					for(PlayerData pData : this.rankManager.getChallengingCountRankList()) {
-						BroadcastTool.sendMessage(p, pData.getName() + ": " + pData.getChallengingCount());
+					for(PlayerData pData : this.rankManager.getChallengingCountRankList())
+					{
+						BroadcastTool.sendMessage(p, pData.getName()+": "+pData.getChallengingCount());
 					}
 					break;
 				case "clearrank":
-					for(PlayerData pData : this.rankManager.getClearCountRankList()) {
-						BroadcastTool.sendMessage(p, pData.getName() + ": " + pData.getClearCount());
+					for(PlayerData pData : this.rankManager.getClearCountRankList())
+					{
+						BroadcastTool.sendMessage(p, pData.getName()+": "+pData.getClearCount());
 					}
 					break;
 				case "roomcountrank":
-					for(PlayerData pData : this.rankManager.getRoomCountRankList()) {
-						BroadcastTool.sendMessage(p, pData.getName() + ": " + this.roomManager.getOwnRooms(pData.getName()).size());
+					for(PlayerData pData : this.rankManager.getRoomCountRankList())
+					{
+						BroadcastTool.sendMessage(p,
+								pData.getName()+": "+this.roomManager.getOwnRooms(pData.getName()).size());
 					}
 					break;
 				default:
 					return false;
 			}
-			
+
 			return true;
 		}
 		return false;
 	}
+
+	private boolean npc(Player p, String[] args)
+	{
+		/*
+		 * /re npc create <name> <skin> 
+		 * /re npc delete <name>
+		 */
+
+		if(args.length>=3)
+		{
+			String option=args[1];
+			String name = args[2]; 
+			switch (option)
+			{
+				case "create":
+					if(args.length == 4) {
+						String skin = args[3];
+						npc.createNPC(p.getLocation(), name, skin);
+						return true;
+					}
+					return false;
+				case "delete":
+					npc.delete(name);
+					return true;
+			}
+		}
+		return false;
+	}
+
+//	private boolean npcCreate(Player p, String[] args)
+//	{
+//		// /re npc create <name>
+//
+//		if(args.length==3)
+//		{
+//			String name=args[2];
+//
+//			return true;
+//		}
+//		return false;
+//	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

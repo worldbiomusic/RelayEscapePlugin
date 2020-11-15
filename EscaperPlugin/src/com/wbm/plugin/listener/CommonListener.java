@@ -21,6 +21,7 @@ import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
@@ -33,6 +34,7 @@ import com.wbm.plugin.util.enums.Role;
 import com.wbm.plugin.util.general.BanItemTool;
 import com.wbm.plugin.util.general.BroadcastTool;
 import com.wbm.plugin.util.general.ItemStackTool;
+import com.wbm.plugin.util.general.NPCManager;
 import com.wbm.plugin.util.general.PotionEffectTool;
 import com.wbm.plugin.util.general.SoundTool;
 import com.wbm.plugin.util.general.SpawnLocationTool;
@@ -49,14 +51,17 @@ public class CommonListener implements Listener
 	PlayerDataManager pDataManager;
 	ShopManager shopManager;
 	BanItemTool banItems;
+	NPCManager npc;
 	
 	public CommonListener(PlayerDataManager pDataManager,
 			ShopManager shopManager,
-			BanItemTool banItems)
+			BanItemTool banItems,
+			NPCManager npc)
 	{
 		this.pDataManager = pDataManager;
 		this.shopManager = shopManager;
 		this.banItems = banItems;
+		this.npc = npc;
 	}
 
 	@EventHandler
@@ -225,6 +230,13 @@ public class CommonListener implements Listener
 			e.setCancelled(true);
 			return;
 		}
+	}
+	
+	@EventHandler
+	public void onPlayerJoin(PlayerJoinEvent e) {
+		if(npc.getNPCs() == null || npc.getNPCs().isEmpty())
+			return;
+		npc.addAllPacketToPlayer(e.getPlayer());
 	}
 	
 	@EventHandler

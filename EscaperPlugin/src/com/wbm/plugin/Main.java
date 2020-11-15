@@ -1,5 +1,8 @@
 package com.wbm.plugin;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -14,7 +17,7 @@ import org.bukkit.scoreboard.Score;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.ScoreboardManager;
 
-import com.wbm.plugin.cmd.DebugCommand;
+import com.wbm.plugin.cmd.Commands;
 import com.wbm.plugin.data.PlayerData;
 import com.wbm.plugin.listener.CommonListener;
 import com.wbm.plugin.listener.GameManager;
@@ -23,10 +26,12 @@ import com.wbm.plugin.util.PlayerDataManager;
 import com.wbm.plugin.util.RankManager;
 import com.wbm.plugin.util.RelayManager;
 import com.wbm.plugin.util.RoomManager;
+import com.wbm.plugin.util.StageManager;
 import com.wbm.plugin.util.config.ConfigTest;
 import com.wbm.plugin.util.config.DataManager;
 import com.wbm.plugin.util.general.BanItemTool;
 import com.wbm.plugin.util.general.BroadcastTool;
+import com.wbm.plugin.util.general.NPCManager;
 import com.wbm.plugin.util.general.SpawnLocationTool;
 import com.wbm.plugin.util.general.shop.ShopGoods;
 import com.wbm.plugin.util.general.shop.ShopManager;
@@ -45,9 +50,11 @@ public class Main extends JavaPlugin
 	ShopManager shopManager;
 	ItemUsingManager itemUsingManager;
 	RankManager rankManager;
+	NPCManager npcManager;
+	StageManager stageManager;
 
 	// command executor
-	DebugCommand dCmd;
+	Commands dCmd;
 
 	ConfigTest ct;
 	
@@ -115,6 +122,9 @@ public class Main extends JavaPlugin
 		
 		// kits
 //		this.makeKits();
+		
+		// NPC
+		this.npcManager = new NPCManager();
 	}
 
 	void setupMain()
@@ -133,22 +143,28 @@ public class Main extends JavaPlugin
 
 		this.roomManager=new RoomManager();
 		this.dataManager.registerMember(this.roomManager);
+		this.dataManager.registerMember(this.npcManager);
 //		// distribute datas (이 메소드는 this.dataManager.registerMember <- 이 메소드들이
 //		// 마지막다음에 바로 실행되어야 함 
 		// -> 그냥 register에 넣어버림
 //		this.dataManager.distributeData();
 
 
-		this.relayManager=new RelayManager(this.pDataManager, this.roomManager);
+		this.rankManager = new RankManager(this.pDataManager, this.roomManager);
+		this.stageManager = new StageManager(this.rankManager, this.npcManager);
+		// setup stages
+		this.setupStages();
+		
+		this.relayManager=new RelayManager(this.pDataManager, this.roomManager, this.stageManager);
 		this.gManager=new GameManager(this.pDataManager, this.roomManager, this.relayManager);
 		this.itemUsingManager = new ItemUsingManager(this.pDataManager, this.roomManager, this.relayManager);
 		this.shopManager = new ShopManager(this.pDataManager);
-		this.rankManager = new RankManager(this.pDataManager, this.roomManager);
+		
 	}
 
 	private void registerListeners()
 	{
-		this.commonListener = new CommonListener(this.pDataManager, this.shopManager, this.banItems);
+		this.commonListener = new CommonListener(this.pDataManager, this.shopManager, this.banItems, this.npcManager);
 		
 		this.registerEvent(this.gManager);
 		this.registerEvent(this.commonListener);
@@ -162,7 +178,7 @@ public class Main extends JavaPlugin
 
 	private void registerCommands()
 	{
-		this.dCmd=new DebugCommand(this.pDataManager, this.relayManager, this.roomManager, this.rankManager);
+		this.dCmd=new Commands(this.pDataManager, this.relayManager, this.roomManager, this.rankManager, this.npcManager);
 		this.getCommand("re").setExecutor(dCmd);
 	}
 	
@@ -203,6 +219,54 @@ public class Main extends JavaPlugin
 		
 	}
 	
+	private void setupStages() {
+		/*
+		 *  token] yaw, pitch: (-90, 0)
+			12.5, 6, 5.5
+			12.5, 5, 6.5
+			12.5, 4, 4.5
+			
+			challenging (0, 0)
+			14.5, 6, 1.5
+			13.5, 5, 1.5
+			15.5, 4, 1.5
+			
+			clear (0, 0)
+			17.5, 6, 1.5
+			16.5, 5, 1.5
+			18.5, 4, 1.5
+			
+			room (90, 0)
+			19.5, 6, 6.5
+			19.5, 5, 5.5
+			19.5, 4, 7.5
+		 */
+		List<Location> tokenLocs = new ArrayList<Location>();
+		tokenLocs.add(new Location(Bukkit.getWorld("world"), 12.5, 6, 5.5, -90, 0));
+		tokenLocs.add(new Location(Bukkit.getWorld("world"), 12.5, 5, 6.5, -90, 0));
+		tokenLocs.add(new Location(Bukkit.getWorld("world"), 12.5, 4, 4.5, -90, 0));
+		
+		List<Location> challengingLocs = new ArrayList<Location>();
+		challengingLocs.add(new Location(Bukkit.getWorld("world"), 14.5, 6, 1.5, 0, 0));
+		challengingLocs.add(new Location(Bukkit.getWorld("world"), 13.5, 5, 1.5, 0, 0));
+		challengingLocs.add(new Location(Bukkit.getWorld("world"), 15.5, 4, 1.5, 0, 0));
+
+		List<Location> clearLocs = new ArrayList<Location>();
+		clearLocs.add(new Location(Bukkit.getWorld("world"), 17.5, 6, 1.5, 0, 0));
+		clearLocs.add(new Location(Bukkit.getWorld("world"), 16.5, 5, 1.5, 0, 0));
+		clearLocs.add(new Location(Bukkit.getWorld("world"), 18.5, 4, 1.5, 0, 0));
+		
+		List<Location> roomLocs = new ArrayList<Location>();
+		roomLocs.add(new Location(Bukkit.getWorld("world"), 19.5, 6, 6.5, 90, 0));
+		roomLocs.add(new Location(Bukkit.getWorld("world"), 19.5, 5, 5.5, 90, 0));
+		roomLocs.add(new Location(Bukkit.getWorld("world"), 19.5, 4, 7.5, 90, 0));
+		
+		this.stageManager.registerLocations("tokenCount", tokenLocs);
+		this.stageManager.registerLocations("challengingCount", challengingLocs);
+		this.stageManager.registerLocations("clearCount", clearLocs);
+		this.stageManager.registerLocations("roomCount", roomLocs);
+	}
+	
 //	void makeKits() {
 //		KitTool.addKit("maker", 
 //				new ItemStack(Material.GLOWSTONE),
@@ -238,14 +302,14 @@ public class Main extends JavaPlugin
 		this.dataManager.save();
 		
 		// 파일 세이브 기다리기
-		try
-		{
-			Thread.sleep(1000 * 5);
-		}
-		catch(InterruptedException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+//		try
+//		{
+//			Thread.sleep(1000 * 5);
+//		}
+//		catch(InterruptedException e)
+//		{
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 	}
 }
