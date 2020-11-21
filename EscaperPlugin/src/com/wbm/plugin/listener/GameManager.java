@@ -229,8 +229,8 @@ public class GameManager implements Listener
 				// 4.next relay 시작
 				this.relayManager.startNextTime();
 
-				// 5.player token +1, clearCount +1
-				int token = PlayerTool.onlinePlayersCount();
+				// 5.player token +, clearCount +1
+				int token = PlayerTool.onlinePlayersCount() / 2;
 				pData.addToken(token);
 				pData.addClearCount(1);
 			}

@@ -106,6 +106,7 @@ public class RelayManager
 		BroadcastTool.sendMessageToEveryone("waitingTime: makingTime starts in "+RelayTime.WAITING.getAmount()+" sec");
 
 		// ranking system(stage) 업데이트
+//		LocalDateTime time = LocalDateTime.now();
 		this.stageManager.updateAllStage();
 		
 		

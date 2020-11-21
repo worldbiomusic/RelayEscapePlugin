@@ -42,7 +42,7 @@ public class RankManager
 		Collections.sort(list, comparator);
 		
 		
-		BroadcastTool.debug(list.toString());
+//		BroadcastTool.debug(list.toString());
 		return list;
 	}
 	
@@ -50,7 +50,7 @@ public class RankManager
 		List<PlayerData> list = new ArrayList<PlayerData>(this.pDataManager.getPlayerData().values());
 		
 		Collections.sort(list, (o1, o2) -> o2.getChallengingCount() - o1.getChallengingCount());
-		BroadcastTool.debug(list.toString());
+//		BroadcastTool.debug(list.toString());
 		
 		return list;
 	}
@@ -59,7 +59,7 @@ public class RankManager
 		List<PlayerData> list = new ArrayList<PlayerData>(this.pDataManager.getPlayerData().values());
 		
 		Collections.sort(list, (o1, o2) -> o2.getClearCount() - o1.getClearCount());
-		BroadcastTool.debug(list.toString());
+//		BroadcastTool.debug(list.toString());
 		
 		return list;
 	}
@@ -83,7 +83,7 @@ public class RankManager
 		};
 		
 		Collections.sort(list, comparator);
-		BroadcastTool.debug(list.toString());
+//		BroadcastTool.debug(list.toString());
 		
 		return list;
 	}

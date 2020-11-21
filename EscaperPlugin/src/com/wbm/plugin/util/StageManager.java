@@ -12,12 +12,15 @@ import com.wbm.plugin.util.general.NPCManager;
 
 public class StageManager
 {
-	Map<String, List<String>> stageNPCs;
-
-	Map<String, List<Location>> stageLocations;
 	/*
 	 * 카테고리(token, 등등)에 맞게 단상에 player npc 를 관리하는 클래스
 	 */
+	
+	// 카테고리별(kind) stage npc
+	Map<String, List<String>> stageNPCs;
+
+	// 카테고리별(kind) stage location 리스트
+	Map<String, List<Location>> stageLocations;
 	
 	RankManager rankManager;
 	NPCManager npcManager;
@@ -85,6 +88,16 @@ public class StageManager
 	{
 		for(String kind : this.stageLocations.keySet()) {
 			this.updateStage(kind);
+		}
+	}
+	
+	public void removeRemainingRankNPCs() {
+		for(String kind : this.stageLocations.keySet()) {
+			if(this.stageNPCs.containsKey(kind)) {
+				for(String npcName : this.stageNPCs.get(kind)) {
+					this.npcManager.delete(npcName);
+				}
+			}
 		}
 	}
 }

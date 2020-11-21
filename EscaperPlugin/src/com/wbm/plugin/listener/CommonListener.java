@@ -41,6 +41,7 @@ import com.wbm.plugin.util.general.SpawnLocationTool;
 import com.wbm.plugin.util.general.TeleportTool;
 import com.wbm.plugin.util.general.shop.ShopGoods;
 import com.wbm.plugin.util.general.shop.ShopManager;
+import com.wbm.plugin.util.general.skin.SkinManager;
 
 public class CommonListener implements Listener
 {
@@ -52,16 +53,19 @@ public class CommonListener implements Listener
 	ShopManager shopManager;
 	BanItemTool banItems;
 	NPCManager npc;
+	SkinManager skinManager;
 	
 	public CommonListener(PlayerDataManager pDataManager,
 			ShopManager shopManager,
 			BanItemTool banItems,
-			NPCManager npc)
+			NPCManager npc,
+			SkinManager skinManager)
 	{
 		this.pDataManager = pDataManager;
 		this.shopManager = shopManager;
 		this.banItems = banItems;
 		this.npc = npc;
+		this.skinManager = skinManager;
 	}
 
 	@EventHandler
@@ -234,9 +238,19 @@ public class CommonListener implements Listener
 	
 	@EventHandler
 	public void onPlayerJoin(PlayerJoinEvent e) {
+		Player p = e.getPlayer();
+		
+		// skin data 다운
+		String pName = p.getName();
+		if(! this.skinManager.doesExist(pName)) {
+			this.skinManager.addPlayerSkinData(pName);
+			BroadcastTool.debug("add skin: " + pName);
+		}
+		
+		// NPC packet
 		if(npc.getNPCs() == null || npc.getNPCs().isEmpty())
 			return;
-		npc.addAllPacketToPlayer(e.getPlayer());
+		npc.sendAllNPCPacketToPlayer(p);
 	}
 	
 	@EventHandler

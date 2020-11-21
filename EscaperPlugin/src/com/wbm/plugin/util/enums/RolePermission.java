@@ -1,4 +1,4 @@
-package com.wbm.plugin.util;
+package com.wbm.plugin.util.enums;
 
 public class RolePermission
 {

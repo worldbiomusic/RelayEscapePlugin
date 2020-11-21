@@ -1,8 +1,6 @@
 package com.wbm.plugin.util.general;
 
-import java.io.InputStreamReader;
 import java.io.Serializable;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -15,11 +13,11 @@ import org.bukkit.craftbukkit.v1_12_R1.CraftWorld;
 import org.bukkit.craftbukkit.v1_12_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.wbm.plugin.util.config.DataMember;
+import com.wbm.plugin.util.general.skin.SkinData;
+import com.wbm.plugin.util.general.skin.SkinManager;
 
 import net.minecraft.server.v1_12_R1.EntityPlayer;
 import net.minecraft.server.v1_12_R1.MinecraftServer;
@@ -101,11 +99,14 @@ public class NPCManager implements DataMember
 	private Map<String, EntityPlayerData> entityPlayerDatas;
 
 	private Map<String, EntityPlayer> NPCs;
+	
+	SkinManager skinManager;
 
-	public NPCManager()
+	public NPCManager(SkinManager skinManager)
 	{
 		this.entityPlayerDatas=new HashMap<String, EntityPlayerData>();
 		this.NPCs=new HashMap<String, EntityPlayer>();
+		this.skinManager = skinManager;
 	}
 
 	public void createNPC(Location loc, String npcName, String skin)
@@ -121,21 +122,30 @@ public class NPCManager implements DataMember
 		EntityPlayer npc=new EntityPlayer(server, world, gameProfile, new PlayerInteractManager(world));
 		npc.setLocation(loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch());
 
-		String[] name=getSkin(skin);
-		if(name==null)
+		SkinData skinData =this.skinManager.getPlayerSkinData(skin);
+		
+		// 잘못된 skin인지 검사
+		if(skinData==null)
 		{
-			BroadcastTool.debug("not exist skin");
+			BroadcastTool.debug(skin + " not exist skin");
 			return;
 		}
-		gameProfile.getProperties().put("textures", new Property("textures", name[0], name[1]));
-
+		BroadcastTool.debug(skin + " skin data===============");
+		String texture = skinData.getTexture();
+		String signature = skinData.getSignature();
+//		BroadcastTool.debug(texture);
+//		BroadcastTool.debug(signature);
+		// gameprofile에 skin적용
+		gameProfile.getProperties().put("textures", new Property("textures", texture, signature));
+		
 		// 현재 접속중인 사람들에게 패킷 전송
-		spreadNPCPacketToEveryone(npc);
+		this.spreadNPCPacketToEveryone(npc);
 
-//		// map에 넣을 데이터 NPCEntityPlayer로 변환해서 저장(EntityPlayer클래스는 serializable이 구현 안되서 저장이 안됨..)
+		// map에 넣을 데이터 NPCEntityPlayer로 변환해서 저장(EntityPlayer클래스는 serializable이 구현 안되서 저장이 안됨..)
 		Location pLoc=loc;
 		EntityPlayerData npcData=new EntityPlayerData(loc.getWorld().getName(), pLoc.getX(), pLoc.getY(), pLoc.getZ(),
-				pLoc.getYaw(), pLoc.getPitch(), skin, name[0], name[1]);
+				pLoc.getYaw(), pLoc.getPitch(), skin, texture, signature);
+		
 		// put to map(entityPlayerDatas)
 		this.entityPlayerDatas.put(npcName, npcData);
 
@@ -170,71 +180,11 @@ public class NPCManager implements DataMember
 		}
 	}
 
-//	public void loadNPC(Location loc, GameProfile profile) {
-//		/*
-//		 * loc = 위치
-//		 * profile = 스킨
-//		 */
-//		MinecraftServer server=((CraftServer)Bukkit.getServer()).getServer();
-//		WorldServer world=((CraftWorld)loc.getWorld()).getHandle();
-//		// gameProfile의 주번째 인자는 name으로 16자가 넘어가면 안됨
-//		// 모든 유저의 GameProfile은 Mojang에 저장되있어서 가져와서 사용가능!(이름, uuid, 스킨 등등 의 정보가 포함되있음)
-//		GameProfile gameProfile = profile;
-//		EntityPlayer npc=new EntityPlayer(server, world, gameProfile, new PlayerInteractManager(world));
-//		npc.setLocation(loc.getX(), loc.getY(), loc.getZ(),
-//				loc.getYaw(), loc.getPitch());
-//
-//		// 현재 접속중인 사람들에게 패킷 전송
-//		addNPCPacket(npc);
-//	}
-
-	private String[] getSkin(String name)
-	{
-		try
-		{
-			URL url=new URL("https://api.mojang.com/users/profiles/minecraft/"+name);
-			InputStreamReader reader=new InputStreamReader(url.openStream());
-			String uuid=new JsonParser().parse(reader).getAsJsonObject().get("id").getAsString();
-
-			URL url2=new URL("https://sessionserver.mojang.com/session/minecraft/profile/"+uuid+"?unsigned=false");
-			InputStreamReader reader2=new InputStreamReader(url2.openStream());
-
-			JsonObject property=new JsonParser().parse(reader2).getAsJsonObject().get("properties").getAsJsonArray()
-					.get(0).getAsJsonObject();
-
-			String texture=property.get("value").getAsString();
-			String signature=property.get("signature").getAsString();
-
-			return new String[]{texture, signature};
-		}
-		catch(Exception e)
-		{
-			/*
-			 * 예외1: 플레이어가 없을때 예외2: 모장사이트에 너무 많은 request할때
-			 */
-			e.printStackTrace();
-
-			// 오류나면 그냥 취소메세지 보내기
-
-//			// 오류나면 그냥 현재 플레이어것으로 처리
-//			EntityPlayer ep = ((CraftPlayer)p).getHandle();
-//			GameProfile profile = ep.getProfile();
-//			Property property = profile.getProperties().get("texture").iterator().next();
-//			
-//			String texture = property.getValue();
-//			String signature = property.getSignature();
-//			
-//			return new String[] {texture, signature};
-
-			return null;
-		}
-	}
-
-	public void spreadAllPacketToEveryone()
+	public void spreadAllNPCToEveryone()
 	{
 		for(Player p : Bukkit.getOnlinePlayers())
 		{
-			this.addAllPacketToPlayer(p);
+			this.sendAllNPCPacketToPlayer(p);
 		}
 	}
 
@@ -250,10 +200,13 @@ public class NPCManager implements DataMember
 					new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, npc));
 			connection.sendPacket(new PacketPlayOutNamedEntitySpawn(npc));
 			connection.sendPacket(new PacketPlayOutEntityHeadRotation(npc, (byte)(npc.yaw*256/360)));
+			// 이거 하면 스킨도 없어짐...
+//			connection.sendPacket(
+//					new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, npc));
 		}
 	}
 
-	public void addAllPacketToPlayer(Player p)
+	public void sendAllNPCPacketToPlayer(Player p)
 	{
 		/*
 		 * 1명 유저에게 모든 NPC 패킷 전송
@@ -265,6 +218,9 @@ public class NPCManager implements DataMember
 					new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, npc));
 			connection.sendPacket(new PacketPlayOutNamedEntitySpawn(npc));
 			connection.sendPacket(new PacketPlayOutEntityHeadRotation(npc, (byte)(npc.yaw*256/360)));
+			// 이거 하면 스킨도 없어짐...
+//			connection.sendPacket(
+//					new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, npc));
 		}
 	}
 
@@ -307,7 +263,7 @@ public class NPCManager implements DataMember
 
 		for(Player p : Bukkit.getOnlinePlayers())
 		{
-			this.addAllPacketToPlayer(p);
+			this.sendAllNPCPacketToPlayer(p);
 		}
 	}
 

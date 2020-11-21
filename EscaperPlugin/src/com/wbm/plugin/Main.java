@@ -21,7 +21,7 @@ import com.wbm.plugin.cmd.Commands;
 import com.wbm.plugin.data.PlayerData;
 import com.wbm.plugin.listener.CommonListener;
 import com.wbm.plugin.listener.GameManager;
-import com.wbm.plugin.util.ItemUsingManager;
+import com.wbm.plugin.listener.ItemUsingManager;
 import com.wbm.plugin.util.PlayerDataManager;
 import com.wbm.plugin.util.RankManager;
 import com.wbm.plugin.util.RelayManager;
@@ -29,12 +29,14 @@ import com.wbm.plugin.util.RoomManager;
 import com.wbm.plugin.util.StageManager;
 import com.wbm.plugin.util.config.ConfigTest;
 import com.wbm.plugin.util.config.DataManager;
+import com.wbm.plugin.util.enums.Role;
 import com.wbm.plugin.util.general.BanItemTool;
 import com.wbm.plugin.util.general.BroadcastTool;
 import com.wbm.plugin.util.general.NPCManager;
 import com.wbm.plugin.util.general.SpawnLocationTool;
 import com.wbm.plugin.util.general.shop.ShopGoods;
 import com.wbm.plugin.util.general.shop.ShopManager;
+import com.wbm.plugin.util.general.skin.SkinManager;
 
 public class Main extends JavaPlugin
 {
@@ -61,6 +63,7 @@ public class Main extends JavaPlugin
 	// Tools
 	SpawnLocationTool respawnManager;
 	BanItemTool banItems;
+	SkinManager skinManager;
 
 	static Main main;
 
@@ -123,8 +126,12 @@ public class Main extends JavaPlugin
 		// kits
 //		this.makeKits();
 		
+		// skindata
+		this.skinManager = new SkinManager();
+
 		// NPC
-		this.npcManager = new NPCManager();
+		this.npcManager = new NPCManager(this.skinManager);
+		
 	}
 
 	void setupMain()
@@ -144,6 +151,9 @@ public class Main extends JavaPlugin
 		this.roomManager=new RoomManager();
 		this.dataManager.registerMember(this.roomManager);
 		this.dataManager.registerMember(this.npcManager);
+		this.dataManager.registerMember(this.skinManager);
+		this.dataManager.distributeData();
+		
 //		// distribute datas (이 메소드는 this.dataManager.registerMember <- 이 메소드들이
 //		// 마지막다음에 바로 실행되어야 함 
 		// -> 그냥 register에 넣어버림
@@ -164,7 +174,7 @@ public class Main extends JavaPlugin
 
 	private void registerListeners()
 	{
-		this.commonListener = new CommonListener(this.pDataManager, this.shopManager, this.banItems, this.npcManager);
+		this.commonListener = new CommonListener(this.pDataManager, this.shopManager, this.banItems, this.npcManager, this.skinManager);
 		
 		this.registerEvent(this.gManager);
 		this.registerEvent(this.commonListener);
@@ -183,6 +193,8 @@ public class Main extends JavaPlugin
 	}
 	
 	public void loopUpdatingScoreboard() {
+		ScoreboardManager manager = Bukkit.getScoreboardManager();
+		Scoreboard board = manager.getNewScoreboard();
 		Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable()
 		{
 			@Override
@@ -190,15 +202,14 @@ public class Main extends JavaPlugin
 			{
 				for(Player p : Bukkit.getOnlinePlayers()) {
 					PlayerData pData = pDataManager.getPlayerData(p.getUniqueId());
+					Role r = pData.getRole();
 					
-					ScoreboardManager manager = Bukkit.getScoreboardManager();
-					Scoreboard board = manager.getNewScoreboard();
-					
+					// ============sidebar============
 					Objective obj = board.registerNewObjective("sidebar", "dummy");
 					obj.setDisplaySlot(DisplaySlot.SIDEBAR);
 					obj.setDisplayName("=====INFO=====");
 					
-					Score role = obj.getScore("Role: " + pData.getRole());
+					Score role = obj.getScore("Role: " + r);
 					role.setScore(10);
 					
 					Score token = obj.getScore("Token: " + pData.getToken());
@@ -210,6 +221,15 @@ public class Main extends JavaPlugin
 					+ "(" + leftTime + ")");
 					relayTime.setScore(8);
 					
+					// ============below name============
+					Objective belowNameObj = board.registerNewObjective("healthNRole", "health");
+					belowNameObj.setDisplaySlot(DisplaySlot.BELOW_NAME);
+					String belowRole = "";
+					if(r == Role.MAKER) {
+						belowRole += "" + ChatColor.RED + ChatColor.BOLD;
+					}
+					belowRole += r.name();
+					belowNameObj.setDisplayName("/"+ pData.getName() +"Role: " + belowRole);
 
 					p.setScoreboard(board);
 					
@@ -261,6 +281,7 @@ public class Main extends JavaPlugin
 		roomLocs.add(new Location(Bukkit.getWorld("world"), 19.5, 5, 5.5, 90, 0));
 		roomLocs.add(new Location(Bukkit.getWorld("world"), 19.5, 4, 7.5, 90, 0));
 		
+		// TODO: delay때문에 일단은1개 stage만 사용
 		this.stageManager.registerLocations("tokenCount", tokenLocs);
 		this.stageManager.registerLocations("challengingCount", challengingLocs);
 		this.stageManager.registerLocations("clearCount", clearLocs);
@@ -291,13 +312,12 @@ public class Main extends JavaPlugin
 	@Override
 	public void onDisable()
 	{
-		// reload대비 처리 (다 나간것으로 처리해서 데이터 save)
-		// 구조 바꿔서 할 필요 없어짐
-//		for(Player p : Bukkit.getOnlinePlayers())
-//		{
-//			this.pDataManager.saveAndRemovePlayerData(p.getUniqueId());
-//		}
-
+		// rank NPC 제거
+		// rank NPC 는 NPC자체가 저장될 필요가 없음
+		// 왜냐하면 각 waitingTime마다 순위에 따라서 NPC가 바뀌므로
+		// StageManager에 위치만 지정해놓고 각 상황에따라 NPC를 삭제하고 불러와야 하므로. 
+		this.stageManager.removeRemainingRankNPCs();
+		
 		// file save
 		this.dataManager.save();
 		
