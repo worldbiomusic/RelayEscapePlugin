@@ -103,11 +103,11 @@ public class RoomManager implements DataMember
 		// Main room
 		Location pos1= null, pos2 = null;
 		if(roomType == RoomType.MAIN) {
-			pos1 = RoomLocation.mainPos1;
-			pos2 = RoomLocation.mainPos2;
+			pos1 = RoomLocation.MAIN_Pos1;
+			pos2 = RoomLocation.MAIN_Pos2;
 		} else if(roomType == RoomType.PRACTICE) {
-			pos1 = RoomLocation.practicePos1;
-			pos2 = RoomLocation.practicePos2;
+			pos1 = RoomLocation.PRACTICE_Pos1;
+			pos2 = RoomLocation.PRACTICE_Pos2;
 		}
 		int pos1X = (int)pos1.getX(); int pos2X = (int)pos2.getX();
 		int pos1Y = (int)pos1.getY(); int pos2Y = (int)pos2.getY();
@@ -202,11 +202,11 @@ public class RoomManager implements DataMember
 		Location pos1 = null, pos2 = null;
 		
 		if(roomType == RoomType.MAIN ) {
-			pos1 = RoomLocation.mainPos1;
-			pos2 = RoomLocation.mainPos2;
+			pos1 = RoomLocation.MAIN_Pos1;
+			pos2 = RoomLocation.MAIN_Pos2;
 		} else if(roomType == RoomType.PRACTICE) {
-			pos1 = RoomLocation.practicePos1;
-			pos2 = RoomLocation.practicePos2;
+			pos1 = RoomLocation.PRACTICE_Pos1;
+			pos2 = RoomLocation.PRACTICE_Pos2;
 		} else {
 			// wrong RoomType
 			BroadcastTool.debug(" bug!!!!!!!!!!!!!!!!!");
@@ -350,6 +350,7 @@ public class RoomManager implements DataMember
 		// register basic rooms
 		this.registerBasicRooms();
 		
+		BroadcastTool.debug("============ROOM DATA===============");
 		// print all room
 		for(Room room : this.roomData.values()) {
 			BroadcastTool.debug(room.toString());

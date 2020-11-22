@@ -22,10 +22,12 @@ import com.wbm.plugin.data.PlayerData;
 import com.wbm.plugin.listener.CommonListener;
 import com.wbm.plugin.listener.GameManager;
 import com.wbm.plugin.listener.ItemUsingManager;
+import com.wbm.plugin.util.MiniGameManager;
 import com.wbm.plugin.util.PlayerDataManager;
 import com.wbm.plugin.util.RankManager;
 import com.wbm.plugin.util.RelayManager;
 import com.wbm.plugin.util.RoomManager;
+import com.wbm.plugin.util.Setting;
 import com.wbm.plugin.util.StageManager;
 import com.wbm.plugin.util.config.ConfigTest;
 import com.wbm.plugin.util.config.DataManager;
@@ -54,6 +56,7 @@ public class Main extends JavaPlugin
 	RankManager rankManager;
 	NPCManager npcManager;
 	StageManager stageManager;
+	MiniGameManager miniGameManager;
 
 	// command executor
 	Commands dCmd;
@@ -112,8 +115,8 @@ public class Main extends JavaPlugin
 		BroadcastTool.setServerNamePrefix("" + ChatColor.RED + ChatColor.BOLD + "[i] " + ChatColor.WHITE);
 		
 		// respawn manager
-		Location loc=new Location(Bukkit.getWorld("world"), 9.5, 4, 5.5, 90, 0);
-		Location lobby=new Location(Bukkit.getWorld("world"), 16, 4, 16, 90, 0);
+		Location loc=Setting.getLoationFromSTDLOC( 9.5, 4, 5.5, 90, 0);
+		Location lobby=Setting.getLoationFromSTDLOC(16, 4, 16, 90, 0);;
 		this.respawnManager=new SpawnLocationTool(loc, loc, lobby);
 		
 		// banItem (후원 banItems는 따로 만들기)
@@ -142,7 +145,6 @@ public class Main extends JavaPlugin
 
 	void setupManagers() throws Exception
 	{
-//		this.ct = new ConfigTest(this.getDataFolder().getPath());
 		this.dataManager=new DataManager(this.getDataFolder().getPath());
 
 		this.pDataManager=new PlayerDataManager(this.ct);
@@ -152,14 +154,12 @@ public class Main extends JavaPlugin
 		this.dataManager.registerMember(this.roomManager);
 		this.dataManager.registerMember(this.npcManager);
 		this.dataManager.registerMember(this.skinManager);
-		this.dataManager.distributeData();
 		
 //		// distribute datas (이 메소드는 this.dataManager.registerMember <- 이 메소드들이
 //		// 마지막다음에 바로 실행되어야 함 
-		// -> 그냥 register에 넣어버림
-//		this.dataManager.distributeData();
+		// -> register안에 넣어버릴까?(인자 추가해서 해당 member만 데이터 받을수 있게)
 
-
+		this.miniGameManager = new MiniGameManager(this.pDataManager);
 		this.rankManager = new RankManager(this.pDataManager, this.roomManager);
 		this.stageManager = new StageManager(this.rankManager, this.npcManager);
 		// setup stages
@@ -174,7 +174,8 @@ public class Main extends JavaPlugin
 
 	private void registerListeners()
 	{
-		this.commonListener = new CommonListener(this.pDataManager, this.shopManager, this.banItems, this.npcManager, this.skinManager);
+		this.commonListener = new CommonListener(this.pDataManager, this.shopManager, 
+				this.banItems, this.npcManager, this.skinManager, this.miniGameManager, this.relayManager);
 		
 		this.registerEvent(this.gManager);
 		this.registerEvent(this.commonListener);
@@ -194,18 +195,18 @@ public class Main extends JavaPlugin
 	
 	public void loopUpdatingScoreboard() {
 		ScoreboardManager manager = Bukkit.getScoreboardManager();
-		Scoreboard board = manager.getNewScoreboard();
 		Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable()
 		{
 			@Override
 			public void run()
 			{
 				for(Player p : Bukkit.getOnlinePlayers()) {
+					Scoreboard board = manager.getNewScoreboard();
 					PlayerData pData = pDataManager.getPlayerData(p.getUniqueId());
 					Role r = pData.getRole();
 					
 					// ============sidebar============
-					Objective obj = board.registerNewObjective("sidebar", "dummy");
+					Objective obj = board.registerNewObjective("side", "dummy");
 					obj.setDisplaySlot(DisplaySlot.SIDEBAR);
 					obj.setDisplayName("=====INFO=====");
 					
@@ -262,26 +263,26 @@ public class Main extends JavaPlugin
 			19.5, 4, 7.5
 		 */
 		List<Location> tokenLocs = new ArrayList<Location>();
-		tokenLocs.add(new Location(Bukkit.getWorld("world"), 12.5, 6, 5.5, -90, 0));
-		tokenLocs.add(new Location(Bukkit.getWorld("world"), 12.5, 5, 6.5, -90, 0));
-		tokenLocs.add(new Location(Bukkit.getWorld("world"), 12.5, 4, 4.5, -90, 0));
+		tokenLocs.add(Setting.getLoationFromSTDLOC(12.5, 6, 5.5, -90, 0));
+		tokenLocs.add(Setting.getLoationFromSTDLOC(12.5, 5, 6.5, -90, 0));
+		tokenLocs.add(Setting.getLoationFromSTDLOC(12.5, 4, 4.5, -90, 0));
 		
 		List<Location> challengingLocs = new ArrayList<Location>();
-		challengingLocs.add(new Location(Bukkit.getWorld("world"), 14.5, 6, 1.5, 0, 0));
-		challengingLocs.add(new Location(Bukkit.getWorld("world"), 13.5, 5, 1.5, 0, 0));
-		challengingLocs.add(new Location(Bukkit.getWorld("world"), 15.5, 4, 1.5, 0, 0));
+		tokenLocs.add(Setting.getLoationFromSTDLOC(14.5, 6, 1.5, 0, 0));
+		tokenLocs.add(Setting.getLoationFromSTDLOC(13.5, 5, 1.5, 0, 0));
+		tokenLocs.add(Setting.getLoationFromSTDLOC(15.5, 4, 1.5, 0, 0));
 
 		List<Location> clearLocs = new ArrayList<Location>();
-		clearLocs.add(new Location(Bukkit.getWorld("world"), 17.5, 6, 1.5, 0, 0));
-		clearLocs.add(new Location(Bukkit.getWorld("world"), 16.5, 5, 1.5, 0, 0));
-		clearLocs.add(new Location(Bukkit.getWorld("world"), 18.5, 4, 1.5, 0, 0));
+		tokenLocs.add(Setting.getLoationFromSTDLOC(17.5, 6, 1.5, 0, 0));
+		tokenLocs.add(Setting.getLoationFromSTDLOC(16.5, 5, 1.5, 0, 0));
+		tokenLocs.add(Setting.getLoationFromSTDLOC(18.5, 4, 1.5, 0, 0));
 		
 		List<Location> roomLocs = new ArrayList<Location>();
-		roomLocs.add(new Location(Bukkit.getWorld("world"), 19.5, 6, 6.5, 90, 0));
-		roomLocs.add(new Location(Bukkit.getWorld("world"), 19.5, 5, 5.5, 90, 0));
-		roomLocs.add(new Location(Bukkit.getWorld("world"), 19.5, 4, 7.5, 90, 0));
+		tokenLocs.add(Setting.getLoationFromSTDLOC(19.5, 6, 6.5, 90, 0));
+		tokenLocs.add(Setting.getLoationFromSTDLOC(19.5, 5, 5.5, 90, 0));
+		tokenLocs.add(Setting.getLoationFromSTDLOC(19.5, 4, 7.5, 90, 0));
 		
-		// TODO: delay때문에 일단은1개 stage만 사용
+		// stage 에 드록
 		this.stageManager.registerLocations("tokenCount", tokenLocs);
 		this.stageManager.registerLocations("challengingCount", challengingLocs);
 		this.stageManager.registerLocations("clearCount", clearLocs);
@@ -320,16 +321,5 @@ public class Main extends JavaPlugin
 		
 		// file save
 		this.dataManager.save();
-		
-		// 파일 세이브 기다리기
-//		try
-//		{
-//			Thread.sleep(1000 * 5);
-//		}
-//		catch(InterruptedException e)
-//		{
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
 	}
 }

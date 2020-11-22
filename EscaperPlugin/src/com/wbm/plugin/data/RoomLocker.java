@@ -9,6 +9,8 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.inventory.ItemStack;
 
+import com.wbm.plugin.util.Setting;
+
 public class RoomLocker
 {
 	public static World w = Bukkit.getWorld("world");
@@ -18,11 +20,11 @@ public class RoomLocker
 	= new ItemStack(Material.CONCRETE);
 	
 	static {
-		mainLocker.add(new Location(w, 9, 5, 11));
-		mainLocker.add(new Location(w, 10, 5, 11));
-		mainLocker.add(new Location(w, 11, 5, 11));
-		mainLocker.add(new Location(w, 11, 5, 10));
-		mainLocker.add(new Location(w, 11, 5, 9));
+		mainLocker.add(Setting.getLoationFromSTDLOC(9, 5, 11));
+		mainLocker.add(Setting.getLoationFromSTDLOC(10, 5, 11));
+		mainLocker.add(Setting.getLoationFromSTDLOC(11, 5, 11));
+		mainLocker.add(Setting.getLoationFromSTDLOC(11, 5, 10));
+		mainLocker.add(Setting.getLoationFromSTDLOC(11, 5, 9));
 	}
 	
 	public static ItemStack air = new ItemStack(Material.AIR);

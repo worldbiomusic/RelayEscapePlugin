@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import com.wbm.plugin.util.enums.GamePermission;
 import com.wbm.plugin.util.enums.Role;
 import com.wbm.plugin.util.general.shop.ShopGoods;
 
@@ -29,6 +30,8 @@ public class PlayerData implements Serializable
 	
 	List<ShopGoods> goods;
 	
+	transient GamePermission gamePermission;
+	
 	public PlayerData(UUID uuid, String name, Role role) {
 		this(uuid, name, role, 0, 0, 0, 0);
 	}
@@ -45,6 +48,8 @@ public class PlayerData implements Serializable
 		this.voted = voted;
 		
 		this.goods = new ArrayList<>();
+		
+		this.gamePermission = null;
 	}
 	
 	public UUID getUUID()
@@ -168,18 +173,29 @@ public class PlayerData implements Serializable
 		return this.goods.contains(goods);
 	}
 	
-	
+	public GamePermission getGamePermission()
+	{
+		return gamePermission;
+	}
+
+	public void setGamePermission(GamePermission gamePermission)
+	{
+		this.gamePermission=gamePermission;
+	}
+
 	@Override
 	public String toString()
 	{
 		return "PlayerData " + 
-				", \nuuid="+this.uuid+
-				", \nname="+this.name+
-				", \ntoken="+this.token+
-				", \nchallengingCount="+this.challengingCount +
-				", \nclearCount="+this.clearCount+
-				", \nvoted="+this.voted + 
-				", \ngoods: " + this.goods;
+				", \nuuid: "+this.uuid+
+				", \nname: "+this.name+
+				", \nrole: "+this.role+
+				", \ntoken: "+this.token+
+				", \nchallengingCount: "+this.challengingCount +
+				", \nclearCount: "+this.clearCount+
+				", \nvoted: "+this.voted + 
+				", \ngoods: " + this.goods + 
+				", \ngamePermission=: " + this.gamePermission;
 	}
 	
 	

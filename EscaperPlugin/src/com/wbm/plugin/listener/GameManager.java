@@ -171,11 +171,37 @@ public class GameManager implements Listener
 		{
 			this.onTesterAndChallengerBreakCore(e);
 			this.onPlayerBreakBlockInMainRoom(e);
-//			this.onPlayerBreakBlockInMainRoom(e);
+		} 
+		else if(RoomLocation.getRoomTypeWithLocation(b.getLocation())==RoomType.PRACTICE)
+		{
+			this.onPlayerBreakBlockInPracticeRoom(e);
 		}
 
 	}
 
+	private void onPlayerBreakBlockInPracticeRoom(BlockBreakEvent e)
+	{
+		Player p = e.getPlayer();
+		PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
+		Role role = pData.getRole();
+		RelayTime time = this.relayManager.getCurrentTime();
+		
+		if(time == RelayTime.MAKING || time == RelayTime.TESTING) {
+			if(role == Role.WAITER) {
+				Block b = e.getBlock();
+				
+				// core 부수면 token: 인원수 / 3 지급
+				if(b.getType() == Material.GLOWSTONE) {
+					int token = Bukkit.getOnlinePlayers().size() / 3;
+					BroadcastTool.sendMessage(p, "you clear practice room");
+					BroadcastTool.sendMessage(p, "token + " + token);
+					
+					// block 사라지게 (1회용)
+					b.setType(Material.AIR);
+				}
+			}
+		}
+	}
 	@EventHandler
 	public void onPlayerPlaceBlock(BlockPlaceEvent e)
 	{
@@ -188,7 +214,6 @@ public class GameManager implements Listener
 		// Main Room 체크
 		if(RoomLocation.getRoomTypeWithLocation(b.getLocation())==RoomType.MAIN)
 		{
-//			this.onPlayerPlaceBlockInMainRoom(e);
 			this.onPlayerPlaceBlockInMainRoom(e);
 		}
 	}

@@ -222,11 +222,34 @@ public class Commands implements CommandExecutor
 				case "allpdata":
 					this.printAllPlayerData(p);
 					break;
+				case "token":
+					return this.token(p, args);
 
 			}
 			return true;
 		}
 		return false;
+	}
+
+	private boolean token(Player p, String[] args)
+	{
+		// re d token set <player> <n>
+		if(args.length != 5) {
+			return false;
+		}
+		
+		String pName = args[3];
+		int token = Integer.parseInt(args[4]);
+		Player targetP = Bukkit.getPlayer(pName);
+		
+		PlayerData pData = this.pDataManager.getPlayerData(targetP.getUniqueId());
+		pData.setToken(token);
+		
+		// info
+		BroadcastTool.sendMessage(p, pName + "token is set to " + token);
+		BroadcastTool.sendMessage(targetP, "your token is set to " + token + " by " + p.getName());
+		
+		return true;
 	}
 
 	private void printPlayerData(Player p)

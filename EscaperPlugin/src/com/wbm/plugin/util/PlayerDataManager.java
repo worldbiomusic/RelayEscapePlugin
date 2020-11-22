@@ -155,10 +155,10 @@ public class PlayerDataManager implements DataMember
 		this.playerData=(Map<UUID, PlayerData>)obj;
 
 		// print console
-		BroadcastTool.debug("==================PlayerData==================");
+		BroadcastTool.debug("==================PLAYER DATA==================");
 		for(PlayerData pData : this.playerData.values())
 		{
-			BroadcastTool.printConsoleMessage(pData.toString());
+			BroadcastTool.debug(pData.toString());
 		}
 	}
 

@@ -1,9 +1,8 @@
 package com.wbm.plugin.data;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.World;
 
+import com.wbm.plugin.util.Setting;
 import com.wbm.plugin.util.enums.RoomType;
 import com.wbm.plugin.util.general.LocationTool;
 import com.wbm.plugin.util.general.MathTool;
@@ -13,26 +12,27 @@ import com.wbm.plugin.util.general.MathTool;
  */
 public class RoomLocation
 {
-	// world
-	private static final World world = Bukkit.getWorld("world");
-	
 	// main
-	public static final Location mainPos1 = new Location(world, 1, 4, 1);
-	public static final Location mainPos2 = new Location(world, 10, 50, 10);
+	public static final Location MAIN_Pos1 = Setting.getLoationFromSTDLOC(1, 4, 1);
+	public static final Location MAIN_Pos2 =Setting.getLoationFromSTDLOC(10, 50, 10);
 	
 	// practice
-	public static final Location practicePos1 = new Location(world, 21, 4, 21);
-	public static final Location practicePos2 = new Location(world, 30, 50, 30);
+	public static final Location PRACTICE_Pos1 = Setting.getLoationFromSTDLOC(21, 4, 21);
+	public static final Location PRACTICE_Pos2 = Setting.getLoationFromSTDLOC(30, 50, 30);
+	
+	// minigame
+	public static final Location MINIGAME_Pos1 = Setting.getLoationFromSTDLOC(1, 4, 21);
+	public static final Location MINIGAME_Pos2 = Setting.getLoationFromSTDLOC(10, 4, 30);
 	
 	public static int getRoomBlockCount(RoomType roomType) {
 		Location pos1 = null, pos2 = null;
 		if(roomType == RoomType.MAIN) {
-			pos1 = RoomLocation.mainPos1;
-			pos2 = RoomLocation.mainPos2;
+			pos1 = MAIN_Pos1;
+			pos2 = MAIN_Pos2;
 		} else if(roomType == RoomType.PRACTICE) {
-			pos1 = RoomLocation.practicePos1;
-			pos2 = RoomLocation.practicePos2;
-		}
+			pos1 = PRACTICE_Pos1;
+			pos2 = PRACTICE_Pos2;
+		} 
 		
 		int dx = MathTool.getDiff((int)pos1.getX(), (int)pos2.getX());
 		int dy = MathTool.getDiff((int)pos1.getY(), (int)pos2.getY());
@@ -44,12 +44,12 @@ public class RoomLocation
 	}
 	
 	public static RoomType getRoomTypeWithLocation(Location loc) {
-		Location target = loc;
-		
-		if(LocationTool.isIn(mainPos1, target, mainPos2)) {
+		if(LocationTool.isIn(MAIN_Pos1, loc, MAIN_Pos2)) {
 			return RoomType.MAIN;
-		} else if(LocationTool.isIn(practicePos1, target, practicePos2)) {
+		} else if(LocationTool.isIn(PRACTICE_Pos1, loc, PRACTICE_Pos2)) {
 			return RoomType.PRACTICE;
+		} else if(LocationTool.isIn(MINIGAME_Pos1, loc, MINIGAME_Pos2)) {
+			return RoomType.MINI_GAME;
 		}
 		
 		return null;

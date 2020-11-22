@@ -11,6 +11,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
@@ -29,8 +30,13 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.util.Vector;
 
 import com.wbm.plugin.Main;
+import com.wbm.plugin.util.MiniGameManager;
 import com.wbm.plugin.util.PlayerDataManager;
+import com.wbm.plugin.util.RelayManager;
+import com.wbm.plugin.util.enums.MiniGame;
+import com.wbm.plugin.util.enums.RelayTime;
 import com.wbm.plugin.util.enums.Role;
+import com.wbm.plugin.util.enums.RoomType;
 import com.wbm.plugin.util.general.BanItemTool;
 import com.wbm.plugin.util.general.BroadcastTool;
 import com.wbm.plugin.util.general.ItemStackTool;
@@ -54,18 +60,24 @@ public class CommonListener implements Listener
 	BanItemTool banItems;
 	NPCManager npc;
 	SkinManager skinManager;
+	MiniGameManager miniGameManager;
+	RelayManager relayManager;
 	
 	public CommonListener(PlayerDataManager pDataManager,
 			ShopManager shopManager,
 			BanItemTool banItems,
 			NPCManager npc,
-			SkinManager skinManager)
+			SkinManager skinManager,
+			MiniGameManager miniGameManager,
+			RelayManager relayManager)
 	{
 		this.pDataManager = pDataManager;
 		this.shopManager = shopManager;
 		this.banItems = banItems;
 		this.npc = npc;
 		this.skinManager = skinManager;
+		this.miniGameManager = miniGameManager;
+		this.relayManager = relayManager;
 	}
 
 	@EventHandler
@@ -155,7 +167,7 @@ public class CommonListener implements Listener
 		Player p = e.getPlayer();
 		Block b = e.getClickedBlock();
 		
-		// core부술때 바로 없어져서 nullpoiter에러 잡기용 if문
+		// 터치한 블럭 없을때 return
 		if(b == null) {
 			return;
 		}
@@ -326,6 +338,56 @@ public class CommonListener implements Listener
 			// 일회성
 			b.setType(Material.DIRT);
 		}
+		
+	}
+	
+	@EventHandler
+	public void onPlayerJoinMiniGame(PlayerInteractEvent e) {
+		Player p = e.getPlayer();
+		Block b = e.getClickedBlock();
+		
+		if(b == null)
+			return;
+		
+		if(b.getType() == Material.SIGN || 
+				b.getType() == Material.SIGN_POST || 
+				b.getType() == Material.WALL_SIGN) {
+			if(e.getAction() == Action.RIGHT_CLICK_BLOCK || 
+					e.getAction() == Action.LEFT_CLICK_BLOCK) {
+				// room, time, role 체크
+				if(this.relayManager.checkRoomAndRelayTimeAndRole(RoomType.MINI_GAME, RelayTime.MAKING, Role.WAITER, p) 
+			|| this.relayManager.checkRoomAndRelayTimeAndRole(RoomType.MINI_GAME, RelayTime.TESTING, Role.WAITER, p)) {
+					Sign sign = (Sign) b.getState();
+					/*
+					 * 0: [MINI_GAME]
+					 * 1: <game title>
+					 * 2: FEE <n> TOKEN
+					 * 3: ---------
+					 */
+					String[] lines = sign.getLines();
+					String minigame = lines[0];
+					String title = lines[1];
+					// string중 2번째것이 숫자이므로
+					int fee = Integer.parseInt(lines[2].split(" ")[1]);
+					
+					// 1
+					if(minigame.equalsIgnoreCase("[MINI_GAME]")) {
+						this.miniGameManager.enterRoom(MiniGame.valueOf(title), fee, p);
+					}
+				}
+			}
+			
+		}
+	}
+	
+	@EventHandler
+	public void onPlayerBreakMiniGameBlock(BlockBreakEvent e) {
+		Player p = e.getPlayer();
+		if(this.relayManager.checkRoomAndRelayTimeAndRole(RoomType.MINI_GAME, RelayTime.MAKING, Role.WAITER, p) 
+				|| this.relayManager.checkRoomAndRelayTimeAndRole(RoomType.MINI_GAME, RelayTime.TESTING, Role.WAITER, p)) {
+			this.miniGameManager.breakBlock(e);
+		}
+		
 		
 	}
 }

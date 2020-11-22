@@ -37,7 +37,7 @@ public class DataManager
 	{
 		this.members.put(member.getDataMemberName(), member);
 //		// 바로 distribute 실행
-//		this.distributeData();
+		this.distributeData(member);
 	}
 
 	public void distributeData()
@@ -55,6 +55,19 @@ public class DataManager
 			{
 				member.installData(loadedData);
 			}
+		}
+	}
+	
+	public void distributeData(DataMember member)
+	{
+		// distribute map data to member
+		// load map data
+		Object loadedData =  this.loadData(member);
+
+		// 없으면 null을 반환하기 때문에 줄 필요가 없음 (member에서는 null처리 안해도 됨, 확실한 데이터가 있을때만 호출되므로)
+		if(loadedData != null)
+		{
+			member.installData(loadedData);
 		}
 	}
 

@@ -130,11 +130,8 @@ public class NPCManager implements DataMember
 			BroadcastTool.debug(skin + " not exist skin");
 			return;
 		}
-		BroadcastTool.debug(skin + " skin data===============");
 		String texture = skinData.getTexture();
 		String signature = skinData.getSignature();
-//		BroadcastTool.debug(texture);
-//		BroadcastTool.debug(signature);
 		// gameprofile에 skin적용
 		gameProfile.getProperties().put("textures", new Property("textures", texture, signature));
 		

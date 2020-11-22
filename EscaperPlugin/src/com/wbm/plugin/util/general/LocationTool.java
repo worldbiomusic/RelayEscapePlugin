@@ -4,6 +4,7 @@ import org.bukkit.Location;
 
 public class LocationTool
 {
+	
 	// 경계포함
 	public static boolean isIn(Location pos1, Location target, Location pos2) {
 		double pos1X = pos1.getX();
