@@ -17,6 +17,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import com.wbm.plugin.data.PlayerData;
 import com.wbm.plugin.data.Room;
 import com.wbm.plugin.data.RoomLocation;
+import com.wbm.plugin.util.MiniGameManager;
 import com.wbm.plugin.util.PlayerDataManager;
 import com.wbm.plugin.util.RelayManager;
 import com.wbm.plugin.util.RoomManager;
@@ -41,12 +42,17 @@ public class GameManager implements Listener
 	RoomManager roomManager;
 	RelayManager relayManager;
 	BanItemTool banItems;
+	MiniGameManager miniGameManager;
 
-	public GameManager(PlayerDataManager pDataManager, RoomManager roomManager, RelayManager relayManager)
+	public GameManager(PlayerDataManager pDataManager, 
+			RoomManager roomManager, 
+			RelayManager relayManager,
+			MiniGameManager miniGameManager)
 	{
 		this.pDataManager=pDataManager;
 		this.roomManager=roomManager;
 		this.relayManager=relayManager;
+		this.miniGameManager = miniGameManager;
 
 		// init
 		this.init();
@@ -152,8 +158,8 @@ public class GameManager implements Listener
 	
 	void giveBasicGoods(Player p) {
 		PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
-		if(!pData.doesHaveGoods(ShopGoods.BLOCKS)) {
-			pData.addGoods(ShopGoods.BLOCKS);
+		if(!pData.doesHaveGoods(ShopGoods.CHEST)) {
+			pData.addGoods(ShopGoods.CHEST);
 		}
 	}
 
@@ -163,7 +169,7 @@ public class GameManager implements Listener
 		// 모든 break event는 여기를 거쳐서 처리됨
 		Block b=e.getBlock();
 
-		// 일단 cancel
+//		// 일단 cancel
 		e.setCancelled(true);
 
 		// Main Room 체크
@@ -175,8 +181,23 @@ public class GameManager implements Listener
 		else if(RoomLocation.getRoomTypeWithLocation(b.getLocation())==RoomType.PRACTICE)
 		{
 			this.onPlayerBreakBlockInPracticeRoom(e);
+		} else if(RoomLocation.getRoomTypeWithLocation(b.getLocation())==RoomType.MINI_GAME) {
+			this.onPlayerBreakBlockInMiniGameRoom(e);
 		}
 
+	}
+	
+	private void onPlayerBreakBlockInMiniGameRoom(BlockBreakEvent e) {
+		Player p = e.getPlayer();
+		PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
+		Role role = pData.getRole();
+		RelayTime time = this.relayManager.getCurrentTime();
+		
+		if(time == RelayTime.MAKING || time == RelayTime.TESTING) {
+			if(role == Role.WAITER) {
+				this.miniGameManager.processBlockEvent(e);
+			}
+		}
 	}
 
 	private void onPlayerBreakBlockInPracticeRoom(BlockBreakEvent e)
@@ -272,7 +293,6 @@ public class GameManager implements Listener
 				this.relayManager.startNextTime();
 			}
 		}
-
 	}
 
 
@@ -281,6 +301,7 @@ public class GameManager implements Listener
 	{
 		Block core=e.getBlock();
 		RelayTime time=this.relayManager.getCurrentTime();
+		
 		// making time
 		if(time==RelayTime.MAKING)
 		{

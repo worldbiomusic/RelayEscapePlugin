@@ -18,8 +18,15 @@ public class ShopManager
 	public ShopManager(PlayerDataManager pDataManager) {
 		this.pDataManager = pDataManager;
 	}
-	public void purchase(Player p, String goods, int cost) {
+	public void purchase(Player p, String goodsString, int cost) {
 		PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
+		ShopGoods goods = ShopGoods.valueOf(goodsString);
+		
+		// 중복(duplicate) check
+		if(pData.doesHaveGoods(goods)) {
+			BroadcastTool.sendMessage(p, "You already have " + goods.name());
+			return;
+		}
 		
 		// check cost
 		if(pData.getToken() < cost) {
@@ -27,13 +34,9 @@ public class ShopManager
 			return;
 		}
 		
-		// TODO: check duplicate goods
-//		if(false) {
-//		}
-		
 		// give goods
 		for(ShopGoods g : ShopGoods.values()) {
-			if(goods.equals(g.name())) {
+			if(goods.equals(g)) {
 				// add to inventory
 //				p.getInventory().addItem(g.getGoods());
 				// set goods data to PlayerData

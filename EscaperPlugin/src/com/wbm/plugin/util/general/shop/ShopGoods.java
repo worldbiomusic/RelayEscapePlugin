@@ -31,7 +31,7 @@ public enum ShopGoods
 	TRAP(ItemStackTool.item(Material.STAINED_GLASS, 1, (short)1, (byte)2, "TRAP", "random trap event block")),
 	FLICKING(ItemStackTool.item(Material.STAINED_GLASS, 1, (short)1, (byte)3, "FLICKING", "flicking event block")),
 	SOUND_TERROR(ItemStackTool.item(Material.STAINED_GLASS, 1, (short)1, (byte)4, "SOUND_TERROR", "sound terror event block")),
-	TERRORIST(ItemStackTool.item(Material.STAINED_GLASS, 1, (short)1, (byte)5, "TERRORIST", "terror to all player event block")),
+	HURT(ItemStackTool.item(Material.STAINED_GLASS, 1, (short)1, (byte)5, "HURT", "hurt payer")),
 	
 	
 	// makingTool
@@ -39,7 +39,7 @@ public enum ShopGoods
 	ROOM_MANAGER(ItemStackTool.item(Material.BOOK, "ROOM_MANAGER", "can load room which you made before")),
 	UNDER_BLOCK(ItemStackTool.item(Material.STICK, "UNDER_BLOCK", "create stone under your foot")),
 	SPAWN(ItemStackTool.item(Material.WOOD_DOOR, "SPAWN", "teleport to spawn")),
-	BLOCKS(ItemStackTool.item(Material.CHEST, "BLOCKS", "open inventory which has blocks you can use")),
+	CHEST(ItemStackTool.item(Material.CHEST, "CHEST", "open inventory which has blocks you can use")),
 	
 	// challengerTool
 	HALF_TIME(ItemStackTool.item(Material.WATCH, "HALF_TIME", "delete half of challenging time")),
@@ -98,7 +98,7 @@ public enum ShopGoods
 		goods.add(ShopGoods.ROOM_MANAGER);
 		goods.add(ShopGoods.UNDER_BLOCK);
 		goods.add(ShopGoods.SPAWN);
-		goods.add(ShopGoods.BLOCKS);
+		goods.add(ShopGoods.CHEST);
 		return goods;
 	}
 	
@@ -129,9 +129,14 @@ public enum ShopGoods
 		blocks.add(ShopGoods.TRAP);
 		blocks.add(ShopGoods.FLICKING);
 		blocks.add(ShopGoods.SOUND_TERROR);
-		blocks.add(ShopGoods.TERRORIST);
+		blocks.add(ShopGoods.HURT);
 		
 		return blocks;
+	}
+	
+	public boolean equals(ShopGoods other)
+	{
+		return this.name().equals(other.name());
 	}
 }
 

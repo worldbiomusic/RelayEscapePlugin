@@ -113,7 +113,13 @@ public class Commands implements CommandExecutor
 		}
 		String title=args[2];
 		Room room=this.roomManager.getRoomData(title);
-
+		
+		// 없는 room일경우 반환
+		if(room == null) {
+			BroadcastTool.sendMessage(p, title+" room is not exist");
+			return true;
+		}
+		
 		// room maker가 아닐시 반환
 		if(!room.getMaker().equals(p.getName()))
 		{

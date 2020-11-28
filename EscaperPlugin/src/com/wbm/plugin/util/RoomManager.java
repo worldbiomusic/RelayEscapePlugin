@@ -253,7 +253,6 @@ public class RoomManager implements DataMember
 				}
 			}
 		}
-
 	}
 	
 	void fillBlocks(List<Location> locs, ItemStack item) {

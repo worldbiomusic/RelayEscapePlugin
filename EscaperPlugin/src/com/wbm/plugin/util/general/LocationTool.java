@@ -56,4 +56,36 @@ public class LocationTool
 		
 		return false;
 	}
+	
+	public static int getAreaBlockCount(Location loc1, Location loc2) {
+		int dx = MathTool.getDiff((int)loc1.getX(), (int)loc2.getX());
+		int dy = MathTool.getDiff((int)loc1.getY(), (int)loc2.getY());
+		int dz = MathTool.getDiff((int)loc1.getZ(), (int)loc2.getZ());
+		
+		// +1하는 이유: 만약 (1,1) ~ (3,3) 면적의 블럭을 지정하면 총 9개의 블럭을 가리키는것인데
+		// 위에서 dx, dy, dz를 구할때 차이를 구하므로 3-1 = 2 즉 2칸만을 의미하게 되서 +1을 해줌
+		return (dx+1) * (dy+1) * (dz+1);
+	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

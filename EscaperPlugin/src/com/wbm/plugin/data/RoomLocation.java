@@ -22,7 +22,7 @@ public class RoomLocation
 	
 	// minigame
 	public static final Location MINIGAME_Pos1 = Setting.getLoationFromSTDLOC(1, 4, 21);
-	public static final Location MINIGAME_Pos2 = Setting.getLoationFromSTDLOC(10, 4, 30);
+	public static final Location MINIGAME_Pos2 = Setting.getLoationFromSTDLOC(10, 50, 30);
 	
 	public static int getRoomBlockCount(RoomType roomType) {
 		Location pos1 = null, pos2 = null;
@@ -32,15 +32,9 @@ public class RoomLocation
 		} else if(roomType == RoomType.PRACTICE) {
 			pos1 = PRACTICE_Pos1;
 			pos2 = PRACTICE_Pos2;
-		} 
+		}
 		
-		int dx = MathTool.getDiff((int)pos1.getX(), (int)pos2.getX());
-		int dy = MathTool.getDiff((int)pos1.getY(), (int)pos2.getY());
-		int dz = MathTool.getDiff((int)pos1.getZ(), (int)pos2.getZ());
-		
-		// +1하는 이유: 만약 (1,1) ~ (3,3) 면적의 블럭을 지정하면 총 9개의 블럭을 가리키는것인데
-		// 위에서 dx, dy, dz를 구할때 차이를 구하므로 3-1 = 2 즉 2칸만을 의미하게 되서 +1을 해줌
-		return (dx+1) * (dy+1) * (dz+1);
+		return LocationTool.getAreaBlockCount(pos1, pos2);
 	}
 	
 	public static RoomType getRoomTypeWithLocation(Location loc) {

@@ -166,7 +166,7 @@ public class Main extends JavaPlugin
 		this.setupStages();
 		
 		this.relayManager=new RelayManager(this.pDataManager, this.roomManager, this.stageManager);
-		this.gManager=new GameManager(this.pDataManager, this.roomManager, this.relayManager);
+		this.gManager=new GameManager(this.pDataManager, this.roomManager, this.relayManager, this.miniGameManager);
 		this.itemUsingManager = new ItemUsingManager(this.pDataManager, this.roomManager, this.relayManager);
 		this.shopManager = new ShopManager(this.pDataManager);
 		

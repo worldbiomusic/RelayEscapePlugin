@@ -5,6 +5,5 @@ public enum RoomType
 	MAIN,
 	PRACTICE,
 	MINI_GAME,
-	PVP,
 	FUN;
 }

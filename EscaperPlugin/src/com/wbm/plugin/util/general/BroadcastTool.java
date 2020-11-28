@@ -46,7 +46,7 @@ public class BroadcastTool
 	// sendTitle
 	public static void sendTitle(Player p, String title, String subTitle)
 	{
-		p.sendTitle(title, subTitle, 1, 3, 1);
+		p.sendTitle(title, subTitle, 20 * 1, 20 * 3, 20 * 1);
 	}
 
 	public static void sendTitle(Player p, String title, String subTitle, int fadeIn, int stay, int fadeOut)
@@ -58,7 +58,7 @@ public class BroadcastTool
 	{
 		for(Player p : Bukkit.getOnlinePlayers())
 		{
-			p.sendTitle(title, subTitle, 1, 3, 1);
+			p.sendTitle(title, subTitle, 20 * 1, 20 * 3, 20 * 1);
 		}
 	}
 

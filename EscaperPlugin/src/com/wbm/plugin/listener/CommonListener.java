@@ -11,7 +11,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
-import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
@@ -33,7 +32,7 @@ import com.wbm.plugin.Main;
 import com.wbm.plugin.util.MiniGameManager;
 import com.wbm.plugin.util.PlayerDataManager;
 import com.wbm.plugin.util.RelayManager;
-import com.wbm.plugin.util.enums.MiniGame;
+import com.wbm.plugin.util.enums.MiniGameType;
 import com.wbm.plugin.util.enums.RelayTime;
 import com.wbm.plugin.util.enums.Role;
 import com.wbm.plugin.util.enums.RoomType;
@@ -42,7 +41,6 @@ import com.wbm.plugin.util.general.BroadcastTool;
 import com.wbm.plugin.util.general.ItemStackTool;
 import com.wbm.plugin.util.general.NPCManager;
 import com.wbm.plugin.util.general.PotionEffectTool;
-import com.wbm.plugin.util.general.SoundTool;
 import com.wbm.plugin.util.general.SpawnLocationTool;
 import com.wbm.plugin.util.general.TeleportTool;
 import com.wbm.plugin.util.general.shop.ShopGoods;
@@ -217,12 +215,12 @@ public class CommonListener implements Listener
 	public void onPlayerOpenIventoryWhenMaker(InventoryCreativeEvent e) {
 		Player p = (Player) e.getWhoClicked();
 		String invTitle= e.getInventory().getTitle();
-		p.sendMessage("invTitle: " +invTitle);
+		BroadcastTool.debug("invTitle: " +invTitle);
 		
 		Role role = this.pDataManager.getPlayerData(p.getUniqueId()).getRole();
-		if(role == Role.MAKER) {
-			if(!invTitle.equals(ShopGoods.BLOCKS.name())) {
-				p.sendMessage("only BLOCKS inv is OK");
+		if(role == Role.MAKER || role == Role.VIEWER) {
+			if(!invTitle.equals(ShopGoods.CHEST.name())) {
+				BroadcastTool.debug("only " + ShopGoods.CHEST.name() + " inventory is allowed");
 				e.setCancelled(true);
 			}
 		}
@@ -323,20 +321,9 @@ public class CommonListener implements Listener
 //			p.sendMessage("RESPAWN");
 			p.playSound(p.getLocation(), Sound.ENTITY_ZOMBIE_AMBIENT, 10, 1);
 		}
-		else if(ItemStackTool.isSameWithMaterialNData(ItemStackTool.block2ItemStack(b), ShopGoods.TERRORIST.getGoods())) {
-//			p.sendMessage("RESPAWN");
-			int r = (int)(Math.random() * 3);
-			if(r==1) {
-				TeleportTool.allTpToLocation(SpawnLocationTool.respawnLocation);
-			} else if(r==2) {
-				PotionEffect effect = PotionEffectTool.getRandomDebuffPotionEffect();
-				PotionEffectTool.addPotionEffectToAll(effect);
-			} else if(r==3) {
-				SoundTool.playSound(p, Sound.ENTITY_ZOMBIE_AMBIENT);
-			}
-			
-			// 일회성
-			b.setType(Material.DIRT);
+		else if(ItemStackTool.isSameWithMaterialNData(ItemStackTool.block2ItemStack(b), ShopGoods.HURT.getGoods())) {
+//			p.sendMessage("HURT");
+			p.setHealth(p.getHealth() - 1);
 		}
 		
 	}
@@ -372,7 +359,7 @@ public class CommonListener implements Listener
 					
 					// 1
 					if(minigame.equalsIgnoreCase("[MINI_GAME]")) {
-						this.miniGameManager.enterRoom(MiniGame.valueOf(title), fee, p);
+						this.miniGameManager.enterRoom(MiniGameType.valueOf(title), fee, p);
 					}
 				}
 			}
@@ -380,16 +367,13 @@ public class CommonListener implements Listener
 		}
 	}
 	
-	@EventHandler
-	public void onPlayerBreakMiniGameBlock(BlockBreakEvent e) {
-		Player p = e.getPlayer();
-		if(this.relayManager.checkRoomAndRelayTimeAndRole(RoomType.MINI_GAME, RelayTime.MAKING, Role.WAITER, p) 
-				|| this.relayManager.checkRoomAndRelayTimeAndRole(RoomType.MINI_GAME, RelayTime.TESTING, Role.WAITER, p)) {
-			this.miniGameManager.breakBlock(e);
-		}
-		
-		
-	}
+//	@EventHandler
+//	public void onPlayerInteractWithMiniGameBlock(PlayerInteractEvent e) {
+//		Player p = e.getPlayer();
+//		p.sendMessage("interact minigame block");
+//		
+//		this.miniGameManager.processBlockEvent(e);
+//	}
 }
 
 

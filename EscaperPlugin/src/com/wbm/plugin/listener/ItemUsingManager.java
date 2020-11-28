@@ -16,6 +16,7 @@ import com.wbm.plugin.util.PlayerDataManager;
 import com.wbm.plugin.util.RelayManager;
 import com.wbm.plugin.util.RoomManager;
 import com.wbm.plugin.util.general.BroadcastTool;
+import com.wbm.plugin.util.general.InventoryTool;
 import com.wbm.plugin.util.general.ItemStackTool;
 import com.wbm.plugin.util.general.SpawnLocationTool;
 import com.wbm.plugin.util.general.shop.ShopGoods;
@@ -93,12 +94,12 @@ public class ItemUsingManager implements Listener
 			this.relayManager.reduceTime(reductionTime);
 			
 			// 사용한후에 삭제
-			p.getInventory().remove(goods.getGoods());
+			InventoryTool.removeItemFromPlayer(p, goods.getGoods());
 			
 			BroadcastTool.sendMessageToEveryone(reductionTime + " sec reduced by " + p.getName());
-		} else if(goods == ShopGoods.BLOCKS) {
+		} else if(goods == ShopGoods.CHEST) {
 			// makingBlock들을 담고 있는 인벤토리 오픈
-			Inventory inv = Bukkit.createInventory(null, 54, ShopGoods.BLOCKS.name());
+			Inventory inv = Bukkit.createInventory(null, 54, ShopGoods.CHEST.name());
 			
 			// 기본 MakingBlock제공
 			inv.addItem(ShopGoods.GLOWSTONE.getGoods());

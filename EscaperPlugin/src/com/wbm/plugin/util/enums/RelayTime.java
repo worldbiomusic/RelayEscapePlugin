@@ -2,10 +2,15 @@ package com.wbm.plugin.util.enums;
 
 public enum RelayTime
 {
-	MAKING(10 * 2),
-	TESTING(5 * 2),
+//	MAKING(10 * 2),
+//	TESTING(5 * 2),
+//	CHALLENGING(30),
+//	WAITING(5 * 2);
+	
+	MAKING(60),
+	TESTING(60),
 	CHALLENGING(30),
-	WAITING(5 * 2);
+	WAITING(10);
 	
 	private int time;
 	
