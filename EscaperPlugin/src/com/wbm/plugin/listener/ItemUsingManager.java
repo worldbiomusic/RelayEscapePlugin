@@ -83,7 +83,7 @@ public class ItemUsingManager implements Listener
 			p.getWorld().getBlockAt(loc).setType(Material.STONE);
 		} else if(goods == ShopGoods.SPAWN) {
 			// spawn
-			p.teleport(SpawnLocationTool.respawnLocation);
+			p.teleport(SpawnLocationTool.RESPAWN);
 		} else if(goods == ShopGoods.ROOM_MANAGER) {
 			// room list출력
 			this.roomManager.printRoomList(p);

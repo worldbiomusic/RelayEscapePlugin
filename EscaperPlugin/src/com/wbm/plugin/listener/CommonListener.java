@@ -157,7 +157,7 @@ public class CommonListener implements Listener
 	
 	@EventHandler
 	public void onPlayerRespawn(PlayerRespawnEvent e) {
-		e.setRespawnLocation(SpawnLocationTool.respawnLocation);
+		e.setRespawnLocation(SpawnLocationTool.RESPAWN);
 	}
 	
 	@EventHandler
@@ -247,7 +247,7 @@ public class CommonListener implements Listener
 	}
 	
 	@EventHandler
-	public void onPlayerJoin(PlayerJoinEvent e) {
+	public void onPlayerJoinsaveSkin(PlayerJoinEvent e) {
 		Player p = e.getPlayer();
 		
 		// skin data 다운
@@ -274,7 +274,7 @@ public class CommonListener implements Listener
 		}
 		else if(ItemStackTool.isSameWithMaterialNData(ItemStackTool.block2ItemStack(b), ShopGoods.RESPAWN.getGoods())) {
 //			p.sendMessage("RESPAWN");
-			TeleportTool.tp(p, SpawnLocationTool.respawnLocation);
+			TeleportTool.tp(p, SpawnLocationTool.RESPAWN);
 		}
 		else if(ItemStackTool.isSameWithMaterialNData(ItemStackTool.block2ItemStack(b), ShopGoods.TRAP.getGoods())) {
 //			p.sendMessage("TRAP");

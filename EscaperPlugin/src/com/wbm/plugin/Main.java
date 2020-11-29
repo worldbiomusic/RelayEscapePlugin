@@ -148,18 +148,20 @@ public class Main extends JavaPlugin
 		this.dataManager=new DataManager(this.getDataFolder().getPath());
 
 		this.pDataManager=new PlayerDataManager(this.ct);
+		this.miniGameManager = new MiniGameManager(this.pDataManager);
 		this.dataManager.registerMember(this.pDataManager);
 
 		this.roomManager=new RoomManager();
 		this.dataManager.registerMember(this.roomManager);
 		this.dataManager.registerMember(this.npcManager);
 		this.dataManager.registerMember(this.skinManager);
+		this.dataManager.registerMember(this.miniGameManager);
 		
 //		// distribute datas (이 메소드는 this.dataManager.registerMember <- 이 메소드들이
 //		// 마지막다음에 바로 실행되어야 함 
 		// -> register안에 넣어버릴까?(인자 추가해서 해당 member만 데이터 받을수 있게)
 
-		this.miniGameManager = new MiniGameManager(this.pDataManager);
+		
 		this.rankManager = new RankManager(this.pDataManager, this.roomManager);
 		this.stageManager = new StageManager(this.rankManager, this.npcManager);
 		// setup stages

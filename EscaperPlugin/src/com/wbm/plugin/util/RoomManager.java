@@ -36,7 +36,7 @@ public class RoomManager implements DataMember
 	// title, room
 	Map<String, Room> roomData;
 	
-	// MainRoom, PracticeRoom
+	// 현재 roomType에 맞는 실제 room data
 	Map<RoomType, Room> rooms;
 	
 	private double durationTime;

@@ -14,8 +14,11 @@ public class DataManager
  * 여러개 클래스의 java Serializable로 Object read/write해주는 클래스 여기서 사용되는 클래스들은
  * Serializable을 구현해야 함!
  * 
- * [고민중] 각 member마다 각 파일 저장 vs 한파일에 모든 멤버 map으로 저장 -> 각 파일 저장: 파일이 커지면 IO시간이 너무
- * 오래걸릴수 이씀
+ * [고민중] 각 member마다 각 파일 저장 vs 한파일에 모든 멤버 map으로 저장 
+ * [결론] 각 파일 저장: 한개의 파일이 커지면 IO시간이 너무 오래걸릴수 있음
+ * 
+ * [고민중] save할때 굳이 다시 데이터를 회수할 필요가 잇나? 객체가 ram에 등록되고 나눠줘서 DataMember에서
+ * 관리되면 레퍼런스가 아직 끊기지 않으니까 그냥 데이터 저장하면 되지 않나?
  */
 {
 	File baseDir;

@@ -150,7 +150,14 @@ public class GameManager implements Listener
 	
 	public void TODOListWhenplayerJoinServer(Player p) {
 		this.processPlayerData(p);
-		p.teleport(SpawnLocationTool.joinLocation);
+		
+		// time에 따라서 spawn위치 바꾸기
+		if(this.relayManager.getCurrentTime() == RelayTime.MAKING ||
+				this.relayManager.getCurrentTime() == RelayTime.TESTING) {
+			p.teleport(SpawnLocationTool.LOBBY);
+		} else { // Waiting, Challenging
+			p.teleport(SpawnLocationTool.JOIN);
+		}
 		InventoryTool.clearPlayerInv(p);
 		// 기본 굿즈 제공
 		this.giveBasicGoods(p);

@@ -1,5 +1,14 @@
 package com.wbm.plugin.util.minigame;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
@@ -14,21 +23,34 @@ import com.wbm.plugin.util.general.TeleportTool;
 
 import net.md_5.bungee.api.ChatColor;
 
-public abstract class MiniGame
+public abstract class MiniGame implements Serializable
 {
+	private static final long serialVersionUID=1L;
 	/*
 	 * 모든 미니게임은 이 클래스를 상속받아서 만들어져야 함
 	 * 
 	 * 튜닝할 수 있는 것
 	 * -게임 아이템 추가: runTaskAfterStartGame() 메소드 오버라이딩하면 시작시 실행해줌
+	 * 
+	 * [주의]
+	 * timeLimit, gameType, rankData는 파일로 저장되야되서 transient 선언안함
+	 * 
+	 * [미니게임 추가하는법]
+	 * 1.MiniGame클래스를 상속하는 클래스를 하나 만들고 필요한 메소드를 다 오바라이딩해서 구현한다
+	 * 2.MiniGameManager의 생성자에서 "allGame.add(new FindTheRed())" 처럼 등록한다
+	 * (이유: 처음에 미니게임 데이터가 없는것을 초기화해서 파일저장하려고, 나중에 파일에 저장되면 데이터 불러올때 저장된것으로 대체가 됨 = 처음에 한번 초기화를 위해서 필요한 코드)
 	 */
-	private Player player;
-	private boolean inUse;
-	private int score;
+	transient private Player player;
+	transient private boolean inUse;
+	transient private int score;
 	private int timeLimit;
 	private MiniGameType gameType;
 	
-	private int waitingTime;
+	// 파일에 저장시킬 필요 없는데 값은 기본값인 0이 아니어서 여기서 static 할당 
+	transient private static int waitingTime = 5;
+	
+	// 각 미니게임의 랭크데이터 관리 변수
+	private Map<String, Integer> rankData;
 	
 	public MiniGame(MiniGameType gameType, int timeLimit) {
 		this.player = null;
@@ -36,7 +58,8 @@ public abstract class MiniGame
 		this.score = 0;
 		this.timeLimit = timeLimit;
 		this.gameType = gameType;
-		this.waitingTime = 5;
+		
+		this.rankData = new HashMap<>();
 	}
 	
 	public void initGame() {
@@ -82,24 +105,32 @@ public abstract class MiniGame
 			}
 		}, 20 * (this.waitingTime + this.timeLimit));
 		
-		
+		// print all rank
+		this.printAllRank();
 	}
 	
 	public void exitGame() {
 		/*
 		 * player 퇴장 (lobby로)
 		 * inventory 초기화
+		 * score rank 처리
 		 * score 공개
 		 * 순위 공개
 		 * 초기화
 		 */
 		
 		// player lobby로 tp
-		TeleportTool.tp(this.player, SpawnLocationTool.lobby);
+		TeleportTool.tp(this.player, SpawnLocationTool.LOBBY);
 		
 		
 		// inventory 초기화
 		InventoryTool.clearPlayerInv(this.player);
+		
+		// score rank 처리
+		this.updatePlayerRankData();
+		
+		// print all rank data
+		this.printAllRank();
 		
 		// score 공개
 		BroadcastTool.sendMessage(this.player, "=================================");
@@ -161,6 +192,119 @@ public abstract class MiniGame
 	public int getGameBlockCount() {
 		return MiniGameLocation.getGameBlockCount(this.gameType);
 	}
+	
+	
+	
+	
+	
+	// RANK SYSTEM METHOD ============================================
+	
+	
+	// <name, score>: score기준 내림차순 정렬
+	public List<Entry<String, Integer>> getSortedMapEntry() {
+		List<Entry<String, Integer>> list = new ArrayList<>(this.rankData.entrySet());
+		
+		Collections.sort(list, new Comparator<Entry<String, Integer>>() {
+
+			@Override
+			public int compare(Entry<String, Integer> o1, Entry<String, Integer> o2)
+			{
+				return o2.getValue() - o1.getValue();
+			}
+			
+		});
+		
+		return list;
+	}
+	
+	public String getRankPlayer(int n) {
+		int index = 0;
+		for(Entry<String, Integer> entry : this.getSortedMapEntry()) {
+			if(index == n-1) {
+				return entry.getKey();
+			}
+			index++;
+		}
+		
+		return null;
+	}
+	public int getScore(Player p) {
+		if(this.isExist(p)) {
+			return this.rankData.get(p.getName());
+		} else {
+			BroadcastTool.reportBug("player rank data is not exist");
+			return -99999999;
+		}
+	}
+	
+	public int getRank(Player p) {
+		// TODO: 구현하기
+		return -1;
+	}
+	
+	public int getQuartileScore(int n) {
+		// TODO: 구현하기
+		return -1;
+	}
+	
+	public void printAllRank() {
+		BroadcastTool.sendMessage(this.player, "==========All Rank==========");
+		for(Entry<String, Integer> entry : this.getSortedMapEntry()) {
+			BroadcastTool.sendMessage(this.player, entry.getKey() + ": " + entry.getValue());
+		}
+	}
+	
+	
+	public boolean isExist(Player p) {
+		return this.rankData.containsKey(p.getName());
+	}
+	
+	public void updatePlayerRankData() {
+		/*
+		 * 이번게임에 달성한 스코어가 더 크면 업데이트하기
+		 */
+		if(this.isNewRecordScore()) {
+			this.rankData.put(this.player.getName(),  this.score);
+		}
+	}
+	
+	public boolean isNewRecordScore() {
+		if(this.isExist(this.player)) {
+			int previousScore = this.getScore(this.player);
+			
+			//이번게임에 달성한 스코어가 더 크면 true
+			return this.score > previousScore;
+		} else {
+			// 처음 도전한것이므로 newRecordScore 임
+			return true;
+		}
+		
+	}
+	
+	private Player getHighScorePlayer(Player target, Player other) {
+		// 두 player의 score를 비교하는것
+		if(this.isExist(target) && this.isExist(other)) {
+			int diff = this.getScore(target) - this.getScore(other);  
+			if(diff == 0) { 
+				// 같을때 null반환
+				return null;
+			}else if(diff > 0) {
+				return target;
+			} else { // diff < 0
+				return other;
+			}
+		} else {
+			BroadcastTool.reportBug("cannot compare not exist player");
+			return null;
+		}
+	}
+	
+	
+	
+	
+	
+	
+	// GETTER, SETTER =============================================
 
 	public Player getPlayer()
 	{

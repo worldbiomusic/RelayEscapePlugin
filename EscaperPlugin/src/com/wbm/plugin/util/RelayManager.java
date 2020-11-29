@@ -139,7 +139,7 @@ public class RelayManager
 		this.giveGoodsToPlayer(this.getMaker());
 		
 		// teleport
-		TeleportTool.tp(this.getMaker(), SpawnLocationTool.joinLocation);
+		TeleportTool.tp(this.getMaker(), SpawnLocationTool.JOIN);
 		
 		// room title 을 "maker이름 + n"으로 설정
 		this.roomTitle = this.roomManager.getNextTitleWithMakerName(this.getMaker().getName());
@@ -152,7 +152,7 @@ public class RelayManager
 			// Goods제공 (role변경후 호출되야함)
 			this.giveGoodsToPlayer(p);
 			// teleport
-			TeleportTool.tp(p, SpawnLocationTool.lobby);
+			TeleportTool.tp(p, SpawnLocationTool.LOBBY);
 		}
 
 		// message 관리
@@ -194,7 +194,7 @@ public class RelayManager
 		// Goods제공 (role변경후 호출되야함)
 		giveGoodsToPlayer(this.getMaker());
 		// teleport
-		TeleportTool.tp(this.getMaker(), SpawnLocationTool.joinLocation);
+		TeleportTool.tp(this.getMaker(), SpawnLocationTool.JOIN);
 				
 		
 		// maker제외한 challenger(waiter) 관리
@@ -240,7 +240,7 @@ public class RelayManager
 			// Goods제공 (role변경후 호출되야함)
 			this.giveGoodsToPlayer(this.getMaker());
 			// teleport
-			TeleportTool.tp(this.getMaker(), SpawnLocationTool.joinLocation);
+			TeleportTool.tp(this.getMaker(), SpawnLocationTool.JOIN);
 			
 		}
 		
@@ -259,7 +259,7 @@ public class RelayManager
 			giveGoodsToPlayer(p);
 			
 			// teleport
-			TeleportTool.tp(p, SpawnLocationTool.joinLocation);
+			TeleportTool.tp(p, SpawnLocationTool.JOIN);
 			
 			// heal
 			PlayerTool.heal(p);
@@ -269,7 +269,7 @@ public class RelayManager
 		// 모두 respawn으로 tp
 		List<Player> maker = new ArrayList<>();
 		maker.add(this.getMaker());
-		TeleportTool.allTpToLocationWithoutThem(SpawnLocationTool.respawnLocation, maker);
+		TeleportTool.allTpToLocationWithoutThem(SpawnLocationTool.RESPAWN, maker);
 		
 
 		// message 관리 

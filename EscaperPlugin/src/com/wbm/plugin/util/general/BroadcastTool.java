@@ -85,6 +85,11 @@ public class BroadcastTool
 	public static void debug(String msg) {
 		Bukkit.getConsoleSender().sendMessage("" + ChatColor.BOLD + ChatColor.RED + "[Debug] " + msg);
 	}
+
+	public static void reportBug(String msg)
+	{
+		Bukkit.getConsoleSender().sendMessage("" + ChatColor.BOLD + ChatColor.RED + "[Bug] " + msg);
+	}
 	
 	
 }

@@ -9,8 +9,8 @@ public enum RelayTime
 	
 	MAKING(60),
 	TESTING(60),
-	CHALLENGING(30),
-	WAITING(10);
+	CHALLENGING(60),
+	WAITING(5);
 	
 	private int time;
 	

@@ -33,6 +33,7 @@ public class RankManager
 			@Override
 			public int compare(PlayerData o1, PlayerData o2)
 			{
+				// descending (내림차순)
 				return o2.getToken() - o1.getToken(); 
 			}
 			

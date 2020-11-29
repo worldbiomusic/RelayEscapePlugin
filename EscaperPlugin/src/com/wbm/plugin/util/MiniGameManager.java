@@ -11,6 +11,7 @@ import org.bukkit.event.block.BlockEvent;
 
 import com.wbm.plugin.data.MiniGameLocation;
 import com.wbm.plugin.data.PlayerData;
+import com.wbm.plugin.util.config.DataMember;
 import com.wbm.plugin.util.enums.MiniGameType;
 import com.wbm.plugin.util.general.BroadcastTool;
 import com.wbm.plugin.util.general.TeleportTool;
@@ -18,7 +19,7 @@ import com.wbm.plugin.util.minigame.FindTheRed;
 import com.wbm.plugin.util.minigame.MiniGame;
 import com.wbm.plugin.util.minigame.Painter;
 
-public class MiniGameManager
+public class MiniGameManager implements DataMember
 {
 	// MiniGame 체크하기 위한 Map (이용중이면 true, 비어있으면 false)
 	private Map<MiniGameType, MiniGame> games;
@@ -104,6 +105,46 @@ public class MiniGameManager
 		
 		
 	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public void installData(Object obj)
+	{
+		this.games = (Map<MiniGameType, MiniGame>)obj;
+		
+		// 데이터 미니게임에게 나눠주기(rank data)
+		this.distributeMiniGameData();
+	}
+
+	private void distributeMiniGameData()
+	{
+		// rank data 나눠주기 (MiniGameType, timeLimit는 설정해야 할듯...(set메소드로))
+		
+	}
+
+	@Override
+	public Object getData()
+	{
+		// 먼저 데이터 모으고 반환
+		this.gatherMiniGameData();
+		
+		return this.games;
+	}
+
+	private void gatherMiniGameData()
+	{
+		// rank data 가져오기
+	}
+
+	@Override
+	public String getDataMemberName()
+	{
+		// TODO Auto-generated method stub
+		return "minigame";
+	}
+	
+	
+	
 }
 
 

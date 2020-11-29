@@ -5,16 +5,16 @@ import org.bukkit.event.Listener;
 
 public class SpawnLocationTool implements Listener
 {
-	public static Location joinLocation;
-	public static Location respawnLocation;
-	public static Location lobby;
+	public static Location JOIN;
+	public static Location RESPAWN;
+	public static Location LOBBY;
 
 	public SpawnLocationTool(Location joinLocation, 
 			Location respawnLocation,
 			Location lobby)
 	{
-		SpawnLocationTool.joinLocation = joinLocation;
-		SpawnLocationTool.respawnLocation = respawnLocation;
-		SpawnLocationTool.lobby = lobby;
+		SpawnLocationTool.JOIN = joinLocation;
+		SpawnLocationTool.RESPAWN = respawnLocation;
+		SpawnLocationTool.LOBBY = lobby;
 	}
 }
