@@ -1,20 +1,18 @@
 package com.wbm.plugin.util.minigame;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
+import org.bukkit.scheduler.BukkitTask;
 
 import com.wbm.plugin.Main;
 import com.wbm.plugin.data.MiniGameLocation;
+import com.wbm.plugin.data.PlayerData;
+import com.wbm.plugin.util.PlayerDataManager;
 import com.wbm.plugin.util.enums.MiniGameType;
 import com.wbm.plugin.util.general.BroadcastTool;
 import com.wbm.plugin.util.general.InventoryTool;
@@ -23,381 +21,270 @@ import com.wbm.plugin.util.general.TeleportTool;
 
 import net.md_5.bungee.api.ChatColor;
 
-public abstract class MiniGame implements Serializable
-{
-	private static final long serialVersionUID=1L;
+public abstract class MiniGame implements Serializable {
+    private static final long serialVersionUID = 1L;
+    /*
+     * 모든 미니게임은 이 클래스를 상속받아서 만들어져야 함
+     * 
+     * 튜닝할 수 있는 것 -게임 아이템 추가: runTaskAfterStartGame() 메소드 오버라이딩하면 시작시 실행해줌
+     * 
+     * [주의] timeLimit, gameType, rankData는 파일로 저장되야되서 transient 선언안함 새로운 변수 추가할때
+     * transient 항상 고려하기
+     * 
+     * 
+     * [주의] MiniGame클래스의 생성자에서 만들어도 여기서 저장된 데이터가 불러들이면 생성자에서 한 행동은 모두 없어지고 저장되었던
+     * 데이터로 "교체"됨! -> 생성자에서 특정 변수 선언하지 말고, static class나 method에 인자로 넘겨서 사용
+     *
+     * 
+     * [미니게임 추가하는법]
+     * 
+     * 1.MiniGame클래스를 상속하는 클래스를 하나 만들고 필요한 메소드를 다 오바라이딩해서 구현한다
+     * 
+     * 2.MiniGameManager의 생성자에서 "allGame.add(new FindTheRed())" 처럼 등록한다 (이유: 처음에
+     * 미니게임 데이터가 없는것을 초기화해서 파일저장하려고, 나중에 파일에 저장되면 데이터 불러올때 저장된것으로 대체가 됨 = 처음에 한번
+     * 초기화를 위해서 필요한 코드)
+     */
+    transient private Player player;
+    transient private boolean activated;
+    transient private int score;
+    transient private static int waitingTime = 5;
+    private int fee;
+
+    private int timeLimit;
+    private MiniGameType gameType;
+
+    // 각 미니게임의 랭크데이터 관리 변수
+    private Map<String, Integer> rankData;
+    
+    transient private BukkitTask startTask, exitTask;
+    
+    public MiniGame(MiniGameType gameType, int timeLimit, int fee) {
+	this.player = null;
+	this.activated = false;
+	this.score = 0;
+	this.timeLimit = timeLimit;
+	this.gameType = gameType;
+	this.fee = fee;
+
+	this.rankData = new HashMap<>();
+    }
+
+    public void initGame() {
+	this.player = null;
+	this.activated = false;
+	this.score = 0;
+	this.startTask = this.exitTask = null;
+    }
+
+    public void startGame(Player p, PlayerDataManager pDataManager) {
+	// setup variables
+	this.initGame();
+	this.player = p;
+	
+	// player에게 정보 전달
+	this.printGameTutorial(p);
+	BroadcastTool.sendMessage(p, this.gameType.name() + " game starts in " + waitingTime + " sec");
+
+	// print all rank
+	MiniGameRankManager.printAllRank(this.rankData, p);
+
+	// this.waitingTime 초 후 실행
+	this.startTask = Bukkit.getScheduler().runTaskLater(Main.getInstance(), new Runnable() {
+	    @Override
+	    public void run() {
+		// activated = true를 waitingTime후에 실행하는 이유: 
+		// block event가 왔을때 activated가 true일때만 실행되게 했으므로
+		activated = true;
+		
+		BroadcastTool.sendTitle(player, "START", "");
+
+		// start game 후에 실행할 작업
+		runTaskAfterStartGame();
+	    }
+	}, 20 * waitingTime);
+
+	// exitGame(): this.waitingTime + this.timeLimit 초 후 실행
+	this.exitTask = Bukkit.getScheduler().runTaskLater(Main.getInstance(), new Runnable() {
+	    @Override
+	    public void run() {
+		exitGame(pDataManager);
+	    }
+	}, 20 * (waitingTime + this.timeLimit));
+
+    }
+
+    public void exitGame(PlayerDataManager pDataManager) {
 	/*
-	 * 모든 미니게임은 이 클래스를 상속받아서 만들어져야 함
-	 * 
-	 * 튜닝할 수 있는 것
-	 * -게임 아이템 추가: runTaskAfterStartGame() 메소드 오버라이딩하면 시작시 실행해줌
-	 * 
-	 * [주의]
-	 * timeLimit, gameType, rankData는 파일로 저장되야되서 transient 선언안함
-	 * 
-	 * [미니게임 추가하는법]
-	 * 1.MiniGame클래스를 상속하는 클래스를 하나 만들고 필요한 메소드를 다 오바라이딩해서 구현한다
-	 * 2.MiniGameManager의 생성자에서 "allGame.add(new FindTheRed())" 처럼 등록한다
-	 * (이유: 처음에 미니게임 데이터가 없는것을 초기화해서 파일저장하려고, 나중에 파일에 저장되면 데이터 불러올때 저장된것으로 대체가 됨 = 처음에 한번 초기화를 위해서 필요한 코드)
+	 * 보상 지급
+	 * player 퇴장 (lobby로) 
+	 * inventory 초기화
+	 * score rank 처리
+	 * 게임 초기화
 	 */
-	transient private Player player;
-	transient private boolean inUse;
-	transient private int score;
-	private int timeLimit;
-	private MiniGameType gameType;
+
+	// 보상 지급
+	this.payReward(pDataManager);
 	
-	// 파일에 저장시킬 필요 없는데 값은 기본값인 0이 아니어서 여기서 static 할당 
-	transient private static int waitingTime = 5;
-	
-	// 각 미니게임의 랭크데이터 관리 변수
-	private Map<String, Integer> rankData;
-	
-	public MiniGame(MiniGameType gameType, int timeLimit) {
-		this.player = null;
-		this.inUse = false;
-		this.score = 0;
-		this.timeLimit = timeLimit;
-		this.gameType = gameType;
-		
-		this.rankData = new HashMap<>();
-	}
-	
-	public void initGame() {
-		this.player = null;
-		this.inUse = false;
-		this.score = 0;
-	}
-	
-	public void startGame(Player p) {
-		// setup variables
-		this.initGame();
-		this.player = p;
-		
-		// player에게 정보 전달
-		this.printGameTutorial();
-		BroadcastTool.sendMessage(this.player, this.gameType.name() + " game starts in "+this.waitingTime+ " sec");
-		
-		// inUse = true: this.waitingTime 초 후 실행
-		Bukkit.getScheduler().runTaskLater(Main.getInstance(), new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				// TODO Auto-generated method stub
-				inUse = true;
-				BroadcastTool.sendTitle(player, "START", "");
-				
-				// start game 후에 실행할 작업 
-				runTaskAfterStartGame();
-			}
-		}, 20 * this.waitingTime);
-		
-		
-		
-		// exitGame(): this.waitingTime + this.timeLimit 초 후 실행
-		Bukkit.getScheduler().runTaskLater(Main.getInstance(), new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				// TODO Auto-generated method stub
-				exitGame();
-			}
-		}, 20 * (this.waitingTime + this.timeLimit));
-		
-		// print all rank
-		this.printAllRank();
-	}
-	
-	public void exitGame() {
-		/*
-		 * player 퇴장 (lobby로)
-		 * inventory 초기화
-		 * score rank 처리
-		 * score 공개
-		 * 순위 공개
-		 * 초기화
-		 */
-		
-		// player lobby로 tp
-		TeleportTool.tp(this.player, SpawnLocationTool.LOBBY);
-		
-		
-		// inventory 초기화
-		InventoryTool.clearPlayerInv(this.player);
-		
-		// score rank 처리
-		this.updatePlayerRankData();
-		
-		// print all rank data
-		this.printAllRank();
-		
-		// score 공개
-		BroadcastTool.sendMessage(this.player, "=================================");
-		BroadcastTool.sendMessage(this.player, "=========== " + ChatColor.RED + ChatColor.BOLD + "Game End" + ChatColor.WHITE + " ===========");
-		BroadcastTool.sendMessage(this.player, "=================================");
-		BroadcastTool.sendMessage(this.player, "Your score: " + this.score);
-		
-		// TODO: 순위 공개
-		
-		
-		// 초기화
-		this.initGame();
-	}
-	
+	// player lobby로 tp
+	TeleportTool.tp(this.player, SpawnLocationTool.LOBBY);
+
+	// inventory 초기화
+	InventoryTool.clearPlayerInv(this.player);
+
+	// score rank 처리
+	MiniGameRankManager.updatePlayerRankData(this.rankData, this.player, this.score);
+
+//	// print all rank data
+//	MiniGameRankManager.printAllRank(this.rankData, this.player);
+
+	// score 공개
+	BroadcastTool.sendMessage(this.player, "=================================");
+	BroadcastTool.sendMessage(this.player,
+		"=========== " + ChatColor.RED + ChatColor.BOLD + "Game End" + ChatColor.WHITE + " ===========");
+	BroadcastTool.sendMessage(this.player, "=================================");
+	BroadcastTool.sendMessage(this.player, "Your score: " + this.score);
+
+	// 초기화
+	this.initGame();
+    }
+
+    // 사분위수에서 오름차순으로 FEE의 1/2, 2/2, 3/2, 4/2 배수 토큰 지급, 1등은 6/2배
+    public void payReward(PlayerDataManager pDataManager) {
 	/*
-	 * 이 메소드는 미니게임에서 플레이어들이 발생한 이벤트를 각 게임에서 처리해주는 범용 메소드
-	 * 예) 
-	 * if(event instanceof BlockBreakEvent)
-		{
-			BlockBreakEvent e = (BlockBreakEvent) event;
-			// 생략
-		}
+	 * 오름차순 score (-34, -13, 3, 14, 50 ...)
 	 */
-	public abstract void processEvent(Event event);
+	PlayerData pData = pDataManager.getPlayerData(this.player.getUniqueId());
 	
-	// tutorial strings
-	public abstract String[] getGameTutorialStrings();
-	
-	
-	public void printGameTutorial() {
-		/*
-		 * 기본적으로 출력되는 정보
-		 * -game name
-		 * -time limit
-		 * -waiting time
-		 * 
-		 * getGameTutorialStrings()에 추가해야 하는 정보
-		 * -game rule
-		 */
-		BroadcastTool.sendMessage(this.player, "=================================");
-		BroadcastTool.sendMessage(this.player, "" + ChatColor.RED + ChatColor.BOLD + this.gameType.name() + ChatColor.WHITE);
-		BroadcastTool.sendMessage(this.player, "=================================");
-		BroadcastTool.sendMessage(this.player, "Time Limit: " + this.timeLimit);
+	// 1,2,3,4분위 안에 속해있을떄 token 지급
+	for(int i = 1; i <= 4; i++) {
+	    String quartilePlayerName = MiniGameRankManager.getQuartilePlayerName(this.rankData, i);
+	    int quartileScore = MiniGameRankManager.getScore(this.rankData, quartilePlayerName);
+	    if(this.score <= quartileScore) {
+		int rewardToken = (int)((i/(double)2) * fee);
+		BroadcastTool.sendMessage(this.player, "You are in " + i + " quartile");
+		BroadcastTool.sendMessage(this.player, "Reward token: " + rewardToken);
 		
-		// print rule
-		BroadcastTool.sendMessage(this.player, "");
-		BroadcastTool.sendMessage(this.player, ChatColor.BOLD + "[Rule]");
-		for(String msg : this.getGameTutorialStrings()) {
-			BroadcastTool.sendMessage(this.player, msg);
-		}
+		pData.addToken(rewardToken);
 		
-		BroadcastTool.sendMessage(this.player, "");
-		BroadcastTool.sendMessage(this.player, "game starts in " + this.waitingTime+ " sec");
+		return;
+	    }
 	}
 	
-	public void runTaskAfterStartGame() {
-	}
-	
-	public int getGameBlockCount() {
-		return MiniGameLocation.getGameBlockCount(this.gameType);
-	}
-	
-	
-	
-	
-	
-	// RANK SYSTEM METHOD ============================================
-	
-	
-	// <name, score>: score기준 내림차순 정렬
-	public List<Entry<String, Integer>> getSortedMapEntry() {
-		List<Entry<String, Integer>> list = new ArrayList<>(this.rankData.entrySet());
-		
-		Collections.sort(list, new Comparator<Entry<String, Integer>>() {
+	// 1,2,3,4 분위 안에 속해있지 않다는것 = 1등 점수
+	BroadcastTool.sendMessage(this.player, "You are first place");
+	BroadcastTool.sendMessage(this.player, "Reward token: " + fee * 3);
+    }
 
-			@Override
-			public int compare(Entry<String, Integer> o1, Entry<String, Integer> o2)
-			{
-				return o2.getValue() - o1.getValue();
-			}
-			
-		});
-		
-		return list;
-	}
-	
-	public String getRankPlayer(int n) {
-		int index = 0;
-		for(Entry<String, Integer> entry : this.getSortedMapEntry()) {
-			if(index == n-1) {
-				return entry.getKey();
-			}
-			index++;
-		}
-		
-		return null;
-	}
-	public int getScore(Player p) {
-		if(this.isExist(p)) {
-			return this.rankData.get(p.getName());
-		} else {
-			BroadcastTool.reportBug("player rank data is not exist");
-			return -99999999;
-		}
-	}
-	
-	public int getRank(Player p) {
-		// TODO: 구현하기
-		return -1;
-	}
-	
-	public int getQuartileScore(int n) {
-		// TODO: 구현하기
-		return -1;
-	}
-	
-	public void printAllRank() {
-		BroadcastTool.sendMessage(this.player, "==========All Rank==========");
-		for(Entry<String, Integer> entry : this.getSortedMapEntry()) {
-			BroadcastTool.sendMessage(this.player, entry.getKey() + ": " + entry.getValue());
-		}
-	}
-	
-	
-	public boolean isExist(Player p) {
-		return this.rankData.containsKey(p.getName());
-	}
-	
-	public void updatePlayerRankData() {
-		/*
-		 * 이번게임에 달성한 스코어가 더 크면 업데이트하기
-		 */
-		if(this.isNewRecordScore()) {
-			this.rankData.put(this.player.getName(),  this.score);
-		}
-	}
-	
-	public boolean isNewRecordScore() {
-		if(this.isExist(this.player)) {
-			int previousScore = this.getScore(this.player);
-			
-			//이번게임에 달성한 스코어가 더 크면 true
-			return this.score > previousScore;
-		} else {
-			// 처음 도전한것이므로 newRecordScore 임
-			return true;
-		}
-		
-	}
-	
-	private Player getHighScorePlayer(Player target, Player other) {
-		// 두 player의 score를 비교하는것
-		if(this.isExist(target) && this.isExist(other)) {
-			int diff = this.getScore(target) - this.getScore(other);  
-			if(diff == 0) { 
-				// 같을때 null반환
-				return null;
-			}else if(diff > 0) {
-				return target;
-			} else { // diff < 0
-				return other;
-			}
-		} else {
-			BroadcastTool.reportBug("cannot compare not exist player");
-			return null;
-		}
-	}
-	
-	
-	
-	
-	
-	
-	// GETTER, SETTER =============================================
+    /*
+     * 이 메소드는 미니게임에서 플레이어들이 발생한 이벤트를 각 게임에서 처리해주는 범용 메소드 예) if(event instanceof
+     * BlockBreakEvent) { BlockBreakEvent e = (BlockBreakEvent) event; // 생략 }
+     */
+    public abstract void processEvent(Event event);
 
-	public Player getPlayer()
-	{
-		return player;
+    // tutorial strings
+    public abstract String[] getGameTutorialStrings();
+    
+    public void printGameTutorial(Player p) {
+	/*
+	 * 기본적으로 출력되는 정보 -game name -time limit -waiting time
+	 * 
+	 * getGameTutorialStrings()에 추가해야 하는 정보 -game rule
+	 */
+	BroadcastTool.sendMessage(p, "=================================");
+	BroadcastTool.sendMessage(p,
+		"" + ChatColor.RED + ChatColor.BOLD + this.gameType.name() + ChatColor.WHITE);
+	BroadcastTool.sendMessage(p, "=================================");
+	BroadcastTool.sendMessage(p, "Time Limit: " + this.timeLimit);
+
+	// print rule
+	BroadcastTool.sendMessage(p, "");
+	BroadcastTool.sendMessage(p, ChatColor.BOLD + "[Rule]");
+	for (String msg : this.getGameTutorialStrings()) {
+	    BroadcastTool.sendMessage(p, msg);
 	}
 
-	public void setPlayer(Player player)
-	{
-		this.player=player;
-	}
+	BroadcastTool.sendMessage(p, "");
+	BroadcastTool.sendMessage(p, "game starts in " + waitingTime + " sec");
+    }
 
-	public boolean isInUse()
-	{
-		return inUse;
-	}
+    public void runTaskAfterStartGame() {
+    }
 
-	public void setInUse(boolean inUse)
-	{
-		this.inUse=inUse;
+    public int getGameBlockCount() {
+	return MiniGameLocation.getGameBlockCount(this.gameType);
+    }
+    
+    public void stopAllTasks() {
+	if(this.startTask != null)
+	    this.startTask.cancel();
+	if(this.exitTask != null) {
+	    this.exitTask.cancel();
 	}
-	
-	public void plusScore(int amount) {
-		this.score += amount;
-	}
-	
-	public void minusScore(int amount) {
-		this.score -= amount;
-	}
+    }
+    
+    public boolean isPlayerPlayingGame(Player p) {
+	return p.equals(this.player);
+    }
 
-	public int getScore()
-	{
-		return score;
-	}
+    // GETTER, SETTER =============================================
 
-	public void setScore(int score)
-	{
-		this.score=score;
-	}
-	
-	public int getTimeLimit()
-	{
-		return timeLimit;
-	}
+    public Player getPlayer() {
+	return player;
+    }
 
-	public void setTimeLimit(int timeLimit)
-	{
-		this.timeLimit=timeLimit;
-	}
+    public void setPlayer(Player player) {
+	this.player = player;
+    }
+    
+    public boolean isSomeoneInGameRoom() {
+	// 해당 게임룸에 누군가 플레이 중인지 반환
+	return this.player != null;
+    }
 
-	public MiniGameType getGameType()
-	{
-		return gameType;
-	}
+    public boolean isActivated() { 
+	return this.activated;
+    }
 
-	public void setGameType(MiniGameType gameType)
-	{
-		this.gameType=gameType;
-	}
+    public void setActivated(boolean activated) {
+	this.activated = activated;
+    }
 
-	@Override
-	public String toString()
-	{
-		return "MiniGame "
-				+ "\nplayer="+player+
-				", \ninUse="+inUse+
-				", \nscore="+score+
-				", \ntimeLimit="+timeLimit+
-				", \ngameType="+gameType+"]";
-	}
-	
-	
+    public void plusScore(int amount) {
+	this.score += amount;
+    }
+
+    public void minusScore(int amount) {
+	this.score -= amount;
+    }
+
+    public int getScore() {
+	return score;
+    }
+
+    public void setScore(int score) {
+	this.score = score;
+    }
+
+    public int getTimeLimit() {
+	return timeLimit;
+    }
+
+    public void setTimeLimit(int timeLimit) {
+	this.timeLimit = timeLimit;
+    }
+
+    public MiniGameType getGameType() {
+	return gameType;
+    }
+
+    public void setGameType(MiniGameType gameType) {
+	this.gameType = gameType;
+    }
+
+    @Override
+    public String toString() {
+	return "MiniGame " + "\nplayer=" + player + ", \nActivated=" + activated + ", \nscore=" + score + ", \ntimeLimit="
+		+ timeLimit + ", \ngameType=" + gameType + "]";
+    }
+
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

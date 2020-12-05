@@ -22,7 +22,6 @@ import com.wbm.plugin.data.PlayerData;
 import com.wbm.plugin.listener.CommonListener;
 import com.wbm.plugin.listener.GameManager;
 import com.wbm.plugin.listener.ItemUsingManager;
-import com.wbm.plugin.util.MiniGameManager;
 import com.wbm.plugin.util.PlayerDataManager;
 import com.wbm.plugin.util.RankManager;
 import com.wbm.plugin.util.RelayManager;
@@ -39,6 +38,7 @@ import com.wbm.plugin.util.general.SpawnLocationTool;
 import com.wbm.plugin.util.general.shop.ShopGoods;
 import com.wbm.plugin.util.general.shop.ShopManager;
 import com.wbm.plugin.util.general.skin.SkinManager;
+import com.wbm.plugin.util.minigame.MiniGameManager;
 
 public class Main extends JavaPlugin
 {
@@ -167,7 +167,7 @@ public class Main extends JavaPlugin
 		// setup stages
 		this.setupStages();
 		
-		this.relayManager=new RelayManager(this.pDataManager, this.roomManager, this.stageManager);
+		this.relayManager=new RelayManager(this.pDataManager, this.roomManager, this.stageManager, this.miniGameManager);
 		this.gManager=new GameManager(this.pDataManager, this.roomManager, this.relayManager, this.miniGameManager);
 		this.itemUsingManager = new ItemUsingManager(this.pDataManager, this.roomManager, this.relayManager);
 		this.shopManager = new ShopManager(this.pDataManager);
