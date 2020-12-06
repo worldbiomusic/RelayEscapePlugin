@@ -40,257 +40,264 @@ import com.wbm.plugin.util.general.shop.ShopManager;
 import com.wbm.plugin.util.general.skin.SkinManager;
 import com.wbm.plugin.util.minigame.MiniGameManager;
 
-public class Main extends JavaPlugin
-{
-	Server server;
-	PluginManager pluginManager;
+public class Main extends JavaPlugin {
+    Server server;
+    PluginManager pluginManager;
 
-	GameManager gManager;
-	CommonListener commonListener;
-	PlayerDataManager pDataManager;
-	RoomManager roomManager;
-	RelayManager relayManager;
-	DataManager dataManager;
-	ShopManager shopManager;
-	ItemUsingManager itemUsingManager;
-	RankManager rankManager;
-	NPCManager npcManager;
-	StageManager stageManager;
-	MiniGameManager miniGameManager;
+    GameManager gManager;
+    CommonListener commonListener;
+    PlayerDataManager pDataManager;
+    RoomManager roomManager;
+    RelayManager relayManager;
+    DataManager dataManager;
+    ShopManager shopManager;
+    ItemUsingManager itemUsingManager;
+    RankManager rankManager;
+    NPCManager npcManager;
+    StageManager stageManager;
+    MiniGameManager miniGameManager;
 
-	// command executor
-	Commands dCmd;
+    // command executor
+    Commands dCmd;
 
-	ConfigTest ct;
-	
-	// Tools
-	SpawnLocationTool respawnManager;
-	BanItemTool banItems;
-	SkinManager skinManager;
+    ConfigTest ct;
 
-	static Main main;
+    // Tools
+    SpawnLocationTool respawnManager;
+    BanItemTool banItems;
+    SkinManager skinManager;
 
-	public static Main getInstance()
-	{
-		return main;
-	}
+    static Main main;
 
-	@Override
-	public void onEnable()
-	{
+    public static Main getInstance() {
+	return main;
+    }
+
+    @Override
+    public void onEnable() {
 //		ConfigurationSerialization.registerClass(PlayerData.class);
-		main=this;
+	main = this;
 
-		try
-		{
-			super.onEnable();
-			this.setupMain();
-			
-			// tools
-			this.setupTools();
+	try {
+	    super.onEnable();
+	    this.setupMain();
 
-			this.setupManagers();
+	    // tools
+	    this.setupTools();
 
-			this.registerListeners();
-			this.registerCommands();
+	    this.setupManagers();
 
-			this.getServer().getConsoleSender().sendMessage(ChatColor.GREEN+"EscaperServerPlugin ON");
-			
+	    this.registerListeners();
+	    this.registerCommands();
+
+	    this.getServer().getConsoleSender().sendMessage(ChatColor.GREEN + "EscaperServerPlugin ON");
+
 //			// reRegister all player (이미 서버에 있는데 reload했을경우) 
-			// GameManager에서 생성자에서 불려야 플레이어데이터가 올라가서 정상작동함 (여기서 하면 안됨)
+	    // GameManager에서 생성자에서 불려야 플레이어데이터가 올라가서 정상작동함 (여기서 하면 안됨)
 //			this.gManager.reRegisterAllPlayer();
-			
-			// update scoreboard every 1 sec
-			this.loopUpdatingScoreboard();
-		}
-		catch(Exception e)
-		{
-			e.printStackTrace();
-		}
+
+	    // update scoreboard every 1 sec
+	    this.loopUpdatingScoreboard();
+
+	    // play music every 4 minutes
+	    this.loopPlayingMusic();
+	} catch (Exception e) {
+	    e.printStackTrace();
+	}
+    }
+
+    private void setupTools() {
+	// BroadcastTool
+	BroadcastTool.setServerNamePrefix("" + ChatColor.RED + ChatColor.BOLD + "[i] " + ChatColor.WHITE);
+
+	// respawn manager
+	Location loc = Setting.getLoationFromSTDLOC(9.5, 4, 5.5, 90, 0);
+	Location lobby = Setting.getLoationFromSTDLOC(16, 4, 16, 90, 0);
+	;
+	this.respawnManager = new SpawnLocationTool(loc, loc, lobby);
+
+	// banItem (후원 banItems는 따로 만들기)
+	this.banItems = new BanItemTool();
+	this.banItems.banAllItem();
+	for (ShopGoods goods : ShopGoods.values()) {
+	    this.banItems.unbanItem(goods.getGoods().getType());
 	}
 
-	private void setupTools()
-	{
-		// BroadcastTool
-		BroadcastTool.setServerNamePrefix("" + ChatColor.RED + ChatColor.BOLD + "[i] " + ChatColor.WHITE);
-		
-		// respawn manager
-		Location loc=Setting.getLoationFromSTDLOC( 9.5, 4, 5.5, 90, 0);
-		Location lobby=Setting.getLoationFromSTDLOC(16, 4, 16, 90, 0);;
-		this.respawnManager=new SpawnLocationTool(loc, loc, lobby);
-		
-		// banItem (후원 banItems는 따로 만들기)
-		this.banItems = new BanItemTool();
-		this.banItems.banAllItem();
-		for(ShopGoods goods : ShopGoods.values()) {
-			this.banItems.unbanItem(goods.getGoods().getType());
-		}
-		
-		// kits
+	// kits
 //		this.makeKits();
-		
-		// skindata
-		this.skinManager = new SkinManager();
 
-		// NPC
-		this.npcManager = new NPCManager(this.skinManager);
-		
-	}
+	// skindata
+	this.skinManager = new SkinManager();
 
-	void setupMain()
-	{
-		this.server=this.getServer();
-		this.pluginManager=this.server.getPluginManager();
-	}
+	// NPC
+	this.npcManager = new NPCManager(this.skinManager);
 
-	void setupManagers() throws Exception
-	{
-		this.dataManager=new DataManager(this.getDataFolder().getPath());
+    }
 
-		this.pDataManager=new PlayerDataManager(this.ct);
-		this.miniGameManager = new MiniGameManager(this.pDataManager);
-		this.dataManager.registerMember(this.pDataManager);
+    void setupMain() {
+	this.server = this.getServer();
+	this.pluginManager = this.server.getPluginManager();
+    }
 
-		this.roomManager=new RoomManager();
-		this.dataManager.registerMember(this.roomManager);
-		this.dataManager.registerMember(this.npcManager);
-		this.dataManager.registerMember(this.skinManager);
-		this.dataManager.registerMember(this.miniGameManager);
-		
+    void setupManagers() throws Exception {
+	this.dataManager = new DataManager(this.getDataFolder().getPath());
+
+	this.pDataManager = new PlayerDataManager(this.ct);
+	this.miniGameManager = new MiniGameManager(this.pDataManager);
+	this.dataManager.registerMember(this.pDataManager);
+
+	this.roomManager = new RoomManager();
+	this.dataManager.registerMember(this.roomManager);
+	this.dataManager.registerMember(this.npcManager);
+	this.dataManager.registerMember(this.skinManager);
+	this.dataManager.registerMember(this.miniGameManager);
+
 //		// distribute datas (이 메소드는 this.dataManager.registerMember <- 이 메소드들이
 //		// 마지막다음에 바로 실행되어야 함 
-		// -> register안에 넣어버릴까?(인자 추가해서 해당 member만 데이터 받을수 있게)
+	// -> register안에 넣어버릴까?(인자 추가해서 해당 member만 데이터 받을수 있게)
 
-		
-		this.rankManager = new RankManager(this.pDataManager, this.roomManager);
-		this.stageManager = new StageManager(this.rankManager, this.npcManager);
-		// setup stages
-		this.setupStages();
-		
-		this.relayManager=new RelayManager(this.pDataManager, this.roomManager, this.stageManager, this.miniGameManager);
-		this.gManager=new GameManager(this.pDataManager, this.roomManager, this.relayManager, this.miniGameManager);
-		this.itemUsingManager = new ItemUsingManager(this.pDataManager, this.roomManager, this.relayManager);
-		this.shopManager = new ShopManager(this.pDataManager);
-		
-	}
+	this.rankManager = new RankManager(this.pDataManager, this.roomManager);
+	this.stageManager = new StageManager(this.rankManager, this.npcManager);
+	// setup stages
+	this.setupStages();
 
-	private void registerListeners()
-	{
-		this.commonListener = new CommonListener(this.pDataManager, this.shopManager, 
-				this.banItems, this.npcManager, this.skinManager, this.miniGameManager, this.relayManager);
-		
-		this.registerEvent(this.gManager);
-		this.registerEvent(this.commonListener);
-		this.registerEvent(this.itemUsingManager);
-	}
+	this.relayManager = new RelayManager(this.pDataManager, this.roomManager, this.stageManager,
+		this.miniGameManager);
+	this.gManager = new GameManager(this.pDataManager, this.roomManager, this.relayManager, this.miniGameManager);
+	this.itemUsingManager = new ItemUsingManager(this.pDataManager, this.roomManager, this.relayManager);
+	this.shopManager = new ShopManager(this.pDataManager);
 
-	void registerEvent(Listener listener)
-	{
-		this.pluginManager.registerEvents(listener, this);
-	}
+    }
 
-	private void registerCommands()
-	{
-		this.dCmd=new Commands(this.pDataManager, this.relayManager, this.roomManager, this.rankManager, this.npcManager);
-		this.getCommand("re").setExecutor(dCmd);
-	}
-	
-	public void loopUpdatingScoreboard() {
-		ScoreboardManager manager = Bukkit.getScoreboardManager();
-		Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				for(Player p : Bukkit.getOnlinePlayers()) {
-					Scoreboard board = manager.getNewScoreboard();
-					PlayerData pData = pDataManager.getPlayerData(p.getUniqueId());
-					Role r = pData.getRole();
-					
-					// ============sidebar============
-					Objective obj = board.registerNewObjective("side", "dummy");
-					obj.setDisplaySlot(DisplaySlot.SIDEBAR);
-					obj.setDisplayName("=====INFO=====");
-					
-					Score role = obj.getScore("Role: " + r);
-					role.setScore(10);
-					
-					Score token = obj.getScore("Token: " + pData.getToken());
-					token.setScore(9);
-					
-					String leftTime = "" + ChatColor.RED + ChatColor.BOLD + relayManager.getLeftTime() + ChatColor.WHITE;
-					Score relayTime = obj.getScore("RelayTime: " 
-					+ relayManager.getCurrentTime().name() 
-					+ "(" + leftTime + ")");
-					relayTime.setScore(8);
-					
-					// ============below name============
-					Objective belowNameObj = board.registerNewObjective("healthNRole", "health");
-					belowNameObj.setDisplaySlot(DisplaySlot.BELOW_NAME);
-					String belowRole = "";
-					if(r == Role.MAKER) {
-						belowRole += "" + ChatColor.RED + ChatColor.BOLD;
-					}
-					belowRole += r.name();
-					belowNameObj.setDisplayName("/"+ pData.getName() +"Role: " + belowRole);
+    private void registerListeners() {
+	this.commonListener = new CommonListener(this.pDataManager, this.shopManager, this.banItems, this.npcManager,
+		this.skinManager, this.miniGameManager, this.relayManager);
 
-					p.setScoreboard(board);
-					
-				}
-			}
-		}, 20 * 1, 20 * 1);
-		
-	}
-	
-	private void setupStages() {
-		/*
-		 *  token] yaw, pitch: (-90, 0)
-			12.5, 6, 5.5
-			12.5, 5, 6.5
-			12.5, 4, 4.5
-			
-			challenging (0, 0)
-			14.5, 6, 1.5
-			13.5, 5, 1.5
-			15.5, 4, 1.5
-			
-			clear (0, 0)
-			17.5, 6, 1.5
-			16.5, 5, 1.5
-			18.5, 4, 1.5
-			
-			room (90, 0)
-			19.5, 6, 6.5
-			19.5, 5, 5.5
-			19.5, 4, 7.5
-		 */
-		List<Location> tokenLocs = new ArrayList<Location>();
-		tokenLocs.add(Setting.getLoationFromSTDLOC(12.5, 6, 5.5, -90, 0));
-		tokenLocs.add(Setting.getLoationFromSTDLOC(12.5, 5, 6.5, -90, 0));
-		tokenLocs.add(Setting.getLoationFromSTDLOC(12.5, 4, 4.5, -90, 0));
-		
-		List<Location> challengingLocs = new ArrayList<Location>();
-		tokenLocs.add(Setting.getLoationFromSTDLOC(14.5, 6, 1.5, 0, 0));
-		tokenLocs.add(Setting.getLoationFromSTDLOC(13.5, 5, 1.5, 0, 0));
-		tokenLocs.add(Setting.getLoationFromSTDLOC(15.5, 4, 1.5, 0, 0));
+	this.registerEvent(this.gManager);
+	this.registerEvent(this.commonListener);
+	this.registerEvent(this.itemUsingManager);
+    }
 
-		List<Location> clearLocs = new ArrayList<Location>();
-		tokenLocs.add(Setting.getLoationFromSTDLOC(17.5, 6, 1.5, 0, 0));
-		tokenLocs.add(Setting.getLoationFromSTDLOC(16.5, 5, 1.5, 0, 0));
-		tokenLocs.add(Setting.getLoationFromSTDLOC(18.5, 4, 1.5, 0, 0));
-		
-		List<Location> roomLocs = new ArrayList<Location>();
-		tokenLocs.add(Setting.getLoationFromSTDLOC(19.5, 6, 6.5, 90, 0));
-		tokenLocs.add(Setting.getLoationFromSTDLOC(19.5, 5, 5.5, 90, 0));
-		tokenLocs.add(Setting.getLoationFromSTDLOC(19.5, 4, 7.5, 90, 0));
-		
-		// stage 에 드록
-		this.stageManager.registerLocations("tokenCount", tokenLocs);
-		this.stageManager.registerLocations("challengingCount", challengingLocs);
-		this.stageManager.registerLocations("clearCount", clearLocs);
-		this.stageManager.registerLocations("roomCount", roomLocs);
-	}
-	
+    void registerEvent(Listener listener) {
+	this.pluginManager.registerEvents(listener, this);
+    }
+
+    private void registerCommands() {
+	this.dCmd = new Commands(this.pDataManager, this.relayManager, this.roomManager, this.rankManager,
+		this.npcManager);
+	this.getCommand("re").setExecutor(dCmd);
+    }
+
+    public void loopUpdatingScoreboard() {
+	ScoreboardManager manager = Bukkit.getScoreboardManager();
+
+	// belowname setting
+//	Objective belowNameObj = board.registerNewObjective("below", "health");
+//	belowNameObj.setDisplaySlot(DisplaySlot.BELOW_NAME);
+//	String belowRole = "/ 20";
+//	belowNameObj.setDisplayName(belowRole);
+
+	// task loop
+	Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
+	    @Override
+	    public void run() {
+		for (Player p : Bukkit.getOnlinePlayers()) {
+		    PlayerData pData = pDataManager.getPlayerData(p.getUniqueId());
+		    Role r = pData.getRole();
+
+		    Scoreboard board = manager.getNewScoreboard();
+
+		    // sidebar setting
+		    Objective sidebarObj = board.registerNewObjective("side", "dummy");
+		    sidebarObj.setDisplaySlot(DisplaySlot.SIDEBAR);
+		    sidebarObj.setDisplayName("===== INFO =====");
+
+		    // ============sidebar============
+
+		    Score role = sidebarObj.getScore("Role: " + r);
+		    role.setScore(10);
+
+		    Score token = sidebarObj.getScore("Token: " + pData.getToken());
+		    token.setScore(9);
+
+//		    int roomCNT = roomManager.getOwnRooms(p.getName()).size();
+//		    Score roomCount = sidebarObj.getScore("Room: " + roomCNT);
+//		    roomCount.setScore(8);
+//
+//		    int clearCNT = pData.getClearCount();
+//		    Score clearCount = sidebarObj.getScore("Clear: " + clearCNT);
+//		    clearCount.setScore(7);
+
+		    String leftTime = "" + ChatColor.RED + ChatColor.BOLD + relayManager.getLeftTime()
+			    + ChatColor.WHITE;
+		    Score relayTime = sidebarObj
+			    .getScore("RelayTime: " + relayManager.getCurrentTime().name() + "(" + leftTime + ")");
+		    relayTime.setScore(6);
+
+		    // ============below name============
+
+//		    if (r == Role.MAKER) {
+//			belowRole += "" + ChatColor.RED + ChatColor.BOLD;
+//		    }
+//		    belowRole += pData.getRole();
+//		    belowNameObj.setDisplayName(p.getName() + ", Role: " + belowRole);
+
+		    p.setScoreboard(board);
+		}
+	    }
+	}, 20 * 1, 20 * 1);
+
+    }
+
+    void loopPlayingMusic() {
+	Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
+
+	    @Override
+	    public void run() {
+		for (Player p : Bukkit.getOnlinePlayers()) {
+		    p.performCommand("play 1 " + p.getName());
+		}
+	    }
+	}, 20 * 10, 20 * 60 * 10);
+    }
+
+    private void setupStages() {
+	/*
+	 * token] yaw, pitch: (-90, 0) 12.5, 6, 5.5 12.5, 5, 6.5 12.5, 4, 4.5
+	 * 
+	 * challenging (0, 0) 14.5, 6, 1.5 13.5, 5, 1.5 15.5, 4, 1.5
+	 * 
+	 * clear (0, 0) 17.5, 6, 1.5 16.5, 5, 1.5 18.5, 4, 1.5
+	 * 
+	 * room (90, 0) 19.5, 6, 6.5 19.5, 5, 5.5 19.5, 4, 7.5
+	 */
+	List<Location> tokenLocs = new ArrayList<Location>();
+	tokenLocs.add(Setting.getLoationFromSTDLOC(12.5, 6, 5.5, -90, 0));
+	tokenLocs.add(Setting.getLoationFromSTDLOC(12.5, 5, 6.5, -90, 0));
+	tokenLocs.add(Setting.getLoationFromSTDLOC(12.5, 4, 4.5, -90, 0));
+
+	List<Location> challengingLocs = new ArrayList<Location>();
+	tokenLocs.add(Setting.getLoationFromSTDLOC(14.5, 6, 1.5, 0, 0));
+	tokenLocs.add(Setting.getLoationFromSTDLOC(13.5, 5, 1.5, 0, 0));
+	tokenLocs.add(Setting.getLoationFromSTDLOC(15.5, 4, 1.5, 0, 0));
+
+	List<Location> clearLocs = new ArrayList<Location>();
+	tokenLocs.add(Setting.getLoationFromSTDLOC(17.5, 6, 1.5, 0, 0));
+	tokenLocs.add(Setting.getLoationFromSTDLOC(16.5, 5, 1.5, 0, 0));
+	tokenLocs.add(Setting.getLoationFromSTDLOC(18.5, 4, 1.5, 0, 0));
+
+	List<Location> roomLocs = new ArrayList<Location>();
+	tokenLocs.add(Setting.getLoationFromSTDLOC(19.5, 6, 6.5, 90, 0));
+	tokenLocs.add(Setting.getLoationFromSTDLOC(19.5, 5, 5.5, 90, 0));
+	tokenLocs.add(Setting.getLoationFromSTDLOC(19.5, 4, 7.5, 90, 0));
+
+	// stage 에 드록
+	this.stageManager.registerLocations("tokenCount", tokenLocs);
+	this.stageManager.registerLocations("challengingCount", challengingLocs);
+	this.stageManager.registerLocations("clearCount", clearLocs);
+	this.stageManager.registerLocations("roomCount", roomLocs);
+    }
+
 //	void makeKits() {
 //		KitTool.addKit("maker", 
 //				new ItemStack(Material.GLOWSTONE),
@@ -312,16 +319,15 @@ public class Main extends JavaPlugin
 ////		KitTool.addKit("waiter", ShopGoods.GHOST.getGoods());
 //	}
 
-	@Override
-	public void onDisable()
-	{
-		// rank NPC 제거
-		// rank NPC 는 NPC자체가 저장될 필요가 없음
-		// 왜냐하면 각 waitingTime마다 순위에 따라서 NPC가 바뀌므로
-		// StageManager에 위치만 지정해놓고 각 상황에따라 NPC를 삭제하고 불러와야 하므로. 
-		this.stageManager.removeRemainingRankNPCs();
-		
-		// file save
-		this.dataManager.save();
-	}
+    @Override
+    public void onDisable() {
+	// rank NPC 제거
+	// rank NPC 는 NPC자체가 저장될 필요가 없음
+	// 왜냐하면 각 waitingTime마다 순위에 따라서 NPC가 바뀌므로
+	// StageManager에 위치만 지정해놓고 각 상황에따라 NPC를 삭제하고 불러와야 하므로.
+	this.stageManager.removeRemainingRankNPCs();
+
+	// file save
+	this.dataManager.save();
+    }
 }

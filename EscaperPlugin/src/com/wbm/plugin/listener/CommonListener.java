@@ -163,7 +163,7 @@ public class CommonListener implements Listener {
 	// keep inventory
 	e.setKeepInventory(true);
 	// player가 플레이중이던 미니게임 종료
-	this.miniGameManager.handlePlayerCurrentMiniGameAndExitGame(e.getEntity());
+	this.miniGameManager.handlePlayerCurrentMiniGameExiting(e.getEntity());
     }
 
     @EventHandler
@@ -363,7 +363,7 @@ public class CommonListener implements Listener {
 	Player p =e.getPlayer();
 	
 	// player가 플레이중이던 미니게임 종료
-	this.miniGameManager.handlePlayerCurrentMiniGameAndExitGame(p);
+	this.miniGameManager.handlePlayerCurrentMiniGameExiting(p);
     }
     
     

@@ -97,7 +97,7 @@ public class MiniGameManager implements DataMember {
 
     }
 
-    public void handlePlayerCurrentMiniGameAndExitGame(Player p) {
+    public void handlePlayerCurrentMiniGameExiting(Player p) {
 	/*
 	 * 플레이어가 진행중이던 game이 있을 때, 강제로 멈춰야 할때 사용하는 메소드
 	 * 
@@ -114,6 +114,8 @@ public class MiniGameManager implements DataMember {
 	    BroadcastTool.debug("handle exit game!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 	}
     }
+    
+
 
     public boolean isPlayerPlayingGame(Player p) {
 	/*

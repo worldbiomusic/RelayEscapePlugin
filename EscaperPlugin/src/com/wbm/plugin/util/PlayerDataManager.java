@@ -69,58 +69,6 @@ public class PlayerDataManager implements DataMember
 
 	
 
-	public void changePlayerRole(UUID uuid, Role role)
-	{
-		// gamemode, role바꾸기: 각 Role에 정해진 Gamemode가 있기 때문
-		PlayerData pData=this.getPlayerData(uuid);
-
-		if(pData==null)
-		{
-			BroadcastTool.printConsoleMessage(ChatColor.RED + "[Bug]: changePlayerRole()- no player in playerData");
-			return;
-		}
-
-		pData.setRole(role);
-
-		this.setPlayerGameModeWithRole(uuid);
-	}
-
-	public void setPlayerGameModeWithRole(UUID uuid)
-	{
-		PlayerData pData=this.getPlayerData(uuid);
-		if(pData==null)
-		{
-			return;
-		}
-
-		Role role=pData.getRole();
-
-		GameMode mode=GameMode.SURVIVAL;
-
-		if(role==Role.MAKER)
-		{
-			mode=GameMode.CREATIVE;
-		}
-		else if(role==Role.CHALLENGER)
-		{
-			mode=GameMode.SURVIVAL;
-		}
-		else if(role==Role.TESTER)
-		{
-			mode=GameMode.SURVIVAL;
-		}
-		else if(role==Role.VIEWER)
-		{
-			mode=GameMode.CREATIVE;
-		}
-		else if(role==Role.WAITER)
-		{
-			mode=GameMode.SURVIVAL;
-		}
-
-		Player p=Bukkit.getPlayer(uuid);
-		p.setGameMode(mode);
-	}
 
 	public Player getMaker()
 	{
@@ -144,7 +92,7 @@ public class PlayerDataManager implements DataMember
 
 	public boolean isMaker(Player p)
 	{
-		return(p.getUniqueId().equals(this.maker.getUniqueId()));
+		return (p.equals(this.maker));
 	}
 
 	@SuppressWarnings("unchecked")

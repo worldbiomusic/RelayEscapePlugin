@@ -106,7 +106,7 @@ public class ItemUsingManager implements Listener
 			inv.addItem(ShopGoods.DIRT.getGoods());
 						
 			// 자신이 구입한 Goods(MakingBLock)만 인벤토리에 추가
-			for(ShopGoods makingBlock : ShopGoods.getMakingBlocks()) {
+			for (ShopGoods makingBlock : ShopGoods.getMakingBlocks()) {
 				PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
 				if(pData.doesHaveGoods(makingBlock)) {
 					inv.addItem(makingBlock.getGoods());

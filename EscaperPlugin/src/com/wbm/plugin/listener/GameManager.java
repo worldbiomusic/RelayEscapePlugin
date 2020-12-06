@@ -28,6 +28,7 @@ import com.wbm.plugin.util.general.BroadcastTool;
 import com.wbm.plugin.util.general.InventoryTool;
 import com.wbm.plugin.util.general.PlayerTool;
 import com.wbm.plugin.util.general.SpawnLocationTool;
+import com.wbm.plugin.util.general.TeleportTool;
 import com.wbm.plugin.util.general.shop.ShopGoods;
 import com.wbm.plugin.util.minigame.MiniGameManager;
 
@@ -72,18 +73,17 @@ public class GameManager implements Listener {
 	PlayerData pData;
 
 	// RelayTime = WAITING or MAKING or TESTING
-	Role baseRole = Role.WAITER;
+	Role role = Role.WAITER;
 	RelayTime time = this.relayManager.getCurrentTime();
 
 	if (time == RelayTime.CHALLENGING) {
-	    baseRole = Role.CHALLENGER;
+	    role = Role.CHALLENGER;
 	}
 
-	// TODO: config연동됬을때 활성화 시킬 코드
 	// PlayerDataManager에 데이터 없는지 확인 (= 서버 처음 들어옴)
 	if (this.pDataManager.isFirstJoin(uuid)) {
 	    String name = p.getName();
-	    pData = new PlayerData(uuid, name, baseRole);
+	    pData = new PlayerData(uuid, name, role);
 	}
 	// 전에 들어왔음 (바꿀것은 Role밖에 없음)
 	else {
@@ -95,36 +95,17 @@ public class GameManager implements Listener {
 //				Player maker=this.pDataManager.getMaker();
 		// 들어온사람이 전에 나간 Maker였을때
 		if (this.pDataManager.isMaker(p)) {
-		    BroadcastTool.sendMessage(p, "you are Viewer in your room(structure)");
-		    baseRole = Role.VIEWER;
+		    BroadcastTool.sendMessage(p, "you are Viewer in your room");
+		    role = Role.VIEWER;
 		}
 	    }
-
-	    // role변경
-	    pData.setRole(baseRole);
 	}
-	// TODO: config연동됬을때 활성화 시킬 코드
-
-	// TODO: config연동 안했을때 사용코드
-//		if(time == RelayTime.CHALLENGING) {
-//			// maker가 남아있는경우는 Maker가 ChallengingTime일떄 나간경우임!
-//			// -> role을 유지해서 viewer로 겜모를바꿔서 자신이 만든룸을 clear못하게 만들어야 함
-//			if(this.pDataManager.makerExists()) {
-//				// 들어온사람이 전에 나간 Maker였을때
-//				Player maker = this.pDataManager.getMaker();
-//				if(uuid.equals(maker.getUniqueId())) {
-//					p.sendMessage("you are Viewer in your room(structure)");
-//					// 바꿀 목표 데이터
-//					baseRole = Role.VIEWER;
-//				}
-//			}
-//		}
-	// TODO: config연동 안했을때 사용코드
 
 	// playerDataManager에 데이터 add
 	this.pDataManager.addPlayerData(pData);
-	// gamemode 처리
-	this.pDataManager.setPlayerGameModeWithRole(uuid);
+	
+	// role 처리
+	pData.setRole(role);
     }
 
     public void reRegisterAllPlayer() {
@@ -139,9 +120,9 @@ public class GameManager implements Listener {
 	// time에 따라서 spawn위치 바꾸기
 	if (this.relayManager.getCurrentTime() == RelayTime.MAKING
 		|| this.relayManager.getCurrentTime() == RelayTime.TESTING) {
-	    p.teleport(SpawnLocationTool.LOBBY);
+	    TeleportTool.tp(p, SpawnLocationTool.LOBBY);
 	} else { // Waiting, Challenging
-	    p.teleport(SpawnLocationTool.JOIN);
+	    TeleportTool.tp(p, SpawnLocationTool.JOIN);
 	}
 	InventoryTool.clearPlayerInv(p);
 	// 기본 굿즈 제공
@@ -245,7 +226,7 @@ public class GameManager implements Listener {
 		this.relayManager.resetRelaySetting();
 
 		// 1. 현재 Maker에게 이제 Challenger라는 메세지 전송
-		BroadcastTool.sendMessageToEveryone("core is broken!");
+		// -> core부수면 바로 waitingTime이 시작되므로 relayManager에서 관리
 
 		// 2. 클리어한 maker는 pDataManager의 maker로 등록
 		this.pDataManager.registerMaker(p);

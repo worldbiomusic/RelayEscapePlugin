@@ -5,8 +5,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.GameMode;
+import org.bukkit.entity.Player;
+
 import com.wbm.plugin.util.enums.GamePermission;
 import com.wbm.plugin.util.enums.Role;
+import com.wbm.plugin.util.general.BroadcastTool;
 import com.wbm.plugin.util.general.shop.ShopGoods;
 
 public class PlayerData implements Serializable
@@ -79,7 +85,41 @@ public class PlayerData implements Serializable
 
 	public void setRole(Role role)
 	{
+	    /*
+	     * Role과 GameMode는 동시에 이루어져야 하기 때문에 밑에 Role에 따라
+	     * Game모드 설정을 따로 추가함
+	     */
 		this.role=role;
+		this.setPlayerGameModeWithRole();
+	}
+
+	public void setPlayerGameModeWithRole()
+	{
+		GameMode mode=GameMode.SURVIVAL;
+
+		if(role==Role.MAKER)
+		{
+			mode=GameMode.CREATIVE;
+		}
+		else if(role==Role.CHALLENGER)
+		{
+			mode=GameMode.SURVIVAL;
+		}
+		else if(role==Role.TESTER)
+		{
+			mode=GameMode.SURVIVAL;
+		}
+		else if(role==Role.VIEWER)
+		{
+			mode=GameMode.CREATIVE;
+		}
+		else if(role==Role.WAITER)
+		{
+			mode=GameMode.SURVIVAL;
+		}
+
+		Player p=Bukkit.getPlayer(uuid);
+		p.setGameMode(mode);
 	}
 	
 	public int getToken()

@@ -3,7 +3,6 @@ package com.wbm.plugin.data;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -13,7 +12,7 @@ import com.wbm.plugin.util.Setting;
 
 public class RoomLocker
 {
-	public static World w = Bukkit.getWorld("world");
+	public static World w = Setting.world;
 	public static List<Location> mainLocker
 	= new ArrayList<>();
 	public static ItemStack mainLockerItem 

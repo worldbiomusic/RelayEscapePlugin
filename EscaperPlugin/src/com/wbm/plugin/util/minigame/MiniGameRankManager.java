@@ -11,6 +11,8 @@ import org.bukkit.entity.Player;
 
 import com.wbm.plugin.util.general.BroadcastTool;
 
+import net.md_5.bungee.api.ChatColor;
+
 public class MiniGameRankManager {
     /*
      * 이 클래스는 static 용
@@ -78,20 +80,19 @@ public class MiniGameRankManager {
 	/*
 	 * 전체를 보여주면 너무 많기 때문에 4분위수 값 경계점수만 보여줌
 	 */
-	BroadcastTool.sendMessage(p, "==========All Rank==========");
-	BroadcastTool.sendMessage(p, "[Quantile]");
+	BroadcastTool.sendMessage(p, ChatColor.BOLD + "[All Rank]");
 	
 	for (int i = 1; i <= 4; i++) {
 	    // 한단계 낮은 분위수
 	    String previousName = getQuartilePlayerName(rankData, i); 
-	    int previousScore = getScore(rankData, previousName);
+	    String previousScore = "" + ChatColor.RED + ChatColor.BOLD + getScore(rankData, previousName) + ChatColor.WHITE;
 	    
 	    // 현재 분위수
 	    String name = getQuartilePlayerName(rankData, i);
-	    int score = getScore(rankData, name);
+	    String score = "" + ChatColor.RED + ChatColor.BOLD + getScore(rankData, name) + ChatColor.WHITE;
 	    
 	    // print
-	    BroadcastTool.sendMessage(p, String.format("Quartile[%d]: %d(%s) ~ %d(%s)", 
+	    BroadcastTool.sendMessage(p, String.format("Q[%d]: %s(%s) ~ %s(%s)", 
 		    i, previousScore, previousName, score, name));
 	}
     }
