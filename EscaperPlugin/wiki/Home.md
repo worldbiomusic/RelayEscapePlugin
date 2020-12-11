@@ -9,7 +9,7 @@
 - 위키에서 수치를 통일해서 관리해야 함 -> 소스코드의 줄번호를 링크하기(그러면 소스코드가 바뀌어도 상관없음)
 - Home위키가 시작 위키로 다른 위키들을 모두 트리형태로 링크해서 사용해야 함
 - 필요한 소스코드는 링크해서 참고할 수 있음
-- 하위 모든 위키 [페이지 템플릿](https://github.com/worldbiomusic/RelayEscape/wiki/page-template)a
+- 하위 모든 위키 [페이지 템플릿](https://github.com/worldbiomusic/RelayEscape/wiki/page-template)
 
 # 링크
 - [플러그인 설명](https://github.com/worldbiomusic/RelayEscape/wiki/plugin-info)
