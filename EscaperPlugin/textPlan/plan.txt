@@ -1,0 +1,14 @@
+할것
+1.maker와 challenger가 나갈때 상황 처리
+2.config
+	-playerData
+	-roomData
+	-serverData
+3.Maker, Challenger이름 바꾸기 -> builder, finder
+
+
+공부할것
+1.디자인패턴
+2.spigot api
+3.java api
+4.wiki
