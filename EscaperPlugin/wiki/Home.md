@@ -13,4 +13,4 @@
 - 하위 모든 위키 [페이지 템플릿](https://github.com/worldbiomusic/RelayEscape/wiki/page-template)
 
 # 링크
-- [플러그인 설명](https://github.com/worldbiomusic/RelayEscape/wiki/plugin-info)
+- [플러그인 설명](https://github.com/worldbiomusic/RelayEscapePlugin/tree/master/EscaperPlugin/wiki)
