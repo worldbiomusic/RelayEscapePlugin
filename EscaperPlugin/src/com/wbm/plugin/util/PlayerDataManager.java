@@ -5,14 +5,11 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 
 import com.wbm.plugin.data.PlayerData;
 import com.wbm.plugin.util.config.ConfigTest;
 import com.wbm.plugin.util.config.DataMember;
-import com.wbm.plugin.util.enums.Role;
 import com.wbm.plugin.util.general.BroadcastTool;
 
 public class PlayerDataManager implements DataMember
@@ -64,7 +61,7 @@ public class PlayerDataManager implements DataMember
 
 	public boolean isFirstJoin(UUID uuid)
 	{
-		return ! (this.playerData.containsKey(uuid));
+		return !(this.playerData.containsKey(uuid));
 	}
 
 	

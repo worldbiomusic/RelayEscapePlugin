@@ -29,8 +29,9 @@ import com.wbm.plugin.util.general.InventoryTool;
 import com.wbm.plugin.util.general.PlayerTool;
 import com.wbm.plugin.util.general.SpawnLocationTool;
 import com.wbm.plugin.util.general.TeleportTool;
-import com.wbm.plugin.util.general.shop.ShopGoods;
 import com.wbm.plugin.util.minigame.MiniGameManager;
+import com.wbm.plugin.util.shop.GoodsRole;
+import com.wbm.plugin.util.shop.ShopGoods;
 
 public class GameManager implements Listener {
     /*
@@ -53,14 +54,13 @@ public class GameManager implements Listener {
 	// init
 	this.init();
     }
-    // 55KB = 55000Byte = 10 * 10 47 = 4700
 
     void init() {
-	// 1.서버 리로드하면 서버에 남아있는 플레이어들 다시 등록
-	this.reRegisterAllPlayer();
-
-	// 2.resetRelay
+	// 1.resetRelay
 	this.relayManager.resetRelay();
+
+	// 2.서버 리로드하면 서버에 남아있는 플레이어들 다시 등록
+	this.reRegisterAllPlayer();
     }
 
     void processPlayerData(Player p) {
@@ -72,10 +72,11 @@ public class GameManager implements Listener {
 	// (Challeging때 나간 Maker가 다시 들어온 경우 Viewer로)
 	PlayerData pData;
 
-	// RelayTime = WAITING or MAKING or TESTING
+	// RelayTime = WAITING or MAKING or TESTING일때는 Waiter
 	Role role = Role.WAITER;
 	RelayTime time = this.relayManager.getCurrentTime();
 
+	// RelayTime = CHALLENGING일때 Challenger
 	if (time == RelayTime.CHALLENGING) {
 	    role = Role.CHALLENGER;
 	}
@@ -85,16 +86,16 @@ public class GameManager implements Listener {
 	    String name = p.getName();
 	    pData = new PlayerData(uuid, name, role);
 	}
-	// 전에 들어왔음 (바꿀것은 Role밖에 없음)
+	// 전에 들어온적 있을 때(바꿀것은 Role밖에 없음)
 	else {
 	    pData = this.pDataManager.getPlayerData(uuid);
 
-	    // maker가 남아있는경우는 Maker가 ChallengingTime일떄 나간경우임!
-	    // -> role을 유지해서 viewer로 겜모를바꿔서 자신이 만든룸을 clear못하게 만들어야 함
-	    if (this.pDataManager.doesMakerExist()) {
-//				Player maker=this.pDataManager.getMaker();
-		// 들어온사람이 전에 나간 Maker였을때
-		if (this.pDataManager.isMaker(p)) {
+	    // 현재 ChallengingTime일때 Room의 Maker와 같으면
+	    // Role을 Vewer로 바꿔서 자신이 만든룸을 clear못하게 만들어야 함
+	    if (time == RelayTime.CHALLENGING) {
+		Room room = this.roomManager.getRoom(RoomType.MAIN);
+		// p가 현재 room maker일 때
+		if (pData.getName().equals(room.getMaker())) {
 		    BroadcastTool.sendMessage(p, "you are Viewer in your room");
 		    role = Role.VIEWER;
 		}
@@ -103,7 +104,7 @@ public class GameManager implements Listener {
 
 	// playerDataManager에 데이터 add
 	this.pDataManager.addPlayerData(pData);
-	
+
 	// role 처리
 	pData.setRole(role);
     }
@@ -115,6 +116,7 @@ public class GameManager implements Listener {
     }
 
     public void TODOListWhenplayerJoinServer(Player p) {
+	// PlayerData 관련 처리
 	this.processPlayerData(p);
 
 	// time에 따라서 spawn위치 바꾸기
@@ -124,12 +126,18 @@ public class GameManager implements Listener {
 	} else { // Waiting, Challenging
 	    TeleportTool.tp(p, SpawnLocationTool.JOIN);
 	}
+
+	// 인벤 초기화
 	InventoryTool.clearPlayerInv(p);
-	// 기본 굿즈 제공
+
+	// 기본 굿즈 없으면 PlayerData에 제공
 	this.giveBasicGoods(p);
     }
 
     void giveBasicGoods(Player p) {
+	/*
+	 * 기본굿즈: CHEST
+	 */
 	PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
 	if (!pData.doesHaveGoods(ShopGoods.CHEST)) {
 	    pData.addGoods(ShopGoods.CHEST);
@@ -284,104 +292,55 @@ public class GameManager implements Listener {
     // priority HIGH 로 높여서 마지막에 검사하게
 //	@EventHandler(priority=EventPriority.HIGH)
     public void onPlayerPlaceBlockInMainRoom(BlockPlaceEvent e) {
-	Block core = e.getBlock();
+	Block block = e.getBlock();
 
+	Player p = e.getPlayer();
+	PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
+	Role role = pData.getRole();
 	RelayTime time = this.relayManager.getCurrentTime();
-	// making time
-	if (time == RelayTime.MAKING) {
-	    Player p = e.getPlayer();
-	    // maker
-	    if (this.pDataManager.isMaker(p)) {
-		// 기본적으로 설치할수있게
-		e.setCancelled(false);
-
-		// core관련 if문
-		// 이미 설치되어 있을때
-		if (core.getType() == Material.GLOWSTONE) {
-		    if (this.relayManager.isCorePlaced()) {
-			BroadcastTool.sendMessage(p, "core is already placed");
-			e.setCancelled(true);
-		    } else {
-			// 설치 x 있을때
-			BroadcastTool.sendMessage(p, "core is placed (max: 1)");
-			this.relayManager.setCorePlaced(true);
+	// making time && maker
+	if (time == RelayTime.MAKING && role == Role.MAKER) {
+	    // 기본적으로 설치할수있게
+	    e.setCancelled(false);
+	    
+	    // 높이 제한 검사 (Goods) (MainRoom공간의 맨밑의 -1 높이로부터 측정)
+	    int blockHigh = block.getY() - ((int)RoomLocation.MAIN_Pos1.getY() - 1);
+	    // 기본 제한 높이 = 5
+	    int allowedHigh = 5;
+	    // HIGH_NN 굿즈중에서 가장 높은 굿즈 검색
+	    for(ShopGoods good : pData.getGoods()) {
+		if(good.getGoodsRole() == GoodsRole.ROOM_HIGH) {
+		    // "HIGH_10"에서 뒤에 숫자만 가져오기
+		    String goodsStirng= good.name().split("_")[1];
+		    int goodsHigh = Integer.parseInt(goodsStirng);
+		    if(goodsHigh > allowedHigh) {
+			allowedHigh = goodsHigh;
 		    }
+		}
+	    }
+	    // 높이제한
+	    if(blockHigh > allowedHigh) {
+		BroadcastTool.sendMessage(p, "you can place block up to " + allowedHigh);
+		BroadcastTool.sendMessage(p, "HIGH_## Goods can highten your limit");
+		e.setCancelled(true);
+	    }
+	    
+	    
+
+	    // core관련 if문
+	    // 이미 설치되어 있을때
+	    if (block.getType() == Material.GLOWSTONE) {
+		if (this.relayManager.isCorePlaced()) {
+		    BroadcastTool.sendMessage(p, "core is already placed");
+		    e.setCancelled(true);
+		} else {
+		    // 설치 x 있을때
+		    BroadcastTool.sendMessage(p, "core is placed (max: 1)");
+		    this.relayManager.setCorePlaced(true);
 		}
 	    }
 	}
     }
-
-//	@EventHandler
-//	public void onPlayerBreakBlockInMainRoom(BlockBreakEvent e)
-//	{
-//		// 생각해보니까 Maker일때만 break할때  체크해주면 됨(다른때는  다 그냥 cancel true로 !
-//		Player p=e.getPlayer();
-//		UUID uuid=p.getUniqueId();
-//		PlayerData pData=this.pDataManager.getOnlinePlayerData(uuid);
-//		Role role=pData.getRole();
-//
-//		boolean permission=false;
-//
-//		// Role별로 권한 체크
-//		if(role==Role.MAKER)
-//		{
-//			permission=RolePermission.MAKER_BREAKBLOCK;
-//		}
-//		else if(role==Role.CHALLENGER)
-//		{
-//			permission=RolePermission.CHALLENGER_BREAKBLOCK;
-//		}
-//		else if(role==Role.TESTER)
-//		{
-//			permission=RolePermission.TESTER_BREAKBLOCK;
-//		}
-//		else if(role==Role.VIEWER)
-//		{
-//			permission=RolePermission.VIEWER_BREAKBLOCK;
-//		}
-//		else if(role==Role.WAITER)
-//		{
-//			permission=RolePermission.WAITER_BREAKBLOCK;
-//		}
-//
-//		e.setCancelled(!permission);
-//	}
-
-//	@EventHandler
-//	public void onPlayerPlaceBlockInMainRoom(BlockPlaceEvent e)
-//	{
-//		// 생각해보니까 Maker일때만 break할때  체크해주면 됨(다른때는  다 그냥 cancel true로 !
-//		Player p=e.getPlayer();
-//		UUID uuid=p.getUniqueId();
-//		PlayerData pData=this.pDataManager.getOnlinePlayerData(uuid);
-//		Role role=pData.getRole();
-//
-//		boolean permission=false;
-//
-//		// Role별로 권한 체크
-//		if(role==Role.MAKER)
-//		{
-//			permission=RolePermission.MAKER_PLACEBLOCK;
-//		}
-//		else if(role==Role.CHALLENGER)
-//		{
-//			permission=RolePermission.CHALLENGER_PLACEBLOCK;
-//		}
-//		else if(role==Role.TESTER)
-//		{
-//			permission=RolePermission.TESTER_PLACEBLOCK;
-//		}
-//		else if(role==Role.VIEWER)
-//		{
-//			permission=RolePermission.VIEWER_PLACEBLOCK;
-//		}
-//		else if(role==Role.WAITER)
-//		{
-//			permission=RolePermission.WAITER_PLACEBLOCK;
-//		}
-//
-//		e.setCancelled(!permission);
-//	}
 
     @EventHandler
     public void onPlayerPlaceBucket(PlayerBucketEmptyEvent e) {
@@ -403,8 +362,7 @@ public class GameManager implements Listener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent e) {
 	Player p = e.getPlayer();
-	BroadcastTool.sendMessage(p, "welcome to RelayEscape server!");
-
+	BroadcastTool.sendTitle(p, "RelayEscape", "");
 	// PlayerData 처리
 	this.TODOListWhenplayerJoinServer(p);
     }
@@ -418,27 +376,16 @@ public class GameManager implements Listener {
 	    if (this.pDataManager.isMaker(p)) {
 		RelayTime time = this.relayManager.getCurrentTime();
 
-		// Time = WAITING, MAKING, TESTING일떄
+		// Time = WAITING, MAKING, TESTING일떄 maker가 나가면 resetRelay()
 		if (time == RelayTime.WAITING || time == RelayTime.MAKING || time == RelayTime.TESTING) {
 		    // msg보내기
-		    BroadcastTool.sendMessageToEveryone("Maker quit server");
+		    BroadcastTool.sendTitleToEveryone("Relay Reset", "Maker quit the server");
 
 		    // reset relay
 		    this.relayManager.resetRelay();
 		}
-
-		// Time = CHALLENGING 일때
-		// -> 재접해서 다시 클리어 방지!
-		else if (time == RelayTime.CHALLENGING) {
-		    // PlayerDataManager maker = null 처리하지 않고, 다시 들어올때 maker에 있는 player로 maker판별!
-		    // -> join event에서 막아주기 때문에수행할 동작이 없음
-		}
 	    }
 	}
-
-	// PlayerDataManager 처리
-	// 구조 바꿔서 할 필요 없어짐
-//		this.pDataManager.saveAndRemovePlayerData(p.getUniqueId());
     }
 
 }

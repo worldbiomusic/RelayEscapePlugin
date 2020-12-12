@@ -21,7 +21,7 @@ import com.wbm.plugin.util.enums.Role;
 import com.wbm.plugin.util.enums.RoomType;
 import com.wbm.plugin.util.general.BroadcastTool;
 import com.wbm.plugin.util.general.NPCManager;
-import com.wbm.plugin.util.general.shop.ShopGoods;
+import com.wbm.plugin.util.shop.ShopGoods;
 
 public class Commands implements CommandExecutor
 {
@@ -417,17 +417,4 @@ public class Commands implements CommandExecutor
 		}
 		return false;
 	}
-
-//	private boolean npcCreate(Player p, String[] args)
-//	{
-//		// /re npc create <name>
-//
-//		if(args.length==3)
-//		{
-//			String name=args[2];
-//
-//			return true;
-//		}
-//		return false;
-//	}
 }

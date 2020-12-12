@@ -35,10 +35,11 @@ import com.wbm.plugin.util.general.BanItemTool;
 import com.wbm.plugin.util.general.BroadcastTool;
 import com.wbm.plugin.util.general.NPCManager;
 import com.wbm.plugin.util.general.SpawnLocationTool;
-import com.wbm.plugin.util.general.shop.ShopGoods;
-import com.wbm.plugin.util.general.shop.ShopManager;
+import com.wbm.plugin.util.general.TeleportTool;
 import com.wbm.plugin.util.general.skin.SkinManager;
 import com.wbm.plugin.util.minigame.MiniGameManager;
+import com.wbm.plugin.util.shop.ShopGoods;
+import com.wbm.plugin.util.shop.ShopManager;
 
 public class Main extends JavaPlugin {
     Server server;
@@ -101,6 +102,9 @@ public class Main extends JavaPlugin {
 
 	    // play music every 4 minutes
 	    this.loopPlayingMusic();
+	    
+	    // check player too far
+	    this.checkPlayerIsTooFarAway();
 	} catch (Exception e) {
 	    e.printStackTrace();
 	}
@@ -120,7 +124,7 @@ public class Main extends JavaPlugin {
 	this.banItems = new BanItemTool();
 	this.banItems.banAllItem();
 	for (ShopGoods goods : ShopGoods.values()) {
-	    this.banItems.unbanItem(goods.getGoods().getType());
+	    this.banItems.unbanItem(goods.getItemStack().getType());
 	}
 
 	// kits
@@ -296,6 +300,27 @@ public class Main extends JavaPlugin {
 	this.stageManager.registerLocations("challengingCount", challengingLocs);
 	this.stageManager.registerLocations("clearCount", clearLocs);
 	this.stageManager.registerLocations("roomCount", roomLocs);
+    }
+    
+    private void checkPlayerIsTooFarAway() {
+	/*
+	 * 플레이어가 너무 멀리가면 청크로딩으로 맵이 켜져서 다시 중심으로 TP
+	 */
+	Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
+	    @Override
+	    public void run() {
+		for (Player p : Bukkit.getOnlinePlayers()) {
+		    Location loc  = Setting.STDLOC.clone().subtract(p.getLocation());
+		    int dx = Math.abs((int)loc.getX());
+		    int dy = Math.abs((int)loc.getY());
+		    int dz = Math.abs((int)loc.getZ());
+		    
+		    if(dx > 100 || dy > 100 || dz > 100) {
+			TeleportTool.tp(p, SpawnLocationTool.JOIN);
+		    }
+		}
+	    }
+	}, 0, 20 * 5);
     }
 
 //	void makeKits() {

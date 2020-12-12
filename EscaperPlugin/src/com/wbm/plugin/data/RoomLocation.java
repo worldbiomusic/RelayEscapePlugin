@@ -13,15 +13,20 @@ public class RoomLocation
 {
 	// main
 	public static final Location MAIN_Pos1 = Setting.getLoationFromSTDLOC(1, 4, 1);
-	public static final Location MAIN_Pos2 =Setting.getLoationFromSTDLOC(10, 50, 10);
+	public static final Location MAIN_Pos2 =Setting.getLoationFromSTDLOC(10, 53, 10);
+	
+	// ROOM사이즈 (main이랑 practice room이랑 같은 크기임)
+	public static final int ROOM_SIZE_X = Math.abs((int)(MAIN_Pos1.getX() - MAIN_Pos2.getX()));
+	public static final int ROOM_SIZE_Y = Math.abs((int)(MAIN_Pos1.getY() - MAIN_Pos2.getY()));
+	public static final int ROOM_SIZE_Z = Math.abs((int)(MAIN_Pos1.getZ() - MAIN_Pos2.getZ()));
 	
 	// practice
 	public static final Location PRACTICE_Pos1 = Setting.getLoationFromSTDLOC(21, 4, 21);
-	public static final Location PRACTICE_Pos2 = Setting.getLoationFromSTDLOC(30, 50, 30);
+	public static final Location PRACTICE_Pos2 = Setting.getLoationFromSTDLOC(30, 53, 30);
 	
 	// minigame
 	public static final Location MINIGAME_Pos1 = Setting.getLoationFromSTDLOC(1, 4, 21);
-	public static final Location MINIGAME_Pos2 = Setting.getLoationFromSTDLOC(10, 50, 30);
+	public static final Location MINIGAME_Pos2 = Setting.getLoationFromSTDLOC(10, 53, 30);
 	
 	public static int getRoomBlockCount(RoomType roomType) {
 		Location pos1 = null, pos2 = null;

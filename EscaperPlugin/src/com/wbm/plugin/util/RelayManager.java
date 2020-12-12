@@ -22,8 +22,8 @@ import com.wbm.plugin.util.general.InventoryTool;
 import com.wbm.plugin.util.general.PlayerTool;
 import com.wbm.plugin.util.general.SpawnLocationTool;
 import com.wbm.plugin.util.general.TeleportTool;
-import com.wbm.plugin.util.general.shop.ShopGoods;
 import com.wbm.plugin.util.minigame.MiniGameManager;
+import com.wbm.plugin.util.shop.ShopGoods;
 
 /* TODO: RelayTime의 Making -> Building, Challenging -> Finding으로 변경
  * TODO: ROle의 Maker-> Builder, Challenger -> Finder로 변경
@@ -265,15 +265,15 @@ public class RelayManager {
     private void startMaking() {
 //	 RelayTime 관리
 	this.currentTime = RelayTime.MAKING;
-	
+
+	// room basic title 을 "maker이름 + n"으로 설정
+	this.roomTitle = this.roomManager.getNextTitleWithMakerName(this.getMaker().getName());
+
 	// common todo list
 	RelayTimeCommonTODOList();
 
 	// Main Room Locker
 	this.roomManager.lockRoom(RoomType.MAIN);
-
-	// room basic title 을 "maker이름 + n"으로 설정
-	this.roomTitle = this.roomManager.getNextTitleWithMakerName(this.getMaker().getName());
 
 	// practice room 설정
 	Room randomRoom = this.roomManager.getRandomRoomData();
@@ -283,7 +283,7 @@ public class RelayManager {
     private void startTesting() {
 //	 RelayTime 관리
 	this.currentTime = RelayTime.TESTING;
-	
+
 	// common todo list
 	RelayTimeCommonTODOList();
     }
@@ -291,7 +291,10 @@ public class RelayManager {
     private void startChallenging() {
 //	 RelayTime 관리
 	this.currentTime = RelayTime.CHALLENGING;
-	
+
+	// maker unregister
+	this.pDataManager.unregisterMaker();
+
 	// common todo list
 	RelayTimeCommonTODOList();
 
@@ -322,8 +325,8 @@ public class RelayManager {
 	 * 
 	 * 대부분 메소드들은 각 플레이어의 Role을 가지고 구분해서 수행함
 	 * 
-	 * 1.여기서 this.currentTime = RelayTime.getNextTime(this.currentTime); 사용하면 안되는 이유:
-	 * 항상 다음것으로 흘러가지 않고 중간에 Making이나 Testing이 실패할 수 도 있는 상황이 있기 떄문에 각자의 메소드에서 직접
+	 * 1.여기서 this.currentTime = RelayTime.getNextTime(this.currentTime); 사용하면 안되는
+	 * 이유: 항상 다음것으로 흘러가지 않고 중간에 Making이나 Testing이 실패할 수 도 있는 상황이 있기 떄문에 각자의 메소드에서 직접
 	 * 설정해줘야 함(예)this.current = RelayTime.TESTING)
 	 * 
 	 * 2.역할 변경
@@ -559,21 +562,21 @@ public class RelayManager {
 	return false;
     }
 
-    private void giveGoodsToPlayer(Player p) {
-	/*
-	 * playerData가 가지고 있는 good중에서만 해당 role에 맞는 good만을 인벤토리에 추가함 이 메소드가 실행되기 전에 선행되야
-	 * 하는 것: player role 변경!
-	 * 
-	 * 각 Role에 맞는 Goods중에서 가지고 있는 Goods 인벤에 지급
-	 */
-
-	PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
-	for (ShopGoods good : ShopGoods.getRoleGoods(pData.getRole())) {
-	    if (pData.doesHaveGoods(good)) {
-		InventoryTool.addItemToPlayer(p, good.getGoods());
-	    }
-	}
-    }
+//    private void giveGoodsToPlayer(Player p) {
+//	/*
+//	 * playerData가 가지고 있는 good중에서만 해당 role에 맞는 good만을 인벤토리에 추가함 이 메소드가 실행되기 전에 선행되야
+//	 * 하는 것: player role 변경!
+//	 * 
+//	 * 각 Role에 맞는 Goods중에서 가지고 있는 Goods 인벤에 지급
+//	 */
+//
+//	PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
+//	for (ShopGoods good : ShopGoods.getPlayerRoleGoods(pData.getRole())) {
+//	    if (pData.doesHaveGoods(good)) {
+//		InventoryTool.addItemToPlayer(p, good.getItemStack());
+//	    }
+//	}
+//    }
 
     private void giveGoodsToEveryone() {
 	/*
@@ -582,9 +585,9 @@ public class RelayManager {
 	 */
 	for (Player p : Bukkit.getOnlinePlayers()) {
 	    PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
-	    for (ShopGoods good : ShopGoods.getRoleGoods(pData.getRole())) {
+	    for (ShopGoods good : ShopGoods.getPlayerRoleGoods(pData.getRole())) {
 		if (pData.doesHaveGoods(good)) {
-		    InventoryTool.addItemToPlayer(p, good.getGoods());
+		    InventoryTool.addItemToPlayer(p, good.getItemStack());
 		}
 	    }
 	}
@@ -616,7 +619,10 @@ public class RelayManager {
 	} else if (this.currentTime == RelayTime.TESTING && this.pDataManager.isMaker(p)) {
 	    role = Role.TESTER;
 	} else if (this.currentTime == RelayTime.CHALLENGING) {
-	    if (this.pDataManager.isMaker(p)) {
+	    Room room = this.roomManager.getRoom(RoomType.MAIN);
+	    // 현재 main room maker가 플레이어이면 Viewer로 역할 변경해서 클리어 불가능 하게
+	    BroadcastTool.debug("pData: "+pData);
+	    if (room.getMaker().equals(pData.getName())) {
 		role = Role.VIEWER;
 	    } else {
 		role = Role.CHALLENGER;
@@ -657,7 +663,9 @@ public class RelayManager {
 	for (Player p : Bukkit.getOnlinePlayers()) {
 	    PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
 	    Role role = pData.getRole();
-	    if (role == Role.WAITER) {
+	    if (role == Role.WAITER && this.currentTime == RelayTime.WAITING) {
+		// 특별히 WaitingTime일때는 누군가 부신거므로 코어 부셔졌다고 메세지 전송
+		BroadcastTool.sendMessage(p, this.getMaker().getName() + " break the core");
 	    } else if (role == Role.MAKER) {
 		BroadcastTool.sendMessage(p, "You can save room with title " + "/re room title [title] "
 			+ "\n(basic title: " + this.roomTitle + ")");
@@ -672,9 +680,10 @@ public class RelayManager {
 		    BroadcastTool.debug("roomData count : " + this.roomManager.getAllRoomCount());
 		}
 	    } else if (role == Role.VIEWER) {
-		BroadcastTool.sendMessage(p, "You cannot clear your own room");
+		BroadcastTool.sendMessage(p, "You are Viewer in your room");
 	    }
 
+	    // 공통 title 전송
 	    BroadcastTool.sendTitle(p, this.currentTime.name(), "you are " + role.name());
 	}
     }

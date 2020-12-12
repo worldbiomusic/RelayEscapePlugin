@@ -27,9 +27,9 @@ public class BlockTool
 		int dz=MathTool.getDiff(pos1Z, pos2Z);
 
 		// get smaller x, y, z
-		int smallX=MathTool.getSmaller(pos1X, pos2X);
-		int smallY=MathTool.getSmaller(pos1Y, pos2Y);
-		int smallZ=MathTool.getSmaller(pos1Z, pos2Z);
+		int smallX=Math.min(pos1X, pos2X);
+		int smallY=Math.min(pos1Y, pos2Y);
+		int smallZ=Math.min(pos1Z, pos2Z);
 
 		int index=0;
 		/*
@@ -70,9 +70,9 @@ public class BlockTool
 		int dz=MathTool.getDiff(pos1Z, pos2Z);
 
 		// get smaller x, y, z
-		int smallX=MathTool.getSmaller(pos1X, pos2X);
-		int smallY=MathTool.getSmaller(pos1Y, pos2Y);
-		int smallZ=MathTool.getSmaller(pos1Z, pos2Z);
+		int smallX=Math.min(pos1X, pos2X);
+		int smallY=Math.min(pos1Y, pos2Y);
+		int smallZ=Math.min(pos1Z, pos2Z);
 
 		int index=0;
 		/*
@@ -120,9 +120,9 @@ public class BlockTool
 		int dz=MathTool.getDiff(pos1Z, pos2Z);
 
 		// get smaller x, y, z
-		int smallX=MathTool.getSmaller(pos1X, pos2X);
-		int smallY=MathTool.getSmaller(pos1Y, pos2Y);
-		int smallZ=MathTool.getSmaller(pos1Z, pos2Z);
+		int smallX=Math.min(pos1X, pos2X);
+		int smallY=Math.min(pos1Y, pos2Y);
+		int smallZ=Math.min(pos1Z, pos2Z);
 
 		/*
 		 * for문에서 <=dx인 이유: 만약 (1,1) ~ (3,3) 면적의 블럭을 지정하면 총 9개의 블럭을 가리키는것인데 위에서 dx, dy,

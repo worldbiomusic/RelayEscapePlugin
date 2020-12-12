@@ -1,4 +1,4 @@
-package com.wbm.plugin.util.minigame;
+package com.wbm.plugin.util.minigame.games;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +14,7 @@ import com.wbm.plugin.util.general.BlockTool;
 import com.wbm.plugin.util.general.BroadcastTool;
 import com.wbm.plugin.util.general.InventoryTool;
 import com.wbm.plugin.util.general.ItemStackTool;
+import com.wbm.plugin.util.minigame.MiniGame;
 
 public class Painter extends MiniGame {
 

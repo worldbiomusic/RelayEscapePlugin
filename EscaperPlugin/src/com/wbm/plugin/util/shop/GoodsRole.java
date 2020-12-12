@@ -1,4 +1,4 @@
-package com.wbm.plugin.util.general.shop;
+package com.wbm.plugin.util.shop;
 
 public enum GoodsRole {
     /*
@@ -16,5 +16,7 @@ public enum GoodsRole {
 
     FUN,
 
-    MAKING_BLOCK;
+    MAKING_BLOCK,
+    
+    ROOM_HIGH;
 }

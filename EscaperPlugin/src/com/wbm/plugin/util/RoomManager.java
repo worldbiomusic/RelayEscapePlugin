@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -25,10 +24,21 @@ import com.wbm.plugin.util.general.MathTool;
 
 public class RoomManager implements DataMember {
     /*
-     * Time Waiting Making Testing Challenging Challenging(again) Room "empty"
-     * "empty" "empty" new title random
+     * 룸 크기: 10 * 50 * 10 = 5000
      * 
-     * Room 크기가 다 일정해야 함!
+     * [AIR를 null로 저장했을때]
+     * 
+     * 룸 개수: 51개 크기: 255KB
+     * 
+     * 룸 1개당 크기: 5KB
+     * 
+     * null(AIR)저장 크기 = 0.001KB
+     * 
+     * 일반블럭 저장크기 = 0.012KB
+     * 
+     * 12배 차이남
+     * 
+     * ※더욱 데이터 아끼는 방법 HashMap<Location, BlockData>으로 저장 (fill 하기 전에 모두 AIR로 변경후에)
      */
 
     // 단순한 Room 데이터들
@@ -62,6 +72,9 @@ public class RoomManager implements DataMember {
     }
 
     public Room getRoom(RoomType roomType) {
+	/*
+	 * 현재 RoomType의 Room을 반환
+	 */
 	return this.rooms.get(roomType);
     }
 
@@ -71,9 +84,10 @@ public class RoomManager implements DataMember {
 
     public String saveRoomData(RoomType roomType, Player p, String roomTitle) {
 
-	// main room
+	// room data 가져오기
 	List<BlockData> blockDatas = this.getRoomBlockDatas(roomType);
 
+	// room 객체 생성
 	Room room = new Room(roomTitle, p.getName(), blockDatas, LocalDateTime.now());
 
 	// rooms 에 저장
@@ -95,9 +109,11 @@ public class RoomManager implements DataMember {
 	return null;
     }
 
-    // TODO: RoomType으로 구별해서 지역별로 data만들기 (argu에 RoomType roomType 추가하기)
+    @SuppressWarnings("deprecation")
     public List<BlockData> getRoomBlockDatas(RoomType roomType) {
-
+	/*
+	 * Material.AIR는 BlockData = null로 저장 (데이터 크기 줄이기)
+	 */
 	// Main room
 	Location pos1 = null, pos2 = null;
 	if (roomType == RoomType.MAIN) {
@@ -107,6 +123,7 @@ public class RoomManager implements DataMember {
 	    pos1 = RoomLocation.PRACTICE_Pos1;
 	    pos2 = RoomLocation.PRACTICE_Pos2;
 	}
+
 	int pos1X = (int) pos1.getX();
 	int pos2X = (int) pos2.getX();
 	int pos1Y = (int) pos1.getY();
@@ -120,23 +137,27 @@ public class RoomManager implements DataMember {
 	int dz = MathTool.getDiff(pos1Z, pos2Z);
 
 	// get smaller x, y, z
-	int smallX = MathTool.getSmaller(pos1X, pos2X);
-	int smallY = MathTool.getSmaller(pos1Y, pos2Y);
-	int smallZ = MathTool.getSmaller(pos1Z, pos2Z);
+	int smallX = Math.min(pos1X, pos2X);
+	int smallY = Math.min(pos1Y, pos2Y);
+	int smallZ = Math.min(pos1Z, pos2Z);
 
 	List<BlockData> blocks = new ArrayList<>();
 	for (int z = 0; z <= dz; z++) {
 	    for (int y = 0; y <= dy; y++) {
 		for (int x = 0; x <= dx; x++) {
-		    Location loc = new Location(Bukkit.getWorld("world"), smallX, smallY, smallZ);
-		    ;
+		    Location loc = new Location(Setting.world, smallX, smallY, smallZ);
 		    loc.add(x, y, z);
 		    Block b = loc.getBlock();
 
 		    Material mat = b.getType();
-		    @SuppressWarnings("deprecation")
 		    Byte data = b.getData();
+
 		    BlockData blockData = new BlockData(mat, data);
+
+		    // AIR일때 null로 저장(데이터 크기 줄일 수 있음)
+		    if (mat == Material.AIR) {
+			blockData = null;
+		    }
 
 		    // add to blockData list
 		    blocks.add(blockData);
@@ -155,11 +176,12 @@ public class RoomManager implements DataMember {
 	    // make room
 	    List<BlockData> emptyBlocks = new ArrayList<>();
 	    for (int i = 0; i < mainRoomBlockCount; i++) {
-		emptyBlocks.add(new BlockData(Material.AIR, 0));
+		// Material.AIR
+		emptyBlocks.add(null);
 	    }
 
 	    // put room
-	    Room emptyRoom = new Room("empty", "wbm", emptyBlocks, LocalDateTime.of(2020, 11, 1, 0, 0));
+	    Room emptyRoom = new Room("empty", "LLLJH", emptyBlocks, LocalDateTime.of(2020, 11, 1, 0, 0));
 	    this.roomData.put("empty", emptyRoom);
 	}
 
@@ -167,13 +189,16 @@ public class RoomManager implements DataMember {
 	if (!(this.roomData.containsKey("base"))) {
 	    // make room
 	    List<BlockData> baseBlocks = new ArrayList<>();
-	    baseBlocks.add(new BlockData(Material.GLOWSTONE, 0));
 	    for (int i = 0; i < mainRoomBlockCount; i++) {
-		baseBlocks.add(new BlockData(Material.AIR, 0));
+		// Material.AIR
+		baseBlocks.add(null);
 	    }
 
+	    // set core block
+	    baseBlocks.set(0, new BlockData(Material.GLOWSTONE, 0));
+
 	    // put room
-	    Room baseRoom = new Room("base", "wbm", baseBlocks, LocalDateTime.of(2020, 11, 1, 0, 0));
+	    Room baseRoom = new Room("base", "LLLJH", baseBlocks, LocalDateTime.of(2020, 11, 1, 0, 0));
 	    this.roomData.put("base", baseRoom);
 	}
 
@@ -184,12 +209,13 @@ public class RoomManager implements DataMember {
     {
 	this.rooms.put(roomType, room);
 	this.fillSpace(roomType, room.getBlocks());
-
-	
     }
 
     @SuppressWarnings("deprecation")
     void fillSpace(RoomType roomType, List<BlockData> blocks) {
+	/*
+	 * BlockData == null 인것은 Material.AIR로 변경 (데이터 크기 줄이기)
+	 */
 	Location pos1 = null, pos2 = null;
 
 	if (roomType == RoomType.MAIN) {
@@ -217,9 +243,9 @@ public class RoomManager implements DataMember {
 	int dz = MathTool.getDiff(pos1Z, pos2Z);
 
 	// get smaller x, y, z
-	int smallX = MathTool.getSmaller(pos1X, pos2X);
-	int smallY = MathTool.getSmaller(pos1Y, pos2Y);
-	int smallZ = MathTool.getSmaller(pos1Z, pos2Z);
+	int smallX = Math.min(pos1X, pos2X);
+	int smallY = Math.min(pos1Y, pos2Y);
+	int smallZ = Math.min(pos1Z, pos2Z);
 
 	int index = 0;
 	/*
@@ -229,12 +255,22 @@ public class RoomManager implements DataMember {
 	for (int z = 0; z <= dz; z++) {
 	    for (int y = 0; y <= dy; y++) {
 		for (int x = 0; x <= dx; x++) {
-		    Location loc = new Location(Bukkit.getWorld("world"), smallX, smallY, smallZ);
+		    Location loc = new Location(Setting.world, smallX, smallY, smallZ);
 		    loc.add(x, y, z);
 
 		    BlockData blockData = blocks.get(index);
-		    Material mat = blockData.getMaterial();
-		    Byte data = blockData.getData();
+		    Material mat;
+		    Byte data;
+
+		    // blockData == null일때 AIR로 변경해서 채우기
+		    if (blockData == null) {
+			mat = Material.AIR;
+			data = 0;
+		    } else {
+			mat = blockData.getMaterial();
+			data = blockData.getData();
+		    }
+
 		    // set type
 		    loc.getBlock().setType(mat);
 		    // set data
@@ -317,18 +353,17 @@ public class RoomManager implements DataMember {
 	    BroadcastTool.sendMessage(p, roomInfo);
 	}
     }
-    
+
     public int getAllRoomCount() {
 	return this.roomData.size();
     }
-    
 
     @SuppressWarnings("unchecked")
     @Override
     public void installData(Object obj) {
 	this.roomData = (Map<String, Room>) obj;
 
-	// register basic rooms
+//	 register basic rooms
 	this.registerBasicRooms();
 
 	BroadcastTool.debug("============ROOM DATA===============");

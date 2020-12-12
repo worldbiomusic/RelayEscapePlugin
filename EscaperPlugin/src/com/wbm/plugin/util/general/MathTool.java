@@ -42,21 +42,6 @@ public class MathTool
 		return Math.abs(a - b);
 	}
 	
-	public static int getSmaller(int a, int b) {
-		if(a < b) {
-			return a;
-		} else {
-			return b;
-		}
-	}
-	
-	public static int getBigger(int a, int b) {
-		if(a > b) {
-			return a;
-		} else {
-			return b;
-		}
-	}
 }
 
 

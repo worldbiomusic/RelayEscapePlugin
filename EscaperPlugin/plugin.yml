@@ -1,15 +1,18 @@
 name: EscaperServerPlugin
 main: com.wbm.plugin.Main
 version: 1.0
-description: made by LLLJH (discord -> arong#7075)
+description: made by worldbiomusic (discord -> worldbiomusic#7075)
 
 commands:
   re:
     description: relay escaper plugin command
     usage:  |  
-          /re d [role | roles | time | finish | reset | pdata | allpdata]
+          /re d [relay | role | roles | time | finish | reset | pdata | allpdata | token]
           /re room [load | title] <title>
           /re room [empty | list]
+          /re rank [tokenrank | challengingrank | clearrank | roomcountrank]
+          /re npc create <name> <skinName>
+          /re npc delete <name> 
       
 permissions:
   re.*:

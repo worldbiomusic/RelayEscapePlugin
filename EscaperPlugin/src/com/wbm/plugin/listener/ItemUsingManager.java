@@ -19,7 +19,8 @@ import com.wbm.plugin.util.general.BroadcastTool;
 import com.wbm.plugin.util.general.InventoryTool;
 import com.wbm.plugin.util.general.ItemStackTool;
 import com.wbm.plugin.util.general.SpawnLocationTool;
-import com.wbm.plugin.util.general.shop.ShopGoods;
+import com.wbm.plugin.util.shop.GoodsRole;
+import com.wbm.plugin.util.shop.ShopGoods;
 
 public class ItemUsingManager implements Listener
 {
@@ -68,7 +69,7 @@ public class ItemUsingManager implements Listener
 			
 			for(ShopGoods goods : ShopGoods.values()) {
 				// item이 goods인지 체크
-				if(ItemStackTool.isSameWithMateiralNDisplay(item, goods.getGoods()))
+				if(ItemStackTool.isSameWithMateiralNDisplay(item, goods.getItemStack()))
 				{
 					this.useGoods(p, goods);
 				}
@@ -94,7 +95,7 @@ public class ItemUsingManager implements Listener
 			this.relayManager.reduceTime(reductionTime);
 			
 			// 사용한후에 삭제
-			InventoryTool.removeItemFromPlayer(p, goods.getGoods());
+			InventoryTool.removeItemFromPlayer(p, goods.getItemStack());
 			
 			BroadcastTool.sendMessageToEveryone(reductionTime + " sec reduced by " + p.getName());
 		} else if(goods == ShopGoods.CHEST) {
@@ -102,14 +103,14 @@ public class ItemUsingManager implements Listener
 			Inventory inv = Bukkit.createInventory(null, 54, ShopGoods.CHEST.name());
 			
 			// 기본 MakingBlock제공
-			inv.addItem(ShopGoods.GLOWSTONE.getGoods());
-			inv.addItem(ShopGoods.DIRT.getGoods());
+			inv.addItem(ShopGoods.GLOWSTONE.getItemStack());
+			inv.addItem(ShopGoods.DIRT.getItemStack());
 						
 			// 자신이 구입한 Goods(MakingBLock)만 인벤토리에 추가
-			for (ShopGoods makingBlock : ShopGoods.getMakingBlocks()) {
+			for (ShopGoods makingBlock : ShopGoods.getGoodsRoleGoods(GoodsRole.MAKING_BLOCK)) {
 				PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
 				if(pData.doesHaveGoods(makingBlock)) {
-					inv.addItem(makingBlock.getGoods());
+					inv.addItem(makingBlock.getItemStack());
 				}
 			}
 			p.openInventory(inv);

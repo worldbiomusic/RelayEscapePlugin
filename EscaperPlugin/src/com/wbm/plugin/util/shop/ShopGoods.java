@@ -1,16 +1,12 @@
-package com.wbm.plugin.util.general.shop;
+package com.wbm.plugin.util.shop;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import com.wbm.plugin.data.PlayerData;
 import com.wbm.plugin.util.enums.Role;
-import com.wbm.plugin.util.general.InventoryTool;
 import com.wbm.plugin.util.general.ItemStackTool;
 
 public enum ShopGoods {
@@ -48,6 +44,8 @@ public enum ShopGoods {
     UNDER_BLOCK(ItemStackTool.item(Material.STICK, "UNDER_BLOCK", "create stone under your foot"), GoodsRole.MAKING),
     SPAWN(ItemStackTool.item(Material.WOOD_DOOR, "SPAWN", "teleport to spawn"), GoodsRole.MAKING),
     CHEST(ItemStackTool.item(Material.CHEST, "CHEST", "open inventory which has blocks you can use"), GoodsRole.MAKING),
+    HIGH_10(ItemStackTool.item(Material.TRIPWIRE_HOOK, "HIGH_10", "allow room high limit up to 10"), GoodsRole.ROOM_HIGH),
+    HIGH_15(ItemStackTool.item(Material.TRIPWIRE_HOOK, "HIGH_15", "allow room high limit up to 15"), GoodsRole.ROOM_HIGH),
 
     // challengerTool
     HALF_TIME(ItemStackTool.item(Material.WATCH, "HALF_TIME", "delete half of challenging time"),
@@ -66,12 +64,16 @@ public enum ShopGoods {
 	this.item = item;
 	this.goodsRole = goodsRole;
     }
+    
+    public GoodsRole getGoodsRole() {
+	return this.goodsRole;
+    }
 
-    public ItemStack getGoods() {
+    public ItemStack getItemStack() {
 	return this.item;
     }
 
-    public static List<ShopGoods> getRoleGoods(Role role) {
+    public static List<ShopGoods> getPlayerRoleGoods(Role role) {
 	List<ShopGoods> goods = new ArrayList<>();
 	for (ShopGoods good : ShopGoods.values()) {
 	    if (good.isRoleGood(role)) {
@@ -80,17 +82,17 @@ public enum ShopGoods {
 	}
 	return goods;
     }
-
-    public static List<ShopGoods> getMakingBlocks() {
+    
+    public static List<ShopGoods> getGoodsRoleGoods(GoodsRole role) {
 	List<ShopGoods> goods = new ArrayList<>();
 	for (ShopGoods good : ShopGoods.values()) {
-	    if (good.goodsRole == GoodsRole.MAKING_BLOCK) {
+	    if (good.goodsRole == role) {
 		goods.add(good);
 	    }
 	}
 	return goods;
     }
-
+    
     public boolean equals(ShopGoods other) {
 	return this.name().equals(other.name());
     }

@@ -1,4 +1,4 @@
-package com.wbm.plugin.util.general.shop;
+package com.wbm.plugin.util.shop;
 
 import org.bukkit.entity.Player;
 

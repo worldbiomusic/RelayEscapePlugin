@@ -16,6 +16,8 @@ import com.wbm.plugin.util.config.DataMember;
 import com.wbm.plugin.util.enums.MiniGameType;
 import com.wbm.plugin.util.general.BroadcastTool;
 import com.wbm.plugin.util.general.TeleportTool;
+import com.wbm.plugin.util.minigame.games.FindTheRed;
+import com.wbm.plugin.util.minigame.games.Painter;
 
 public class MiniGameManager implements DataMember {
     // MiniGame 체크하기 위한 Map (이용중이면 true, 비어있으면 false)

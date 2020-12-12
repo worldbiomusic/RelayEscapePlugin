@@ -7,6 +7,7 @@ import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
+import org.bukkit.entity.ItemFrame;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -14,8 +15,10 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.inventory.InventoryCreativeEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
@@ -44,10 +47,10 @@ import com.wbm.plugin.util.general.NPCManager;
 import com.wbm.plugin.util.general.PotionEffectTool;
 import com.wbm.plugin.util.general.SpawnLocationTool;
 import com.wbm.plugin.util.general.TeleportTool;
-import com.wbm.plugin.util.general.shop.ShopGoods;
-import com.wbm.plugin.util.general.shop.ShopManager;
 import com.wbm.plugin.util.general.skin.SkinManager;
 import com.wbm.plugin.util.minigame.MiniGameManager;
+import com.wbm.plugin.util.shop.ShopGoods;
+import com.wbm.plugin.util.shop.ShopManager;
 
 public class CommonListener implements Listener {
     /*
@@ -270,14 +273,14 @@ public class CommonListener implements Listener {
 	Player p = e.getPlayer();
 	Block b = p.getLocation().subtract(0, 1, 0).getBlock();
 
-	if (ItemStackTool.isSameWithMaterialNData(ItemStackTool.block2ItemStack(b), ShopGoods.JUMPING.getGoods())) {
+	if (ItemStackTool.isSameWithMaterialNData(ItemStackTool.block2ItemStack(b), ShopGoods.JUMPING.getItemStack())) {
 //			p.sendMessage("JUMPING");
 	    p.setVelocity(new Vector(0, 0.5, 0));
 	} else if (ItemStackTool.isSameWithMaterialNData(ItemStackTool.block2ItemStack(b),
-		ShopGoods.RESPAWN.getGoods())) {
+		ShopGoods.RESPAWN.getItemStack())) {
 //			p.sendMessage("RESPAWN");
 	    TeleportTool.tp(p, SpawnLocationTool.RESPAWN);
-	} else if (ItemStackTool.isSameWithMaterialNData(ItemStackTool.block2ItemStack(b), ShopGoods.TRAP.getGoods())) {
+	} else if (ItemStackTool.isSameWithMaterialNData(ItemStackTool.block2ItemStack(b), ShopGoods.TRAP.getItemStack())) {
 //			p.sendMessage("TRAP");
 
 	    if (p.getActivePotionEffects().size() >= 1) {
@@ -287,7 +290,7 @@ public class CommonListener implements Listener {
 	    PotionEffect potion = PotionEffectTool.getRandomDebuffPotionEffect();
 	    p.addPotionEffect(potion);
 	} else if (ItemStackTool.isSameWithMaterialNData(ItemStackTool.block2ItemStack(b),
-		ShopGoods.FLICKING.getGoods())) {
+		ShopGoods.FLICKING.getItemStack())) {
 //			p.sendMessage("FLICKING");
 
 	    Material mat = b.getType();
@@ -314,10 +317,10 @@ public class CommonListener implements Listener {
 		}
 	    }, 20 * 6);
 	} else if (ItemStackTool.isSameWithMaterialNData(ItemStackTool.block2ItemStack(b),
-		ShopGoods.SOUND_TERROR.getGoods())) {
+		ShopGoods.SOUND_TERROR.getItemStack())) {
 //			p.sendMessage("RESPAWN");
 	    p.playSound(p.getLocation(), Sound.ENTITY_ZOMBIE_AMBIENT, 10, 1);
-	} else if (ItemStackTool.isSameWithMaterialNData(ItemStackTool.block2ItemStack(b), ShopGoods.HURT.getGoods())) {
+	} else if (ItemStackTool.isSameWithMaterialNData(ItemStackTool.block2ItemStack(b), ShopGoods.HURT.getItemStack())) {
 //			p.sendMessage("HURT");
 	    p.setHealth(p.getHealth() - 1);
 	}
@@ -366,7 +369,29 @@ public class CommonListener implements Listener {
 	this.miniGameManager.handlePlayerCurrentMiniGameExiting(p);
     }
     
+    @EventHandler
+    public void onPlayerBreakHanging(HangingBreakByEntityEvent e) {
+	Player p = (Player) e.getRemover();
+	
+	// op아니면 블럭 부서지는것 방지
+	if(p.isOp()) {
+	   return;
+	}
+	
+	e.setCancelled(true);
+    }
     
+    @EventHandler
+    public void onItemFrameItemRemovalByPlayer(EntityDamageByEntityEvent e) {
+	if(e.getEntity() instanceof ItemFrame) {
+	    if(e.getDamager() instanceof Player) {
+		Player p = (Player) e.getDamager();
+		if(!p.isOp()) {
+		    e.setCancelled(true);
+		}
+	    }
+	}
+    }
 }
 
 
