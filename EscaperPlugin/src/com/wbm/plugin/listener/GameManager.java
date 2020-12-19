@@ -30,7 +30,6 @@ import com.wbm.plugin.util.general.PlayerTool;
 import com.wbm.plugin.util.general.SpawnLocationTool;
 import com.wbm.plugin.util.general.TeleportTool;
 import com.wbm.plugin.util.minigame.MiniGameManager;
-import com.wbm.plugin.util.shop.GoodsRole;
 import com.wbm.plugin.util.shop.ShopGoods;
 
 public class GameManager implements Listener {
@@ -136,11 +135,16 @@ public class GameManager implements Listener {
 
     void giveBasicGoods(Player p) {
 	/*
-	 * 기본굿즈: CHEST
+	 * 기본굿즈: ShopGoods.CHEST, ShopGoods.HIGH_5, ShopGoods.MAKINGTIME_5
 	 */
 	PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
-	if (!pData.doesHaveGoods(ShopGoods.CHEST)) {
-	    pData.addGoods(ShopGoods.CHEST);
+	ShopGoods[] basicGoods = {ShopGoods.CHEST, ShopGoods.HIGH_5, ShopGoods.MAKINGTIME_5};
+	
+	// PlayerData의 goods리스트에 지급
+	for(ShopGoods good : basicGoods) {
+	    if (!pData.doesHaveGoods(good)) {
+		pData.addGoods(good);
+	    }
 	}
     }
 
@@ -249,7 +253,7 @@ public class GameManager implements Listener {
 
 		// 5.player token +, clearCount +1
 		int token = PlayerTool.onlinePlayersCount() / 2;
-		pData.addToken(token);
+		pData.plusToken(token);
 		pData.addClearCount(1);
 	    }
 	    // Time: Testing / Role: Tester
@@ -305,19 +309,11 @@ public class GameManager implements Listener {
 	    
 	    // 높이 제한 검사 (Goods) (MainRoom공간의 맨밑의 -1 높이로부터 측정)
 	    int blockHigh = block.getY() - ((int)RoomLocation.MAIN_Pos1.getY() - 1);
-	    // 기본 제한 높이 = 5
-	    int allowedHigh = 5;
-	    // HIGH_NN 굿즈중에서 가장 높은 굿즈 검색
-	    for(ShopGoods good : pData.getGoods()) {
-		if(good.getGoodsRole() == GoodsRole.ROOM_HIGH) {
-		    // "HIGH_10"에서 뒤에 숫자만 가져오기
-		    String goodsStirng= good.name().split("_")[1];
-		    int goodsHigh = Integer.parseInt(goodsStirng);
-		    if(goodsHigh > allowedHigh) {
-			allowedHigh = goodsHigh;
-		    }
-		}
-	    }
+	    
+	    // HIGH_## 굿즈중에서 가장 높은 굿즈 검색
+	    String kind = ShopGoods.HIGH_10.name().split("_")[0];
+	    int allowedHigh = pData.getRoomSettingGoodsHighestValue(kind);;
+	    
 	    // 높이제한
 	    if(blockHigh > allowedHigh) {
 		BroadcastTool.sendMessage(p, "you can place block up to " + allowedHigh);

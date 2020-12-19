@@ -33,6 +33,7 @@ import com.wbm.plugin.util.config.DataManager;
 import com.wbm.plugin.util.enums.Role;
 import com.wbm.plugin.util.general.BanItemTool;
 import com.wbm.plugin.util.general.BroadcastTool;
+import com.wbm.plugin.util.general.CoolDownManager;
 import com.wbm.plugin.util.general.NPCManager;
 import com.wbm.plugin.util.general.SpawnLocationTool;
 import com.wbm.plugin.util.general.TeleportTool;
@@ -111,6 +112,10 @@ public class Main extends JavaPlugin {
     }
 
     private void setupTools() {
+//	register CoolDown subject
+	CoolDownManager.registerSubject(Setting.CoolDown_Subject_CHAT, 5);
+	CoolDownManager.registerSubject(Setting.CoolDown_Subject_CMD_ROOM, 10);
+	
 	// BroadcastTool
 	BroadcastTool.setServerNamePrefix("" + ChatColor.RED + ChatColor.BOLD + "[i] " + ChatColor.WHITE);
 
@@ -188,7 +193,7 @@ public class Main extends JavaPlugin {
 
     private void registerCommands() {
 	this.dCmd = new Commands(this.pDataManager, this.relayManager, this.roomManager, this.rankManager,
-		this.npcManager);
+		this.npcManager, this.miniGameManager);
 	this.getCommand("re").setExecutor(dCmd);
     }
 

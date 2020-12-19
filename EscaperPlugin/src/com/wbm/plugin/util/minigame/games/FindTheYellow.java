@@ -12,19 +12,14 @@ import com.wbm.plugin.data.MiniGameLocation;
 import com.wbm.plugin.util.enums.MiniGameType;
 import com.wbm.plugin.util.general.BlockTool;
 import com.wbm.plugin.util.general.BroadcastTool;
-import com.wbm.plugin.util.minigame.SoloMiniGame;
+import com.wbm.plugin.util.minigame.CooperativeMiniGame;
 
-public class FindTheRed extends SoloMiniGame {
-    /**
-     * 
-     */
+public class FindTheYellow extends CooperativeMiniGame{
+
     private static final long serialVersionUID = 1L;
 
-    /*
-     * 게임소개 노랑꽃중에서 빨간꽃을 부수면 점수 얻는 게임
-     */
-    public FindTheRed() {
-	super(MiniGameType.FIND_THE_RED);
+    public FindTheYellow() {
+	super(MiniGameType.FIND_THE_YELLOW);
     }
 
     @Override
@@ -34,10 +29,10 @@ public class FindTheRed extends SoloMiniGame {
 	    Block b = e.getBlock();
 
 	    // score
-	    if (b.getType() == Material.RED_ROSE) {
+	    if (b.getType() == Material.YELLOW_FLOWER) {
 		BroadcastTool.sendMessage(this.getPlayer(), "+1");
 		this.plusScore(1);
-	    } else if (b.getType() == Material.YELLOW_FLOWER) {
+	    } else if (b.getType() == Material.RED_ROSE) {
 		BroadcastTool.sendMessage(this.getPlayer(), "-2");
 		this.minusScore(2);
 	    }
@@ -48,21 +43,21 @@ public class FindTheRed extends SoloMiniGame {
     }
 
     @Override
+    public String[] getGameTutorialStrings() {
+	String[] msg = { "Break Yellow flower: +1", "Break Red rose: -2", };
+
+	return msg;
+    }
+    
+    @Override
     public void runTaskAfterStartGame() {
 	// 블럭 재정비
 	this.generateNewBlocks();
     }
-
-    @Override
-    public String[] getGameTutorialStrings() {
-	String[] msg = { "Break Red Rose: +1", "Break Yellow flower: -2", };
-
-	return msg;
-    }
-
+    
     private void generateNewBlocks() {
 	// 블럭 재정비
-	Material yellow = Material.YELLOW_FLOWER;
+	Material yellow = Material.RED_ROSE;
 	List<Material> flowers = new ArrayList<>();
 
 	for (int i = 0; i < this.getGameBlockCount(); i++) {
@@ -70,9 +65,30 @@ public class FindTheRed extends SoloMiniGame {
 	}
 
 	int r = (int) (Math.random() * 16);
-	flowers.set(r, Material.RED_ROSE);
+	flowers.set(r, Material.YELLOW_FLOWER);
 
-	BlockTool.setBlockWithMaterial(MiniGameLocation.FIND_THE_RED_POS1, MiniGameLocation.FIND_THE_RED_POS2, flowers);
+	BlockTool.setBlockWithMaterial(MiniGameLocation.FIND_THE_YELLOW_POS1, MiniGameLocation.FIND_THE_YELLOW_POS2, flowers);
     }
-
+    
 }
+
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//

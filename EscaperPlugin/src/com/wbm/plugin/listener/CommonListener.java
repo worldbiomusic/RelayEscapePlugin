@@ -15,7 +15,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
@@ -36,12 +35,14 @@ import org.bukkit.util.Vector;
 import com.wbm.plugin.Main;
 import com.wbm.plugin.util.PlayerDataManager;
 import com.wbm.plugin.util.RelayManager;
+import com.wbm.plugin.util.Setting;
 import com.wbm.plugin.util.enums.MiniGameType;
 import com.wbm.plugin.util.enums.RelayTime;
 import com.wbm.plugin.util.enums.Role;
 import com.wbm.plugin.util.enums.RoomType;
 import com.wbm.plugin.util.general.BanItemTool;
 import com.wbm.plugin.util.general.BroadcastTool;
+import com.wbm.plugin.util.general.CoolDownManager;
 import com.wbm.plugin.util.general.ItemStackTool;
 import com.wbm.plugin.util.general.NPCManager;
 import com.wbm.plugin.util.general.PotionEffectTool;
@@ -87,33 +88,44 @@ public class CommonListener implements Listener {
 
     @EventHandler
     public void onPlayerChat(AsyncPlayerChatEvent e) {
+	Player p = e.getPlayer();
 
-	String msg = e.getMessage();
+	// chat 쿨다운 관리
+	if (CoolDownManager.addPlayer(Setting.CoolDown_Subject_CHAT, p)) {
+	    String msg = e.getMessage();
 
-	String translatedMsg = "";
-	switch (msg) {
-	case "1":
-	    translatedMsg = "HI";
-	    break;
-	case "2":
-	    translatedMsg = "BYE";
-	    break;
-	case "3":
-	    translatedMsg = "FUXX";
-	    break;
-	case "4":
-	    translatedMsg = "FOLLOW ME";
-	    break;
-	case "5":
-	    translatedMsg = "VOTE";
-	    break;
-	default:
+	    String translatedMsg = "";
+	    switch (msg) {
+	    case "1":
+		translatedMsg = "HI";
+		break;
+	    case "2":
+		translatedMsg = "BYE";
+		break;
+	    case "3":
+		translatedMsg = "FUXX";
+		break;
+	    case "4":
+		translatedMsg = "FOLLOW ME";
+		break;
+	    case "5":
+		translatedMsg = "VOTE";
+		break;
+	    case "6":
+		translatedMsg = "PASS";
+		break;
+	    default:
+		e.setCancelled(true);
+		return;
+
+	    }
+
+	    e.setMessage(translatedMsg);
+	} else {
+	    BroadcastTool.sendMessage(p, "too fast chat");
 	    e.setCancelled(true);
-	    return;
-
 	}
 
-	e.setMessage(translatedMsg);
     }
 
     @EventHandler
@@ -152,12 +164,12 @@ public class CommonListener implements Listener {
 	Role role = this.pDataManager.getPlayerData(p.getUniqueId()).getRole();
 
 	Location respawnLoc = SpawnLocationTool.RESPAWN;
-	if(role == Role.WAITER) {
+	if (role == Role.WAITER) {
 	    respawnLoc = SpawnLocationTool.LOBBY;
 	} else if (role == Role.TESTER || role == Role.CHALLENGER) {
 	    respawnLoc = SpawnLocationTool.RESPAWN;
 	}
-	
+
 	e.setRespawnLocation(respawnLoc);
     }
 
@@ -280,7 +292,8 @@ public class CommonListener implements Listener {
 		ShopGoods.RESPAWN.getItemStack())) {
 //			p.sendMessage("RESPAWN");
 	    TeleportTool.tp(p, SpawnLocationTool.RESPAWN);
-	} else if (ItemStackTool.isSameWithMaterialNData(ItemStackTool.block2ItemStack(b), ShopGoods.TRAP.getItemStack())) {
+	} else if (ItemStackTool.isSameWithMaterialNData(ItemStackTool.block2ItemStack(b),
+		ShopGoods.TRAP.getItemStack())) {
 //			p.sendMessage("TRAP");
 
 	    if (p.getActivePotionEffects().size() >= 1) {
@@ -320,7 +333,8 @@ public class CommonListener implements Listener {
 		ShopGoods.SOUND_TERROR.getItemStack())) {
 //			p.sendMessage("RESPAWN");
 	    p.playSound(p.getLocation(), Sound.ENTITY_ZOMBIE_AMBIENT, 10, 1);
-	} else if (ItemStackTool.isSameWithMaterialNData(ItemStackTool.block2ItemStack(b), ShopGoods.HURT.getItemStack())) {
+	} else if (ItemStackTool.isSameWithMaterialNData(ItemStackTool.block2ItemStack(b),
+		ShopGoods.HURT.getItemStack())) {
 //			p.sendMessage("HURT");
 	    p.setHealth(p.getHealth() - 1);
 	}
@@ -343,70 +357,58 @@ public class CommonListener implements Listener {
 				Role.WAITER, p)) {
 		    Sign sign = (Sign) b.getState();
 		    /*
-		     * 0: [MINI_GAME] 1: <game title> 2: FEE <n> TOKEN 3: ---------
+		     * 0: [MINI_GAME]
+		     * 
+		     * 1: <game title>
+		     * 
+		     * 2: FEE <n> TOKEN
+		     * 
+		     * 3: ---------
 		     */
 		    String[] lines = sign.getLines();
 		    String minigame = lines[0];
 		    String title = lines[1];
-		    // string중 2번째것이 숫자이므로
-		    int fee = Integer.parseInt(lines[2].split(" ")[1]);
+		    // token은 안 남겨줘도 gameType에서 가져옴
 
 		    // 1
 		    if (minigame.equalsIgnoreCase("[MINI_GAME]")) {
-			this.miniGameManager.enterRoom(MiniGameType.valueOf(title), fee, p);
+			this.miniGameManager.enterRoom(MiniGameType.valueOf(title), p);
 		    }
 		}
 	    }
 
 	}
     }
-    
+
     @EventHandler
     public void handleMiniGameResultonPlayerQuit(PlayerQuitEvent e) {
-	Player p =e.getPlayer();
-	
+	Player p = e.getPlayer();
+
 	// player가 플레이중이던 미니게임 종료
 	this.miniGameManager.handlePlayerCurrentMiniGameExiting(p);
     }
-    
+
     @EventHandler
     public void onPlayerBreakHanging(HangingBreakByEntityEvent e) {
 	Player p = (Player) e.getRemover();
-	
+
 	// op아니면 블럭 부서지는것 방지
-	if(p.isOp()) {
-	   return;
+	if (p.isOp()) {
+	    return;
 	}
-	
+
 	e.setCancelled(true);
     }
-    
+
     @EventHandler
     public void onItemFrameItemRemovalByPlayer(EntityDamageByEntityEvent e) {
-	if(e.getEntity() instanceof ItemFrame) {
-	    if(e.getDamager() instanceof Player) {
+	if (e.getEntity() instanceof ItemFrame) {
+	    if (e.getDamager() instanceof Player) {
 		Player p = (Player) e.getDamager();
-		if(!p.isOp()) {
+		if (!p.isOp()) {
 		    e.setCancelled(true);
 		}
 	    }
 	}
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

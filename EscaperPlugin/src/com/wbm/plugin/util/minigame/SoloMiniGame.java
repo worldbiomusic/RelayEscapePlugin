@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.scheduler.BukkitTask;
@@ -21,12 +22,14 @@ import com.wbm.plugin.util.general.TeleportTool;
 
 import net.md_5.bungee.api.ChatColor;
 
-public abstract class MiniGame implements Serializable {
+public abstract class SoloMiniGame implements Serializable, MiniGameInterface {
     private static final long serialVersionUID = 1L;
     /*
-     * 모든 미니게임은 이 클래스를 상속받아서 만들어져야 함
+     * 모든 솔로 미니게임은 이 클래스를 상속받아서 만들어져야 함
      * 
-     * 튜닝할 수 있는 것 -게임 아이템 추가: runTaskAfterStartGame() 메소드 오버라이딩하면 시작시 실행해줌
+     * 튜닝할 수 있는 것
+     * 
+     * -runTaskAfterStartGame(): 메소드 오버라이딩하면 시작시 실행해줌(예.게임 아이템 추가)
      * 
      * [주의] timeLimit, gameType, rankData는 파일로 저장되야되서 transient 선언안함 새로운 변수 추가할때
      * transient 항상 고려하기
@@ -38,33 +41,33 @@ public abstract class MiniGame implements Serializable {
      * 
      * [미니게임 추가하는법]
      * 
-     * 1.MiniGame클래스를 상속하는 클래스를 하나 만들고 필요한 메소드를 다 오바라이딩해서 구현한다
+     * 1.이 클래스를 상속하는 클래스를 하나 만들고 필요한 메소드를 다 오바라이딩해서 구현한다
      * 
      * 2.MiniGameManager의 생성자에서 "allGame.add(new FindTheRed())" 처럼 등록한다 (이유: 처음에
      * 미니게임 데이터가 없는것을 초기화해서 파일저장하려고, 나중에 파일에 저장되면 데이터 불러올때 저장된것으로 대체가 됨 = 처음에 한번
      * 초기화를 위해서 필요한 코드)
      */
-    transient private Player player;
-    transient private boolean activated;
-    transient private int score;
-    transient private static int waitingTime = 5;
-    private int fee;
+    transient protected Player player;
+    transient protected boolean activated;
+    transient protected int score;
+    transient protected static int waitingTime = 5;
+    protected int fee;
 
-    private int timeLimit;
-    private MiniGameType gameType;
+    protected int timeLimit;
+    protected MiniGameType gameType;
 
     // 각 미니게임의 랭크데이터 관리 변수
-    private Map<String, Integer> rankData;
+    protected Map<String, Integer> rankData;
 
-    transient private BukkitTask startTask, exitTask;
+    transient protected BukkitTask startTask, exitTask;
 
-    public MiniGame(MiniGameType gameType, int timeLimit, int fee) {
+    public SoloMiniGame(MiniGameType gameType) {
 	this.player = null;
 	this.activated = false;
 	this.score = 0;
-	this.timeLimit = timeLimit;
 	this.gameType = gameType;
-	this.fee = fee;
+	this.timeLimit = gameType.getTimeLimit();
+	this.fee = gameType.getFee();
 
 	this.rankData = new HashMap<>();
     }
@@ -76,19 +79,50 @@ public abstract class MiniGame implements Serializable {
 	this.startTask = this.exitTask = null;
     }
 
-    public void startGame(Player p, PlayerDataManager pDataManager) {
-	// setup variables
+    @Override
+    public void enterRoom(Player p, PlayerDataManager pDataManager) {
+	PlayerData pData = pDataManager.getPlayerData(p.getUniqueId());
+
+	// 사람 들어있는지 확인
+	// SoloMiniGame: 사람 있으면 못들어감
+	// MultiCooperativeMiniGame: master가 있으면 허락맡고 입장
+	// MultiBattleMiniGame: 인원수 full 아니면 그냥 입장
+
+	// 누군가 있을때
+	if (this.isSomeoneInGameRoom()) {
+	    BroadcastTool.sendMessage(p, "someone is already playing game");
+	    return;
+	} else { // 아무도 없을때
+	    // 먼저: token충분한지 검사
+	    if (!pData.minusToken(fee)) {
+		BroadcastTool.sendMessage(p, "you need more token");
+		return;
+	    }
+	    // init variables
+	    this.setupVariables(p);
+	    // start game
+	    this.startGame(pDataManager);
+	}
+    }
+
+    private void setupVariables(Player p) {
 	this.initGame();
 	this.player = p;
+    }
+
+    private void startGame(PlayerDataManager pDataManager) {
+	// 게임룸 위치로 tp
+	Location gameRoom = this.gameType.getRoomLocation();
+	TeleportTool.tp(this.player, gameRoom);
 
 	// player에게 정보 전달
-	this.printGameTutorial(p);
+	this.printGameTutorial(this.player);
 
 	// print all rank
-	MiniGameRankManager.printAllRank(this.rankData, p);
-	
+	MiniGameRankManager.printAllRank(this.rankData, this.player);
+
 	// count down 시작
-	BroadcastTool.sendCountDownTitle(p, waitingTime);
+	BroadcastTool.sendCountDownTitle(this.player, waitingTime);
 
 	// this.waitingTime 초 후 실행
 	this.reserveActivateGameTask();
@@ -124,13 +158,9 @@ public abstract class MiniGame implements Serializable {
 
     public void exitGame(PlayerDataManager pDataManager) {
 	/*
-	 * print game result  
-	 * 보상 지급
-	 *  score rank 처리
-	 *   player 퇴장 (lobby로) 
-	 *   inventory 초기화 게임 초기화
+	 * print game result 보상 지급 score rank 처리 player 퇴장 (lobby로) inventory 초기화 게임 초기화
 	 */
-	
+
 	// print game result
 	this.printGameResult();
 
@@ -138,7 +168,7 @@ public abstract class MiniGame implements Serializable {
 	this.payReward(pDataManager);
 
 	// score rank 처리
-	MiniGameRankManager.updatePlayerRankData(this.rankData, this.player, this.score);
+	MiniGameRankManager.updatePlayerRankData(this.rankData, this.player.getName(), this.score);
 
 	// player lobby로 tp
 	TeleportTool.tp(this.player, SpawnLocationTool.LOBBY);
@@ -153,12 +183,12 @@ public abstract class MiniGame implements Serializable {
     private void printGameResult() {
 	// GAME END print
 	BroadcastTool.sendMessage(this.player, "=================================");
-	BroadcastTool.sendMessage(this.player,"" + ChatColor.RED + ChatColor.BOLD + "Game End");
+	BroadcastTool.sendMessage(this.player, "" + ChatColor.RED + ChatColor.BOLD + "Game End");
 	BroadcastTool.sendMessage(this.player, "=================================");
 
 	// score 공개
 	BroadcastTool.sendMessage(this.player, "Your score: " + this.score);
-	
+
 	// send title
 	BroadcastTool.sendTitle(this.player, "Game End", "");
 	BroadcastTool.sendMessage(this.player, "");
@@ -180,7 +210,7 @@ public abstract class MiniGame implements Serializable {
 		BroadcastTool.sendMessage(this.player, "You are in " + i + " quartile");
 		BroadcastTool.sendMessage(this.player, "Reward token: " + rewardToken);
 
-		pData.addToken(rewardToken);
+		pData.plusToken(rewardToken);
 
 		return;
 	    }
@@ -189,6 +219,8 @@ public abstract class MiniGame implements Serializable {
 	// 1,2,3,4 분위 안에 속해있지 않다는것 = 1등 점수
 	BroadcastTool.sendMessage(this.player, "You are first place");
 	BroadcastTool.sendMessage(this.player, "Reward token: " + fee * 3);
+
+	pData.plusToken(fee * 3);
     }
 
     /*
@@ -221,7 +253,7 @@ public abstract class MiniGame implements Serializable {
 	BroadcastTool.sendMessage(p, "");
 	int lastScore = MiniGameRankManager.getScore(this.rankData, p.getName());
 	BroadcastTool.sendMessage(p, "Your last score: " + lastScore);
-	
+
 //	BroadcastTool.sendMessage(p, "");
 //	BroadcastTool.sendMessage(p, this.gameType.name() + " game starts in " + waitingTime + " sec");
 //	BroadcastTool.sendMessage(p, "");

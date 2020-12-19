@@ -20,6 +20,12 @@ public class TeleportTool
 		src.teleport(dst);
 	}
 	
+	public static void tp(List<? extends Entity> entities , Location dst) {
+	    for(Entity entity : entities) {
+		entity.teleport(dst);
+	    }
+	}
+	
 	public static void tp(Entity src, Entity dst) {
 		src.teleport(dst.getLocation());
 	}

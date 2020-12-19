@@ -1,5 +1,7 @@
 package com.wbm.plugin.util.general;
 
+import java.util.List;
+
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -26,6 +28,12 @@ public class InventoryTool
 	
 	public static void clearPlayerInv(Player p) {
 			p.getInventory().clear();
+	}
+
+	public static void clearPlayerInv(List<Player> players) {
+	    for(Player p : players) {
+		p.getInventory().clear();
+	}
 	}
 	
 	public static void clearAllPlayerInv() {

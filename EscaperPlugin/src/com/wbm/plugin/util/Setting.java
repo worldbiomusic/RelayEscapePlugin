@@ -46,4 +46,37 @@ public class Setting {
     public static Location getLoationFromSTDLOC(double x, double y, double z, float yaw, float pitch) {
 	return new Location(Setting.world, x, y, z, yaw, pitch).add(Setting.STDLOC);
     }
+    
+    public static final String CoolDown_Subject_CHAT = "CHAT";
+    public static final String CoolDown_Subject_CMD_ROOM = "CMD_ROOM";
+    
+    // RelayTime time amount
+    public static final int WAITING_TIME = 5;
+    public static final int MAKING_TIME = 60 * 5;
+    public static final int TESTING_TIME = 60 * 10;
+    public static final int CHALLENGING_TIME = 60 * 10;
+    
+    
 }
+
+
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//

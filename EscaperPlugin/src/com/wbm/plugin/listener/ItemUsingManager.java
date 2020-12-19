@@ -88,7 +88,7 @@ public class ItemUsingManager implements Listener
 		} else if(goods == ShopGoods.ROOM_MANAGER) {
 			// room list출력
 			this.roomManager.printRoomList(p);
-		} else if(goods == ShopGoods.HALF_TIME) {
+		} else if(goods == ShopGoods.REDUCE_TIME) {
 			// ChallengingTime 남은 시간(1/(player수+1)) 단축
 			int leftTime = this.relayManager.getLeftTime();
 			int reductionTime = leftTime / (Bukkit.getOnlinePlayers().size() + 1);

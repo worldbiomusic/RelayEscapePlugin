@@ -18,5 +18,5 @@ public enum GoodsRole {
 
     MAKING_BLOCK,
     
-    ROOM_HIGH;
+    ROOM_SETTING;
 }

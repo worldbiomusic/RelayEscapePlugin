@@ -45,7 +45,7 @@ public class ShopManager
 		}
 		
 		// notify
-		pData.subToken(cost);
+		pData.minusToken(cost);
 		BroadcastTool.sendMessage(p, "You purchased " + goods);
 	}
 }

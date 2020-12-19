@@ -14,9 +14,9 @@ import com.wbm.plugin.util.general.BlockTool;
 import com.wbm.plugin.util.general.BroadcastTool;
 import com.wbm.plugin.util.general.InventoryTool;
 import com.wbm.plugin.util.general.ItemStackTool;
-import com.wbm.plugin.util.minigame.MiniGame;
+import com.wbm.plugin.util.minigame.SoloMiniGame;
 
-public class Painter extends MiniGame {
+public class Painter extends SoloMiniGame {
 
     /*
      * 게임소개 두가지 색깔로 칠해진 블럭들을 '좌'클릭해서 블럭들을 한가지 색으로 통일하면 점수를 얻는 게임
@@ -30,7 +30,7 @@ public class Painter extends MiniGame {
     Material mat1, mat2;
 
     public Painter() {
-	super(MiniGameType.PAINTER, 30, 10);
+	super(MiniGameType.PAINTER);
 
 	// setup
 	this.mats = new ArrayList<>();

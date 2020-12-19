@@ -295,12 +295,6 @@ public class RelayManager {
 	// maker unregister
 	this.pDataManager.unregisterMaker();
 
-	// common todo list
-	RelayTimeCommonTODOList();
-
-	// room challeningCount + 1
-	this.roomManager.getRoom(RoomType.MAIN).addChallengingCount(1);
-
 	// maker제외한 challenger(challenger) 관리
 	for (Player p : this.getChallengers()) {
 	    // minigame 중지 (Maker는 minigame을 못하니까 상관x)
@@ -311,6 +305,12 @@ public class RelayManager {
 	    PlayerData pData = this.pDataManager.getPlayerData(uuid);
 	    pData.addChallengingCount(1);
 	}
+
+	// common todo list
+	RelayTimeCommonTODOList();
+
+	// room challeningCount + 1
+	this.roomManager.getRoom(RoomType.MAIN).addChallengingCount(1);
 
 	// start recording room duration time
 	this.roomManager.startMainRoomDurationTime();
@@ -358,7 +358,7 @@ public class RelayManager {
 	this.giveGoodsToEveryone();
 
 	// 6.다음 태스크 예약
-	reserveNextTask(this.currentTime.getAmount());
+	this.reserveNextTask(this.currentTime.getAmount());
 
 	// 7.힐
 	for (Player p : Bukkit.getOnlinePlayers()) {
@@ -367,13 +367,22 @@ public class RelayManager {
     }
 
     private void reserveNextTask(int durationTime) {
+	RelayTime currentTime = getCurrentTime();
+
+	// MakingTime 일때 goods(MAKINGTIME_##)검사해서 추가시간 적용
+	if (currentTime == RelayTime.MAKING) {
+	    // TIME_NN 굿즈 검사해서 MakingTime 조절
+	    PlayerData pData = this.pDataManager.getPlayerData(this.getMaker().getUniqueId());
+	    String kind = ShopGoods.MAKINGTIME_10.name().split("_")[0];
+	    durationTime = 60 * pData.getRoomSettingGoodsHighestValue(kind);
+	}
+	
+	// task 예약
 	this.reservationTask = this.currentCountDownTask = Bukkit.getScheduler().runTaskLater(Main.getInstance(),
 		new Runnable() {
-
 		    @Override
 		    public void run() {
 			// time에 따른 실행
-			RelayTime currentTime = getCurrentTime();
 			if (currentTime == RelayTime.WAITING) {
 			    startNextTime();
 			} else if (currentTime == RelayTime.MAKING) {
@@ -394,6 +403,9 @@ public class RelayManager {
 			}
 		    }
 		}, 20 * durationTime);
+
+	// timer 시작
+	this.startNewCountDownTimer(durationTime);
     }
 
     public List<Player> getChallengers() {
@@ -410,7 +422,7 @@ public class RelayManager {
 
     // this.pDataManager.getMaker()가 너무 길어서 만든 메소드
     // this.pDataManager.getMaker() <- 여기서만 참조해야 데이터 무결성이 보장됨
-    private Player getMaker() {
+    public Player getMaker() {
 	return this.pDataManager.getMaker();
     }
 
@@ -439,7 +451,7 @@ public class RelayManager {
 	    this.startWaiting();
 	}
 
-	this.startNewCountDownTimer(RelayTime.getNextTime(time));
+//	this.startNewCountDownTimer(RelayTime.getNextTime(time));
     }
 
     // 예외적인 상황이 발생했을 때 사용 (Maker가 방을 중간에 나가거나 or 조건이 불만족되었을때)
@@ -457,7 +469,7 @@ public class RelayManager {
 	    this.startChallenging();
 	}
 
-	this.startNewCountDownTimer(anotherTime);
+//	this.startNewCountDownTimer(anotherTime);
     }
 
     public void resetRelay() {
@@ -524,11 +536,11 @@ public class RelayManager {
 	return this.timer.getCount();
     }
 
-    private void startNewCountDownTimer(RelayTime newTime) {
+    private void startNewCountDownTimer(int leftTime) {
 	// stop current timer
 	Bukkit.getScheduler().cancelTask(this.timerTask);
 
-	this.timer.setCount(newTime.getAmount());
+	this.timer.setCount(leftTime);
 
 	this.timerTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(Main.getInstance(), new Runnable() {
 	    @Override
@@ -541,8 +553,6 @@ public class RelayManager {
     public void reduceTime(int reductionTime) {
 	this.reservationTask.cancel();
 	this.reserveNextTask(this.timer.getCount() - reductionTime);
-
-	this.timer.removeCount(reductionTime);
     }
 
     public boolean checkRoomAndRelayTimeAndRole(RoomType roomType, RelayTime relayTime, Role role, Player p) {
@@ -621,7 +631,7 @@ public class RelayManager {
 	} else if (this.currentTime == RelayTime.CHALLENGING) {
 	    Room room = this.roomManager.getRoom(RoomType.MAIN);
 	    // 현재 main room maker가 플레이어이면 Viewer로 역할 변경해서 클리어 불가능 하게
-	    BroadcastTool.debug("pData: "+pData);
+	    BroadcastTool.debug("pData: " + pData);
 	    if (room.getMaker().equals(pData.getName())) {
 		role = Role.VIEWER;
 	    } else {

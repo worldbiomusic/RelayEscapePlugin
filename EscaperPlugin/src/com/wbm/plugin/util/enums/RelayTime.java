@@ -1,5 +1,7 @@
 package com.wbm.plugin.util.enums;
 
+import com.wbm.plugin.util.Setting;
+
 public enum RelayTime
 {
 //	MAKING(10 * 2),
@@ -7,10 +9,11 @@ public enum RelayTime
 //	CHALLENGING(30),
 //	WAITING(5 * 2);
 	
-	MAKING(60),
-	TESTING(60),
-	CHALLENGING(60),
-	WAITING(5);
+    // 단위: 초
+    	WAITING(Setting.WAITING_TIME),
+	MAKING(Setting.MAKING_TIME),
+	TESTING(Setting.TESTING_TIME),
+	CHALLENGING(Setting.CHALLENGING_TIME);
 	
 	private int time;
 	

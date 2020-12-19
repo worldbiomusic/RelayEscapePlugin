@@ -7,7 +7,7 @@ public enum Role {
     MAKER(GameMode.CREATIVE),
     TESTER(GameMode.SURVIVAL),
     CHALLENGER(GameMode.SURVIVAL),
-    VIEWER(GameMode.SPECTATOR);
+    VIEWER(GameMode.SURVIVAL);
 
     GameMode gamemode;
 

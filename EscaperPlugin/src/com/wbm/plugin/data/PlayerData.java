@@ -6,9 +6,11 @@ import java.util.List;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 
 import com.wbm.plugin.util.enums.Role;
+import com.wbm.plugin.util.shop.GoodsRole;
 import com.wbm.plugin.util.shop.ShopGoods;
 
 public class PlayerData implements Serializable {
@@ -17,16 +19,16 @@ public class PlayerData implements Serializable {
      * data부분도 관리
      */
     private static final long serialVersionUID = 1L;
-    UUID uuid;
-    String name;
-    transient Role role;
-    int token;
+    private  UUID uuid;
+    private String name;
+    private transient Role role;
+    private int token;
 
-    int challengingCount;
-    int clearCount;
-    int voted;
+    private  int challengingCount;
+    private  int clearCount;
+    private int voted;
 
-    List<ShopGoods> goods;
+    private List<ShopGoods> goods;
 
     public PlayerData(UUID uuid, String name, Role role) {
 	this(uuid, name, role, 0, 0, 0, 0);
@@ -75,22 +77,39 @@ public class PlayerData implements Serializable {
     public void setPlayerGameModeWithRole() {
 	Player p=Bukkit.getPlayer(uuid);
 	p.setGameMode(this.role.getGameMode());
+	
+	// VIEWER && GHOST 굿즈가 있으면 서바이벌 -> 관전자 모드로 변경
+	if(this.role == Role.VIEWER && this.doesHaveGoods(ShopGoods.GHOST)) {
+	    p.setGameMode(GameMode.SPECTATOR);
+	}
     }
 
     public int getToken() {
 	return token;
     }
 
-    public void setToken(int token) {
-	this.token = token;
-    }
+    // 토큰 추적을 위해 사용 금지
+//    public void setToken(int token) {
+//	this.token = token;
+//    }
 
-    public void addToken(int token) {
+    public void plusToken(int token) {
+	/*
+	 * pData plus할때는 서버 토큰에서 minus
+	 */
 	this.token += token;
     }
 
-    public void subToken(int token) {
-	this.token -= token;
+    public boolean minusToken(int token) {
+	/*
+	 * pData minus할때는 서버 토큰에서 plus
+	 */
+	if(this.token >= token) {
+	    this.token -= token;
+	    return true;
+	}
+	
+	return false;
     }
 
     public int getChallengingCount() {
@@ -155,6 +174,31 @@ public class PlayerData implements Serializable {
 
     public boolean doesHaveGoods(ShopGoods goods) {
 	return this.goods.contains(goods);
+    }
+    
+    public void makeEmptyGoods() {
+	this.goods = new ArrayList<>();
+    }
+    
+    public int getRoomSettingGoodsHighestValue(String kind) {
+	/*
+	 * RoomSetting들중 kind에서 가장 높은 값 반환
+	 */
+	int maxValue = Integer.MIN_VALUE;
+	// 굿즈중에서 가장 높은 굿즈 검색
+	for (ShopGoods good : this.getGoods()) {
+	    if (good.getGoodsRole() == GoodsRole.ROOM_SETTING) {
+		// 이름이 kind로 시작할떄 뒤에 숫자만 가져오기
+		if (good.name().startsWith(kind)) {
+		    String goodsStirng = good.name().split("_")[1];
+		    int goodsValue = Integer.parseInt(goodsStirng);
+		    if (goodsValue > maxValue) {
+			maxValue = goodsValue;
+		    }
+		}
+	    }
+	}
+	return maxValue;
     }
 
 

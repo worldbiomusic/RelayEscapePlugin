@@ -7,9 +7,10 @@ commands:
   re:
     description: relay escaper plugin command
     usage:  |  
-          /re d [relay | role | roles | time | finish | reset | pdata | allpdata | token]
+          /re d [relay | role | roles | time | finish | reset | pdata | allpdata]
+          /re d token [plus | minus] <playerName> <amount>
           /re room [load | title] <title>
-          /re room [empty | list]
+          /re room [empty | list | finish]
           /re rank [tokenrank | challengingrank | clearrank | roomcountrank]
           /re npc create <name> <skinName>
           /re npc delete <name> 

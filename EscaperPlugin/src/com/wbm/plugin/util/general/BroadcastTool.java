@@ -48,6 +48,14 @@ public class BroadcastTool {
     public static void sendTitle(Player p, String title, String subTitle) {
 	p.sendTitle(title, subTitle, 20 * 1, 20 * 3, 20 * 1);
     }
+    
+    public static void sendTitle(List<Player> players , String title, String subTitle) {
+	for(Player p : players) {
+	    p.sendTitle(title, subTitle, 20 * 1, 20 * 3, 20 * 1);
+	}
+    }
+    
+    
 
     public static void sendTitleToEveryone(String title, String subTitle) {
 	for (Player p : Bukkit.getOnlinePlayers()) {
