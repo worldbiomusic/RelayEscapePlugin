@@ -432,7 +432,9 @@ public class Commands implements CommandExecutor {
 	/*
 	 * 설명] CooperativeMiniGame의 master만 사용가능한 명령어
 	 * 
-	 * /re minigame [ok | kick] <playerName> /re minigame waitlist
+	 * /re minigame [ok | kick] <playerName> 
+	 * 
+	 * /re minigame waitlist
 	 */
 
 	MiniGameInterface minigame = this.minigameManager.getPlayingGame(p);
@@ -458,7 +460,7 @@ public class Commands implements CommandExecutor {
 
 	    }
 	}
-	return false;
+	return true;
     }
 
     private void manageList(Player p, String[] args, CooperativeMiniGame game) {
@@ -473,13 +475,14 @@ public class Commands implements CommandExecutor {
 	String order = args[1];
 	String targetPlayerName = args[2];
 	Player targetPlayer = Bukkit.getPlayer(targetPlayerName);
-	PlayerData targetPData = this.pDataManager.getPlayerData(targetPlayer.getUniqueId());
-
 	// 1.player가 null이 아닐때(서버 안나갔을때)(밖에서 거름)
 	if (targetPlayer == null) {
 	    BroadcastTool.sendMessage(p, "not exist player");
 	    return;
 	}
+	
+	PlayerData targetPData = this.pDataManager.getPlayerData(targetPlayer.getUniqueId());
+
 
 	// 2.이미 <name> 플레이어가 다른 미니게임을 플레이하고 있지 않을 때
 	if (this.minigameManager.isPlayerPlayingGame(targetPlayer)) {

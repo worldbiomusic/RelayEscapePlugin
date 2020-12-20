@@ -11,7 +11,7 @@ import com.wbm.plugin.Main;
 
 public class BroadcastTool {
     private static int countDown;
-    
+
     // TODO: broadcast해줄때 앞에 "[serverName] " 붙여주는 기능
     public static String serverName;
 
@@ -42,20 +42,36 @@ public class BroadcastTool {
 
     // sendTitle
     public static void sendTitle(Player p, String title, String subTitle, double fadeIn, double stay, double fadeOut) {
-	p.sendTitle(title, subTitle, (int)(20 * fadeIn), (int)(20 * stay), (int)(20 * fadeOut));
-    }   
-    
+	p.sendTitle(title, subTitle, (int) (20 * fadeIn), (int) (20 * stay), (int) (20 * fadeOut));
+    }
+
     public static void sendTitle(Player p, String title, String subTitle) {
 	p.sendTitle(title, subTitle, 20 * 1, 20 * 3, 20 * 1);
     }
-    
-    public static void sendTitle(List<Player> players , String title, String subTitle) {
-	for(Player p : players) {
+
+    public static void sendTitle(Player[] players, String title, String subTitle) {
+	for (Player p : players) {
 	    p.sendTitle(title, subTitle, 20 * 1, 20 * 3, 20 * 1);
 	}
     }
     
+    public static void sendTitle(Player[] players, String title, String subTitle, double fadeIn, double stay, double fadeOut) {
+	for (Player p : players) {
+	    BroadcastTool.sendTitle(p, title, subTitle, fadeIn, stay, fadeOut);
+	}
+    }
+
+    public static void sendTitle(List<Player> players, String title, String subTitle) {
+	for (Player p : players) {
+	    p.sendTitle(title, subTitle, 20 * 1, 20 * 3, 20 * 1);
+	}
+    }
     
+    public static void sendTitle(List<Player> players, String title, String subTitle, double fadeIn, double stay, double fadeOut) {
+	for (Player p : players) {
+	    BroadcastTool.sendTitle(p, title, subTitle, fadeIn, stay, fadeOut);
+	}
+    }
 
     public static void sendTitleToEveryone(String title, String subTitle) {
 	for (Player p : Bukkit.getOnlinePlayers()) {
@@ -89,7 +105,7 @@ public class BroadcastTool {
 	/*
 	 * 모두에게 n ~ 1까지 delay초마다 카운트 다운
 	 */
-	for(Player p : Bukkit.getOnlinePlayers()) {
+	for (Player p : Bukkit.getOnlinePlayers()) {
 	    sendCountDownTitle(p, n);
 	}
     }

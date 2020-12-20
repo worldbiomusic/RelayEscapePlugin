@@ -16,6 +16,7 @@ import com.wbm.plugin.data.PlayerData;
 import com.wbm.plugin.util.PlayerDataManager;
 import com.wbm.plugin.util.enums.MiniGameType;
 import com.wbm.plugin.util.general.BroadcastTool;
+import com.wbm.plugin.util.general.Counter;
 import com.wbm.plugin.util.general.InventoryTool;
 import com.wbm.plugin.util.general.SpawnLocationTool;
 import com.wbm.plugin.util.general.TeleportTool;
@@ -31,7 +32,7 @@ public abstract class SoloMiniGame implements Serializable, MiniGameInterface {
      * 
      * -runTaskAfterStartGame(): 메소드 오버라이딩하면 시작시 실행해줌(예.게임 아이템 추가)
      * 
-     * [주의] timeLimit, gameType, rankData는 파일로 저장되야되서 transient 선언안함 새로운 변수 추가할때
+     * [주의] gameType, rankData는 파일로 저장되야되서 transient 선언안함 새로운 변수 추가할때
      * transient 항상 고려하기
      * 
      * 
@@ -50,10 +51,10 @@ public abstract class SoloMiniGame implements Serializable, MiniGameInterface {
     transient protected Player player;
     transient protected boolean activated;
     transient protected int score;
-    transient protected static int waitingTime = 5;
-    protected int fee;
+    transient protected int waitingTime;
+    transient protected int fee;
 
-    protected int timeLimit;
+    transient protected int timeLimit;
     protected MiniGameType gameType;
 
     // 각 미니게임의 랭크데이터 관리 변수
@@ -61,22 +62,25 @@ public abstract class SoloMiniGame implements Serializable, MiniGameInterface {
 
     transient protected BukkitTask startTask, exitTask;
 
+    // 시작 타이머
+    transient protected Counter timer;
+
     public SoloMiniGame(MiniGameType gameType) {
-	this.player = null;
-	this.activated = false;
-	this.score = 0;
 	this.gameType = gameType;
-	this.timeLimit = gameType.getTimeLimit();
-	this.fee = gameType.getFee();
+	this.initGameSettings();
 
 	this.rankData = new HashMap<>();
     }
 
-    public void initGame() {
+    public void initGameSettings() {
 	this.player = null;
 	this.activated = false;
 	this.score = 0;
 	this.startTask = this.exitTask = null;
+	this.timer = new Counter(waitingTime);
+	this.waitingTime = 10;
+	this.timeLimit = gameType.getTimeLimit();
+	this.fee = gameType.getFee();
     }
 
     @Override
@@ -99,31 +103,67 @@ public abstract class SoloMiniGame implements Serializable, MiniGameInterface {
 		return;
 	    }
 	    // init variables
-	    this.setupVariables(p);
+	    this.prepareGame(p);
 	    // start game
-	    this.startGame(pDataManager);
+	    this.reserveGameTasks(pDataManager);
 	}
     }
 
-    private void setupVariables(Player p) {
-	this.initGame();
-	this.player = p;
+    private void startTimer() {
+	/*
+	 * 1초마다 모든 플레이어에게 Counter의 수를 send title함
+	 */
+	// 1까지만 셈
+	if (this.timer.getCount() <= 0) {
+	    return;
+	}
+
+	// send title
+	BroadcastTool.sendTitle(this.player, this.timer.getCount() + "", "", 0.2, 0.6, 0.2);
+
+	this.timer.removeCount(1);
+	// 재귀함수
+	Bukkit.getScheduler().runTaskLater(Main.getInstance(), new Runnable() {
+	    @Override
+	    public void run() {
+		startTimer();
+	    }
+	}, 20 * 1);
     }
 
-    private void startGame(PlayerDataManager pDataManager) {
+    private void prepareGame(Player p) {
+	/*
+	 * 게임 초기화하고, 게임 준비
+	 */
+	// 게임 초기화
+	this.initGameSettings();
+
+	// player 등록
+	this.player = p;
+
 	// 게임룸 위치로 tp
 	Location gameRoom = this.gameType.getRoomLocation();
 	TeleportTool.tp(this.player, gameRoom);
 
-	// player에게 정보 전달
-	this.printGameTutorial(this.player);
-
-	// print all rank
-	MiniGameRankManager.printAllRank(this.rankData, this.player);
+	// info 전달
+	this.notifyInfo(p);
 
 	// count down 시작
-	BroadcastTool.sendCountDownTitle(this.player, waitingTime);
+	this.startTimer();
+    }
 
+    void notifyInfo(Player p) {
+	// player에게 정보 전달
+	this.printGameTutorial(p);
+
+	// print all rank
+	MiniGameRankManager.printAllRank(this.rankData, p);
+    }
+
+    private void reserveGameTasks(PlayerDataManager pDataManager) {
+	/*
+	 * 게임 활성화, 퇴장 task 예약
+	 */
 	// this.waitingTime 초 후 실행
 	this.reserveActivateGameTask();
 
@@ -177,7 +217,7 @@ public abstract class SoloMiniGame implements Serializable, MiniGameInterface {
 	InventoryTool.clearPlayerInv(this.player);
 
 	// 초기화
-	this.initGame();
+	this.initGameSettings();
     }
 
     private void printGameResult() {

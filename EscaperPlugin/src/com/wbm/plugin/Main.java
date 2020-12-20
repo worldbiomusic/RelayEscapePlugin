@@ -320,7 +320,7 @@ public class Main extends JavaPlugin {
 		    int dy = Math.abs((int)loc.getY());
 		    int dz = Math.abs((int)loc.getZ());
 		    
-		    if(dx > 100 || dy > 100 || dz > 100) {
+		    if(dx > 1000 || dy > 1000 || dz > 1000) {
 			TeleportTool.tp(p, SpawnLocationTool.JOIN);
 		    }
 		}

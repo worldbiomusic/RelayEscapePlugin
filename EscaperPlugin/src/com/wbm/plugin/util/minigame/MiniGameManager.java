@@ -139,7 +139,7 @@ public class MiniGameManager implements DataMember {
 	
 	// 저장된 미니게임을 불러오면 transient변수들은 초기화를 따로 해줘야 함
 	for(MiniGameInterface game : this.games.values()) {
-	    game.initGame();
+	    game.initGameSettings();
 	}
     }
 
