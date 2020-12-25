@@ -7,13 +7,17 @@ commands:
   re:
     description: relay escaper plugin command
     usage:  |  
-          /re d [relay | role | roles | time | finish | reset | pdata | allpdata]
-          /re d token [plus | minus] <playerName> <amount>
-          /re room [load | title] <title>
-          /re room [empty | list | finish]
+          /re d [relay | reset | pdata | allpdata]
+          /re d token [plus | minus] <player> <amount>
+          /re d goods init
+          /re d goods [add | remove] <player> <goods>
           /re rank [tokenrank | challengingrank | clearrank | roomcountrank]
           /re npc create <name> <skinName>
           /re npc delete <name> 
+          /re room [load | title] <title>
+          /re room [empty | list | finish]
+          /re minigame [ok | kick] <player>
+          /re minigame waitlist
       
 permissions:
   re.*:

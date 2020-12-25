@@ -23,7 +23,7 @@ import com.wbm.plugin.util.general.TeleportTool;
 
 import net.md_5.bungee.api.ChatColor;
 
-public abstract class SoloMiniGame implements Serializable, MiniGameInterface {
+public abstract class SoloMiniGame implements Serializable, MiniGame {
     private static final long serialVersionUID = 1L;
     /*
      * 모든 솔로 미니게임은 이 클래스를 상속받아서 만들어져야 함
@@ -32,8 +32,8 @@ public abstract class SoloMiniGame implements Serializable, MiniGameInterface {
      * 
      * -runTaskAfterStartGame(): 메소드 오버라이딩하면 시작시 실행해줌(예.게임 아이템 추가)
      * 
-     * [주의] gameType, rankData는 파일로 저장되야되서 transient 선언안함 새로운 변수 추가할때
-     * transient 항상 고려하기
+     * [주의] gameType, rankData는 파일로 저장되야되서 transient 선언안함 새로운 변수 추가할때 transient 항상
+     * 고려하기
      * 
      * 
      * [주의] MiniGame클래스의 생성자에서 만들어도 여기서 저장된 데이터가 불러들이면 생성자에서 한 행동은 모두 없어지고 저장되었던
@@ -60,10 +60,7 @@ public abstract class SoloMiniGame implements Serializable, MiniGameInterface {
     // 각 미니게임의 랭크데이터 관리 변수
     protected Map<String, Integer> rankData;
 
-    transient protected BukkitTask startTask, exitTask;
-
-    // 시작 타이머
-    transient protected Counter timer;
+    transient protected BukkitTask startTask, exitTask, timerTask;
 
     public SoloMiniGame(MiniGameType gameType) {
 	this.gameType = gameType;
@@ -76,8 +73,9 @@ public abstract class SoloMiniGame implements Serializable, MiniGameInterface {
 	this.player = null;
 	this.activated = false;
 	this.score = 0;
-	this.startTask = this.exitTask = null;
-	this.timer = new Counter(waitingTime);
+	// 먼저 실행중인 task취소하고 초기화
+	this.stopAllTasks();
+	this.startTask = this.exitTask = this.timerTask = null;
 	this.waitingTime = 10;
 	this.timeLimit = gameType.getTimeLimit();
 	this.fee = gameType.getFee();
@@ -103,7 +101,7 @@ public abstract class SoloMiniGame implements Serializable, MiniGameInterface {
 		return;
 	    }
 	    // init variables
-	    this.prepareGame(p);
+	    this.prepareGame(p, pData);
 	    // start game
 	    this.reserveGameTasks(pDataManager);
 	}
@@ -113,25 +111,24 @@ public abstract class SoloMiniGame implements Serializable, MiniGameInterface {
 	/*
 	 * 1초마다 모든 플레이어에게 Counter의 수를 send title함
 	 */
-	// 1까지만 셈
-	if (this.timer.getCount() <= 0) {
-	    return;
-	}
+	Counter timer = new Counter(this.waitingTime);
 
-	// send title
-	BroadcastTool.sendTitle(this.player, this.timer.getCount() + "", "", 0.2, 0.6, 0.2);
-
-	this.timer.removeCount(1);
-	// 재귀함수
-	Bukkit.getScheduler().runTaskLater(Main.getInstance(), new Runnable() {
+	this.timerTask = Bukkit.getScheduler().runTaskTimer(Main.getInstance(), new Runnable() {
 	    @Override
 	    public void run() {
-		startTimer();
+		// send title
+		BroadcastTool.sendTitle(player, timer.getCount() + "", "", 0.2, 0.6, 0.2);
+		timer.removeCount(1);
+
+		// 0이하에서는 취소
+		if (timer.getCount() <= 0) {
+		    timerTask.cancel();
+		}
 	    }
-	}, 20 * 1);
+	}, 0, 20);
     }
 
-    private void prepareGame(Player p) {
+    private void prepareGame(Player p, PlayerData pData) {
 	/*
 	 * 게임 초기화하고, 게임 준비
 	 */
@@ -147,6 +144,9 @@ public abstract class SoloMiniGame implements Serializable, MiniGameInterface {
 
 	// info 전달
 	this.notifyInfo(p);
+
+	// pdata에 미니게임 등록
+	pData.setMinigame(this.gameType);
 
 	// count down 시작
 	this.startTimer();
@@ -215,6 +215,10 @@ public abstract class SoloMiniGame implements Serializable, MiniGameInterface {
 
 	// inventory 초기화
 	InventoryTool.clearPlayerInv(this.player);
+
+	// pData minigame 초기화
+	PlayerData pData = pDataManager.getPlayerData(this.player.getUniqueId());
+	pData.setNull();
 
 	// 초기화
 	this.initGameSettings();
@@ -307,15 +311,48 @@ public abstract class SoloMiniGame implements Serializable, MiniGameInterface {
     }
 
     public void stopAllTasks() {
-	if (this.startTask != null)
+	if (this.startTask != null) {
 	    this.startTask.cancel();
+	}
 	if (this.exitTask != null) {
 	    this.exitTask.cancel();
+	}
+	if (this.timerTask != null) {
+	    this.timerTask.cancel();
 	}
     }
 
     public boolean isPlayerPlayingGame(Player p) {
 	return p.equals(this.player);
+    }
+
+    @Override
+    public void processHandlingMiniGameExitDuringPlaying(Player p, PlayerDataManager pDataManager,
+	    MiniGame.ExitReason reason) {
+	/*
+	 * SELF_EXIT: 혼자 퇴장, 보상 지급 없음
+	 * 
+	 * RELAY_TIME_CHANGED: 게임 자체 종료(보상 지급 있음)
+	 */
+
+	if (reason == MiniGame.ExitReason.SELF_EXIT) {
+	    // player lobby로 tp
+	    TeleportTool.tp(p, SpawnLocationTool.LOBBY);
+
+	    // inventory 초기화
+	    InventoryTool.clearPlayerInv(p);
+
+	    // pData minigame 초기화
+	    PlayerData pData = pDataManager.getPlayerData(p.getUniqueId());
+	    pData.setNull();
+
+	    // 패널티
+	    pData.minusToken(this.fee * 2);
+
+	    this.initGameSettings();
+	} else if (reason == MiniGame.ExitReason.RELAY_TIME_CHANGED) {
+	    this.exitGame(pDataManager);
+	}
     }
 
     // GETTER, SETTER =============================================

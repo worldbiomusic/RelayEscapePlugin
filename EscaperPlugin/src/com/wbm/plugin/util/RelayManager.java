@@ -22,6 +22,7 @@ import com.wbm.plugin.util.general.InventoryTool;
 import com.wbm.plugin.util.general.PlayerTool;
 import com.wbm.plugin.util.general.SpawnLocationTool;
 import com.wbm.plugin.util.general.TeleportTool;
+import com.wbm.plugin.util.minigame.MiniGame;
 import com.wbm.plugin.util.minigame.MiniGameManager;
 import com.wbm.plugin.util.shop.ShopGoods;
 
@@ -298,7 +299,7 @@ public class RelayManager {
 	// maker제외한 challenger(challenger) 관리
 	for (Player p : this.getChallengers()) {
 	    // minigame 중지 (Maker는 minigame을 못하니까 상관x)
-	    this.miniGameManager.handlePlayerCurrentMiniGameExiting(p);
+	    this.miniGameManager.handleMiniGameExitDuringPlaying(p, MiniGame.ExitReason.RELAY_TIME_CHANGED);
 
 	    // challengingCount +1
 	    UUID uuid = p.getUniqueId();

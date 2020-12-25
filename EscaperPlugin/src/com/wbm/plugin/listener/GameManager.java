@@ -176,7 +176,7 @@ public class GameManager implements Listener {
 
 	if (time == RelayTime.MAKING || time == RelayTime.TESTING) {
 	    if (role == Role.WAITER) {
-		this.miniGameManager.processBlockEvent(e);
+		this.miniGameManager.processEvent(e);
 	    }
 	}
     }

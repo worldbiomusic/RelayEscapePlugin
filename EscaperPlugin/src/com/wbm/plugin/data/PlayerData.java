@@ -9,6 +9,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 
+import com.wbm.plugin.util.enums.MiniGameType;
 import com.wbm.plugin.util.enums.Role;
 import com.wbm.plugin.util.shop.GoodsRole;
 import com.wbm.plugin.util.shop.ShopGoods;
@@ -18,17 +19,19 @@ public class PlayerData implements Serializable {
      * 속성 추가할때 고칠것 1.get, set method 2.toString()에 추가 3.constructor 관리 4.data저장하는것이면
      * data부분도 관리
      */
-    private static final long serialVersionUID = 1L;
-    private  UUID uuid;
+    private transient static final long serialVersionUID = 1L;
+    private UUID uuid;
     private String name;
     private transient Role role;
     private int token;
 
-    private  int challengingCount;
-    private  int clearCount;
+    private int challengingCount;
+    private int clearCount;
     private int voted;
 
     private List<ShopGoods> goods;
+    
+    private transient MiniGameType minigame;
 
     public PlayerData(UUID uuid, String name, Role role) {
 	this(uuid, name, role, 0, 0, 0, 0);
@@ -44,6 +47,8 @@ public class PlayerData implements Serializable {
 	this.voted = voted;
 
 	this.goods = new ArrayList<>();
+	
+	this.minigame = null;
     }
 
     public UUID getUUID() {
@@ -75,11 +80,11 @@ public class PlayerData implements Serializable {
     }
 
     public void setPlayerGameModeWithRole() {
-	Player p=Bukkit.getPlayer(uuid);
+	Player p = Bukkit.getPlayer(uuid);
 	p.setGameMode(this.role.getGameMode());
-	
+
 	// VIEWER && GHOST 굿즈가 있으면 서바이벌 -> 관전자 모드로 변경
-	if(this.role == Role.VIEWER && this.doesHaveGoods(ShopGoods.GHOST)) {
+	if (this.role == Role.VIEWER && this.doesHaveGoods(ShopGoods.GHOST)) {
 	    p.setGameMode(GameMode.SPECTATOR);
 	}
     }
@@ -104,11 +109,11 @@ public class PlayerData implements Serializable {
 	/*
 	 * pData minus할때는 서버 토큰에서 plus
 	 */
-	if(this.token >= token) {
+	if (this.token >= token) {
 	    this.token -= token;
 	    return true;
 	}
-	
+
 	return false;
     }
 
@@ -169,17 +174,25 @@ public class PlayerData implements Serializable {
     }
 
     public void addGoods(ShopGoods goods) {
-	this.goods.add(goods);
+	if (!this.doesHaveGoods(goods)) {
+	    this.goods.add(goods);
+	}
+    }
+
+    public void removeGoods(ShopGoods goods) {
+	if (this.doesHaveGoods(goods)) {
+	    this.goods.remove(goods);
+	}
     }
 
     public boolean doesHaveGoods(ShopGoods goods) {
 	return this.goods.contains(goods);
     }
-    
+
     public void makeEmptyGoods() {
 	this.goods = new ArrayList<>();
     }
-    
+
     public int getRoomSettingGoodsHighestValue(String kind) {
 	/*
 	 * RoomSetting들중 kind에서 가장 높은 값 반환
@@ -201,12 +214,23 @@ public class PlayerData implements Serializable {
 	return maxValue;
     }
 
+    public MiniGameType getMinigame() {
+        return minigame;
+    }
+
+    public void setMinigame(MiniGameType minigame) {
+        this.minigame = minigame;
+    }
+    
+    public void setNull() {
+	this.minigame = null;
+    }
 
     @Override
     public String toString() {
 	return "PlayerData " + ", \nuuid: " + this.uuid + ", \nname: " + this.name + ", \nrole: " + this.role
 		+ ", \ntoken: " + this.token + ", \nchallengingCount: " + this.challengingCount + ", \nclearCount: "
-		+ this.clearCount + ", \nvoted: " + this.voted + ", \ngoods: " + this.goods;
+		+ this.clearCount + ", \nvoted: " + this.voted + ", \ngoods: " + this.goods+ ", \nminigame: " + this.minigame;
     }
 
 }

@@ -8,7 +8,7 @@ import org.bukkit.inventory.ItemStack;
 public class BlockData implements Serializable
 
 {
-	private static final long serialVersionUID=1L;
+	private transient static final long serialVersionUID=1L;
 	
 	Material material;
 	byte data;

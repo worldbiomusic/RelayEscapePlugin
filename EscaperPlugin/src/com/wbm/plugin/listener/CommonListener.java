@@ -7,7 +7,9 @@ import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
+import org.bukkit.entity.Creature;
 import org.bukkit.entity.ItemFrame;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -15,6 +17,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityInteractEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
@@ -49,6 +52,7 @@ import com.wbm.plugin.util.general.PotionEffectTool;
 import com.wbm.plugin.util.general.SpawnLocationTool;
 import com.wbm.plugin.util.general.TeleportTool;
 import com.wbm.plugin.util.general.skin.SkinManager;
+import com.wbm.plugin.util.minigame.MiniGame;
 import com.wbm.plugin.util.minigame.MiniGameManager;
 import com.wbm.plugin.util.shop.ShopGoods;
 import com.wbm.plugin.util.shop.ShopManager;
@@ -79,11 +83,6 @@ public class CommonListener implements Listener {
     @EventHandler
     public static void onFoodLevelChanged(FoodLevelChangeEvent e) {
 	e.setCancelled(true);
-    }
-
-    @EventHandler
-    public void onPlayerDeath(PlayerDeathEvent e) {
-//		e.getDrops().clear();
     }
 
     @EventHandler
@@ -149,10 +148,13 @@ public class CommonListener implements Listener {
     }
 
     @EventHandler
-    public void onPlayerDamanged(EntityDamageByEntityEvent e) {
+    public void onPVP(EntityDamageByEntityEvent e) {
+	// Player가 Player에게만 맞앚을때
 	if (e.getEntity() instanceof Player && e.getDamager() instanceof Player) {
-	    // 나중에 Maker가 Waiter기다리는것 때리게 만들 예정
+	    // 기본적으로 금지
 	    e.setCancelled(true);
+	    // pvp minigame 관련 이벤트 전송
+	    this.miniGameManager.processEvent(e);
 	}
     }
 
@@ -175,10 +177,11 @@ public class CommonListener implements Listener {
 
     @EventHandler
     public void onPlayerDeathInManyTimes(PlayerDeathEvent e) {
-	// keep inventory
-	e.setKeepInventory(true);
-	// player가 플레이중이던 미니게임 종료
-	this.miniGameManager.handlePlayerCurrentMiniGameExiting(e.getEntity());
+	// clear drops
+	e.getDrops().clear();
+
+	// minigame으로 pvp관련 이벤트 전송
+	this.miniGameManager.processEvent(e);
     }
 
     @EventHandler
@@ -385,7 +388,7 @@ public class CommonListener implements Listener {
 	Player p = e.getPlayer();
 
 	// player가 플레이중이던 미니게임 종료
-	this.miniGameManager.handlePlayerCurrentMiniGameExiting(p);
+	this.miniGameManager.handleMiniGameExitDuringPlaying(p, MiniGame.ExitReason.SELF_EXIT);
     }
 
     @EventHandler
@@ -409,6 +412,13 @@ public class CommonListener implements Listener {
 		    e.setCancelled(true);
 		}
 	    }
+	}
+    }
+
+    @EventHandler
+    public void onCropBreakingByEntity(PlayerInteractEvent e) {
+	if(e.getAction() == Action.PHYSICAL && e.getClickedBlock().getType() == Material.SOIL) {
+	    e.setCancelled(true);
 	}
     }
 }

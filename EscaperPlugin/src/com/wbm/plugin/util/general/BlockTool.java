@@ -55,6 +55,7 @@ public class BlockTool
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	public static void setBlockWithItemStack(Location pos1, Location pos2, List<ItemStack> items)
 	{
 		int pos1X=(int)pos1.getX();
@@ -90,11 +91,11 @@ public class BlockTool
 
 					ItemStack item =items.get(index);
 					Material mat=item.getType();
-//					Byte data=item.;
+					Byte data=item.getData().getData();
 					// set type
 					loc.getBlock().setType(mat);
 					// set data
-//					loc.getBlock().setData(data);
+					loc.getBlock().setData(data);
 
 					index++;
 				}

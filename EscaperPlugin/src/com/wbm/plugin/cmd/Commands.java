@@ -24,7 +24,7 @@ import com.wbm.plugin.util.general.BroadcastTool;
 import com.wbm.plugin.util.general.CoolDownManager;
 import com.wbm.plugin.util.general.NPCManager;
 import com.wbm.plugin.util.minigame.CooperativeMiniGame;
-import com.wbm.plugin.util.minigame.MiniGameInterface;
+import com.wbm.plugin.util.minigame.MiniGame;
 import com.wbm.plugin.util.minigame.MiniGameManager;
 import com.wbm.plugin.util.shop.ShopGoods;
 
@@ -61,16 +61,14 @@ public class Commands implements CommandExecutor {
 	    case "d": // debug
 		BroadcastTool.sendMessage(p, "==========debug cmd=============");
 		return this.debug(p, args);
-	    case "room":
-		return this.room(p, args);
 	    case "rank":
 		return this.rank(p, args);
 	    case "npc":
 		return this.npc(p, args);
+	    case "room":
+		return this.room(p, args);
 	    case "minigame":
 		return this.minigame(p, args);
-	    case "player":
-		return this.player(p, args);
 	    }
 	}
 
@@ -221,35 +219,25 @@ public class Commands implements CommandExecutor {
 	    switch (second) {
 	    case "relay":
 		this.printRelayInfo(p);
-		break;
-	    case "role": // print own role
-		this.printPlayerRole(p);
-		break;
-	    case "roles": // print all player role
-		this.printAllPlayerRole(p);
-		break;
-	    case "rolechange":
-		this.changeRole(p, args);
-		break;
-	    case "time":
-		this.printCurrentRelayTime(p);
-		break;
-	    case "finish":
-		this.finishMakingTime(p);
-		break;
+		return true;
 	    case "reset":
 		this.relayManager.resetRelay();
-		break;
+		return true;
 	    case "pdata":
 		this.printPlayerData(p);
-		break;
+		return true;
 	    case "allpdata":
 		this.printAllPlayerData(p);
-		break;
+		return true;
 	    case "token":
 		return this.token(p, args);
+	    case "rolechange":
+		this.changeRole(p, args);
+		return true;
+	    case "goods":
+		return this.goodsCmd(p, args);
 	    }
-	    return true;
+	    return false;
 	}
 	return false;
     }
@@ -294,19 +282,6 @@ public class Commands implements CommandExecutor {
 	}
     }
 
-    private void finishMakingTime(Player p) {
-	// MakingTime일때 Testing으로 넘어갈 수 있게 해주는 명령어
-	RelayTime time = this.relayManager.getCurrentTime();
-	if (time == RelayTime.MAKING) {
-	    if (!this.relayManager.isCorePlaced()) {
-		BroadcastTool.sendMessage(p, "core is not placed");
-	    } else {
-		this.relayManager.startNextTime();
-	    }
-
-	}
-    }
-
     private void printRelayInfo(Player p) {
 	// print maker
 	this.printMaker(p);
@@ -341,10 +316,10 @@ public class Commands implements CommandExecutor {
 	// /re d rolechange <playerName> <role>
 	String pName = args[2];
 	String roleStr = args[3];
-	
+
 	Player targetP = Bukkit.getPlayer(pName);
 	Role role = Role.valueOf(roleStr);
-	
+
 	PlayerData pData = this.pDataManager.getPlayerData(targetP.getUniqueId());
 	pData.setRole(role);
     }
@@ -432,12 +407,12 @@ public class Commands implements CommandExecutor {
 	/*
 	 * 설명] CooperativeMiniGame의 master만 사용가능한 명령어
 	 * 
-	 * /re minigame [ok | kick] <playerName> 
+	 * /re minigame [ok | kick] <playerName>
 	 * 
 	 * /re minigame waitlist
 	 */
 
-	MiniGameInterface minigame = this.minigameManager.getPlayingGame(p);
+	MiniGame minigame = this.minigameManager.getPlayingGame(p);
 	// 하고 있는 미니게임이 CooperativeMiniGame일때
 	if (minigame != null && minigame instanceof CooperativeMiniGame) {
 	    CooperativeMiniGame game = (CooperativeMiniGame) minigame;
@@ -480,9 +455,8 @@ public class Commands implements CommandExecutor {
 	    BroadcastTool.sendMessage(p, "not exist player");
 	    return;
 	}
-	
-	PlayerData targetPData = this.pDataManager.getPlayerData(targetPlayer.getUniqueId());
 
+	PlayerData targetPData = this.pDataManager.getPlayerData(targetPlayer.getUniqueId());
 
 	// 2.이미 <name> 플레이어가 다른 미니게임을 플레이하고 있지 않을 때
 	if (this.minigameManager.isPlayerPlayingGame(targetPlayer)) {
@@ -505,21 +479,52 @@ public class Commands implements CommandExecutor {
 	}
     }
 
-    private boolean player(Player p, String[] args) {
+    private boolean goodsCmd(Player p, String[] args) {
 	/*
-	 * /re <playerName> init [all | goods]
+	 * /re d goods init <player> /re d goods [add | remove] <player> <ShopGoods>
 	 */
-	String playerName = args[1];
-	String options = args[2];
+	String option = args[2];
+	String playerName = args[3];
 	PlayerData pData = this.pDataManager.getPlayerData(Bukkit.getPlayerUniqueId(playerName));
 
-	switch (options) {
-	case "goods":
-	    pData.makeEmptyGoods();
-	    BroadcastTool.sendMessage(p, playerName + " goods made empty");
-	    break;
+	if (args.length > 3) {
+	    switch (option) {
+	    case "init":
+		pData.makeEmptyGoods();
+		BroadcastTool.sendMessage(p, playerName + " goods made empty");
+		return true;
+	    case "add":
+	    case "remove":
+		return manageGoods(p, args);
+	    }
+	    return false;
 	}
-	return true;
+
+	return false;
+    }
+
+    private boolean manageGoods(Player p, String[] args) {
+	String option = args[2];
+	String playerName = args[3];
+	String goodsName = args[4];
+	PlayerData pData = this.pDataManager.getPlayerData(Bukkit.getPlayerUniqueId(playerName));
+	ShopGoods goods = ShopGoods.valueOf(goodsName);
+
+	if (args.length == 5) {
+	    switch (option) {
+	    case "add":
+		pData.addGoods(goods);
+		BroadcastTool.sendMessage(p, "add " + goods.name() + " to " + playerName);
+		return true;
+	    case "remove":
+		pData.removeGoods(goods);
+		BroadcastTool.sendMessage(p, "remove " + goods.name() + " from " + playerName);
+		return true;
+	    }
+	    return false;
+	}
+
+	return false;
     }
 }
 
