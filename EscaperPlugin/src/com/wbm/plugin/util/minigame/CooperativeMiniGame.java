@@ -1,31 +1,22 @@
 package com.wbm.plugin.util.minigame;
 
-import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
-import org.bukkit.scheduler.BukkitTask;
 
-import com.wbm.plugin.Main;
 import com.wbm.plugin.data.MiniGameLocation;
 import com.wbm.plugin.data.PlayerData;
 import com.wbm.plugin.util.PlayerDataManager;
 import com.wbm.plugin.util.enums.MiniGameType;
 import com.wbm.plugin.util.general.BroadcastTool;
-import com.wbm.plugin.util.general.Counter;
 import com.wbm.plugin.util.general.InventoryTool;
 import com.wbm.plugin.util.general.SpawnLocationTool;
 import com.wbm.plugin.util.general.TeleportTool;
 
 import net.md_5.bungee.api.ChatColor;
 
-public abstract class CooperativeMiniGame implements Serializable, MiniGame {
+public abstract class CooperativeMiniGame extends MiniGame {
 
     /*
      * 모든 협동 미니게임은 이 클래스를 상속받아서 만들어져야 함
@@ -59,43 +50,23 @@ public abstract class CooperativeMiniGame implements Serializable, MiniGame {
     private static final long serialVersionUID = 1L;
 
     // 방장=master
-    transient protected Player master;
+    transient private Player master;
     // 모든 플레이어들(방장 포함)
-    transient protected List<Player> players;
-    transient protected boolean activated;
+    transient private List<Player> players;
     transient protected int score;
-    transient protected int waitingTime;
-    transient protected int fee;
 
-    transient protected int timeLimit;
-    protected MiniGameType gameType;
+    transient private List<Player> waitPlayers;
 
-    // 각 미니게임의 랭크데이터 관리 변수
-    protected Map<String, Integer> rankData;
-
-    transient protected BukkitTask startTask, exitTask, timerTask;
-
-    transient protected List<Player> waitPlayers;
-
-    public CooperativeMiniGame(MiniGameType gameType) {
-	this.gameType = gameType;
-	this.initGameSettings();
-
-	this.rankData = new HashMap<>();
+    public CooperativeMiniGame(MiniGameType gameType, PlayerDataManager pDataManager) {
+	super(gameType,pDataManager);
     }
 
     public void initGameSettings() {
+	super.initGameSettings();
 	this.master = null;
 	this.players = new ArrayList<>();
 	this.waitPlayers = new ArrayList<>();
-	this.activated = false;
 	this.score = 0;
-	// 먼저 실행중인 task취소하고 초기화
-	this.stopAllTasks();
-	this.startTask = this.exitTask = this.timerTask = null;
-	this.timeLimit = gameType.getTimeLimit();
-	this.fee = gameType.getFee();
-	this.waitingTime = 60;
     }
 
     @Override
@@ -117,7 +88,10 @@ public abstract class CooperativeMiniGame implements Serializable, MiniGame {
 		return;
 	    }
 	    // init variables
-	    this.prepareGame(p, pData);
+	    this.prepareGame(p);
+	    // setup player settings
+	    this.setupPlayerSettings(p, pData);
+	    // task
 	    this.reserveGameTasks(pDataManager);
 	}
     }
@@ -155,21 +129,13 @@ public abstract class CooperativeMiniGame implements Serializable, MiniGame {
 	    return;
 	}
 
-	// 멤버에 추가
-	this.players.add(waiter);
-
-	// tp
-	Location gameRoom = this.gameType.getRoomLocation();
-	TeleportTool.tp(waiter, gameRoom);
-
-	// info 전달
-	this.notifyInfo(waiter);
-
-	// pdata에 미니게임 등록
-	waiterPData.setMinigame(this.gameType);
+	// setup player settings
+	this.setupPlayerSettings(waiter, waiterPData);
 
 	// 허락 메세지
-	BroadcastTool.sendMessage(waiter, "you are accepted to this minigame by " + this.master.getName());
+	BroadcastTool.sendMessage(this.master, waiter.getName() + " come to " + this.gameType.name() + " room");
+	BroadcastTool.sendMessage(waiter,
+		"you are accepted to " + this.gameType.name() + " by " + this.master.getName());
     }
 
     public void kickPlayer(Player p) {
@@ -188,7 +154,7 @@ public abstract class CooperativeMiniGame implements Serializable, MiniGame {
 	BroadcastTool.sendMessage(p, "you kicked by " + this.master.getName() + " from " + this.gameType.name());
     }
 
-    private void prepareGame(Player p, PlayerData pData) {
+    private void prepareGame(Player p) {
 	/*
 	 * master가 들어왔을때 딱 1번 실행됨
 	 */
@@ -198,83 +164,9 @@ public abstract class CooperativeMiniGame implements Serializable, MiniGame {
 
 	// 마스터 등록
 	this.master = p;
-	this.players.add(p);
-
-	// 게임룸 위치로 tp
-	Location gameRoom = this.gameType.getRoomLocation();
-	TeleportTool.tp(p, gameRoom);
-
-	// info 전달
-	this.notifyInfo(p);
-
-	// pdata에 미니게임 등록
-	pData.setMinigame(this.gameType);
 
 	// 게임 룸 count down 시작
 	this.startTimer();
-    }
-
-    private void notifyInfo(Player p) {
-	// player에게 정보 전달
-	this.printGameTutorial(p);
-
-	// print all rank
-	MiniGameRankManager.printAllRank(this.rankData, p);
-    }
-
-    private void startTimer() {
-	/*
-	 * 1초마다 모든 플레이어에게 Counter의 수를 send title함
-	 */
-	Counter timer = new Counter(this.waitingTime);
-
-	this.timerTask = Bukkit.getScheduler().runTaskTimer(Main.getInstance(), new Runnable() {
-	    @Override
-	    public void run() {
-		// send title
-		BroadcastTool.sendTitle(getPlayer(), timer.getCount() + "", "", 0.2, 0.6, 0.2);
-		timer.removeCount(1);
-
-		// 0이하에서는 취소
-		if (timer.getCount() <= 0) {
-		    timerTask.cancel();
-		}
-	    }
-	}, 0, 20);
-    }
-
-    private void reserveGameTasks(PlayerDataManager pDataManager) {
-	// this.waitingTime 초 후 실행
-	this.reserveActivateGameTask();
-
-	// exitGame(): this.waitingTime + this.timeLimit 초 후 실행
-	this.reserveExitGameTask(pDataManager);
-    }
-
-    private void reserveActivateGameTask() {
-	this.startTask = Bukkit.getScheduler().runTaskLater(Main.getInstance(), new Runnable() {
-	    @Override
-	    public void run() {
-		// activated = true를 waitingTime후에 실행하는 이유:
-		// block event가 왔을때 activated가 true일때만 실행되게 했으므로
-		activated = true;
-
-		BroadcastTool.sendTitle(players, "START", "");
-
-		// start game 후에 실행할 작업
-		runTaskAfterStartGame();
-	    }
-	}, 20 * waitingTime);
-
-    }
-
-    private void reserveExitGameTask(PlayerDataManager pDataManager) {
-	this.exitTask = Bukkit.getScheduler().runTaskLater(Main.getInstance(), new Runnable() {
-	    @Override
-	    public void run() {
-		exitGame(pDataManager);
-	    }
-	}, 20 * (waitingTime + this.timeLimit));
     }
 
     public void exitGame(PlayerDataManager pDataManager) {
@@ -302,7 +194,7 @@ public abstract class CooperativeMiniGame implements Serializable, MiniGame {
 	InventoryTool.clearPlayerInv(this.players);
 
 	// pData minigame 초기화
-	for (Player p : this.getPlayer()) {
+	for (Player p : this.getAllPlayer()) {
 	    PlayerData pData = pDataManager.getPlayerData(p.getUniqueId());
 	    pData.setNull();
 	}
@@ -367,50 +259,10 @@ public abstract class CooperativeMiniGame implements Serializable, MiniGame {
      * 이 메소드는 미니게임에서 플레이어들이 발생한 이벤트를 각 게임에서 처리해주는 범용 메소드 예) if(event instanceof
      * BlockBreakEvent) { BlockBreakEvent e = (BlockBreakEvent) event; // 생략 }
      */
-    public abstract void processEvent(Event event);
 
-    // tutorial strings
-    public abstract String[] getGameTutorialStrings();
-
-    public void printGameTutorial(Player p) {
-	/*
-	 * 기본적으로 출력되는 정보 -game name -time limit -waiting time
-	 * 
-	 * getGameTutorialStrings()에 추가해야 하는 정보 -game rule
-	 */
-	BroadcastTool.sendMessage(p, "=================================");
-	BroadcastTool.sendMessage(p, "" + ChatColor.RED + ChatColor.BOLD + this.gameType.name() + ChatColor.WHITE);
-	BroadcastTool.sendMessage(p, "=================================");
-
-	// print rule
-	BroadcastTool.sendMessage(p, "");
-	BroadcastTool.sendMessage(p, ChatColor.BOLD + "[Rule]");
-	BroadcastTool.sendMessage(p, "Time Limit: " + this.timeLimit);
-	for (String msg : this.getGameTutorialStrings()) {
-	    BroadcastTool.sendMessage(p, msg);
-	}
-
-//	BroadcastTool.sendMessage(p, "");
-//	int lastScore = MiniGameRankManager.getScore(this.rankData, p.getName());
-//	BroadcastTool.sendMessage(p, "Your last score: " + lastScore);
-    }
-
-    public void runTaskAfterStartGame() {
-    }
 
     public int getGameBlockCount() {
 	return MiniGameLocation.getGameBlockCount(this.gameType);
-    }
-
-    public void stopAllTasks() {
-	if (this.startTask != null)
-	    this.startTask.cancel();
-	if (this.exitTask != null) {
-	    this.exitTask.cancel();
-	}
-	if (this.timerTask != null) {
-	    this.timerTask.cancel();
-	}
     }
 
     public boolean isPlayerPlayingGame(Player p) {
@@ -463,24 +315,13 @@ public abstract class CooperativeMiniGame implements Serializable, MiniGame {
 	return this.master;
     }
 
-    public List<Player> getPlayer() {
+    @Override
+    public List<Player> getAllPlayer() {
 	return players;
-    }
-
-    public void setPlayer(List<Player> player) {
-	this.players = player;
     }
 
     public boolean isSomeoneInGameRoom() {
 	return this.players.size() > 0;
-    }
-
-    public boolean isActivated() {
-	return this.activated;
-    }
-
-    public void setActivated(boolean activated) {
-	this.activated = activated;
     }
 
     public void plusScore(int amount) {
@@ -498,21 +339,9 @@ public abstract class CooperativeMiniGame implements Serializable, MiniGame {
     public void setScore(int score) {
 	this.score = score;
     }
-
-    public int getTimeLimit() {
-	return timeLimit;
-    }
-
-    public void setTimeLimit(int timeLimit) {
-	this.timeLimit = timeLimit;
-    }
-
-    public MiniGameType getGameType() {
-	return gameType;
-    }
-
-    public void setGameType(MiniGameType gameType) {
-	this.gameType = gameType;
+    @Override
+    public void registerPlayer(Player p) {
+	this.players.add(p);
     }
 
     @Override

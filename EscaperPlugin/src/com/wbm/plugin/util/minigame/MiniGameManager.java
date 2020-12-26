@@ -10,6 +10,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.block.BlockEvent;
 import org.bukkit.event.entity.EntityEvent;
+import org.bukkit.event.player.PlayerEvent;
 
 import com.wbm.plugin.data.MiniGameLocation;
 import com.wbm.plugin.util.PlayerDataManager;
@@ -38,11 +39,11 @@ public class MiniGameManager implements DataMember {
 
     public void registerGames() {
 	List<MiniGame> allGame = new ArrayList<>();
-	allGame.add(new FindTheRed());
-	allGame.add(new Painter());
-	allGame.add(new FindTheYellow());
-	allGame.add(new FindTheBlue());
-	allGame.add(new BattleTown());
+	allGame.add(new FindTheRed(this.pDataManager));
+	allGame.add(new Painter(this.pDataManager));
+	allGame.add(new FindTheYellow(this.pDataManager));
+	allGame.add(new FindTheBlue(this.pDataManager));
+	allGame.add(new BattleTown(this.pDataManager));
 	
 	// 모든 미니게임 games에 등록
 	for (MiniGame game : allGame) {
@@ -92,6 +93,9 @@ public class MiniGameManager implements DataMember {
 	} else if (event instanceof EntityEvent) {
 	    EntityEvent entityEvent = (EntityEvent) event;
 	    eventLoc = entityEvent.getEntity().getLocation();
+	} else if (event instanceof PlayerEvent) {
+	    PlayerEvent playerEvent = (PlayerEvent) event;
+	    eventLoc = playerEvent.getPlayer().getLocation();
 	} else {
 	    // 처리할 이벤트가 아닐땐 반환
 	    return;

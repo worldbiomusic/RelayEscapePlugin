@@ -7,17 +7,15 @@ import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
-import org.bukkit.entity.Creature;
 import org.bukkit.entity.ItemFrame;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityInteractEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
@@ -36,6 +34,8 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.util.Vector;
 
 import com.wbm.plugin.Main;
+import com.wbm.plugin.data.PlayerData;
+import com.wbm.plugin.data.RoomLocation;
 import com.wbm.plugin.util.PlayerDataManager;
 import com.wbm.plugin.util.RelayManager;
 import com.wbm.plugin.util.Setting;
@@ -161,18 +161,21 @@ public class CommonListener implements Listener {
     @EventHandler
     public void onPlayerRespawn(PlayerRespawnEvent e) {
 	// 여러 RelayTime에 따라 리스폰 위치 조정업
-	// Maker와 Viewr는 creative이므로 죽을 상황 없음
+	// WAITER 제외하고 모두 RESPAWN지점
 	Player p = e.getPlayer();
 	Role role = this.pDataManager.getPlayerData(p.getUniqueId()).getRole();
 
 	Location respawnLoc = SpawnLocationTool.RESPAWN;
 	if (role == Role.WAITER) {
 	    respawnLoc = SpawnLocationTool.LOBBY;
-	} else if (role == Role.TESTER || role == Role.CHALLENGER) {
+	} else {
 	    respawnLoc = SpawnLocationTool.RESPAWN;
 	}
 
 	e.setRespawnLocation(respawnLoc);
+	
+	// pvp 죽었을때 위치 조정
+	this.miniGameManager.processEvent(e);
     }
 
     @EventHandler
@@ -421,4 +424,81 @@ public class CommonListener implements Listener {
 	    e.setCancelled(true);
 	}
     }
+    
+    @EventHandler
+    public void onPlayerBreakTokenBlock(BlockBreakEvent e) {
+	/*
+	 * Token Block 부쉈을때 토큰 지급후 블럭 1분후 등장
+	 */
+	Block b = e.getBlock();
+	Location loc = b.getLocation();
+	RoomType roomType = RoomLocation.getRoomTypeWithLocation(loc);
+	int bonusToken = 0;
+	if(roomType == RoomType.FUN) {
+	    if(b.getType() == Material.IRON_BLOCK) {
+		bonusToken = 1;
+	    } else if(b.getType() == Material.GOLD_BLOCK) {
+		bonusToken = 2;
+	    } else if(b.getType() == Material.DIAMOND_BLOCK) {
+		bonusToken = 3;
+	    }else if(b.getType() == Material.EMERALD_BLOCK) {
+		bonusToken = 4;
+	    }else {
+		return;
+	    }
+	    
+	    Player p = e.getPlayer();
+	    PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
+	    pData.plusToken(bonusToken);
+	    BroadcastTool.sendMessage(p, "Bonus token: " + bonusToken);
+	    
+	    // 블럭 없에기
+	    b.setType(Material.AIR);
+	    
+	    // 일정시간후 블럭 다시 나타나기
+	    Bukkit.getScheduler().runTaskLater(Main.getInstance(), new Runnable() {
+		
+		@Override
+		public void run() {
+		    double r = Math.random();
+		    Material block=Material.IRON_BLOCK;
+		    
+		    if(r < 0.5) {
+			block=Material.IRON_BLOCK;
+		    }else if(r < 0.8) {
+			block=Material.GOLD_BLOCK;
+		    }else if(r < 0.95) {
+			block=Material.DIAMOND_BLOCK;
+		    }else if(r < 1) {
+			block=Material.EMERALD_BLOCK;
+		    }
+		    
+		    b.setType(block);
+		}
+	    }, 20 * 1);
+	}
+    }
 }
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//

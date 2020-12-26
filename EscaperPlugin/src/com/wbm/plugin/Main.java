@@ -93,19 +93,6 @@ public class Main extends JavaPlugin {
 	    this.registerCommands();
 
 	    this.getServer().getConsoleSender().sendMessage(ChatColor.GREEN + "EscaperServerPlugin ON");
-
-//			// reRegister all player (이미 서버에 있는데 reload했을경우) 
-	    // GameManager에서 생성자에서 불려야 플레이어데이터가 올라가서 정상작동함 (여기서 하면 안됨)
-//			this.gManager.reRegisterAllPlayer();
-
-	    // update scoreboard every 1 sec
-	    this.loopUpdatingScoreboard();
-
-	    // play music every 4 minutes
-	    this.loopPlayingMusic();
-	    
-	    // check player too far
-	    this.checkPlayerIsTooFarAway();
 	} catch (Exception e) {
 	    e.printStackTrace();
 	}
@@ -115,9 +102,9 @@ public class Main extends JavaPlugin {
 //	register CoolDown subject
 	CoolDownManager.registerSubject(Setting.CoolDown_Subject_CHAT, 5);
 	CoolDownManager.registerSubject(Setting.CoolDown_Subject_CMD_ROOM, 10);
-	
+
 	// BroadcastTool
-	BroadcastTool.setServerNamePrefix("" + ChatColor.RED + ChatColor.BOLD + "[i] " + ChatColor.WHITE);
+	BroadcastTool.setMessagePrefix("" + ChatColor.RED + ChatColor.BOLD + "[i] " + ChatColor.WHITE);
 
 	// respawn manager
 	Location loc = Setting.getLoationFromSTDLOC(9.5, 4, 5.5, 90, 0);
@@ -141,6 +128,17 @@ public class Main extends JavaPlugin {
 	// NPC
 	this.npcManager = new NPCManager(this.skinManager);
 
+	// update scoreboard every 1 sec
+	this.loopUpdatingScoreboard();
+
+	// play music every 4 minutes
+	this.loopPlayingMusic();
+
+	// check player too far
+	this.checkPlayerIsTooFarAway();
+
+	// TIP
+	this.loopTips();
     }
 
     void setupMain() {
@@ -306,7 +304,7 @@ public class Main extends JavaPlugin {
 	this.stageManager.registerLocations("clearCount", clearLocs);
 	this.stageManager.registerLocations("roomCount", roomLocs);
     }
-    
+
     private void checkPlayerIsTooFarAway() {
 	/*
 	 * 플레이어가 너무 멀리가면 청크로딩으로 맵이 켜져서 다시 중심으로 TP
@@ -315,17 +313,40 @@ public class Main extends JavaPlugin {
 	    @Override
 	    public void run() {
 		for (Player p : Bukkit.getOnlinePlayers()) {
-		    Location loc  = Setting.STDLOC.clone().subtract(p.getLocation());
-		    int dx = Math.abs((int)loc.getX());
-		    int dy = Math.abs((int)loc.getY());
-		    int dz = Math.abs((int)loc.getZ());
-		    
-		    if(dx > 1000 || dy > 1000 || dz > 1000) {
+		    Location loc = Setting.STDLOC.clone().subtract(p.getLocation());
+		    int dx = Math.abs((int) loc.getX());
+		    int dy = Math.abs((int) loc.getY());
+		    int dz = Math.abs((int) loc.getZ());
+
+		    if (dx > 1000 || dy > 1000 || dz > 1000) {
 			TeleportTool.tp(p, SpawnLocationTool.JOIN);
 		    }
 		}
 	    }
 	}, 0, 20 * 5);
+    }
+
+    private void loopTips() {
+	Bukkit.getScheduler().scheduleSyncRepeatingTask(Main.getInstance(), new Runnable() {
+
+	    @Override
+	    public void run() {
+		List<String> tips = new ArrayList<>();
+		tips.add("Discord " + ChatColor.WHITE + ":" + ChatColor.GREEN + ChatColor.UNDERLINE + ChatColor.BOLD
+			+ " https://discord.gg/yRFHkPKqBX" + ChatColor.WHITE);
+		tips.add("Tutorial: /re tutorial");
+		tips.add("Server Name is Relay Escape");
+		tips.add("There some easter egg");
+		tips.add("Simple is best");
+
+		// random tip 고르기
+		String randomTip = tips.get((int) (Math.random() * tips.size()));
+
+		// 색깔 줘서 알리기
+		String tipMsg = "" + ChatColor.YELLOW + ChatColor.BOLD + "[TIP] " + ChatColor.WHITE + randomTip;
+		BroadcastTool.sendMessageToEveryoneWithoutPrefix(tipMsg);
+	    }
+	}, 0, 20 * 60 * 1);
     }
 
 //	void makeKits() {

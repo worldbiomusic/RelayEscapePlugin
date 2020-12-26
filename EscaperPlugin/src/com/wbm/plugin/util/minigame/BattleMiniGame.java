@@ -1,6 +1,5 @@
 package com.wbm.plugin.util.minigame;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -8,25 +7,20 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
-import org.bukkit.scheduler.BukkitTask;
 
-import com.wbm.plugin.Main;
 import com.wbm.plugin.data.MiniGameLocation;
 import com.wbm.plugin.data.PlayerData;
 import com.wbm.plugin.util.PlayerDataManager;
 import com.wbm.plugin.util.enums.MiniGameType;
 import com.wbm.plugin.util.general.BroadcastTool;
-import com.wbm.plugin.util.general.Counter;
 import com.wbm.plugin.util.general.InventoryTool;
 import com.wbm.plugin.util.general.SpawnLocationTool;
 import com.wbm.plugin.util.general.TeleportTool;
 
 import net.md_5.bungee.api.ChatColor;
 
-public abstract class BattleMiniGame implements Serializable, MiniGame {
+public abstract class BattleMiniGame extends MiniGame {
 
     private static final long serialVersionUID = 1L;
     /*
@@ -54,30 +48,18 @@ public abstract class BattleMiniGame implements Serializable, MiniGame {
      */
 
     // BattleMiniGame에서는 players로 Rank판단 가능
-    transient protected Map<String, Integer> players;
-    transient protected boolean activated;
-    transient protected int waitingTime;
-    transient protected int fee;
+    transient private Map<String, Integer> players;
 
-    transient protected int timeLimit;
-    protected MiniGameType gameType;
+    // 게임 시작시 SUM(fee token 합) 값 저장(플레이어 나가면 몇명참가인지 못셈)
+    transient int SUM;
 
-    transient protected BukkitTask startTask, exitTask, timerTask;
-
-    public BattleMiniGame(MiniGameType gameType) {
-	this.gameType = gameType;
-	this.initGameSettings();
+    public BattleMiniGame(MiniGameType gameType, PlayerDataManager pDataManager) {
+	super(gameType, pDataManager);
     }
 
     public void initGameSettings() {
+	super.initGameSettings();
 	this.players = new HashMap<>();
-	this.activated = false;
-	// 먼저 실행중인 task취소하고 초기화
-	this.stopAllTasks();
-	this.startTask = this.exitTask = this.timerTask = null;
-	this.waitingTime = 30;
-	this.timeLimit = gameType.getTimeLimit();
-	this.fee = gameType.getFee();
     }
 
     @Override
@@ -94,6 +76,9 @@ public abstract class BattleMiniGame implements Serializable, MiniGame {
 	    BroadcastTool.sendMessage(p, "you need more token");
 	    return;
 	}
+	
+	// 참가 알림
+	BroadcastTool.sendMessage(this.getAllPlayer(), p.getName() + " join game");
 
 	// 누군가 있을때
 	if (this.isSomeoneInGameRoom()) {
@@ -101,7 +86,7 @@ public abstract class BattleMiniGame implements Serializable, MiniGame {
 	    this.setupPlayerSettings(p, pData);
 	} else { // 아무도 없을때는 게임을 prepare해서 초기화상태로 만듬
 	    // init variables
-	    this.prepareGame(p);
+	    this.prepareGame();
 	    // player관련 세팅
 	    this.setupPlayerSettings(p, pData);
 	    // start game
@@ -110,28 +95,13 @@ public abstract class BattleMiniGame implements Serializable, MiniGame {
 
     }
 
-    private void startTimer() {
-	/*
-	 * 1초마다 모든 플레이어에게 Counter의 수를 send title함
-	 */
-	Counter timer = new Counter(this.waitingTime);
+    @Override
+    public void runTaskAfterStartGame() {
+	this.SUM = this.players.size() * this.gameType.getFee();
+	BroadcastTool.debug("SUM: " + SUM);
+    };
 
-	this.timerTask = Bukkit.getScheduler().runTaskTimer(Main.getInstance(), new Runnable() {
-	    @Override
-	    public void run() {
-		// send title
-		BroadcastTool.sendTitle(getPlayer(), timer.getCount() + "", "", 0.2, 0.6, 0.2);
-		timer.removeCount(1);
-
-		// 0이하에서는 취소
-		if (timer.getCount() <= 0) {
-		    timerTask.cancel();
-		}
-	    }
-	}, 0, 20);
-    }
-
-    private void prepareGame(Player p) {
+    private void prepareGame() {
 	/*
 	 * 게임 초기화하고, 게임 준비
 	 */
@@ -142,63 +112,10 @@ public abstract class BattleMiniGame implements Serializable, MiniGame {
 	this.startTimer();
     }
 
-    private void setupPlayerSettings(Player p, PlayerData pData) {
-	/*
-	 * 게임 초기화는 이미 했으므로 플레이어관련한것만 세팅
-	 */
-	// player 등록
-	this.players.put(p.getName(), 0);
-
-	// 게임룸 위치로 tp
-	Location gameRoom = this.gameType.getRoomLocation();
-	TeleportTool.tp(p, gameRoom);
-
-	// info 전달
-	this.notifyInfo(p);
-
-	// pdata에 미니게임 등록
-	pData.setMinigame(this.gameType);
-    }
-
+    @Override
     void notifyInfo(Player p) {
 	// player에게 정보 전달
 	this.printGameTutorial(p);
-    }
-
-    private void reserveGameTasks(PlayerDataManager pDataManager) {
-	/*
-	 * 게임 활성화, 퇴장 task 예약
-	 */
-	// this.waitingTime 초 후 실행
-	this.reserveActivateGameTask();
-
-	// exitGame(): this.waitingTime + this.timeLimit 초 후 실행
-	this.reserveExitGameTask(pDataManager);
-    }
-
-    private void reserveActivateGameTask() {
-	this.startTask = Bukkit.getScheduler().runTaskLater(Main.getInstance(), new Runnable() {
-	    @Override
-	    public void run() {
-		// activated = true를 waitingTime후에 실행하는 이유:
-		// block event가 왔을때 activated가 true일때만 실행되게 했으므로
-		activated = true;
-
-		BroadcastTool.sendTitle(getPlayer(), "START", "");
-
-		// start game 후에 실행할 작업
-		runTaskAfterStartGame();
-	    }
-	}, 20 * waitingTime);
-    }
-
-    private void reserveExitGameTask(PlayerDataManager pDataManager) {
-	this.exitTask = Bukkit.getScheduler().runTaskLater(Main.getInstance(), new Runnable() {
-	    @Override
-	    public void run() {
-		exitGame(pDataManager);
-	    }
-	}, 20 * (waitingTime + this.timeLimit));
     }
 
     public void exitGame(PlayerDataManager pDataManager) {
@@ -213,13 +130,13 @@ public abstract class BattleMiniGame implements Serializable, MiniGame {
 	this.payReward(pDataManager);
 
 	// player lobby로 tp
-	TeleportTool.tp(this.getPlayer(), SpawnLocationTool.LOBBY);
+	TeleportTool.tp(this.getAllPlayer(), SpawnLocationTool.LOBBY);
 
 	// inventory 초기화
-	InventoryTool.clearPlayerInv(this.getPlayer());
+	InventoryTool.clearPlayerInv(this.getAllPlayer());
 
 	// pData minigame 초기화
-	for (Player p : this.getPlayer()) {
+	for (Player p : this.getAllPlayer()) {
 	    PlayerData pData = pDataManager.getPlayerData(p.getUniqueId());
 	    pData.setNull();
 	}
@@ -229,15 +146,17 @@ public abstract class BattleMiniGame implements Serializable, MiniGame {
     }
 
     private void printGameResult() {
-	for (Player p : this.getPlayer()) {
+	for (Player p : this.getAllPlayer()) {
 	    // GAME END print
 	    BroadcastTool.sendMessage(p, "=================================");
 	    BroadcastTool.sendMessage(p, "" + ChatColor.RED + ChatColor.BOLD + "Game End");
 	    BroadcastTool.sendMessage(p, "=================================");
 
 	    // 전체플레이어 score 공개
-	    for (Player all : this.getPlayer()) {
-		BroadcastTool.sendMessage(p, all.getName() + " score: " + this.players.get(all.getName()));
+	    for (int i = 0; i < this.getAllPlayer().size(); i++) {
+		Player all = this.getAllPlayer().get(i);
+		BroadcastTool.sendMessage(p, "[" + i + "]" + all.getName() + " score: "
+			+ this.players.get(all.getName()));
 	    }
 
 	    // send title
@@ -275,8 +194,6 @@ public abstract class BattleMiniGame implements Serializable, MiniGame {
 	 * 참가보상: 20의 10%씩 = 2
 	 * 
 	 */
-
-	int SUM = this.players.size() * this.gameType.getFee();
 
 	// token의 내림차순으로 랭크된 플레이어 목록
 	List<Entry<String, Integer>> rank = MiniGameRankManager.getDescendingSortedMapEntrys(this.players);
@@ -331,46 +248,9 @@ public abstract class BattleMiniGame implements Serializable, MiniGame {
      * 이 메소드는 미니게임에서 플레이어들이 발생한 이벤트를 각 게임에서 처리해주는 범용 메소드 예) if(event instanceof
      * BlockBreakEvent) { BlockBreakEvent e = (BlockBreakEvent) event; // 생략 }
      */
-    public abstract void processEvent(Event event);
-
-    // tutorial strings
-    public abstract String[] getGameTutorialStrings();
-
-    public void printGameTutorial(Player p) {
-	/*
-	 * 기본적으로 출력되는 정보 -game name -time limit -waiting time
-	 * 
-	 * getGameTutorialStrings()에 추가해야 하는 정보 -game rule
-	 */
-	BroadcastTool.sendMessage(p, "=================================");
-	BroadcastTool.sendMessage(p, "" + ChatColor.RED + ChatColor.BOLD + this.gameType.name() + ChatColor.WHITE);
-	BroadcastTool.sendMessage(p, "=================================");
-
-	// print rule
-	BroadcastTool.sendMessage(p, "");
-	BroadcastTool.sendMessage(p, ChatColor.BOLD + "[Rule]");
-	BroadcastTool.sendMessage(p, "Time Limit: " + this.timeLimit);
-	for (String msg : this.getGameTutorialStrings()) {
-	    BroadcastTool.sendMessage(p, msg);
-	}
-    }
-
-    public void runTaskAfterStartGame() {
-    }
 
     public int getGameBlockCount() {
 	return MiniGameLocation.getGameBlockCount(this.gameType);
-    }
-
-    public void stopAllTasks() {
-	if (this.startTask != null)
-	    this.startTask.cancel();
-	if (this.exitTask != null) {
-	    this.exitTask.cancel();
-	}
-	if (this.timerTask != null) {
-	    this.timerTask.cancel();
-	}
     }
 
     public boolean isPlayerPlayingGame(Player p) {
@@ -401,8 +281,8 @@ public abstract class BattleMiniGame implements Serializable, MiniGame {
 	    pData.setNull();
 
 	    // 남은 인원에게 알리기
-	    BroadcastTool.sendMessage(this.getPlayer(), p.getName() + " exit " + this.gameType.name());
-	    
+	    BroadcastTool.sendMessage(this.getAllPlayer(), p.getName() + " exit " + this.gameType.name());
+
 	    // 패널티
 	    pData.minusToken(this.fee * 2);
 
@@ -418,7 +298,8 @@ public abstract class BattleMiniGame implements Serializable, MiniGame {
 
     // GETTER, SETTER =============================================
 
-    public List<Player> getPlayer() {
+    @Override
+    public List<Player> getAllPlayer() {
 	/*
 	 * String Player name을 Player형 리스트로 반환
 	 */
@@ -430,24 +311,9 @@ public abstract class BattleMiniGame implements Serializable, MiniGame {
 	return allPlayer;
     }
 
-    public void setPlayer(List<Player> players) {
-	for (Player p : players) {
-	    this.players.put(p.getName(), 0);
-	}
-
-    }
-
     public boolean isSomeoneInGameRoom() {
 	// 해당 게임룸에 누군가 플레이 중인지 반환
 	return (this.players.size() > 0);
-    }
-
-    public boolean isActivated() {
-	return this.activated;
-    }
-
-    public void setActivated(boolean activated) {
-	this.activated = activated;
     }
 
     public void plusScore(Player p, int amount) {
@@ -472,25 +338,14 @@ public abstract class BattleMiniGame implements Serializable, MiniGame {
 //	this.score = scores;
     }
 
-    public int getTimeLimit() {
-	return timeLimit;
-    }
-
-    public void setTimeLimit(int timeLimit) {
-	this.timeLimit = timeLimit;
-    }
-
-    public MiniGameType getGameType() {
-	return gameType;
-    }
-
-    public void setGameType(MiniGameType gameType) {
-	this.gameType = gameType;
+    @Override
+    public void registerPlayer(Player p) {
+	this.players.put(p.getName(), 0);
     }
 
     @Override
     public String toString() {
-	return "MiniGame " + "\nplayer=" + this.getPlayer() + ", \nActivated=" + activated + ", \nscore="
+	return "MiniGame " + "\nplayer=" + this.getAllPlayer() + ", \nActivated=" + activated + ", \nscore="
 		+ this.getScore() + ", \ntimeLimit=" + timeLimit + ", \ngameType=" + gameType + "]";
     }
 

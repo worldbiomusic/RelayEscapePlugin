@@ -9,6 +9,7 @@ import org.bukkit.event.Event;
 import org.bukkit.event.block.BlockBreakEvent;
 
 import com.wbm.plugin.data.MiniGameLocation;
+import com.wbm.plugin.util.PlayerDataManager;
 import com.wbm.plugin.util.enums.MiniGameType;
 import com.wbm.plugin.util.general.BlockTool;
 import com.wbm.plugin.util.general.BroadcastTool;
@@ -29,8 +30,8 @@ public class Painter extends SoloMiniGame {
     private List<Material> mats;
     Material mat1, mat2;
 
-    public Painter() {
-	super(MiniGameType.PAINTER);
+    public Painter(PlayerDataManager pDataManager) {
+	super(MiniGameType.PAINTER, pDataManager);
 
 	// setup
 	this.mats = new ArrayList<>();
@@ -49,7 +50,7 @@ public class Painter extends SoloMiniGame {
 	this.generateNewBlocks();
 
 	// 곡괭이 지급
-	InventoryTool.addItemToPlayer(this.getPlayer(), ItemStackTool.item(Material.IRON_PICKAXE));
+	InventoryTool.addItemToPlayers(this.getAllPlayer(), ItemStackTool.item(Material.IRON_PICKAXE));
 
     }
 
@@ -66,7 +67,7 @@ public class Painter extends SoloMiniGame {
 
 	    // 완성된지 체크
 	    if (this.isComplete()) {
-		BroadcastTool.sendMessage(this.getPlayer(), "+1");
+		BroadcastTool.sendMessage(this.getAllPlayer(), "+1");
 		this.plusScore(1);
 		this.generateNewBlocks();
 	    }
@@ -129,4 +130,5 @@ public class Painter extends SoloMiniGame {
     private boolean isComplete() {
 	return BlockTool.isAllSameBlock(MiniGameLocation.PAINTER_POS1, MiniGameLocation.PAINTER_POS2);
     }
+
 }

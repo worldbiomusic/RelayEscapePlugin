@@ -14,11 +14,6 @@ public class RoomLocation {
     public static final Location MAIN_Pos1 = Setting.getLoationFromSTDLOC(1, 4, 1);
     public static final Location MAIN_Pos2 = Setting.getLoationFromSTDLOC(10, 53, 10);
 
-    // ROOM사이즈 (main이랑 practice room이랑 같은 크기임)
-    public static final int ROOM_SIZE_X = Math.abs((int) (MAIN_Pos1.getX() - MAIN_Pos2.getX()));
-    public static final int ROOM_SIZE_Y = Math.abs((int) (MAIN_Pos1.getY() - MAIN_Pos2.getY()));
-    public static final int ROOM_SIZE_Z = Math.abs((int) (MAIN_Pos1.getZ() - MAIN_Pos2.getZ()));
-
     // practice
     public static final Location PRACTICE_Pos1 = Setting.getLoationFromSTDLOC(21, 4, 21);
     public static final Location PRACTICE_Pos2 = Setting.getLoationFromSTDLOC(30, 53, 30);
@@ -26,6 +21,15 @@ public class RoomLocation {
     // minigame
     public static final Location MINIGAME_Pos1 = Setting.getLoationFromSTDLOC(1, 4, 21);
     public static final Location MINIGAME_Pos2 = Setting.getLoationFromSTDLOC(10, 53, 30);
+
+    // minigame
+    public static final Location FUN_Pos1 = Setting.getLoationFromSTDLOC(21, 4, 10);
+    public static final Location FUN_Pos2 = Setting.getLoationFromSTDLOC(30, 53, 1);
+
+    // ROOM사이즈 (모든 룸 같은 크기)
+    public static final int ROOM_SIZE_X = Math.abs((int) (MAIN_Pos1.getX() - MAIN_Pos2.getX()));
+    public static final int ROOM_SIZE_Y = Math.abs((int) (MAIN_Pos1.getY() - MAIN_Pos2.getY()));
+    public static final int ROOM_SIZE_Z = Math.abs((int) (MAIN_Pos1.getZ() - MAIN_Pos2.getZ()));
 
     public static int getRoomBlockCount(RoomType roomType) {
 	Location pos1 = null, pos2 = null;
@@ -35,6 +39,12 @@ public class RoomLocation {
 	} else if (roomType == RoomType.PRACTICE) {
 	    pos1 = PRACTICE_Pos1;
 	    pos2 = PRACTICE_Pos2;
+	} else if (roomType == RoomType.MINI_GAME) {
+	    pos1 = MINIGAME_Pos1;
+	    pos2 = MINIGAME_Pos2;
+	} else if (roomType == RoomType.FUN) {
+	    pos1 = FUN_Pos1;
+	    pos2 = FUN_Pos2;
 	}
 
 	return LocationTool.getAreaBlockCount(pos1, pos2);
@@ -47,9 +57,11 @@ public class RoomLocation {
 	    return RoomType.PRACTICE;
 	} else if (LocationTool.isIn(MINIGAME_Pos1, loc, MINIGAME_Pos2)) {
 	    return RoomType.MINI_GAME;
+	} else if (LocationTool.isIn(FUN_Pos1, loc, FUN_Pos2)) {
+	    return RoomType.FUN;
 	}
 
 	return null;
     }
-    
+
 }

@@ -14,6 +14,12 @@ public class InventoryTool
 		inv.addItem(item);
 	}
 	
+	public static void addItemToPlayers(List<Player> all, ItemStack item) {
+	    for(Player p : all) {
+		addItemToPlayer(p, item);
+	    }
+	}
+	
 	public static void addItemsToPlayer(Player p, ItemStack[] items) {
 		Inventory inv= p.getInventory();
 		for(ItemStack item : items) {

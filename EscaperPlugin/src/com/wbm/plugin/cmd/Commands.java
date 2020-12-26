@@ -1,5 +1,7 @@
 package com.wbm.plugin.cmd;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -58,17 +60,20 @@ public class Commands implements CommandExecutor {
 	    String first = args[0];
 
 	    switch (first) {
-	    case "d": // debug
+	    case "d": // op
 		BroadcastTool.sendMessage(p, "==========debug cmd=============");
 		return this.debug(p, args);
-	    case "rank":
+	    case "rank": // op
 		return this.rank(p, args);
-	    case "npc":
+	    case "npc": // op
 		return this.npc(p, args);
 	    case "room":
 		return this.room(p, args);
 	    case "minigame":
 		return this.minigame(p, args);
+	    case "tutorial":
+		this.printTutorial(p, args);
+		return true;
 	    }
 	}
 
@@ -213,6 +218,11 @@ public class Commands implements CommandExecutor {
     }
 
     private boolean debug(Player p, String[] args) {
+	// check OP
+	if (!p.isOp()) {
+	    BroadcastTool.sendMessage(p, "OP CMD");
+	    return true;
+	}
 	if (args.length >= 2) {
 	    String second = args[1];
 
@@ -236,10 +246,25 @@ public class Commands implements CommandExecutor {
 		return true;
 	    case "goods":
 		return this.goodsCmd(p, args);
+	    case "cmd":
+		this.printAllCMD(p, args);
+		return true;
 	    }
 	    return false;
 	}
 	return false;
+    }
+
+    private void printAllCMD(Player p, String[] args) {
+	String cmd = "\n" + "/re d [relay | reset | pdata | allpdata]\r\n"
+		+ "/re d token [plus | minus] <player> <amount>\r\n" + "/re d rolechange <playerName> <role>\r\n"
+		+ "/re d goods init\r\n" + "/re d goods [add | remove] <player> <goods>\r\n"
+		+ "/re rank [tokenrank | challengingrank | clearrank | roomcountrank]\r\n"
+		+ "/re npc create <name> <skinName>\r\n" + "/re npc delete <name> \r\n"
+		+ "/re room [load | title] <title>\r\n" + "/re room [empty | list | finish]\r\n"
+		+ "/re minigame [ok | kick] <player>\r\n" + "/re minigame waitlist";
+
+	BroadcastTool.sendMessage(p, cmd);
     }
 
     private boolean token(Player p, String[] args) {
@@ -289,6 +314,8 @@ public class Commands implements CommandExecutor {
 	this.printAllPlayerRole(p);
 	// currentTime
 	this.printCurrentRelayTime(p);
+	// print MainRoom info
+	this.printAllRoomInfo(p);
     }
 
     void printPlayerRole(Player p) {
@@ -331,6 +358,21 @@ public class Commands implements CommandExecutor {
 	p.sendMessage("------------------------------");
     }
 
+    private void printAllRoomInfo(Player p) {
+	p.sendMessage(ChatColor.BOLD + "[Room]");
+
+	p.sendMessage(ChatColor.RED + "MainRoom" + ChatColor.WHITE);
+	Room mainRoom = this.roomManager.getRoom(RoomType.MAIN);
+	p.sendMessage(mainRoom.toString());
+
+	p.sendMessage(ChatColor.RED + "PracticeRoom" + ChatColor.WHITE);
+	Room practiceRoom = this.roomManager.getRoom(RoomType.PRACTICE);
+	if (practiceRoom != null)
+	    p.sendMessage(practiceRoom.toString());
+
+	p.sendMessage("------------------------------");
+    }
+
     private void printMaker(Player p) {
 	String makerName = "";
 	Player maker = this.pDataManager.getMaker();
@@ -343,6 +385,11 @@ public class Commands implements CommandExecutor {
     }
 
     private boolean rank(Player p, String[] args) {
+	// check OP
+	if (!p.isOp()) {
+	    BroadcastTool.sendMessage(p, "OP CMD");
+	    return true;
+	}
 	// /re rank [options]
 	if (args.length == 2) {
 	    String list = args[1];
@@ -384,6 +431,11 @@ public class Commands implements CommandExecutor {
 	 * /re npc delete <name>
 	 */
 
+	// check OP
+	if (!p.isOp()) {
+	    BroadcastTool.sendMessage(p, "OP CMD");
+	    return true;
+	}
 	if (args.length >= 3) {
 	    String option = args[1];
 	    String name = args[2];
@@ -474,7 +526,7 @@ public class Commands implements CommandExecutor {
 
     private void printWaitList(Player p, String[] args, CooperativeMiniGame game) {
 	BroadcastTool.sendMessage(p, "========= WAIT LIST =========");
-	for (Player waiter : game.getPlayer()) {
+	for (Player waiter : game.getAllPlayer()) {
 	    BroadcastTool.sendMessage(p, waiter.getName());
 	}
     }
@@ -525,6 +577,29 @@ public class Commands implements CommandExecutor {
 	}
 
 	return false;
+    }
+
+    private void printTutorial(Player p, String[] args) {
+	List<String> tutorials = new ArrayList<>();
+	tutorials.add("=================================");
+	tutorials.add("=========      Tutorial       =========");
+	tutorials.add("=================================");
+	tutorials.add("- Player: MAKER or CHALLENGER");
+	tutorials.add("- You can become a Maker if you clear MainRoom in ChallengingTime");
+	tutorials.add("- Token is server money");
+	tutorials.add("- Time: Waiting->Making->Testing->Challenging");
+	tutorials.add("- You can play MiniGame in MakingTime and TestingTime");
+	tutorials.add("- Chat: enter number 1 ~ 9");
+	tutorials.add("- Commands: /re");
+	tutorials.add(
+		"- Discord: " + ChatColor.YELLOW + ChatColor.BOLD + " https://discord.gg/yRFHkPKqBX" + ChatColor.WHITE);
+	tutorials.add("=================================");
+	tutorials.add("=========         END         =========");
+	tutorials.add("=================================");
+
+	for (String msg : tutorials) {
+	    BroadcastTool.sendMessage(p, msg);
+	}
     }
 }
 

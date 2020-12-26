@@ -1,29 +1,22 @@
 package com.wbm.plugin.util.minigame;
 
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
-import org.bukkit.scheduler.BukkitTask;
 
-import com.wbm.plugin.Main;
 import com.wbm.plugin.data.MiniGameLocation;
 import com.wbm.plugin.data.PlayerData;
 import com.wbm.plugin.util.PlayerDataManager;
 import com.wbm.plugin.util.enums.MiniGameType;
 import com.wbm.plugin.util.general.BroadcastTool;
-import com.wbm.plugin.util.general.Counter;
 import com.wbm.plugin.util.general.InventoryTool;
 import com.wbm.plugin.util.general.SpawnLocationTool;
 import com.wbm.plugin.util.general.TeleportTool;
 
 import net.md_5.bungee.api.ChatColor;
 
-public abstract class SoloMiniGame implements Serializable, MiniGame {
+public abstract class SoloMiniGame extends MiniGame{
     private static final long serialVersionUID = 1L;
     /*
      * 모든 솔로 미니게임은 이 클래스를 상속받아서 만들어져야 함
@@ -48,37 +41,18 @@ public abstract class SoloMiniGame implements Serializable, MiniGame {
      * 미니게임 데이터가 없는것을 초기화해서 파일저장하려고, 나중에 파일에 저장되면 데이터 불러올때 저장된것으로 대체가 됨 = 처음에 한번
      * 초기화를 위해서 필요한 코드)
      */
-    transient protected Player player;
-    transient protected boolean activated;
+    transient private Player player;
+    
     transient protected int score;
-    transient protected int waitingTime;
-    transient protected int fee;
 
-    transient protected int timeLimit;
-    protected MiniGameType gameType;
-
-    // 각 미니게임의 랭크데이터 관리 변수
-    protected Map<String, Integer> rankData;
-
-    transient protected BukkitTask startTask, exitTask, timerTask;
-
-    public SoloMiniGame(MiniGameType gameType) {
-	this.gameType = gameType;
-	this.initGameSettings();
-
-	this.rankData = new HashMap<>();
+    public SoloMiniGame(MiniGameType gameType, PlayerDataManager pDataManager) {
+	super(gameType, pDataManager);
     }
 
     public void initGameSettings() {
-	this.player = null;
-	this.activated = false;
+	super.initGameSettings();
+	this.registerPlayer(null);
 	this.score = 0;
-	// 먼저 실행중인 task취소하고 초기화
-	this.stopAllTasks();
-	this.startTask = this.exitTask = this.timerTask = null;
-	this.waitingTime = 10;
-	this.timeLimit = gameType.getTimeLimit();
-	this.fee = gameType.getFee();
     }
 
     @Override
@@ -101,99 +75,23 @@ public abstract class SoloMiniGame implements Serializable, MiniGame {
 		return;
 	    }
 	    // init variables
-	    this.prepareGame(p, pData);
+	    this.prepareGame();
+	    // player관련 세팅
+	    this.setupPlayerSettings(p, pData);
 	    // start game
 	    this.reserveGameTasks(pDataManager);
 	}
     }
 
-    private void startTimer() {
-	/*
-	 * 1초마다 모든 플레이어에게 Counter의 수를 send title함
-	 */
-	Counter timer = new Counter(this.waitingTime);
-
-	this.timerTask = Bukkit.getScheduler().runTaskTimer(Main.getInstance(), new Runnable() {
-	    @Override
-	    public void run() {
-		// send title
-		BroadcastTool.sendTitle(player, timer.getCount() + "", "", 0.2, 0.6, 0.2);
-		timer.removeCount(1);
-
-		// 0이하에서는 취소
-		if (timer.getCount() <= 0) {
-		    timerTask.cancel();
-		}
-	    }
-	}, 0, 20);
-    }
-
-    private void prepareGame(Player p, PlayerData pData) {
+    private void prepareGame() {
 	/*
 	 * 게임 초기화하고, 게임 준비
 	 */
 	// 게임 초기화
 	this.initGameSettings();
 
-	// player 등록
-	this.player = p;
-
-	// 게임룸 위치로 tp
-	Location gameRoom = this.gameType.getRoomLocation();
-	TeleportTool.tp(this.player, gameRoom);
-
-	// info 전달
-	this.notifyInfo(p);
-
-	// pdata에 미니게임 등록
-	pData.setMinigame(this.gameType);
-
 	// count down 시작
 	this.startTimer();
-    }
-
-    void notifyInfo(Player p) {
-	// player에게 정보 전달
-	this.printGameTutorial(p);
-
-	// print all rank
-	MiniGameRankManager.printAllRank(this.rankData, p);
-    }
-
-    private void reserveGameTasks(PlayerDataManager pDataManager) {
-	/*
-	 * 게임 활성화, 퇴장 task 예약
-	 */
-	// this.waitingTime 초 후 실행
-	this.reserveActivateGameTask();
-
-	// exitGame(): this.waitingTime + this.timeLimit 초 후 실행
-	this.reserveExitGameTask(pDataManager);
-    }
-
-    private void reserveActivateGameTask() {
-	this.startTask = Bukkit.getScheduler().runTaskLater(Main.getInstance(), new Runnable() {
-	    @Override
-	    public void run() {
-		// activated = true를 waitingTime후에 실행하는 이유:
-		// block event가 왔을때 activated가 true일때만 실행되게 했으므로
-		activated = true;
-
-		BroadcastTool.sendTitle(player, "START", "");
-
-		// start game 후에 실행할 작업
-		runTaskAfterStartGame();
-	    }
-	}, 20 * waitingTime);
-    }
-
-    private void reserveExitGameTask(PlayerDataManager pDataManager) {
-	this.exitTask = Bukkit.getScheduler().runTaskLater(Main.getInstance(), new Runnable() {
-	    @Override
-	    public void run() {
-		exitGame(pDataManager);
-	    }
-	}, 20 * (waitingTime + this.timeLimit));
     }
 
     public void exitGame(PlayerDataManager pDataManager) {
@@ -271,55 +169,21 @@ public abstract class SoloMiniGame implements Serializable, MiniGame {
      * 이 메소드는 미니게임에서 플레이어들이 발생한 이벤트를 각 게임에서 처리해주는 범용 메소드 예) if(event instanceof
      * BlockBreakEvent) { BlockBreakEvent e = (BlockBreakEvent) event; // 생략 }
      */
-    public abstract void processEvent(Event event);
+    
 
-    // tutorial strings
-    public abstract String[] getGameTutorialStrings();
-
+    @Override
     public void printGameTutorial(Player p) {
-	/*
-	 * 기본적으로 출력되는 정보 -game name -time limit -waiting time
-	 * 
-	 * getGameTutorialStrings()에 추가해야 하는 정보 -game rule
-	 */
-	BroadcastTool.sendMessage(p, "=================================");
-	BroadcastTool.sendMessage(p, "" + ChatColor.RED + ChatColor.BOLD + this.gameType.name() + ChatColor.WHITE);
-	BroadcastTool.sendMessage(p, "=================================");
+	super.printGameTutorial(p);
 
-	// print rule
-	BroadcastTool.sendMessage(p, "");
-	BroadcastTool.sendMessage(p, ChatColor.BOLD + "[Rule]");
-	BroadcastTool.sendMessage(p, "Time Limit: " + this.timeLimit);
-	for (String msg : this.getGameTutorialStrings()) {
-	    BroadcastTool.sendMessage(p, msg);
-	}
-
+	// 자신 최고 점수 출력
 	BroadcastTool.sendMessage(p, "");
 	int lastScore = MiniGameRankManager.getScore(this.rankData, p.getName());
 	BroadcastTool.sendMessage(p, "Your last score: " + lastScore);
 
-//	BroadcastTool.sendMessage(p, "");
-//	BroadcastTool.sendMessage(p, this.gameType.name() + " game starts in " + waitingTime + " sec");
-//	BroadcastTool.sendMessage(p, "");
-    }
-
-    public void runTaskAfterStartGame() {
     }
 
     public int getGameBlockCount() {
 	return MiniGameLocation.getGameBlockCount(this.gameType);
-    }
-
-    public void stopAllTasks() {
-	if (this.startTask != null) {
-	    this.startTask.cancel();
-	}
-	if (this.exitTask != null) {
-	    this.exitTask.cancel();
-	}
-	if (this.timerTask != null) {
-	    this.timerTask.cancel();
-	}
     }
 
     public boolean isPlayerPlayingGame(Player p) {
@@ -357,25 +221,16 @@ public abstract class SoloMiniGame implements Serializable, MiniGame {
 
     // GETTER, SETTER =============================================
 
-    public Player getPlayer() {
-	return player;
-    }
-
-    public void setPlayer(Player player) {
-	this.player = player;
+    @Override
+    public List<Player> getAllPlayer() {
+	List<Player> all = new ArrayList<>();
+	all.add(this.player);
+	return all;
     }
 
     public boolean isSomeoneInGameRoom() {
 	// 해당 게임룸에 누군가 플레이 중인지 반환
 	return this.player != null;
-    }
-
-    public boolean isActivated() {
-	return this.activated;
-    }
-
-    public void setActivated(boolean activated) {
-	this.activated = activated;
     }
 
     public void plusScore(int amount) {
@@ -393,22 +248,12 @@ public abstract class SoloMiniGame implements Serializable, MiniGame {
     public void setScore(int score) {
 	this.score = score;
     }
-
-    public int getTimeLimit() {
-	return timeLimit;
+    
+    @Override
+    public void registerPlayer(Player p) {
+	this.player = p;
     }
 
-    public void setTimeLimit(int timeLimit) {
-	this.timeLimit = timeLimit;
-    }
-
-    public MiniGameType getGameType() {
-	return gameType;
-    }
-
-    public void setGameType(MiniGameType gameType) {
-	this.gameType = gameType;
-    }
 
     @Override
     public String toString() {
