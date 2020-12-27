@@ -44,7 +44,8 @@ public enum ShopGoods {
     UNDER_BLOCK(ItemStackTool.item(Material.STICK, "UNDER_BLOCK", "create stone under your foot"), GoodsRole.MAKING),
     SPAWN(ItemStackTool.item(Material.WOOD_DOOR, "SPAWN", "teleport to spawn"), GoodsRole.MAKING),
     CHEST(ItemStackTool.item(Material.CHEST, "CHEST", "open inventory which has blocks you can use"), GoodsRole.MAKING),
-    
+    FINISH(ItemStackTool.item(Material.ARROW, "FINISH", "finish MakingTime and go next to the TesetingTime"), GoodsRole.MAKING),
+    BLOCK_CHANGER(ItemStackTool.item(Material.WOOD_PICKAXE, "BLOCK_CHANGER", "Change the block immediately with the block you are holding", "===Mode===", "off"), GoodsRole.MAKING),
     /*
      * 밑의 ROOM_SETTING 관련 굿즈 제작시 지켜야 하는 사항
      * 

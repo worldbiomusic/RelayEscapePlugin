@@ -26,8 +26,7 @@ public abstract class MiniGame implements Serializable {
 	SELF_EXIT, RELAY_TIME_CHANGED; // Unavoidancable_exit으로 바꾸기
     }
 
-    public MiniGame(MiniGameType gameType, PlayerDataManager pDataManager) {
-	this.pDataManager = pDataManager;
+    public MiniGame(MiniGameType gameType) {
 	this.gameType = gameType;
 	this.initGameSettings();
 
@@ -39,20 +38,14 @@ public abstract class MiniGame implements Serializable {
 	// 먼저 실행중인 task취소하고 초기화
 	this.stopAllTasks();
 	this.startTask = this.exitTask = this.timerTask = null;
-	this.waitingTime = this.gameType.getWaitingTime();
-	this.timeLimit = gameType.getTimeLimit();
-	this.fee = gameType.getFee();
     }
     
-    transient protected PlayerDataManager pDataManager;
+    transient static protected PlayerDataManager pDataManager;
 
     transient private static final long serialVersionUID = 1L;
     transient protected boolean activated;
     transient protected BukkitTask startTask, exitTask, timerTask;
-    transient protected int fee;
-    transient protected int waitingTime;
     protected MiniGameType gameType;
-    transient protected int timeLimit;
 
     // 각 미니게임의 랭크데이터 관리 변수(BattleMiniGame은 사용 안함)
     protected Map<String, Integer> rankData;
@@ -89,20 +82,12 @@ public abstract class MiniGame implements Serializable {
 	this.gameType = gameType;
     }
 
-    public int getTimeLimit() {
-	return timeLimit;
-    }
-
-    public void setTimeLimit(int timeLimit) {
-	this.timeLimit = timeLimit;
-    }
-
     protected void reserveGameTasks(PlayerDataManager pDataManager) {
 	/*
 	 * 게임 활성화, 퇴장 task 예약
 	 */
 	// 전체 공지로 게임 룸이 만들어졌다는것을 알리기 (플레이어 모집을 위해서)
-	BroadcastTool.sendMessageToEveryone("" +ChatColor.GREEN +ChatColor.BOLD + this.gameType.name() +ChatColor.WHITE+ " room is made" + ChatColor.WHITE);
+	BroadcastTool.sendMessageToEveryone("" +ChatColor.GREEN +ChatColor.BOLD + this.gameType.name() +ChatColor.WHITE+ " minigame is made" + ChatColor.WHITE);
 	
 	// this.waitingTime 초 후 실행
 	this.reserveActivateGameTask();
@@ -125,7 +110,7 @@ public abstract class MiniGame implements Serializable {
 		// start game 후에 실행할 작업
 		runTaskAfterStartGame();
 	    }
-	}, 20 * waitingTime);
+	}, 20 * getWaitingTime());
     }
 
     protected void reserveExitGameTask(PlayerDataManager pDataManager) {
@@ -134,7 +119,7 @@ public abstract class MiniGame implements Serializable {
 	    public void run() {
 		exitGame(pDataManager);
 	    }
-	}, 20 * (waitingTime + this.timeLimit));
+	}, 20 * (getWaitingTime() + getTimeLimit()));
     }
 
     protected void setupPlayerSettings(Player p, PlayerData pData) {
@@ -176,7 +161,7 @@ public abstract class MiniGame implements Serializable {
 	// print rule
 	BroadcastTool.sendMessage(p, "");
 	BroadcastTool.sendMessage(p, ChatColor.BOLD + "[Rule]");
-	BroadcastTool.sendMessage(p, "Time Limit: " + this.timeLimit);
+	BroadcastTool.sendMessage(p, "Time Limit: " + this.getTimeLimit());
 	for (String msg : this.getGameTutorialStrings()) {
 	    BroadcastTool.sendMessage(p, msg);
 	}
@@ -186,7 +171,7 @@ public abstract class MiniGame implements Serializable {
 	/*
 	 * 1초마다 모든 플레이어에게 Counter의 수를 send title함
 	 */
-	Counter timer = new Counter(this.waitingTime);
+	Counter timer = new Counter(this.getWaitingTime());
 
 	this.timerTask = Bukkit.getScheduler().runTaskTimer(Main.getInstance(), new Runnable() {
 	    @Override
@@ -202,7 +187,19 @@ public abstract class MiniGame implements Serializable {
 	    }
 	}, 0, 20);
     }
-
+    
+    public int getFee() {
+	return this.gameType.getFee();
+    }
+    
+    public int getWaitingTime() {
+	return this.gameType.getWaitingTime();
+    }
+    
+    public int getTimeLimit() {
+	return this.gameType.getTimeLimit();
+    }
+    
     // ============sub class 들에서 상황에 맞게 각각 다르게 구현되어야 하는 메소드들=============
     public abstract void enterRoom(Player p, PlayerDataManager pDataManager);
 
@@ -223,3 +220,23 @@ public abstract class MiniGame implements Serializable {
     // 각 게임의 참여 멤버에 플레이어 추가
     public abstract void registerPlayer(Player p);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -7,6 +7,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Server;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.PluginManager;
@@ -19,9 +20,10 @@ import org.bukkit.scoreboard.ScoreboardManager;
 
 import com.wbm.plugin.cmd.Commands;
 import com.wbm.plugin.data.PlayerData;
+import com.wbm.plugin.data.RoomLocation;
 import com.wbm.plugin.listener.CommonListener;
 import com.wbm.plugin.listener.GameManager;
-import com.wbm.plugin.listener.ItemUsingManager;
+import com.wbm.plugin.listener.GoodsListener;
 import com.wbm.plugin.util.PlayerDataManager;
 import com.wbm.plugin.util.RankManager;
 import com.wbm.plugin.util.RelayManager;
@@ -31,6 +33,7 @@ import com.wbm.plugin.util.StageManager;
 import com.wbm.plugin.util.config.ConfigTest;
 import com.wbm.plugin.util.config.DataManager;
 import com.wbm.plugin.util.enums.Role;
+import com.wbm.plugin.util.enums.RoomType;
 import com.wbm.plugin.util.general.BanItemTool;
 import com.wbm.plugin.util.general.BroadcastTool;
 import com.wbm.plugin.util.general.CoolDownManager;
@@ -53,7 +56,7 @@ public class Main extends JavaPlugin {
     RelayManager relayManager;
     DataManager dataManager;
     ShopManager shopManager;
-    ItemUsingManager itemUsingManager;
+    GoodsListener itemUsingManager;
     RankManager rankManager;
     NPCManager npcManager;
     StageManager stageManager;
@@ -99,6 +102,8 @@ public class Main extends JavaPlugin {
     }
 
     private void setupTools() {
+	// set MOTD
+
 //	register CoolDown subject
 	CoolDownManager.registerSubject(Setting.CoolDown_Subject_CHAT, 5);
 	CoolDownManager.registerSubject(Setting.CoolDown_Subject_CMD_ROOM, 10);
@@ -139,6 +144,8 @@ public class Main extends JavaPlugin {
 
 	// TIP
 	this.loopTips();
+
+	loopSpawnBlockRound();
     }
 
     void setupMain() {
@@ -171,7 +178,7 @@ public class Main extends JavaPlugin {
 	this.relayManager = new RelayManager(this.pDataManager, this.roomManager, this.stageManager,
 		this.miniGameManager);
 	this.gManager = new GameManager(this.pDataManager, this.roomManager, this.relayManager, this.miniGameManager);
-	this.itemUsingManager = new ItemUsingManager(this.pDataManager, this.roomManager, this.relayManager);
+	this.itemUsingManager = new GoodsListener(this.pDataManager, this.roomManager, this.relayManager);
 	this.shopManager = new ShopManager(this.pDataManager);
 
     }
@@ -225,7 +232,7 @@ public class Main extends JavaPlugin {
 		    role.setScore(10);
 
 		    Score token = sidebarObj.getScore("Token: " + pData.getToken());
-		    token.setScore(9);
+		    token.setScore(1);
 
 //		    int roomCNT = roomManager.getOwnRooms(p.getName()).size();
 //		    Score roomCount = sidebarObj.getScore("Room: " + roomCNT);
@@ -235,11 +242,21 @@ public class Main extends JavaPlugin {
 //		    Score clearCount = sidebarObj.getScore("Clear: " + clearCNT);
 //		    clearCount.setScore(7);
 
+		    // relay time
 		    String leftTime = "" + ChatColor.RED + ChatColor.BOLD + relayManager.getLeftTime()
 			    + ChatColor.WHITE;
 		    Score relayTime = sidebarObj
 			    .getScore("RelayTime: " + relayManager.getCurrentTime().name() + "(" + leftTime + ")");
 		    relayTime.setScore(6);
+
+		    // player location
+		    RoomType roomType = RoomLocation.getRoomTypeWithLocation(p.getLocation());
+		    String roomString = null;
+		    if (roomType == null) {
+			roomString = "Not Room";
+		    }
+		    Score room = sidebarObj.getScore("Room: " + roomString);
+		    room.setScore(9);
 
 		    // ============below name============
 
@@ -336,8 +353,6 @@ public class Main extends JavaPlugin {
 			+ " https://discord.gg/yRFHkPKqBX" + ChatColor.WHITE);
 		tips.add("Tutorial: /re tutorial");
 		tips.add("Server Name is Relay Escape");
-		tips.add("There some easter egg");
-		tips.add("Simple is best");
 
 		// random tip 고르기
 		String randomTip = tips.get((int) (Math.random() * tips.size()));
@@ -346,7 +361,60 @@ public class Main extends JavaPlugin {
 		String tipMsg = "" + ChatColor.YELLOW + ChatColor.BOLD + "[TIP] " + ChatColor.WHITE + randomTip;
 		BroadcastTool.sendMessageToEveryoneWithoutPrefix(tipMsg);
 	    }
-	}, 0, 20 * 60 * 1);
+	}, 0, 20 * 60 * 5);
+    }
+
+    void loopSpawnBlockRound() {
+	/*
+	 * red: 14 yellow: 4 lime: 5 cyan: 9
+	 */
+	
+	List<Location> locs = new ArrayList<>();
+	locs.add(new Location(Setting.world, 14, 4, 14));
+	locs.add(new Location(Setting.world, 14, 4, 15));
+	locs.add(new Location(Setting.world, 14, 4, 16));
+
+	locs.add(new Location(Setting.world, 14, 4, 17));
+	locs.add(new Location(Setting.world, 15, 4, 17));
+	locs.add(new Location(Setting.world, 16, 4, 17));
+
+	locs.add(new Location(Setting.world, 17, 4, 17));
+	locs.add(new Location(Setting.world, 17, 4, 16));
+	locs.add(new Location(Setting.world, 17, 4, 15));
+
+	locs.add(new Location(Setting.world, 17, 4, 14));
+	locs.add(new Location(Setting.world, 16, 4, 14));
+	locs.add(new Location(Setting.world, 15, 4, 14));
+
+	Bukkit.getScheduler().scheduleSyncRepeatingTask(Main.getInstance(), new Runnable() {
+
+	    @SuppressWarnings("deprecation")
+	    @Override
+	    public void run() {
+//		List<ItemStack> items = new ArrayList<>();
+//		items.add(ItemStackTool.item(Material.CONCRETE, (byte) 4));
+//		items.add(ItemStackTool.item(Material.CONCRETE, (byte) 5));
+//		items.add(ItemStackTool.item(Material.CONCRETE, (byte) 9));
+//		items.add(ItemStackTool.item(Material.CONCRETE, (byte) 14));
+
+//		List<Block> blocks = new ArrayList<>();
+//
+//		System.out.println("==================================");
+//		for (int i = 0; i < locs.size(); i++) {
+//		    int nextIndex = (i + 1) % locs.size();
+//		    Block b = locs.get(nextIndex).getBlock();
+//		    blocks.add(b);
+//		    System.out.println("nextindex: " + nextIndex);
+//		    System.out.println(i + " : " +b.getType().toString());
+//		}
+//		
+//		for (int i = locs.size() - 1; i >= 0;i--) {
+//		    Block b = blocks.get(i);
+//		    locs.get(i).getBlock().setType(b.getType());
+//		    locs.get(i).getBlock().setData(b.getData());
+//		}
+	    }
+	}, 0, 20 * 1);
     }
 
 //	void makeKits() {

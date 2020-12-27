@@ -57,8 +57,8 @@ public abstract class CooperativeMiniGame extends MiniGame {
 
     transient private List<Player> waitPlayers;
 
-    public CooperativeMiniGame(MiniGameType gameType, PlayerDataManager pDataManager) {
-	super(gameType,pDataManager);
+    public CooperativeMiniGame(MiniGameType gameType) {
+	super(gameType);
     }
 
     public void initGameSettings() {
@@ -83,7 +83,7 @@ public abstract class CooperativeMiniGame extends MiniGame {
 	    return;
 	} else { // 아무도 없으므로 처음 들어오는 사람이 master
 	    // token충분한지 검사
-	    if (!pData.minusToken(fee)) {
+	    if (!pData.minusToken(this.getFee())) {
 		BroadcastTool.sendMessage(p, "you need more token");
 		return;
 	    }
@@ -123,7 +123,7 @@ public abstract class CooperativeMiniGame extends MiniGame {
 	 */
 
 	// token충분한지 검사
-	if (!waiterPData.minusToken(fee)) {
+	if (!waiterPData.minusToken(this.getFee())) {
 	    BroadcastTool.sendMessage(waiter, "you need more token to enter minigame " + this.gameType);
 	    BroadcastTool.sendMessage(this.master, waiter + " need more token to enter this minigame ");
 	    return;
@@ -173,6 +173,10 @@ public abstract class CooperativeMiniGame extends MiniGame {
 	/*
 	 * print game result 보상 지급 score rank 처리 player 퇴장 (lobby로) inventory 초기화 게임 초기화
 	 */
+
+	// 미니게임 종료 공지
+	BroadcastTool.sendMessageToEveryone("" + ChatColor.RED + ChatColor.BOLD + this.gameType.name() + ChatColor.WHITE
+		+ " minigame is end" + ChatColor.WHITE);
 
 	// print game result
 	this.printGameResult();
@@ -237,7 +241,7 @@ public abstract class CooperativeMiniGame extends MiniGame {
 		String quartilePlayerName = MiniGameRankManager.getQuartilePlayerName(this.rankData, i);
 		int quartileScore = MiniGameRankManager.getScore(this.rankData, quartilePlayerName);
 		if (this.score <= quartileScore) {
-		    int rewardToken = (int) ((i / (double) 2) * fee);
+		    int rewardToken = (int) ((i / (double) 2) * this.getFee());
 		    BroadcastTool.sendMessage(all, "Your team is in " + i + " quartile");
 		    BroadcastTool.sendMessage(all, "Reward token: " + rewardToken);
 
@@ -249,9 +253,9 @@ public abstract class CooperativeMiniGame extends MiniGame {
 
 	    // 1,2,3,4 분위 안에 속해있지 않다는것 = 1등 점수
 	    BroadcastTool.sendMessage(all, "Your team is first place");
-	    BroadcastTool.sendMessage(all, "Reward token: " + fee * 3);
+	    BroadcastTool.sendMessage(all, "Reward token: " + this.getFee() * 3);
 
-	    pData.plusToken(fee * 3);
+	    pData.plusToken(this.getFee() * 3);
 	}
     }
 
@@ -259,7 +263,6 @@ public abstract class CooperativeMiniGame extends MiniGame {
      * 이 메소드는 미니게임에서 플레이어들이 발생한 이벤트를 각 게임에서 처리해주는 범용 메소드 예) if(event instanceof
      * BlockBreakEvent) { BlockBreakEvent e = (BlockBreakEvent) event; // 생략 }
      */
-
 
     public int getGameBlockCount() {
 	return MiniGameLocation.getGameBlockCount(this.gameType);
@@ -299,7 +302,7 @@ public abstract class CooperativeMiniGame extends MiniGame {
 	    BroadcastTool.sendMessage(this.players, p.getName() + " exit " + this.gameType.name());
 
 	    // 패널티
-	    pData.minusToken(this.fee * 2);
+	    pData.minusToken(this.getFee() * 2);
 
 	    // 게임에 아무도 없을 때 game init & stop all tasks
 	    if (!this.isSomeoneInGameRoom()) {
@@ -339,14 +342,11 @@ public abstract class CooperativeMiniGame extends MiniGame {
     public void setScore(int score) {
 	this.score = score;
     }
+
     @Override
     public void registerPlayer(Player p) {
 	this.players.add(p);
     }
 
-    @Override
-    public String toString() {
-	return "MiniGame " + "\nplayer=" + players + ", \nActivated=" + activated + ", \nscore=" + score
-		+ ", \ntimeLimit=" + timeLimit + ", \ngameType=" + gameType + "]";
-    }
+    
 }

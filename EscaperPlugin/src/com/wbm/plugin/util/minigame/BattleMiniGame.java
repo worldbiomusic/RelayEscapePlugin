@@ -53,8 +53,8 @@ public abstract class BattleMiniGame extends MiniGame {
     // 게임 시작시 SUM(fee token 합) 값 저장(플레이어 나가면 몇명참가인지 못셈)
     transient int SUM;
 
-    public BattleMiniGame(MiniGameType gameType, PlayerDataManager pDataManager) {
-	super(gameType, pDataManager);
+    public BattleMiniGame(MiniGameType gameType) {
+	super(gameType);
     }
 
     public void initGameSettings() {
@@ -72,11 +72,11 @@ public abstract class BattleMiniGame extends MiniGame {
 	// MultiBattleMiniGame: 인원수 full 아니면 그냥 입장
 
 	// 먼저: token충분한지 검사
-	if (!pData.minusToken(fee)) {
+	if (!pData.minusToken(this.getFee())) {
 	    BroadcastTool.sendMessage(p, "you need more token");
 	    return;
 	}
-	
+
 	// 참가 알림
 	BroadcastTool.sendMessage(this.getAllPlayer(), p.getName() + " join game");
 
@@ -97,8 +97,8 @@ public abstract class BattleMiniGame extends MiniGame {
 
     @Override
     public void runTaskAfterStartGame() {
-	this.SUM = this.players.size() * this.gameType.getFee();
-	BroadcastTool.debug("SUM: " + SUM);
+	this.SUM = this.players.size() * this.getFee();
+//	BroadcastTool.debug("SUM: " + this.SUM);
     };
 
     private void prepareGame() {
@@ -122,6 +122,10 @@ public abstract class BattleMiniGame extends MiniGame {
 	/*
 	 * print game result 보상 지급 score rank 처리 player 퇴장 (lobby로) inventory 초기화 게임 초기화
 	 */
+
+	// 미니게임 종료 공지
+	BroadcastTool.sendMessageToEveryone("" + ChatColor.RED + ChatColor.BOLD + this.gameType.name() + ChatColor.WHITE
+		+ " minigame is end" + ChatColor.WHITE);
 
 	// print game result
 	this.printGameResult();
@@ -153,10 +157,13 @@ public abstract class BattleMiniGame extends MiniGame {
 	    BroadcastTool.sendMessage(p, "=================================");
 
 	    // 전체플레이어 score 공개
-	    for (int i = 0; i < this.getAllPlayer().size(); i++) {
-		Player all = this.getAllPlayer().get(i);
-		BroadcastTool.sendMessage(p, "[" + i + "]" + all.getName() + " score: "
-			+ this.players.get(all.getName()));
+	    BroadcastTool.sendMessage(p, ""+ ChatColor.BOLD + "[ RANK ]");
+	    List<Entry<String, Integer>> rank = MiniGameRankManager.getDescendingSortedMapEntrys(this.players);
+	    for (int i = 0; i < rank.size(); i++) {
+		Entry<String, Integer> entry = rank.get(i);
+		String name = entry.getKey();
+		int score = entry.getValue();
+		BroadcastTool.sendMessage(p, "[" + (i + 1) + "]" + name + " score: " + score);
 	    }
 
 	    // send title
@@ -195,43 +202,47 @@ public abstract class BattleMiniGame extends MiniGame {
 	 * 
 	 */
 
-	// token의 내림차순으로 랭크된 플레이어 목록
+	// this.players의 int값을 기준으로 내림차순으로 랭크된 플레이어 목록
 	List<Entry<String, Integer>> rank = MiniGameRankManager.getDescendingSortedMapEntrys(this.players);
 
-	int firstReward = (int) (SUM * 0.3);
-	int secondReward = (int) (SUM * 0.2);
-	int thirdReward = (int) (SUM * 0.1);
+	int firstReward = (int) (this.SUM * 0.3);
+	int secondReward = (int) (this.SUM * 0.2);
+	int thirdReward = (int) (this.SUM * 0.1);
 
-	int REMAIN = SUM;
+	int REMAIN = this.SUM;
 
 	// nullPointerException피하기 위해서 코드가 더러움
 	String firstPlayer = null, secondPlayer = null, thirdPlayer = null;
-	firstPlayer = rank.get(0).getKey();
-	REMAIN -= firstReward;
-	if (rank.size() >= 2) {
+	int playerCount = this.getAllPlayer().size();
+	if (playerCount >= 1) {
+	    firstPlayer = rank.get(0).getKey();
+	    REMAIN -= firstReward;
+	}
+	if (playerCount >= 2) {
 	    secondPlayer = rank.get(1).getKey();
 	    REMAIN -= secondReward;
 	}
-	if (rank.size() >= 3) {
+	if (playerCount >= 3) {
 	    thirdPlayer = rank.get(2).getKey();
 	    REMAIN -= thirdReward;
 	}
 
 	// REMAIN에서 1,2,3등 뺀 것에서 참가보상 계산
-	int participationReward = REMAIN * (1 / this.players.size());
+//	BroadcastTool.debug("REMAIN: " + REMAIN);
+	int participationReward = (int)(REMAIN * ((double)1 / this.getAllPlayer().size()));
+//	BroadcastTool.debug("participationReward: " + participationReward);
 	// reward
-	for (String name : this.players.keySet()) {
-	    Player p = Bukkit.getPlayer(name);
+	for (Player p : this.getAllPlayer()) {
 	    PlayerData pData = pDataManager.getPlayerData(p.getUniqueId());
 
 	    int reward = participationReward;
 
 	    // 1, 2, 3 reward
-	    if (name.equals(firstPlayer)) {
+	    if (p.getName().equals(firstPlayer)) {
 		reward += firstReward;
-	    } else if (name.equals(secondPlayer)) {
+	    } else if (p.getName().equals(secondPlayer)) {
 		reward += secondReward;
-	    } else if (name.equals(thirdPlayer)) {
+	    } else if (p.getName().equals(thirdPlayer)) {
 		reward += thirdReward;
 	    }
 
@@ -284,7 +295,7 @@ public abstract class BattleMiniGame extends MiniGame {
 	    BroadcastTool.sendMessage(this.getAllPlayer(), p.getName() + " exit " + this.gameType.name());
 
 	    // 패널티
-	    pData.minusToken(this.fee * 2);
+	    pData.minusToken(this.getFee() * 2);
 
 	    // 게임에 아무도 없을 때 game init & stop all tasks
 	    if (!this.isSomeoneInGameRoom()) {
@@ -346,7 +357,7 @@ public abstract class BattleMiniGame extends MiniGame {
     @Override
     public String toString() {
 	return "MiniGame " + "\nplayer=" + this.getAllPlayer() + ", \nActivated=" + activated + ", \nscore="
-		+ this.getScore() + ", \ntimeLimit=" + timeLimit + ", \ngameType=" + gameType + "]";
+		+ this.getScore() + ", \ntimeLimit=" + this.getTimeLimit() + ", \ngameType=" + gameType + "]";
     }
 
 }

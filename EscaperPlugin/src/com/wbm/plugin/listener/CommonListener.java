@@ -29,6 +29,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.event.server.ServerListPingEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.util.Vector;
@@ -38,14 +39,13 @@ import com.wbm.plugin.data.PlayerData;
 import com.wbm.plugin.data.RoomLocation;
 import com.wbm.plugin.util.PlayerDataManager;
 import com.wbm.plugin.util.RelayManager;
-import com.wbm.plugin.util.Setting;
 import com.wbm.plugin.util.enums.MiniGameType;
 import com.wbm.plugin.util.enums.RelayTime;
 import com.wbm.plugin.util.enums.Role;
 import com.wbm.plugin.util.enums.RoomType;
 import com.wbm.plugin.util.general.BanItemTool;
 import com.wbm.plugin.util.general.BroadcastTool;
-import com.wbm.plugin.util.general.CoolDownManager;
+import com.wbm.plugin.util.general.ChatColorTool;
 import com.wbm.plugin.util.general.ItemStackTool;
 import com.wbm.plugin.util.general.NPCManager;
 import com.wbm.plugin.util.general.PotionEffectTool;
@@ -87,43 +87,43 @@ public class CommonListener implements Listener {
 
     @EventHandler
     public void onPlayerChat(AsyncPlayerChatEvent e) {
-	Player p = e.getPlayer();
-
-	// chat 쿨다운 관리
-	if (CoolDownManager.addPlayer(Setting.CoolDown_Subject_CHAT, p)) {
-	    String msg = e.getMessage();
-
-	    String translatedMsg = "";
-	    switch (msg) {
-	    case "1":
-		translatedMsg = "HI";
-		break;
-	    case "2":
-		translatedMsg = "BYE";
-		break;
-	    case "3":
-		translatedMsg = "FUXX";
-		break;
-	    case "4":
-		translatedMsg = "FOLLOW ME";
-		break;
-	    case "5":
-		translatedMsg = "VOTE";
-		break;
-	    case "6":
-		translatedMsg = "PASS";
-		break;
-	    default:
-		e.setCancelled(true);
-		return;
-
-	    }
-
-	    e.setMessage(translatedMsg);
-	} else {
-	    BroadcastTool.sendMessage(p, "too fast chat");
-	    e.setCancelled(true);
-	}
+//	Player p = e.getPlayer();
+//
+//	// chat 쿨다운 관리
+//	if (CoolDownManager.addPlayer(Setting.CoolDown_Subject_CHAT, p)) {
+//	    String msg = e.getMessage();
+//
+//	    String translatedMsg = "";
+//	    switch (msg) {
+//	    case "1":
+//		translatedMsg = "HI";
+//		break;
+//	    case "2":
+//		translatedMsg = "BYE";
+//		break;
+//	    case "3":
+//		translatedMsg = "FUXX";
+//		break;
+//	    case "4":
+//		translatedMsg = "FOLLOW ME";
+//		break;
+//	    case "5":
+//		translatedMsg = "VOTE";
+//		break;
+//	    case "6":
+//		translatedMsg = "PASS";
+//		break;
+//	    default:
+//		e.setCancelled(true);
+//		return;
+//
+//	    }
+//
+//	    e.setMessage(translatedMsg);
+//	} else {
+//	    BroadcastTool.sendMessage(p, "too fast chat");
+//	    e.setCancelled(true);
+//	}
 
     }
 
@@ -173,18 +173,12 @@ public class CommonListener implements Listener {
 	}
 
 	e.setRespawnLocation(respawnLoc);
-	
-	// pvp 죽었을때 위치 조정
-	this.miniGameManager.processEvent(e);
     }
 
     @EventHandler
     public void onPlayerDeathInManyTimes(PlayerDeathEvent e) {
 	// clear drops
 	e.getDrops().clear();
-
-	// minigame으로 pvp관련 이벤트 전송
-	this.miniGameManager.processEvent(e);
     }
 
     @EventHandler
@@ -225,16 +219,6 @@ public class CommonListener implements Listener {
     public void onPlayerDropItem(PlayerDropItemEvent e) {
 	e.setCancelled(true);
     }
-
-//	@EventHandler
-//	public void onPlayerOpenIventoryWhenMaker(InventoryOpenEvent e) {
-//		Player p = (Player) e.getPlayer();
-//		PlayerData pData = this.pDataManager.getOnlinePlayerData(p.getUniqueId());
-//		if(pData.getRole() == Role.MAKER) {
-//			BroadcastTool.sendMessage(p, "cannot open inven when Maker");
-//			e.setCancelled(true);
-//		}
-//	}
 
     @EventHandler
     public void onPlayerOpenIventoryWhenMaker(InventoryCreativeEvent e) {
@@ -287,7 +271,7 @@ public class CommonListener implements Listener {
     }
 
     @EventHandler
-    public void onPlayerInteractingWithEventBlock(PlayerMoveEvent e) {
+    public void onPlayerMoveOnTheEventBlock(PlayerMoveEvent e) {
 	Player p = e.getPlayer();
 	Block b = p.getLocation().subtract(0, 1, 0).getBlock();
 
@@ -420,11 +404,11 @@ public class CommonListener implements Listener {
 
     @EventHandler
     public void onCropBreakingByEntity(PlayerInteractEvent e) {
-	if(e.getAction() == Action.PHYSICAL && e.getClickedBlock().getType() == Material.SOIL) {
+	if (e.getAction() == Action.PHYSICAL && e.getClickedBlock().getType() == Material.SOIL) {
 	    e.setCancelled(true);
 	}
     }
-    
+
     @EventHandler
     public void onPlayerBreakTokenBlock(BlockBreakEvent e) {
 	/*
@@ -434,49 +418,63 @@ public class CommonListener implements Listener {
 	Location loc = b.getLocation();
 	RoomType roomType = RoomLocation.getRoomTypeWithLocation(loc);
 	int bonusToken = 0;
-	if(roomType == RoomType.FUN) {
-	    if(b.getType() == Material.IRON_BLOCK) {
+	if (roomType == RoomType.FUN) {
+	    if (b.getType() == Material.IRON_BLOCK) {
 		bonusToken = 1;
-	    } else if(b.getType() == Material.GOLD_BLOCK) {
+	    } else if (b.getType() == Material.GOLD_BLOCK) {
 		bonusToken = 2;
-	    } else if(b.getType() == Material.DIAMOND_BLOCK) {
+	    } else if (b.getType() == Material.DIAMOND_BLOCK) {
 		bonusToken = 3;
-	    }else if(b.getType() == Material.EMERALD_BLOCK) {
+	    } else if (b.getType() == Material.EMERALD_BLOCK) {
 		bonusToken = 4;
-	    }else {
+	    } else {
 		return;
 	    }
-	    
+
 	    Player p = e.getPlayer();
 	    PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
 	    pData.plusToken(bonusToken);
 	    BroadcastTool.sendMessage(p, "Bonus token: " + bonusToken);
-	    
+
 	    // 블럭 없에기
 	    b.setType(Material.AIR);
-	    
+
 	    // 일정시간후 블럭 다시 나타나기
 	    Bukkit.getScheduler().runTaskLater(Main.getInstance(), new Runnable() {
-		
+
 		@Override
 		public void run() {
 		    double r = Math.random();
-		    Material block=Material.IRON_BLOCK;
-		    
-		    if(r < 0.5) {
-			block=Material.IRON_BLOCK;
-		    }else if(r < 0.8) {
-			block=Material.GOLD_BLOCK;
-		    }else if(r < 0.95) {
-			block=Material.DIAMOND_BLOCK;
-		    }else if(r < 1) {
-			block=Material.EMERALD_BLOCK;
+		    Material block = Material.IRON_BLOCK;
+
+		    if (r < 0.5) {
+			block = Material.IRON_BLOCK;
+		    } else if (r < 0.8) {
+			block = Material.GOLD_BLOCK;
+		    } else if (r < 0.95) {
+			block = Material.DIAMOND_BLOCK;
+		    } else if (r < 1) {
+			block = Material.EMERALD_BLOCK;
 		    }
-		    
+
 		    b.setType(block);
 		}
-	    }, 20 * 1);
+	    }, 20 * 60 * 1);
 	}
+    }
+
+    @EventHandler
+    public void setServerMOTD(ServerListPingEvent e) {
+	e.setMaxPlayers(20);
+
+	String motd = "" + ChatColorTool.random() + ChatColor.BOLD + "Relay";
+	motd += "" + ChatColorTool.random() + ChatColor.BOLD +" Escape ";
+	motd += ChatColor.WHITE + "[";
+	motd += ChatColorTool.random() + "1.12.2";
+	motd += ChatColor.WHITE + " - ";
+	motd += ChatColorTool.random() + "1.16.4";
+	motd += ChatColor.WHITE + "]";
+	e.setMotd(motd);
     }
 }
 //

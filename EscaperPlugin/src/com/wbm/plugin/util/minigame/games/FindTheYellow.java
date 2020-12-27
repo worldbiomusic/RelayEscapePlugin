@@ -9,7 +9,6 @@ import org.bukkit.event.Event;
 import org.bukkit.event.block.BlockBreakEvent;
 
 import com.wbm.plugin.data.MiniGameLocation;
-import com.wbm.plugin.util.PlayerDataManager;
 import com.wbm.plugin.util.enums.MiniGameType;
 import com.wbm.plugin.util.general.BlockTool;
 import com.wbm.plugin.util.general.BroadcastTool;
@@ -19,8 +18,8 @@ public class FindTheYellow extends CooperativeMiniGame{
 
     private static final long serialVersionUID = 1L;
 
-    public FindTheYellow(PlayerDataManager pDataManager) {
-	super(MiniGameType.FIND_THE_YELLOW, pDataManager);
+    public FindTheYellow() {
+	super(MiniGameType.FIND_THE_YELLOW);
     }
 
     @Override

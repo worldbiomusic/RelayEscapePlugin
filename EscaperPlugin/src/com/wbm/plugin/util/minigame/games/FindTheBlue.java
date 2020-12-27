@@ -11,7 +11,6 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
 
 import com.wbm.plugin.data.MiniGameLocation;
-import com.wbm.plugin.util.PlayerDataManager;
 import com.wbm.plugin.util.enums.MiniGameType;
 import com.wbm.plugin.util.general.BlockTool;
 import com.wbm.plugin.util.general.BroadcastTool;
@@ -23,8 +22,8 @@ public class FindTheBlue extends BattleMiniGame{
     private static final long serialVersionUID = 1L;
     private static ItemStack plusItem = ItemStackTool.item(Material.RED_ROSE, (byte)1);
 
-    public FindTheBlue(PlayerDataManager pDataManager) {
-	super(MiniGameType.FIND_THE_BLUE, pDataManager);
+    public FindTheBlue() {
+	super(MiniGameType.FIND_THE_BLUE);
     }
 
     @Override

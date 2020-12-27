@@ -73,6 +73,8 @@ public class Commands implements CommandExecutor {
 		return this.minigame(p, args);
 	    case "tutorial":
 		this.printTutorial(p, args);
+	    case "goods":
+		this.printGoods(p, args);
 		return true;
 	    }
 	}
@@ -86,6 +88,7 @@ public class Commands implements CommandExecutor {
 
 	    // 명령어 cooldown 체크
 	    if (CoolDownManager.addPlayer(Setting.CoolDown_Subject_CMD_ROOM, p)) {
+		BroadcastTool.sendMessage(p, "??????????????");
 		String second = args[1];
 
 		switch (second) {
@@ -177,8 +180,12 @@ public class Commands implements CommandExecutor {
 	}
 	if (this.relayManager.checkRoomAndRelayTimeAndRole(RoomType.MAIN, RelayTime.MAKING, Role.MAKER, p)) {
 	    String title = args[2];
-	    this.relayManager.setRoomTitle(title);
-	    BroadcastTool.sendMessage(p, "your room tile set to " + title);
+	    if(this.relayManager.isMainRoomTitleExist(title)) {
+		BroadcastTool.sendMessage(p, "Room tile " + title + "is already exist");
+	    }else {
+		this.relayManager.setMainRoomTitle(title);
+		BroadcastTool.sendMessage(p, "Room tile set to " + title);
+	    }
 	}
 	return true;
     }
@@ -579,7 +586,7 @@ public class Commands implements CommandExecutor {
 	return false;
     }
 
-    private void printTutorial(Player p, String[] args) {
+    private boolean printTutorial(Player p, String[] args) {
 	List<String> tutorials = new ArrayList<>();
 	tutorials.add("=================================");
 	tutorials.add("=========      Tutorial       =========");
@@ -587,7 +594,7 @@ public class Commands implements CommandExecutor {
 	tutorials.add("- Player: MAKER or CHALLENGER");
 	tutorials.add("- You can become a Maker if you clear MainRoom in ChallengingTime");
 	tutorials.add("- Token is server money");
-	tutorials.add("- Time: Waiting->Making->Testing->Challenging");
+	tutorials.add("- Time: Waiting->Making->Testing->Challenging->Waiting...");
 	tutorials.add("- You can play MiniGame in MakingTime and TestingTime");
 	tutorials.add("- Chat: enter number 1 ~ 9");
 	tutorials.add("- Commands: /re");
@@ -600,6 +607,18 @@ public class Commands implements CommandExecutor {
 	for (String msg : tutorials) {
 	    BroadcastTool.sendMessage(p, msg);
 	}
+
+	return true;
+    }
+
+    private boolean printGoods(Player p, String[] args) {
+	BroadcastTool.sendMessage(p, "========= Goods List =========");
+	PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
+	for (ShopGoods good : pData.getGoods()) {
+	    BroadcastTool.sendMessage(p, good.name());
+	}
+
+	return true;
     }
 }
 

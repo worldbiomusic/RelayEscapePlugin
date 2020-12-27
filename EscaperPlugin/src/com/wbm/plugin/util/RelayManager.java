@@ -63,7 +63,7 @@ public class RelayManager {
     private BukkitTask currentCountDownTask;
 
     private boolean corePlaced;
-    private String roomTitle;
+    private String mainRoomTitle;
 
     private Counter timer;
     private int timerTask;
@@ -268,7 +268,7 @@ public class RelayManager {
 	this.currentTime = RelayTime.MAKING;
 
 	// room basic title 을 "maker이름 + n"으로 설정
-	this.roomTitle = this.roomManager.getNextTitleWithMakerName(this.getMaker().getName());
+	this.mainRoomTitle = this.roomManager.getNextTitleWithMakerName(this.getMaker().getName());
 
 	// common todo list
 	RelayTimeCommonTODOList();
@@ -388,9 +388,9 @@ public class RelayManager {
 			    startNextTime();
 			} else if (currentTime == RelayTime.MAKING) {
 			    if (!isCorePlaced()) {
+				BroadcastTool.sendMessageToEveryone("Maker failed to make the room");
 				resetRelay();
 			    } else {
-				BroadcastTool.sendMessageToEveryone("Maker failed to make the room");
 				startNextTime();
 			    }
 			} else if (currentTime == RelayTime.TESTING) {
@@ -525,12 +525,16 @@ public class RelayManager {
 	this.corePlaced = corePlaced;
     }
 
-    public String getRoomTitle() {
-	return roomTitle;
+    public String getMainRoomTitle() {
+	return mainRoomTitle;
     }
 
-    public void setRoomTitle(String roomTitle) {
-	this.roomTitle = roomTitle;
+    public void setMainRoomTitle(String mainRoomTitle) {
+	this.mainRoomTitle = mainRoomTitle;
+    }
+    
+    public boolean isMainRoomTitleExist(String mainRoomTitle) {
+	return this.roomManager.isExistRoomTitle(mainRoomTitle);
     }
 
     public int getLeftTime() {
@@ -679,7 +683,7 @@ public class RelayManager {
 		BroadcastTool.sendMessage(p, this.getMaker().getName() + " break the core");
 	    } else if (role == Role.MAKER) {
 		BroadcastTool.sendMessage(p, "You can save room with title " + "/re room title [title] "
-			+ "\n(basic title: " + this.roomTitle + ")");
+			+ "\n(basic title: " + this.mainRoomTitle + ")");
 	    } else if (role == Role.TESTER) {
 		BroadcastTool.sendMessage(p, "You must break core to save this room");
 	    } else if (role == Role.CHALLENGER) {

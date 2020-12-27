@@ -9,6 +9,7 @@ commands:
     usage:  |  
           =========Command=========
           /re tutorial
+          /re goods
           /re room [load | title] <title>
           /re room [empty | list | finish]
           /re minigame [ok | kick] <player>

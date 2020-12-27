@@ -9,7 +9,6 @@ import org.bukkit.event.Event;
 import org.bukkit.event.block.BlockBreakEvent;
 
 import com.wbm.plugin.data.MiniGameLocation;
-import com.wbm.plugin.util.PlayerDataManager;
 import com.wbm.plugin.util.enums.MiniGameType;
 import com.wbm.plugin.util.general.BlockTool;
 import com.wbm.plugin.util.general.BroadcastTool;
@@ -24,8 +23,8 @@ public class FindTheRed extends SoloMiniGame {
     /*
      * 게임소개 노랑꽃중에서 빨간꽃을 부수면 점수 얻는 게임
      */
-    public FindTheRed(PlayerDataManager pDataManager) {
-	super(MiniGameType.FIND_THE_RED, pDataManager);
+    public FindTheRed() {
+	super(MiniGameType.FIND_THE_RED);
     }
 
     @Override

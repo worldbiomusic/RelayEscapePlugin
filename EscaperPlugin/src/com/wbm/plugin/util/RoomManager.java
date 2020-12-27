@@ -357,6 +357,10 @@ public class RoomManager implements DataMember {
     public int getAllRoomCount() {
 	return this.roomData.size();
     }
+    
+    public boolean isExistRoomTitle(String title) {
+	return this.roomData.containsKey(title);
+    }
 
     @SuppressWarnings("unchecked")
     @Override

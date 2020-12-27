@@ -45,8 +45,8 @@ public abstract class SoloMiniGame extends MiniGame{
     
     transient protected int score;
 
-    public SoloMiniGame(MiniGameType gameType, PlayerDataManager pDataManager) {
-	super(gameType, pDataManager);
+    public SoloMiniGame(MiniGameType gameType) {
+	super(gameType);
     }
 
     public void initGameSettings() {
@@ -70,7 +70,7 @@ public abstract class SoloMiniGame extends MiniGame{
 	    return;
 	} else { // 아무도 없을때
 	    // 먼저: token충분한지 검사
-	    if (!pData.minusToken(fee)) {
+	    if (!pData.minusToken(this.getFee())) {
 		BroadcastTool.sendMessage(p, "you need more token");
 		return;
 	    }
@@ -98,6 +98,9 @@ public abstract class SoloMiniGame extends MiniGame{
 	/*
 	 * print game result 보상 지급 score rank 처리 player 퇴장 (lobby로) inventory 초기화 게임 초기화
 	 */
+	
+	// 미니게임 종료 공지
+	BroadcastTool.sendMessageToEveryone("" +ChatColor.RED +ChatColor.BOLD + this.gameType.name() +ChatColor.WHITE+ " minigame is end" + ChatColor.WHITE);
 
 	// print game result
 	this.printGameResult();
@@ -148,7 +151,7 @@ public abstract class SoloMiniGame extends MiniGame{
 	    String quartilePlayerName = MiniGameRankManager.getQuartilePlayerName(this.rankData, i);
 	    int quartileScore = MiniGameRankManager.getScore(this.rankData, quartilePlayerName);
 	    if (this.score <= quartileScore) {
-		int rewardToken = (int) ((i / (double) 2) * fee);
+		int rewardToken = (int) ((i / (double) 2) * this.getFee());
 		BroadcastTool.sendMessage(this.player, "You are in " + i + " quartile");
 		BroadcastTool.sendMessage(this.player, "Reward token: " + rewardToken);
 
@@ -160,9 +163,9 @@ public abstract class SoloMiniGame extends MiniGame{
 
 	// 1,2,3,4 분위 안에 속해있지 않다는것 = 1등 점수
 	BroadcastTool.sendMessage(this.player, "You are first place");
-	BroadcastTool.sendMessage(this.player, "Reward token: " + fee * 3);
+	BroadcastTool.sendMessage(this.player, "Reward token: " + this.getFee() * 3);
 
-	pData.plusToken(fee * 3);
+	pData.plusToken(this.getFee() * 3);
     }
 
     /*
@@ -211,7 +214,7 @@ public abstract class SoloMiniGame extends MiniGame{
 	    pData.setNull();
 
 	    // 패널티
-	    pData.minusToken(this.fee * 2);
+	    pData.minusToken(this.getFee() * 2);
 
 	    this.initGameSettings();
 	} else if (reason == MiniGame.ExitReason.RELAY_TIME_CHANGED) {
@@ -258,7 +261,7 @@ public abstract class SoloMiniGame extends MiniGame{
     @Override
     public String toString() {
 	return "MiniGame " + "\nplayer=" + player + ", \nActivated=" + activated + ", \nscore=" + score
-		+ ", \ntimeLimit=" + timeLimit + ", \ngameType=" + gameType + "]";
+		 + ", \ngameType=" + gameType + "]";
     }
 
 }

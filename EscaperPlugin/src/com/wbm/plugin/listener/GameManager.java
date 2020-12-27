@@ -138,10 +138,10 @@ public class GameManager implements Listener {
 	 * 기본굿즈: ShopGoods.CHEST, ShopGoods.HIGH_5, ShopGoods.MAKINGTIME_5
 	 */
 	PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
-	ShopGoods[] basicGoods = {ShopGoods.CHEST, ShopGoods.HIGH_5, ShopGoods.MAKINGTIME_5};
-	
+	ShopGoods[] basicGoods = { ShopGoods.CHEST, ShopGoods.HIGH_5, ShopGoods.MAKINGTIME_5, ShopGoods.FINISH };
+
 	// PlayerData의 goods리스트에 지급
-	for(ShopGoods good : basicGoods) {
+	for (ShopGoods good : basicGoods) {
 	    if (!pData.doesHaveGoods(good)) {
 		pData.addGoods(good);
 	    }
@@ -259,7 +259,7 @@ public class GameManager implements Listener {
 	    // Time: Testing / Role: Tester
 	    else if (role == Role.TESTER) {
 		// 1.save room, set main room
-		String title = this.relayManager.getRoomTitle();
+		String title = this.relayManager.getMainRoomTitle();
 		this.roomManager.saveRoomData(RoomType.MAIN, p, title);
 		Room mainRoom = this.roomManager.getRoomData(title);
 		this.roomManager.setRoom(RoomType.MAIN, mainRoom);
@@ -306,33 +306,34 @@ public class GameManager implements Listener {
 	if (time == RelayTime.MAKING && role == Role.MAKER) {
 	    // 기본적으로 설치할수있게
 	    e.setCancelled(false);
-	    
+
 	    // 높이 제한 검사 (Goods) (MainRoom공간의 맨밑의 -1 높이로부터 측정)
-	    int blockHigh = block.getY() - ((int)RoomLocation.MAIN_Pos1.getY() - 1);
-	    
+	    int blockHigh = block.getY() - ((int) RoomLocation.MAIN_Pos1.getY() - 1);
+
 	    // HIGH_## 굿즈중에서 가장 높은 굿즈 검색
-	    String kind = ShopGoods.HIGH_10.name().split("_")[0];
-	    int allowedHigh = pData.getRoomSettingGoodsHighestValue(kind);;
-	    
-	    // 높이제한
-	    if(blockHigh > allowedHigh) {
+//	    String kind = ShopGoods.HIGH_10.name().split("_")[0];
+	    String kind = "HIGH";
+	    int allowedHigh = pData.getRoomSettingGoodsHighestValue(kind);
+	    ;
+
+	    // 높이제한 검사
+	    if (blockHigh > allowedHigh) {
+		// 높이제한보다 높을때 취소
 		BroadcastTool.sendMessage(p, "you can place block up to " + allowedHigh);
 		BroadcastTool.sendMessage(p, "HIGH_## Goods can highten your limit");
 		e.setCancelled(true);
-	    }
-	    
-	    
-
-	    // core관련 if문
-	    // 이미 설치되어 있을때
-	    if (block.getType() == Material.GLOWSTONE) {
-		if (this.relayManager.isCorePlaced()) {
-		    BroadcastTool.sendMessage(p, "core is already placed");
-		    e.setCancelled(true);
-		} else {
-		    // 설치 x 있을때
-		    BroadcastTool.sendMessage(p, "core is placed (max: 1)");
-		    this.relayManager.setCorePlaced(true);
+	    } else {
+		// 높이보다 낮으면 가능, 그리고 core 체크
+		if (block.getType() == Material.GLOWSTONE) {
+		    if (this.relayManager.isCorePlaced()) {
+			// 설치 o 있을때
+			BroadcastTool.sendMessage(p, "core is already placed");
+			e.setCancelled(true);
+		    } else {
+			// 설치 x 있을때
+			BroadcastTool.sendMessage(p, "core is placed (max: 1)");
+			this.relayManager.setCorePlaced(true);
+		    }
 		}
 	    }
 	}

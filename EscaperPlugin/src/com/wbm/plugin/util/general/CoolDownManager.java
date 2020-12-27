@@ -27,33 +27,33 @@ public class CoolDownManager {
     private static Map<String, Integer> subjectTime = new HashMap<>();
 
     // 주제의 쿨 다운 타임 플레이어 관리 리스트
-    private static Map<String, List<Player>> subject = new HashMap<>();
+    private static Map<String, List<Player>> subjects = new HashMap<>();
 
     public static void registerSubject(String subject, int subjectTime) {
 	// 주제 시간 등록
 	CoolDownManager.subjectTime.put(subject, subjectTime);
 
 	// 주제 리스트 생성
-	CoolDownManager.subject.put(subject, new ArrayList<>());
+	CoolDownManager.subjects.put(subject, new ArrayList<>());
     }
 
     public static boolean addPlayer(String subject, Player p) {
 	// 주제가 존재할때
 	if (subjectTime.containsKey(subject)) {
 	    // list에 player가 있으면 처리 x (등록 실패: false 반환)
-	    if ((CoolDownManager.subject.get(subject).contains(p))) {
+	    if ((CoolDownManager.subjects.get(subject).contains(p))) {
 		return false;
 	    }
 
 	    // list에 삽입
-	    CoolDownManager.subject.get(subject).add(p);
+	    CoolDownManager.subjects.get(subject).add(p);
 
 	    // 주제 시간후에 자동으로 리스트에서 삭제
 	    Bukkit.getScheduler().runTaskLater(Main.getInstance(), new Runnable() {
 
 		@Override
 		public void run() {
-		    CoolDownManager.subject.get(subject).remove(p);
+		    CoolDownManager.subjects.get(subject).remove(p);
 		}
 	    }, 20 * CoolDownManager.subjectTime.get(subject));
 
@@ -68,7 +68,7 @@ public class CoolDownManager {
 
     public static boolean hasPlayer(String subject, Player p) {
 	if (CoolDownManager.subjectTime.containsKey(subject)) {
-	    return CoolDownManager.subject.get(subject).contains(p);
+	    return CoolDownManager.subjects.get(subject).contains(p);
 	}
 	return false;
     }

@@ -9,7 +9,6 @@ import org.bukkit.event.Event;
 import org.bukkit.event.block.BlockBreakEvent;
 
 import com.wbm.plugin.data.MiniGameLocation;
-import com.wbm.plugin.util.PlayerDataManager;
 import com.wbm.plugin.util.enums.MiniGameType;
 import com.wbm.plugin.util.general.BlockTool;
 import com.wbm.plugin.util.general.BroadcastTool;
@@ -30,8 +29,8 @@ public class Painter extends SoloMiniGame {
     private List<Material> mats;
     Material mat1, mat2;
 
-    public Painter(PlayerDataManager pDataManager) {
-	super(MiniGameType.PAINTER, pDataManager);
+    public Painter() {
+	super(MiniGameType.PAINTER);
 
 	// setup
 	this.mats = new ArrayList<>();

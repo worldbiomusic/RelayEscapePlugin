@@ -61,7 +61,7 @@ public class ItemStackTool
 		return item;
 	}
 	
-	public static boolean isSameWithMateiralNDisplay(ItemStack item1, ItemStack item2) {
+	public static boolean isSameWithMaterialNDisplay(ItemStack item1, ItemStack item2) {
 		if(item1 != null && item2 != null ) {
 			if(item1.getType() == item2.getType()) {
 				String item1Display = item1.getItemMeta().getDisplayName();

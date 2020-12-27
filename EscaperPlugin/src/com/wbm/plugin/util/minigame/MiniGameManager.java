@@ -38,12 +38,14 @@ public class MiniGameManager implements DataMember {
     }
 
     public void registerGames() {
+	MiniGame.pDataManager = this.pDataManager;
+	
 	List<MiniGame> allGame = new ArrayList<>();
-	allGame.add(new FindTheRed(this.pDataManager));
-	allGame.add(new Painter(this.pDataManager));
-	allGame.add(new FindTheYellow(this.pDataManager));
-	allGame.add(new FindTheBlue(this.pDataManager));
-	allGame.add(new BattleTown(this.pDataManager));
+	allGame.add(new FindTheRed());
+	allGame.add(new Painter());
+	allGame.add(new FindTheYellow());
+	allGame.add(new FindTheBlue());
+	allGame.add(new BattleTown());
 	
 	// 모든 미니게임 games에 등록
 	for (MiniGame game : allGame) {
@@ -87,17 +89,17 @@ public class MiniGameManager implements DataMember {
 
 	Location eventLoc;
 
-	if (event instanceof BlockEvent) {
+	if (event instanceof BlockEvent) { // 블럭 관련 이벤트
 	    BlockEvent blockEvent = (BlockEvent) event;
 	    eventLoc = blockEvent.getBlock().getLocation();
-	} else if (event instanceof EntityEvent) {
+	} else if (event instanceof EntityEvent) { // 엔티티 관련 이벤트
 	    EntityEvent entityEvent = (EntityEvent) event;
 	    eventLoc = entityEvent.getEntity().getLocation();
-	} else if (event instanceof PlayerEvent) {
+	} else if (event instanceof PlayerEvent) { // 플레이어 관련 이벤트
 	    PlayerEvent playerEvent = (PlayerEvent) event;
 	    eventLoc = playerEvent.getPlayer().getLocation();
 	} else {
-	    // 처리할 이벤트가 아닐땐 반환
+	    // 처리할 이벤트 대상이 아닐땐 반환
 	    return;
 	}
 
