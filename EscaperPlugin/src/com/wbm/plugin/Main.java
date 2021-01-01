@@ -7,7 +7,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Server;
-import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.PluginManager;
@@ -35,9 +34,11 @@ import com.wbm.plugin.util.config.DataManager;
 import com.wbm.plugin.util.enums.Role;
 import com.wbm.plugin.util.enums.RoomType;
 import com.wbm.plugin.util.general.BanItemTool;
+import com.wbm.plugin.util.general.BlockRotateTool;
 import com.wbm.plugin.util.general.BroadcastTool;
 import com.wbm.plugin.util.general.CoolDownManager;
 import com.wbm.plugin.util.general.NPCManager;
+import com.wbm.plugin.util.general.Rotationer;
 import com.wbm.plugin.util.general.SpawnLocationTool;
 import com.wbm.plugin.util.general.TeleportTool;
 import com.wbm.plugin.util.general.skin.SkinManager;
@@ -112,7 +113,7 @@ public class Main extends JavaPlugin {
 	BroadcastTool.setMessagePrefix("" + ChatColor.RED + ChatColor.BOLD + "[i] " + ChatColor.WHITE);
 
 	// respawn manager
-	Location loc = Setting.getLoationFromSTDLOC(9.5, 4, 5.5, 90, 0);
+	Location loc = Setting.getLoationFromSTDLOC(8.5, 4, 3.5, 90, 0);
 	Location lobby = Setting.getLoationFromSTDLOC(16, 4, 16, 90, 0);
 	;
 	this.respawnManager = new SpawnLocationTool(loc, loc, lobby);
@@ -123,6 +124,7 @@ public class Main extends JavaPlugin {
 	for (ShopGoods goods : ShopGoods.values()) {
 	    this.banItems.unbanItem(goods.getItemStack().getType());
 	}
+	
 
 	// kits
 //		this.makeKits();
@@ -251,10 +253,13 @@ public class Main extends JavaPlugin {
 
 		    // player location
 		    RoomType roomType = RoomLocation.getRoomTypeWithLocation(p.getLocation());
-		    String roomString = null;
+		    String roomString;
 		    if (roomType == null) {
-			roomString = "Not Room";
+			roomString = "NOT ROOM";
+		    } else {
+			roomString = roomType.name();
 		    }
+
 		    Score room = sidebarObj.getScore("Room: " + roomString);
 		    room.setScore(9);
 
@@ -279,7 +284,9 @@ public class Main extends JavaPlugin {
 	    @Override
 	    public void run() {
 		for (Player p : Bukkit.getOnlinePlayers()) {
-		    p.performCommand("play 1 " + p.getName());
+		    // note block API 재생
+		    String cmd = "play 1 " + p.getName();
+		    Bukkit.getServer().dispatchCommand(Bukkit.getServer().getConsoleSender(), (cmd));
 		}
 	    }
 	}, 20 * 10, 20 * 60 * 10);
@@ -369,52 +376,56 @@ public class Main extends JavaPlugin {
 	 * red: 14 yellow: 4 lime: 5 cyan: 9
 	 */
 	
-	List<Location> locs = new ArrayList<>();
-	locs.add(new Location(Setting.world, 14, 4, 14));
-	locs.add(new Location(Setting.world, 14, 4, 15));
-	locs.add(new Location(Setting.world, 14, 4, 16));
+	List<Location> spawnLocs = new ArrayList<>();
+	spawnLocs.add(new Location(Setting.world, 14, 4, 14));
+	spawnLocs.add(new Location(Setting.world, 14, 4, 15));
+	spawnLocs.add(new Location(Setting.world, 14, 4, 16));
 
-	locs.add(new Location(Setting.world, 14, 4, 17));
-	locs.add(new Location(Setting.world, 15, 4, 17));
-	locs.add(new Location(Setting.world, 16, 4, 17));
+	spawnLocs.add(new Location(Setting.world, 14, 4, 17));
+	spawnLocs.add(new Location(Setting.world, 15, 4, 17));
+	spawnLocs.add(new Location(Setting.world, 16, 4, 17));
 
-	locs.add(new Location(Setting.world, 17, 4, 17));
-	locs.add(new Location(Setting.world, 17, 4, 16));
-	locs.add(new Location(Setting.world, 17, 4, 15));
+	spawnLocs.add(new Location(Setting.world, 17, 4, 17));
+	spawnLocs.add(new Location(Setting.world, 17, 4, 16));
+	spawnLocs.add(new Location(Setting.world, 17, 4, 15));
 
-	locs.add(new Location(Setting.world, 17, 4, 14));
-	locs.add(new Location(Setting.world, 16, 4, 14));
-	locs.add(new Location(Setting.world, 15, 4, 14));
+	spawnLocs.add(new Location(Setting.world, 17, 4, 14));
+	spawnLocs.add(new Location(Setting.world, 16, 4, 14));
+	spawnLocs.add(new Location(Setting.world, 15, 4, 14));
 
-	Bukkit.getScheduler().scheduleSyncRepeatingTask(Main.getInstance(), new Runnable() {
-
-	    @SuppressWarnings("deprecation")
-	    @Override
-	    public void run() {
-//		List<ItemStack> items = new ArrayList<>();
-//		items.add(ItemStackTool.item(Material.CONCRETE, (byte) 4));
-//		items.add(ItemStackTool.item(Material.CONCRETE, (byte) 5));
-//		items.add(ItemStackTool.item(Material.CONCRETE, (byte) 9));
-//		items.add(ItemStackTool.item(Material.CONCRETE, (byte) 14));
-
-//		List<Block> blocks = new ArrayList<>();
-//
-//		System.out.println("==================================");
-//		for (int i = 0; i < locs.size(); i++) {
-//		    int nextIndex = (i + 1) % locs.size();
-//		    Block b = locs.get(nextIndex).getBlock();
-//		    blocks.add(b);
-//		    System.out.println("nextindex: " + nextIndex);
-//		    System.out.println(i + " : " +b.getType().toString());
-//		}
-//		
-//		for (int i = locs.size() - 1; i >= 0;i--) {
-//		    Block b = blocks.get(i);
-//		    locs.get(i).getBlock().setType(b.getType());
-//		    locs.get(i).getBlock().setData(b.getData());
-//		}
-	    }
-	}, 0, 20 * 1);
+	Rotationer spawn = new Rotationer("spawn", 10 * 1, spawnLocs, Rotationer.Direction.CLOCK);
+	BlockRotateTool.registerRotation(spawn);
+	
+	// spawn loof
+	List<Location> loofLocs = new ArrayList<>();
+	loofLocs.add(new Location(Setting.world, 14, 7, 14));
+	loofLocs.add(new Location(Setting.world, 14, 7, 15));
+	loofLocs.add(new Location(Setting.world, 14, 7, 16));
+                                                     
+	loofLocs.add(new Location(Setting.world, 14, 7, 17));
+	loofLocs.add(new Location(Setting.world, 15, 7, 17));
+	loofLocs.add(new Location(Setting.world, 16, 7, 17));
+                                                     
+	loofLocs.add(new Location(Setting.world, 17, 7, 17));
+	loofLocs.add(new Location(Setting.world, 17, 7, 16));
+	loofLocs.add(new Location(Setting.world, 17, 7, 15));
+                                                     
+	loofLocs.add(new Location(Setting.world, 17, 7, 14));
+	loofLocs.add(new Location(Setting.world, 16, 7, 14));
+	loofLocs.add(new Location(Setting.world, 15, 7, 14));
+                                                     
+	Rotationer loof = new Rotationer("loof", 10 * 1, loofLocs, Rotationer.Direction.CLOCK);
+	BlockRotateTool.registerRotation(loof);
+	
+	
+	
+	
+	
+	
+	
+	
+	// ratating 시작
+	BlockRotateTool.startRotating();
     }
 
 //	void makeKits() {

@@ -88,7 +88,7 @@ public class Commands implements CommandExecutor {
 
 	    // 명령어 cooldown 체크
 	    if (CoolDownManager.addPlayer(Setting.CoolDown_Subject_CMD_ROOM, p)) {
-		BroadcastTool.sendMessage(p, "??????????????");
+//		BroadcastTool.sendMessage(p, "??????????????");
 		String second = args[1];
 
 		switch (second) {

@@ -179,6 +179,8 @@ public class CommonListener implements Listener {
     public void onPlayerDeathInManyTimes(PlayerDeathEvent e) {
 	// clear drops
 	e.getDrops().clear();
+	// inven save
+	e.setKeepInventory(true);
     }
 
     @EventHandler
@@ -351,9 +353,9 @@ public class CommonListener implements Listener {
 		     * 
 		     * 1: <game title>
 		     * 
-		     * 2: FEE <n> TOKEN
+		     * 2: TOKEN <n>
 		     * 
-		     * 3: ---------
+		     * 3: ( game type )
 		     */
 		    String[] lines = sign.getLines();
 		    String minigame = lines[0];

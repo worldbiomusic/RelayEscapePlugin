@@ -11,20 +11,20 @@ public class MiniGameLocation {
      * MiniGame 블럭들의 위치를 관리하는 클래스
      */
     // FIND_THE_RED============
-    public static final Location FIND_THE_RED_POS1 = Setting.getLoationFromSTDLOC(1, 9, 30);
-    public static final Location FIND_THE_RED_POS2 = Setting.getLoationFromSTDLOC(4, 9, 27);
+    public static final Location FIND_THE_RED_POS1 = Setting.getLoationFromSTDLOC(1, 9, 35);
+    public static final Location FIND_THE_RED_POS2 = Setting.getLoationFromSTDLOC(4, 9, 32);
 
     // PAINTER==============
     public static final Location PAINTER_POS1 = Setting.getLoationFromSTDLOC(1, 10, 24);
     public static final Location PAINTER_POS2 = Setting.getLoationFromSTDLOC(1, 8, 21);
 
     // FIND_THE_YELLOW============
-    public static final Location FIND_THE_YELLOW_POS1 = Setting.getLoationFromSTDLOC(1, 13, 30);
-    public static final Location FIND_THE_YELLOW_POS2 = Setting.getLoationFromSTDLOC(4, 13, 27);
+    public static final Location FIND_THE_YELLOW_POS1 = Setting.getLoationFromSTDLOC(1, 13, 35);
+    public static final Location FIND_THE_YELLOW_POS2 = Setting.getLoationFromSTDLOC(4, 13, 32);
 
     // FIND_THE_BLUE============
-    public static final Location FIND_THE_BLUE_POS1 = Setting.getLoationFromSTDLOC(1, 17, 30);
-    public static final Location FIND_THE_BLUE_POS2 = Setting.getLoationFromSTDLOC(4, 17, 27);
+    public static final Location FIND_THE_BLUE_POS1 = Setting.getLoationFromSTDLOC(1, 17, 35);
+    public static final Location FIND_THE_BLUE_POS2 = Setting.getLoationFromSTDLOC(4, 17, 32);
 
     // FIND_THE_BLUE============
     public static final Location BATTLE_TOWN_POS1 = Setting.getLoationFromSTDLOC(-36, 4, 203);

@@ -11,20 +11,20 @@ import com.wbm.plugin.util.general.LocationTool;
  */
 public class RoomLocation {
     // main
-    public static final Location MAIN_Pos1 = Setting.getLoationFromSTDLOC(1, 4, 1);
-    public static final Location MAIN_Pos2 = Setting.getLoationFromSTDLOC(10, 53, 10);
+    public static final Location MAIN_Pos1 = Setting.getLoationFromSTDLOC(-4, 4, -4);
+    public static final Location MAIN_Pos2 = Setting.getLoationFromSTDLOC(10, 33, 10);
 
     // practice
     public static final Location PRACTICE_Pos1 = Setting.getLoationFromSTDLOC(21, 4, 21);
-    public static final Location PRACTICE_Pos2 = Setting.getLoationFromSTDLOC(30, 53, 30);
+    public static final Location PRACTICE_Pos2 = Setting.getLoationFromSTDLOC(35, 33, 35);
 
     // minigame
-    public static final Location MINIGAME_Pos1 = Setting.getLoationFromSTDLOC(1, 4, 21);
-    public static final Location MINIGAME_Pos2 = Setting.getLoationFromSTDLOC(10, 53, 30);
+    public static final Location MINIGAME_Pos1 = Setting.getLoationFromSTDLOC(10, 4, 21);
+    public static final Location MINIGAME_Pos2 = Setting.getLoationFromSTDLOC(-4, 33, 35);
 
     // minigame
     public static final Location FUN_Pos1 = Setting.getLoationFromSTDLOC(21, 4, 10);
-    public static final Location FUN_Pos2 = Setting.getLoationFromSTDLOC(30, 53, 1);
+    public static final Location FUN_Pos2 = Setting.getLoationFromSTDLOC(35, 33, -4);
 
     // ROOM사이즈 (모든 룸 같은 크기)
     public static final int ROOM_SIZE_X = Math.abs((int) (MAIN_Pos1.getX() - MAIN_Pos2.getX()));
