@@ -40,6 +40,7 @@ import com.wbm.plugin.util.general.CoolDownManager;
 import com.wbm.plugin.util.general.NPCManager;
 import com.wbm.plugin.util.general.Rotationer;
 import com.wbm.plugin.util.general.SpawnLocationTool;
+import com.wbm.plugin.util.general.TPManager;
 import com.wbm.plugin.util.general.TeleportTool;
 import com.wbm.plugin.util.general.skin.SkinManager;
 import com.wbm.plugin.util.minigame.MiniGameManager;
@@ -124,10 +125,9 @@ public class Main extends JavaPlugin {
 	for (ShopGoods goods : ShopGoods.values()) {
 	    this.banItems.unbanItem(goods.getItemStack().getType());
 	}
-	
 
-	// kits
-//		this.makeKits();
+	// TPManager
+	TPManager.registerLocation("PRACTICE_SPAWN", Setting.getLoationFromSTDLOC(33.5, 4, 28.5, 90, 0));
 
 	// skindata
 	this.skinManager = new SkinManager();
@@ -147,7 +147,11 @@ public class Main extends JavaPlugin {
 	// TIP
 	this.loopTips();
 
-	loopSpawnBlockRound();
+	// RotationBlock
+	this.loopRotationBlock();
+	
+	// ranking system(stage) 업데이트
+	this.loopUpdateAllStage();
     }
 
     void setupMain() {
@@ -177,7 +181,7 @@ public class Main extends JavaPlugin {
 	// setup stages
 	this.setupStages();
 
-	this.relayManager = new RelayManager(this.pDataManager, this.roomManager, this.stageManager,
+	this.relayManager = new RelayManager(this.pDataManager, this.roomManager,
 		this.miniGameManager);
 	this.gManager = new GameManager(this.pDataManager, this.roomManager, this.relayManager, this.miniGameManager);
 	this.itemUsingManager = new GoodsListener(this.pDataManager, this.roomManager, this.relayManager);
@@ -308,19 +312,19 @@ public class Main extends JavaPlugin {
 	tokenLocs.add(Setting.getLoationFromSTDLOC(12.5, 4, 4.5, -90, 0));
 
 	List<Location> challengingLocs = new ArrayList<Location>();
-	tokenLocs.add(Setting.getLoationFromSTDLOC(14.5, 6, 1.5, 0, 0));
-	tokenLocs.add(Setting.getLoationFromSTDLOC(13.5, 5, 1.5, 0, 0));
-	tokenLocs.add(Setting.getLoationFromSTDLOC(15.5, 4, 1.5, 0, 0));
+	challengingLocs.add(Setting.getLoationFromSTDLOC(14.5, 6, 1.5, 0, 0));
+	challengingLocs.add(Setting.getLoationFromSTDLOC(13.5, 5, 1.5, 0, 0));
+	challengingLocs.add(Setting.getLoationFromSTDLOC(15.5, 4, 1.5, 0, 0));
 
 	List<Location> clearLocs = new ArrayList<Location>();
-	tokenLocs.add(Setting.getLoationFromSTDLOC(17.5, 6, 1.5, 0, 0));
-	tokenLocs.add(Setting.getLoationFromSTDLOC(16.5, 5, 1.5, 0, 0));
-	tokenLocs.add(Setting.getLoationFromSTDLOC(18.5, 4, 1.5, 0, 0));
+	clearLocs.add(Setting.getLoationFromSTDLOC(17.5, 6, 1.5, 0, 0));
+	clearLocs.add(Setting.getLoationFromSTDLOC(16.5, 5, 1.5, 0, 0));
+	clearLocs.add(Setting.getLoationFromSTDLOC(18.5, 4, 1.5, 0, 0));
 
 	List<Location> roomLocs = new ArrayList<Location>();
-	tokenLocs.add(Setting.getLoationFromSTDLOC(19.5, 6, 6.5, 90, 0));
-	tokenLocs.add(Setting.getLoationFromSTDLOC(19.5, 5, 5.5, 90, 0));
-	tokenLocs.add(Setting.getLoationFromSTDLOC(19.5, 4, 7.5, 90, 0));
+	roomLocs.add(Setting.getLoationFromSTDLOC(19.5, 6, 6.5, 90, 0));
+	roomLocs.add(Setting.getLoationFromSTDLOC(19.5, 5, 5.5, 90, 0));
+	roomLocs.add(Setting.getLoationFromSTDLOC(19.5, 4, 7.5, 90, 0));
 
 	// stage 에 드록
 	this.stageManager.registerLocations("tokenCount", tokenLocs);
@@ -371,11 +375,11 @@ public class Main extends JavaPlugin {
 	}, 0, 20 * 60 * 5);
     }
 
-    void loopSpawnBlockRound() {
+    void loopRotationBlock() {
 	/*
 	 * red: 14 yellow: 4 lime: 5 cyan: 9
 	 */
-	
+
 	List<Location> spawnLocs = new ArrayList<>();
 	spawnLocs.add(new Location(Setting.world, 14, 4, 14));
 	spawnLocs.add(new Location(Setting.world, 14, 4, 15));
@@ -395,37 +399,40 @@ public class Main extends JavaPlugin {
 
 	Rotationer spawn = new Rotationer("spawn", 10 * 1, spawnLocs, Rotationer.Direction.CLOCK);
 	BlockRotateTool.registerRotation(spawn);
-	
+
 	// spawn loof
 	List<Location> loofLocs = new ArrayList<>();
 	loofLocs.add(new Location(Setting.world, 14, 7, 14));
 	loofLocs.add(new Location(Setting.world, 14, 7, 15));
 	loofLocs.add(new Location(Setting.world, 14, 7, 16));
-                                                     
+
 	loofLocs.add(new Location(Setting.world, 14, 7, 17));
 	loofLocs.add(new Location(Setting.world, 15, 7, 17));
 	loofLocs.add(new Location(Setting.world, 16, 7, 17));
-                                                     
+
 	loofLocs.add(new Location(Setting.world, 17, 7, 17));
 	loofLocs.add(new Location(Setting.world, 17, 7, 16));
 	loofLocs.add(new Location(Setting.world, 17, 7, 15));
-                                                     
+
 	loofLocs.add(new Location(Setting.world, 17, 7, 14));
 	loofLocs.add(new Location(Setting.world, 16, 7, 14));
 	loofLocs.add(new Location(Setting.world, 15, 7, 14));
-                                                     
+
 	Rotationer loof = new Rotationer("loof", 10 * 1, loofLocs, Rotationer.Direction.CLOCK);
 	BlockRotateTool.registerRotation(loof);
-	
-	
-	
-	
-	
-	
-	
-	
+
 	// ratating 시작
 	BlockRotateTool.startRotating();
+    }
+    
+    private void loopUpdateAllStage() {
+	Bukkit.getScheduler().scheduleSyncRepeatingTask(Main.getInstance(), new Runnable() {
+
+	    @Override
+	    public void run() {
+		stageManager.updateAllStage();
+	    }
+	}, 0, 20 * 60 * 5);
     }
 
 //	void makeKits() {

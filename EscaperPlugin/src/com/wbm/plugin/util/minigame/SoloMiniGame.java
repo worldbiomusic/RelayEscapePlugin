@@ -152,7 +152,7 @@ public abstract class SoloMiniGame extends MiniGame{
 	    int quartileScore = MiniGameRankManager.getScore(this.rankData, quartilePlayerName);
 	    if (this.score <= quartileScore) {
 		int rewardToken = (int) ((i / (double) 2) * this.getFee());
-		BroadcastTool.sendMessage(this.player, "You are in " + i + " quartile");
+		BroadcastTool.sendMessage(this.player, "Your score is in the top " + i + " quartile");
 		BroadcastTool.sendMessage(this.player, "Reward token: " + rewardToken);
 
 		pData.plusToken(rewardToken);

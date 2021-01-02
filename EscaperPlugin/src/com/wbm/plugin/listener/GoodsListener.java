@@ -9,6 +9,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -24,6 +25,7 @@ import com.wbm.plugin.util.enums.RoomType;
 import com.wbm.plugin.util.general.BroadcastTool;
 import com.wbm.plugin.util.general.InventoryTool;
 import com.wbm.plugin.util.general.ItemStackTool;
+import com.wbm.plugin.util.general.PlayerTool;
 import com.wbm.plugin.util.general.SpawnLocationTool;
 import com.wbm.plugin.util.shop.GoodsRole;
 import com.wbm.plugin.util.shop.ShopGoods;
@@ -83,6 +85,38 @@ public class GoodsListener implements Listener {
 	} else if (role == Role.WAITER && good.getGoodsRole() == GoodsRole.WAITING) {
 	    this.useWaitingGoods(p, good);
 	}
+	
+	// 굿즈의 GoodsRole이 ALWAYS면 항상 사용할 수 있게
+	if(good.getGoodsRole() == GoodsRole.ALWAYS) {
+	    this.useAlwaysGoods(p, good);
+	}
+    }
+
+    private void useAlwaysGoods(Player p, ShopGoods good) {
+	
+	if (good == ShopGoods.GOODS_LIST) {
+	    // goods들을 포함한 GUI inventory 보여주기 (클락 불가능)
+	    String title = p.getName() + "'s GoodS List";
+	    Inventory inv=Bukkit.createInventory(null, 54, title);
+	    
+	    PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
+	    for(ShopGoods g : pData.getGoods()) {
+		inv.addItem(g.getItemStack());
+	    }
+	    
+	    p.openInventory(inv);
+	}
+    }
+    
+    @EventHandler
+    public void onPlayerClickGoodsListInventory(InventoryClickEvent e) {
+	Player p = (Player) e.getWhoClicked();
+	String title = p.getName() + "'s GoodS List";
+	Inventory inv = e.getInventory();
+	if(inv.getTitle().equalsIgnoreCase(title)) { 
+	    e.setCancelled(true);
+	}
+
     }
 
 //    // BLOCK_CHANGER 관련 리스너
@@ -126,18 +160,18 @@ public class GoodsListener implements Listener {
 //	}
 //    }
 
-    void useMakingGoods(Player p, ShopGoods goods) {
-	if (goods == ShopGoods.UNDER_BLOCK) {
+    void useMakingGoods(Player p, ShopGoods good) {
+	if (good == ShopGoods.UNDER_BLOCK) {
 	    // 발밑에 블럭 생성
 	    Location underFootLoc = p.getLocation();
 	    p.getWorld().getBlockAt(underFootLoc).setType(Material.DIRT);
-	} else if (goods == ShopGoods.SPAWN) {
+	} else if (good == ShopGoods.SPAWN) {
 	    // spawn
 	    p.teleport(SpawnLocationTool.RESPAWN);
-	} else if (goods == ShopGoods.ROOM_MANAGER) {
+	} else if (good == ShopGoods.ROOM_MANAGER) {
 	    // room list출력
 	    this.roomManager.printRoomList(p);
-	} else if (goods == ShopGoods.CHEST) {
+	} else if (good == ShopGoods.CHEST) {
 	    // makingBlock들을 담고 있는 인벤토리 오픈
 	    Inventory inv = Bukkit.createInventory(null, 54, ShopGoods.CHEST.name());
 
@@ -146,14 +180,14 @@ public class GoodsListener implements Listener {
 	    inv.addItem(ShopGoods.DIRT.getItemStack());
 
 	    // 자신이 구입한 Goods(MakingBLock)만 인벤토리에 추가
-	    for (ShopGoods makingBlock : ShopGoods.getGoodsRoleGoods(GoodsRole.MAKING_BLOCK)) {
+	    for (ShopGoods makingBlock : ShopGoods.getGoodsWithGoodsRole(GoodsRole.MAKING_BLOCK)) {
 		PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
 		if (pData.doesHaveGoods(makingBlock)) {
 		    inv.addItem(makingBlock.getItemStack());
 		}
 	    }
 	    p.openInventory(inv);
-	} else if (goods == ShopGoods.FINISH) {
+	} else if (good == ShopGoods.FINISH) {
 	    // room finish 실행
 	    if (!this.relayManager.isCorePlaced()) {
 		BroadcastTool.sendMessage(p, "core is not placed");
@@ -161,7 +195,7 @@ public class GoodsListener implements Listener {
 	    } else {
 		this.relayManager.startNextTime();
 	    }
-	} else if (goods == ShopGoods.BLOCK_CHANGER) {
+	} else if (good == ShopGoods.BLOCK_CHANGER) {
 	    // 플레이어가 들고있는 굿즈의 lore중의 3번째줄을 true or false로 변경
 	    ItemStack blockChanger = p.getInventory().getItemInMainHand();
 	    ItemMeta meta = blockChanger.getItemMeta();
@@ -170,10 +204,10 @@ public class GoodsListener implements Listener {
 	    String mode = lores.get(2);
 	    if (mode.equalsIgnoreCase("on")) {
 		lores.set(2, "off");
-		BroadcastTool.sendMessage(p, goods.name() + " mode set to off");
+		BroadcastTool.sendMessage(p, good.name() + " mode set to off");
 	    } else if (mode.equalsIgnoreCase("off")) {
 		lores.set(2, "on");
-		BroadcastTool.sendMessage(p, goods.name() + " mode set to on");
+		BroadcastTool.sendMessage(p, good.name() + " mode set to on");
 	    }
 	    meta.setLore(lores);
 
@@ -182,6 +216,31 @@ public class GoodsListener implements Listener {
 
 	    // main hand에 모드 바뀐것으로 굿즈 체인지
 	    p.getInventory().setItemInMainHand(blockChanger);
+	}else if (good == ShopGoods.HIDE) {
+	 // 플레이어가 들고있는 굿즈의 lore중의 3번째줄을 true or false로 변경
+	    ItemStack hideGoods = p.getInventory().getItemInMainHand();
+	    ItemMeta meta = hideGoods.getItemMeta();
+	    // lore 조정
+	    List<String> lores = meta.getLore();
+	    String mode = lores.get(2);
+	    if (mode.equalsIgnoreCase("on")) {
+		lores.set(2, "off");
+		BroadcastTool.sendMessage(p, good.name() + " mode set to off");
+		// unhide
+		PlayerTool.unhidePlayerFromEveryone(p);
+	    } else if (mode.equalsIgnoreCase("off")) {
+		lores.set(2, "on");
+		BroadcastTool.sendMessage(p, good.name() + " mode set to on");
+		// hide
+		PlayerTool.hidePlayerFromEveryone(p);
+	    }
+	    meta.setLore(lores);
+
+	    // meta 설정
+	    hideGoods.setItemMeta(meta);
+
+	    // main hand에 모드 바뀐것으로 굿즈 체인지
+	    p.getInventory().setItemInMainHand(hideGoods);
 	}
     }
 
@@ -200,6 +259,29 @@ public class GoodsListener implements Listener {
 	    InventoryTool.removeItemFromPlayer(p, good.getItemStack());
 
 	    BroadcastTool.sendMessageToEveryone(reductionTime + " sec reduced by " + p.getName());
+	} else if (good == ShopGoods.SUPER_STAR) {
+	 // 플레이어가 들고있는 굿즈의 lore중의 3번째줄을 true or false로 변경
+	    ItemStack superStar = p.getInventory().getItemInMainHand();
+	    ItemMeta meta = superStar.getItemMeta();
+	    // lore 조정
+	    List<String> lores = meta.getLore();
+	    String mode = lores.get(2);
+	    if (mode.equalsIgnoreCase("on")) {
+		lores.set(2, "off");
+		BroadcastTool.sendMessage(p, good.name() + " mode set to off");
+		p.setGlowing(false);
+	    } else if (mode.equalsIgnoreCase("off")) {
+		lores.set(2, "on");
+		BroadcastTool.sendMessage(p, good.name() + " mode set to on");
+		p.setGlowing(true);
+	    }
+	    meta.setLore(lores);
+
+	    // meta 설정
+	    superStar.setItemMeta(meta);
+
+	    // main hand에 모드 바뀐것으로 굿즈 체인지
+	    p.getInventory().setItemInMainHand(superStar);
 	}
     }
 

@@ -14,6 +14,8 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockIgniteEvent;
+import org.bukkit.event.block.BlockIgniteEvent.IgniteCause;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
@@ -48,8 +50,10 @@ import com.wbm.plugin.util.general.BroadcastTool;
 import com.wbm.plugin.util.general.ChatColorTool;
 import com.wbm.plugin.util.general.ItemStackTool;
 import com.wbm.plugin.util.general.NPCManager;
+import com.wbm.plugin.util.general.PlayerTool;
 import com.wbm.plugin.util.general.PotionEffectTool;
 import com.wbm.plugin.util.general.SpawnLocationTool;
+import com.wbm.plugin.util.general.TPManager;
 import com.wbm.plugin.util.general.TeleportTool;
 import com.wbm.plugin.util.general.skin.SkinManager;
 import com.wbm.plugin.util.minigame.MiniGame;
@@ -87,6 +91,8 @@ public class CommonListener implements Listener {
 
     @EventHandler
     public void onPlayerChat(AsyncPlayerChatEvent e) {
+	PlayerTool.playSoundToEveryone(Sound.BLOCK_END_PORTAL_FRAME_FILL);
+
 //	Player p = e.getPlayer();
 //
 //	// chat 쿨다운 관리
@@ -149,13 +155,13 @@ public class CommonListener implements Listener {
 
     @EventHandler
     public void onPVP(EntityDamageByEntityEvent e) {
-	// Player가 Player에게만 맞앚을때
-	if (e.getEntity() instanceof Player && e.getDamager() instanceof Player) {
+	// Player가 Player에게 피해입는것 기본적으로 금지
+	if (e.getEntity() instanceof Player) {
 	    // 기본적으로 금지
 	    e.setCancelled(true);
-	    // pvp minigame 관련 이벤트 전송
-	    this.miniGameManager.processEvent(e);
 	}
+	// 누구에게 누가 피해 입든 pvp minigame 관련 이벤트 전송
+	this.miniGameManager.processEvent(e);
     }
 
     @EventHandler
@@ -189,24 +195,24 @@ public class CommonListener implements Listener {
 	Block b = e.getClickedBlock();
 
 	// 터치한 블럭 없을때 return
-	if (b == null) {
-	    return;
-	}
+	if (b != null) {
 
-	// sign click
-	if (b.getType() == Material.WALL_SIGN || b.getType() == Material.SIGN_POST || b.getType() == Material.SIGN) {
-	    Action act = e.getAction();
-	    if (act == Action.RIGHT_CLICK_BLOCK || act == Action.RIGHT_CLICK_AIR) {
-		Sign sign = (Sign) b.getState();
-		String[] lines = sign.getLines();
+	    // sign click
+	    if (b.getType() == Material.WALL_SIGN || b.getType() == Material.SIGN_POST
+		    || b.getType() == Material.SIGN) {
+		Action act = e.getAction();
+		if (act == Action.RIGHT_CLICK_BLOCK) {
+		    Sign sign = (Sign) b.getState();
+		    String[] lines = sign.getLines();
 
-		// SHOP click
-		if (lines[0].equals("[SHOP]")) {
-		    String goods = lines[1];
-		    String[] tokenStr = lines[2].split(" ");
-		    // 띄어쓰기 기분으로 2번째를 token number로 봄
-		    int cost = Integer.parseInt(tokenStr[1]);
-		    this.shopManager.purchase(p, goods, cost);
+		    // SHOP click
+		    if (lines[0].equals("[SHOP]")) {
+			String goods = lines[1];
+			String[] tokenStr = lines[2].split(" ");
+			// 띄어쓰기 기분으로 2번째를 token number로 봄
+			int cost = Integer.parseInt(tokenStr[1]);
+			this.shopManager.purchase(p, goods, cost);
+		    }
 		}
 	    }
 	}
@@ -214,7 +220,7 @@ public class CommonListener implements Listener {
 
     @EventHandler
     public void onPlayerConsumeItem(PlayerItemConsumeEvent e) {
-	e.setCancelled(true);
+//	e.setCancelled(true);
     }
 
     @EventHandler
@@ -259,6 +265,9 @@ public class CommonListener implements Listener {
     public void onPlayerJoinsaveSkin(PlayerJoinEvent e) {
 	Player p = e.getPlayer();
 
+	// 입장 소리 재생
+	PlayerTool.playSoundToEveryone(Sound.BLOCK_CHEST_OPEN);
+
 	// skin data 다운
 	String pName = p.getName();
 	if (!this.skinManager.doesExist(pName)) {
@@ -279,7 +288,7 @@ public class CommonListener implements Listener {
 
 	if (ItemStackTool.isSameWithMaterialNData(ItemStackTool.block2ItemStack(b), ShopGoods.JUMPING.getItemStack())) {
 //			p.sendMessage("JUMPING");
-	    p.setVelocity(new Vector(0, 0.5, 0));
+	    p.setVelocity(new Vector(0, 0.65, 0));
 	} else if (ItemStackTool.isSameWithMaterialNData(ItemStackTool.block2ItemStack(b),
 		ShopGoods.RESPAWN.getItemStack())) {
 //			p.sendMessage("RESPAWN");
@@ -329,6 +338,16 @@ public class CommonListener implements Listener {
 		ShopGoods.HURT.getItemStack())) {
 //			p.sendMessage("HURT");
 	    p.setHealth(p.getHealth() - 1);
+	} else if (ItemStackTool.isSameWithMaterialNData(ItemStackTool.block2ItemStack(b),
+		ShopGoods.UP_TP.getItemStack())) {
+//		p.sendMessage("FIX EYE");
+	    Location upLoc = p.getLocation().add(0, 3, 0);
+	    TeleportTool.tp(p, upLoc);
+	}else if (ItemStackTool.isSameWithMaterialNData(ItemStackTool.block2ItemStack(b),
+		ShopGoods.DOWN_TP.getItemStack())) {
+//		p.sendMessage("FIX EYE");
+	    Location downLoc = p.getLocation().subtract(0, 3, 0);
+	    TeleportTool.tp(p, downLoc);
 	}
 
     }
@@ -338,43 +357,46 @@ public class CommonListener implements Listener {
 	Player p = e.getPlayer();
 	Block b = e.getClickedBlock();
 
-	if (b == null)
-	    return;
+	if (b != null) {
+	    if (b.getType() == Material.SIGN || b.getType() == Material.SIGN_POST
+		    || b.getType() == Material.WALL_SIGN) {
+		if (e.getAction() == Action.RIGHT_CLICK_BLOCK || e.getAction() == Action.LEFT_CLICK_BLOCK) {
+		    // room, time, role 체크
+		    if (this.relayManager.checkRoomAndRelayTimeAndRole(RoomType.MINI_GAME, RelayTime.MAKING,
+			    Role.WAITER, p)
+			    || this.relayManager.checkRoomAndRelayTimeAndRole(RoomType.MINI_GAME, RelayTime.TESTING,
+				    Role.WAITER, p)) {
+			Sign sign = (Sign) b.getState();
+			/*
+			 * 0: [MINI_GAME]
+			 * 
+			 * 1: <game title>
+			 * 
+			 * 2: TOKEN <n>
+			 * 
+			 * 3: ( game type )
+			 */
+			String[] lines = sign.getLines();
+			String minigame = lines[0];
+			String title = lines[1];
+			// token은 안 남겨줘도 gameType에서 가져옴
 
-	if (b.getType() == Material.SIGN || b.getType() == Material.SIGN_POST || b.getType() == Material.WALL_SIGN) {
-	    if (e.getAction() == Action.RIGHT_CLICK_BLOCK || e.getAction() == Action.LEFT_CLICK_BLOCK) {
-		// room, time, role 체크
-		if (this.relayManager.checkRoomAndRelayTimeAndRole(RoomType.MINI_GAME, RelayTime.MAKING, Role.WAITER, p)
-			|| this.relayManager.checkRoomAndRelayTimeAndRole(RoomType.MINI_GAME, RelayTime.TESTING,
-				Role.WAITER, p)) {
-		    Sign sign = (Sign) b.getState();
-		    /*
-		     * 0: [MINI_GAME]
-		     * 
-		     * 1: <game title>
-		     * 
-		     * 2: TOKEN <n>
-		     * 
-		     * 3: ( game type )
-		     */
-		    String[] lines = sign.getLines();
-		    String minigame = lines[0];
-		    String title = lines[1];
-		    // token은 안 남겨줘도 gameType에서 가져옴
-
-		    // 1
-		    if (minigame.equalsIgnoreCase("[MINI_GAME]")) {
-			this.miniGameManager.enterRoom(MiniGameType.valueOf(title), p);
+			// 1
+			if (minigame.equalsIgnoreCase("[MINI_GAME]")) {
+			    this.miniGameManager.enterRoom(MiniGameType.valueOf(title), p);
+			}
 		    }
 		}
 	    }
-
 	}
     }
 
     @EventHandler
     public void handleMiniGameResultonPlayerQuit(PlayerQuitEvent e) {
 	Player p = e.getPlayer();
+
+	// 퇴장 소리 재생
+	PlayerTool.playSoundToEveryone(Sound.BLOCK_CHEST_CLOSE);
 
 	// player가 플레이중이던 미니게임 종료
 	this.miniGameManager.handleMiniGameExitDuringPlaying(p, MiniGame.ExitReason.SELF_EXIT);
@@ -470,13 +492,77 @@ public class CommonListener implements Listener {
 	e.setMaxPlayers(20);
 
 	String motd = "" + ChatColorTool.random() + ChatColor.BOLD + "Relay";
-	motd += "" + ChatColorTool.random() + ChatColor.BOLD +" Escape ";
+	motd += "" + ChatColorTool.random() + ChatColor.BOLD + " Escape ";
 	motd += ChatColor.WHITE + "[";
 	motd += ChatColorTool.random() + "1.12.2";
 	motd += ChatColor.WHITE + " - ";
 	motd += ChatColorTool.random() + "1.16.4";
 	motd += ChatColor.WHITE + "]";
 	e.setMotd(motd);
+    }
+
+    @EventHandler
+    public void onBlockIgnite(BlockIgniteEvent event) {
+	if (event.getCause() == IgniteCause.SPREAD) {
+	    event.setCancelled(true);
+	}
+    }
+
+    @EventHandler
+    public void onPlayerClickTPSign(PlayerInteractEvent e) {
+	/*
+	 * [TP]
+	 * 
+	 * <tp title>
+	 * 
+	 * TOKEN <amount>
+	 */
+	Player p = e.getPlayer();
+	Block b = e.getClickedBlock();
+	PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
+
+	// 터치한 블럭 없을때 return
+	if (b != null) {
+	    // sign click
+	    if (b.getType() == Material.WALL_SIGN || b.getType() == Material.SIGN_POST
+		    || b.getType() == Material.SIGN) {
+		Action act = e.getAction();
+		if (act == Action.RIGHT_CLICK_BLOCK) {
+		    Sign sign = (Sign) b.getState();
+		    String[] lines = sign.getLines();
+
+		    // TP sign click
+		    if (lines[0].equals("[TP]")) {
+			String locTitle = lines[1];
+			String[] tokenStr = lines[2].split(" ");
+			// 띄어쓰기 기분으로 2번째를 token number로 봄
+			int cost = Integer.parseInt(tokenStr[1]);
+			if (pData.minusToken(cost)) {
+			    Location targetLoc = TPManager.getLocation(locTitle);
+			    TeleportTool.tp(p, targetLoc);
+			    BroadcastTool.sendMessage(p, "teleport to " + locTitle);
+			} else {
+			    BroadcastTool.sendMessage(p, "you need more token");
+			}
+		    }
+		}
+	    }
+	}
+    }
+
+    @EventHandler
+    public void onPlayerHitByArrow(EntityDamageByEntityEvent e) {
+//	System.out.println("ENTITY HITTTTTT");
+//	
+//	Entity damager = e.getDamager();
+//	if(damager instanceof Arrow) {
+//	    System.out.println("ENTITY ARROW");
+//	    Arrow arrow = (Arrow) damager;
+//	    Entity shooter = (Entity) arrow.getShooter();
+//	    if(shooter instanceof Player) {
+//		System.out.println("ENTITY PLLAYER HIT BY AROW");
+//	    }
+//	}
     }
 }
 //

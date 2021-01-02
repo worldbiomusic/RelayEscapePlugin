@@ -3,7 +3,7 @@ package com.wbm.plugin.util.minigame.games;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Arrow;
-import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -35,10 +35,10 @@ public class BattleTown extends BattleMiniGame {
 	    EntityDamageByEntityEvent e = (EntityDamageByEntityEvent) event;
 	    // 기본적으로 true이지만 여기선 false 로 변경해서 때리기 가능하게
 	    e.setCancelled(false);
-	    BroadcastTool.debug("EVENt!!!!!!!!!!!");
 
 	    // player가 player직접 때려 죽였을때
-	    Player victim = null, damager = null;
+	    Player victim = null;
+	    Player damager = null;
 	    if (e.getEntity() instanceof Player && e.getDamager() instanceof Player) {
 		victim = (Player) e.getEntity();
 		damager = (Player) e.getDamager();
@@ -46,9 +46,11 @@ public class BattleTown extends BattleMiniGame {
 		// 화살처리
 		BroadcastTool.debug("ARROW HIT!!!!!!!!!!!");
 		victim = (Player) e.getEntity();
-		LivingEntity shooter = (LivingEntity) ((Arrow) e.getDamager()).getShooter();
+		Arrow arrow = (Arrow) e.getDamager();
+		Entity shooter = (Entity) arrow.getShooter();
 		if (shooter instanceof Player) {
 		    damager = (Player) shooter;
+		    BroadcastTool.debug("PLAYER HIT BY ARROW!!!!!!");
 		} else {
 		    return;
 		}

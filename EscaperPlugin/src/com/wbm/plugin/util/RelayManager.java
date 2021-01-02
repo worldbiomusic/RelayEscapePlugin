@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -24,6 +25,7 @@ import com.wbm.plugin.util.general.SpawnLocationTool;
 import com.wbm.plugin.util.general.TeleportTool;
 import com.wbm.plugin.util.minigame.MiniGame;
 import com.wbm.plugin.util.minigame.MiniGameManager;
+import com.wbm.plugin.util.shop.GoodsRole;
 import com.wbm.plugin.util.shop.ShopGoods;
 
 /* TODO: RelayTime의 Making -> Building, Challenging -> Finding으로 변경
@@ -55,7 +57,6 @@ public class RelayManager {
 
     private PlayerDataManager pDataManager;
     private RoomManager roomManager;
-    private StageManager stageManager;
 
     // TODO: RelayTime이름보단 다른것찾아보기 예> RelayTurn ??
     private RelayTime currentTime;
@@ -72,11 +73,10 @@ public class RelayManager {
 
     private MiniGameManager miniGameManager;
 
-    public RelayManager(PlayerDataManager pDataManager, RoomManager roomManager, StageManager stageManager,
+    public RelayManager(PlayerDataManager pDataManager, RoomManager roomManager,
 	    MiniGameManager miniGameManager) {
 	this.pDataManager = pDataManager;
 	this.roomManager = roomManager;
-	this.stageManager = stageManager;
 
 	this.currentTime = RelayTime.CHALLENGING;
 	this.corePlaced = false;
@@ -257,10 +257,6 @@ public class RelayManager {
 	if (this.getMaker() == null) {
 	    BroadcastTool.printConsoleMessage(ChatColor.RED + "[Bug] No Maker in WaitingTime!!!!");
 	}
-
-	// ranking system(stage) 업데이트
-	this.stageManager.updateAllStage();
-
     }
 
     private void startMaking() {
@@ -290,6 +286,7 @@ public class RelayManager {
     }
 
     private void startChallenging() {
+	
 //	 RelayTime 관리
 	this.currentTime = RelayTime.CHALLENGING;
 
@@ -341,6 +338,8 @@ public class RelayManager {
 	 * 6.다음 태스크 예약
 	 * 
 	 * 7.힐
+	 * 
+	 * 8.소리재생
 	 */
 
 //	2.역할 변경
@@ -355,8 +354,7 @@ public class RelayManager {
 	this.tpEveryoneWithRole();
 
 //	5.인벤토리 관리(초기화 후, Goods 제공)
-	InventoryTool.clearAllPlayerInv();
-	this.giveGoodsToEveryone();
+	this.initInventoryAndGiveGoods();
 
 	// 6.다음 태스크 예약
 	this.reserveNextTask(this.currentTime.getAmount());
@@ -365,6 +363,32 @@ public class RelayManager {
 	for (Player p : Bukkit.getOnlinePlayers()) {
 	    PlayerTool.heal(p);
 	}
+	
+	// 8.소리재생
+	this.playSoundToEveryone();
+    }
+
+    private void playSoundToEveryone() {
+	if(this.currentTime == RelayTime.WAITING) {
+	    PlayerTool.playSoundToEveryone(Sound.BLOCK_END_PORTAL_SPAWN);
+	} else if(this.currentTime == RelayTime.MAKING) {
+	    PlayerTool.playSoundToEveryone(Sound.BLOCK_ANVIL_USE);
+	} else if(this.currentTime == RelayTime.TESTING) {
+	    PlayerTool.playSoundToEveryone(Sound.BLOCK_ANVIL_DESTROY);
+	} else if(this.currentTime == RelayTime.CHALLENGING) {
+	    PlayerTool.playSoundToEveryone(Sound.ENTITY_ENDERMEN_TELEPORT);
+	}
+    }
+
+    private void initInventoryAndGiveGoods() {
+	// 테스팅타임때는 WAITER들은 인벤 초기화하면 안됨
+	if (this.currentTime == RelayTime.TESTING) {
+	    InventoryTool.clearPlayerInv(this.getMaker());
+	} else {
+	    InventoryTool.clearAllPlayerInv();
+	}
+	this.giveGoodsToEveryone();
+	
     }
 
     private void reserveNextTask(int durationTime) {
@@ -377,7 +401,7 @@ public class RelayManager {
 	    String kind = ShopGoods.MAKINGTIME_10.name().split("_")[0];
 	    durationTime = 60 * pData.getRoomSettingGoodsHighestValue(kind);
 	}
-	
+
 	// task 예약
 	this.reservationTask = this.currentCountDownTask = Bukkit.getScheduler().runTaskLater(Main.getInstance(),
 		new Runnable() {
@@ -532,7 +556,7 @@ public class RelayManager {
     public void setMainRoomTitle(String mainRoomTitle) {
 	this.mainRoomTitle = mainRoomTitle;
     }
-    
+
     public boolean isMainRoomTitleExist(String mainRoomTitle) {
 	return this.roomManager.isExistRoomTitle(mainRoomTitle);
     }
@@ -596,15 +620,25 @@ public class RelayManager {
     private void giveGoodsToEveryone() {
 	/*
 	 * playerData가 가지고 있는 good중 해당 role에 맞는 good만을 인벤토리에 추가함 이 메소드가 실행되기 전에 선행되야 하는
-	 * 것: player role 변경! * 각 Role에 맞는 Goods중에서 가지고 있는 Goods 인벤에 지급
+	 * 것: player role 변경! 
+	 * 
+	 * * 각 Role에 맞는 Goods중에서 가지고 있는 Goods 인벤에 지급
 	 */
 	for (Player p : Bukkit.getOnlinePlayers()) {
 	    PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
+	    // 플레이어 역할에 맞는 굿즈 제공
 	    for (ShopGoods good : ShopGoods.getPlayerRoleGoods(pData.getRole())) {
 		if (pData.doesHaveGoods(good)) {
 		    InventoryTool.addItemToPlayer(p, good.getItemStack());
 		}
 	    }
+	    // 항상 가지고 있어야 하는 굿즈(ALWAYS) 제공
+	    for (ShopGoods good : ShopGoods.getGoodsWithGoodsRole(GoodsRole.ALWAYS)) {
+		if (pData.doesHaveGoods(good)) {
+		    InventoryTool.addItemToPlayer(p, good.getItemStack());
+		}
+	    }
+	    
 	}
     }
 
@@ -695,6 +729,10 @@ public class RelayManager {
 		    BroadcastTool.debug("roomData count : " + this.roomManager.getAllRoomCount());
 		}
 	    } else if (role == Role.VIEWER) {
+		Room room = this.roomManager.getRoom(RoomType.MAIN);
+		String roomTitle = room.getTitle();
+		String roomMaker = room.getMaker();
+		BroadcastTool.sendMessage(p, "Main room: " + roomTitle + "(" + roomMaker + ")");
 		BroadcastTool.sendMessage(p, "You are Viewer in your room");
 	    }
 

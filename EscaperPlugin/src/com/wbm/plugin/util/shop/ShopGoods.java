@@ -12,6 +12,8 @@ import com.wbm.plugin.util.general.ItemStackTool;
 public enum ShopGoods {
     /*
      * 서버에서 파는 다양한 물건 저장소 makingBlock, makingTool, toy 등
+     * 
+     * [주의] 먹는것 추가하면 안됨!
      */
 
     // makingBlock
@@ -23,6 +25,7 @@ public enum ShopGoods {
     FENCE(ItemStackTool.item(Material.FENCE), GoodsRole.MAKING_BLOCK),
     WHITE_WOOL(ItemStackTool.item(Material.WOOL, (byte) 0), GoodsRole.MAKING_BLOCK),
     BLACK_WOOL(ItemStackTool.item(Material.WOOL, (byte) 15), GoodsRole.MAKING_BLOCK),
+
     // event making block
     JUMPING(ItemStackTool.item(Material.STAINED_GLASS, 1, (short) 1, (byte) 0, "JUMPING", "super jump event block"),
 	    GoodsRole.MAKING_BLOCK),
@@ -36,6 +39,10 @@ public enum ShopGoods {
 	    "sound terror event block"), GoodsRole.MAKING_BLOCK),
     HURT(ItemStackTool.item(Material.STAINED_GLASS, 1, (short) 1, (byte) 5, "HURT", "hurt payer"),
 	    GoodsRole.MAKING_BLOCK),
+    UP_TP(ItemStackTool.item(Material.STAINED_GLASS, 1, (short) 1, (byte) 6, "UP_TP", "teleport player 3 block up"),
+	    GoodsRole.MAKING_BLOCK),
+    DOWN_TP(ItemStackTool.item(Material.STAINED_GLASS, 1, (short) 1, (byte) 7, "DOWN_TP",
+	    "teleport player 1 block down"), GoodsRole.MAKING_BLOCK),
 
     // makingTool
     // 이 템으로 클릭시 list나오고 명령어로 가능하게 하기(명령어에서 이 템 가지고 있나 체크)
@@ -44,8 +51,15 @@ public enum ShopGoods {
     UNDER_BLOCK(ItemStackTool.item(Material.STICK, "UNDER_BLOCK", "create stone under your foot"), GoodsRole.MAKING),
     SPAWN(ItemStackTool.item(Material.WOOD_DOOR, "SPAWN", "teleport to spawn"), GoodsRole.MAKING),
     CHEST(ItemStackTool.item(Material.CHEST, "CHEST", "open inventory which has blocks you can use"), GoodsRole.MAKING),
-    FINISH(ItemStackTool.item(Material.ARROW, "FINISH", "finish MakingTime and go next to the TesetingTime"), GoodsRole.MAKING),
-    BLOCK_CHANGER(ItemStackTool.item(Material.WOOD_PICKAXE, "BLOCK_CHANGER", "Change the block immediately with the block you are holding", "===Mode===", "off"), GoodsRole.MAKING),
+    FINISH(ItemStackTool.item(Material.ARROW, "FINISH", "finish MakingTime and go next to the TesetingTime"),
+	    GoodsRole.MAKING),
+    BLOCK_CHANGER(
+	    ItemStackTool.item(Material.WOOD_PICKAXE, "BLOCK_CHANGER",
+		    "Change the block immediately with the block you are holding", "===Mode===", "off"),
+	    GoodsRole.MAKING),
+    HIDE(ItemStackTool.item(Material.BOWL, "HIDE", "You can hide you from everyone", "===Mode===", "off"),
+	    GoodsRole.MAKING),
+
     /*
      * 밑의 ROOM_SETTING 관련 굿즈 제작시 지켜야 하는 사항
      * 
@@ -53,30 +67,47 @@ public enum ShopGoods {
      * 
      * PlayerData에서 getRoomSettingGoodsHighestValue(kind)메소드로 최대값 가져올 수 있게 규칙을 정함
      */
-    HIGH_5(ItemStackTool.item(Material.TRIPWIRE_HOOK, "HIGH_5", "allow room high limit up to 5"), GoodsRole.ROOM_SETTING),
-    HIGH_10(ItemStackTool.item(Material.TRIPWIRE_HOOK, "HIGH_10", "allow room high limit up to 10"), GoodsRole.ROOM_SETTING),
-    HIGH_15(ItemStackTool.item(Material.TRIPWIRE_HOOK, "HIGH_15", "allow room high limit up to 15"), GoodsRole.ROOM_SETTING),
-    HIGH_20(ItemStackTool.item(Material.TRIPWIRE_HOOK, "HIGH_20", "allow room high limit up to 20"), GoodsRole.ROOM_SETTING),
-    HIGH_25(ItemStackTool.item(Material.TRIPWIRE_HOOK, "HIGH_25", "allow room high limit up to 25"), GoodsRole.ROOM_SETTING),
-    HIGH_30(ItemStackTool.item(Material.TRIPWIRE_HOOK, "HIGH_30", "allow room high limit up to 30"), GoodsRole.ROOM_SETTING),
-    HIGH_35(ItemStackTool.item(Material.TRIPWIRE_HOOK, "HIGH_35", "allow room high limit up to 35"), GoodsRole.ROOM_SETTING),
-    HIGH_40(ItemStackTool.item(Material.TRIPWIRE_HOOK, "HIGH_40", "allow room high limit up to 40"), GoodsRole.ROOM_SETTING),
-    HIGH_45(ItemStackTool.item(Material.TRIPWIRE_HOOK, "HIGH_45", "allow room high limit up to 45"), GoodsRole.ROOM_SETTING),
-    HIGH_50(ItemStackTool.item(Material.TRIPWIRE_HOOK, "HIGH_50", "allow room high limit up to 50"), GoodsRole.ROOM_SETTING),
-    
-    MAKINGTIME_5(ItemStackTool.item(Material.TRIPWIRE_HOOK, "MAKINGTIME_5", "MakingTime increases to 5 min"), GoodsRole.ROOM_SETTING),
-    MAKINGTIME_10(ItemStackTool.item(Material.TRIPWIRE_HOOK, "MAKINGTIME_10", "MakingTime increases to 10 min"), GoodsRole.ROOM_SETTING),
-    MAKINGTIME_15(ItemStackTool.item(Material.TRIPWIRE_HOOK, "MAKINGTIME_15", "MakingTime increases to 15 min"), GoodsRole.ROOM_SETTING),
+    HIGH_5(ItemStackTool.item(Material.TRIPWIRE_HOOK, "HIGH_5", "allow room high limit up to 5"),
+	    GoodsRole.ROOM_SETTING),
+    HIGH_10(ItemStackTool.item(Material.TRIPWIRE_HOOK, "HIGH_10", "allow room high limit up to 10"),
+	    GoodsRole.ROOM_SETTING),
+    HIGH_15(ItemStackTool.item(Material.TRIPWIRE_HOOK, "HIGH_15", "allow room high limit up to 15"),
+	    GoodsRole.ROOM_SETTING),
+    HIGH_20(ItemStackTool.item(Material.TRIPWIRE_HOOK, "HIGH_20", "allow room high limit up to 20"),
+	    GoodsRole.ROOM_SETTING),
+    HIGH_25(ItemStackTool.item(Material.TRIPWIRE_HOOK, "HIGH_25", "allow room high limit up to 25"),
+	    GoodsRole.ROOM_SETTING),
+    HIGH_30(ItemStackTool.item(Material.TRIPWIRE_HOOK, "HIGH_30", "allow room high limit up to 30"),
+	    GoodsRole.ROOM_SETTING),
+    HIGH_35(ItemStackTool.item(Material.TRIPWIRE_HOOK, "HIGH_35", "allow room high limit up to 35"),
+	    GoodsRole.ROOM_SETTING),
+    HIGH_40(ItemStackTool.item(Material.TRIPWIRE_HOOK, "HIGH_40", "allow room high limit up to 40"),
+	    GoodsRole.ROOM_SETTING),
+    HIGH_45(ItemStackTool.item(Material.TRIPWIRE_HOOK, "HIGH_45", "allow room high limit up to 45"),
+	    GoodsRole.ROOM_SETTING),
+    HIGH_50(ItemStackTool.item(Material.TRIPWIRE_HOOK, "HIGH_50", "allow room high limit up to 50"),
+	    GoodsRole.ROOM_SETTING),
+
+    MAKINGTIME_5(ItemStackTool.item(Material.TRIPWIRE_HOOK, "MAKINGTIME_5", "MakingTime increases to 5 min"),
+	    GoodsRole.ROOM_SETTING),
+    MAKINGTIME_10(ItemStackTool.item(Material.TRIPWIRE_HOOK, "MAKINGTIME_10", "MakingTime increases to 10 min"),
+	    GoodsRole.ROOM_SETTING),
+    MAKINGTIME_15(ItemStackTool.item(Material.TRIPWIRE_HOOK, "MAKINGTIME_15", "MakingTime increases to 15 min"),
+	    GoodsRole.ROOM_SETTING),
 
     // challengerTool
     REDUCE_TIME(ItemStackTool.item(Material.WATCH, "HALF_TIME", "delete half of challenging time"),
 	    GoodsRole.CHALLENGING),
+    SUPER_STAR(ItemStackTool.item(Material.GLOWSTONE_DUST, "SUPER_STAR", "you are now supre star", "===Mode===", "off"),
+	    GoodsRole.CHALLENGING),
 
     // viewrTool
-    GHOST(ItemStackTool.item(Material.SKULL_ITEM, 1, (short) 1, (byte) 3, "GHOST",
-	    "can move other player's view easily"), GoodsRole.VIEWING);
+    GHOST(ItemStackTool.item(Material.GHAST_TEAR, 1, (short) 1, (byte) 3, "GHOST",
+	    "can move other player's view easily"), GoodsRole.VIEWING),
 
-    // toy
+    // ALWAYS
+    GOODS_LIST(ItemStackTool.item(Material.PAPER, 1, (short) 1, (byte) 3, "GOODS_LIST",
+	    "open Goods List GUI"), GoodsRole.ALWAYS);
 
     ItemStack item;
     GoodsRole goodsRole;
@@ -85,7 +116,7 @@ public enum ShopGoods {
 	this.item = item;
 	this.goodsRole = goodsRole;
     }
-    
+
     public GoodsRole getGoodsRole() {
 	return this.goodsRole;
     }
@@ -95,6 +126,9 @@ public enum ShopGoods {
     }
 
     public static List<ShopGoods> getPlayerRoleGoods(Role role) {
+	/*
+	 * 플레이어 역할에 맞는 굿즈 리스트 반환
+	 */
 	List<ShopGoods> goods = new ArrayList<>();
 	for (ShopGoods good : ShopGoods.values()) {
 	    if (good.isRoleGood(role)) {
@@ -103,8 +137,11 @@ public enum ShopGoods {
 	}
 	return goods;
     }
-    
-    public static List<ShopGoods> getGoodsRoleGoods(GoodsRole role) {
+
+    public static List<ShopGoods> getGoodsWithGoodsRole(GoodsRole role) {
+	/*
+	 * 굿즈 역할로 구분된 굿즈 리스트 반환
+	 */
 	List<ShopGoods> goods = new ArrayList<>();
 	for (ShopGoods good : ShopGoods.values()) {
 	    if (good.goodsRole == role) {
@@ -113,12 +150,15 @@ public enum ShopGoods {
 	}
 	return goods;
     }
-    
+
     public boolean equals(ShopGoods other) {
 	return this.name().equals(other.name());
     }
 
     public boolean isRoleGood(Role role) {
+	/*
+	 * 해당 굿즈가 역할에 맞는 굿즈인지 검사 
+	 */
 	if (this.goodsRole == GoodsRole.WAITING && role == Role.WAITER
 		|| this.goodsRole == GoodsRole.MAKING && role == Role.MAKER
 		|| this.goodsRole == GoodsRole.TESTING && role == Role.TESTER

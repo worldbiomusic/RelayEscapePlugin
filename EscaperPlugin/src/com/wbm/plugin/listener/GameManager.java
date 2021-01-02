@@ -129,7 +129,7 @@ public class GameManager implements Listener {
 	// 인벤 초기화
 	InventoryTool.clearPlayerInv(p);
 
-	// 기본 굿즈 없으면 PlayerData에 제공
+	// 기본 굿즈 PlayerData에 제공
 	this.giveBasicGoods(p);
     }
 
@@ -138,7 +138,7 @@ public class GameManager implements Listener {
 	 * 기본굿즈: ShopGoods.CHEST, ShopGoods.HIGH_5, ShopGoods.MAKINGTIME_5
 	 */
 	PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
-	ShopGoods[] basicGoods = { ShopGoods.CHEST, ShopGoods.HIGH_5, ShopGoods.MAKINGTIME_5, ShopGoods.FINISH };
+	ShopGoods[] basicGoods = { ShopGoods.CHEST, ShopGoods.HIGH_5, ShopGoods.MAKINGTIME_5, ShopGoods.FINISH, ShopGoods.GOODS_LIST };
 
 	// PlayerData의 goods리스트에 지급
 	for (ShopGoods good : basicGoods) {
@@ -193,7 +193,7 @@ public class GameManager implements Listener {
 
 		// core 부수면 token: 인원수 / 3 지급
 		if (b.getType() == Material.GLOWSTONE) {
-		    int token = Bukkit.getOnlinePlayers().size() / 3;
+		    int token = Bukkit.getOnlinePlayers().size() / 2;
 		    BroadcastTool.sendMessage(p, "you clear practice room");
 		    BroadcastTool.sendMessage(p, "token + " + token);
 

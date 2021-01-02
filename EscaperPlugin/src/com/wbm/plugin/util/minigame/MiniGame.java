@@ -39,7 +39,7 @@ public abstract class MiniGame implements Serializable {
 	this.stopAllTasks();
 	this.startTask = this.exitTask = this.timerTask = null;
     }
-    
+
     transient static protected PlayerDataManager pDataManager;
 
     transient private static final long serialVersionUID = 1L;
@@ -87,8 +87,9 @@ public abstract class MiniGame implements Serializable {
 	 * 게임 활성화, 퇴장 task 예약
 	 */
 	// 전체 공지로 게임 룸이 만들어졌다는것을 알리기 (플레이어 모집을 위해서)
-	BroadcastTool.sendMessageToEveryone("" +ChatColor.GREEN +ChatColor.BOLD + this.gameType.name() +ChatColor.WHITE+ " minigame is made" + ChatColor.WHITE);
-	
+	BroadcastTool.sendMessageToEveryone("" + ChatColor.GREEN + ChatColor.BOLD + this.gameType.name()
+		+ ChatColor.WHITE + " minigame is made");
+
 	// this.waitingTime 초 후 실행
 	this.reserveActivateGameTask();
 
@@ -187,19 +188,19 @@ public abstract class MiniGame implements Serializable {
 	    }
 	}, 0, 20);
     }
-    
+
     public int getFee() {
 	return this.gameType.getFee();
     }
-    
+
     public int getWaitingTime() {
 	return this.gameType.getWaitingTime();
     }
-    
+
     public int getTimeLimit() {
 	return this.gameType.getTimeLimit();
     }
-    
+
     // ============sub class 들에서 상황에 맞게 각각 다르게 구현되어야 하는 메소드들=============
     public abstract void enterRoom(Player p, PlayerDataManager pDataManager);
 
@@ -220,23 +221,3 @@ public abstract class MiniGame implements Serializable {
     // 각 게임의 참여 멤버에 플레이어 추가
     public abstract void registerPlayer(Player p);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
