@@ -131,6 +131,9 @@ public class GameManager implements Listener {
 
 	// 기본 굿즈 PlayerData에 제공
 	this.giveBasicGoods(p);
+	
+	// 발광효과 제거
+	p.setGlowing(false);
     }
 
     void giveBasicGoods(Player p) {
@@ -162,7 +165,7 @@ public class GameManager implements Listener {
 	    this.onPlayerBreakBlockInMainRoom(e);
 	} else if (RoomLocation.getRoomTypeWithLocation(b.getLocation()) == RoomType.PRACTICE) {
 	    this.onPlayerBreakBlockInPracticeRoom(e);
-	} else if (RoomLocation.getRoomTypeWithLocation(b.getLocation()) == RoomType.MINI_GAME) {
+	} else { // MiniGame블럭은 위치검사가 따로 있기 때문에, 그리고 미니게임룸이 분리되있기때문에 룸 검사 안함
 	    this.onPlayerBreakBlockInMiniGameRoom(e);
 	}
 

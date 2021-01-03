@@ -21,6 +21,7 @@ import com.wbm.plugin.util.minigame.games.BattleTown;
 import com.wbm.plugin.util.minigame.games.FindTheBlue;
 import com.wbm.plugin.util.minigame.games.FindTheRed;
 import com.wbm.plugin.util.minigame.games.FindTheYellow;
+import com.wbm.plugin.util.minigame.games.JumpMap;
 import com.wbm.plugin.util.minigame.games.Painter;
 
 public class MiniGameManager implements DataMember {
@@ -39,14 +40,15 @@ public class MiniGameManager implements DataMember {
 
     public void registerGames() {
 	MiniGame.pDataManager = this.pDataManager;
-	
+
 	List<MiniGame> allGame = new ArrayList<>();
 	allGame.add(new FindTheRed());
 	allGame.add(new Painter());
 	allGame.add(new FindTheYellow());
 	allGame.add(new FindTheBlue());
 	allGame.add(new BattleTown());
-	
+	allGame.add(new JumpMap());
+
 	// 모든 미니게임 games에 등록
 	for (MiniGame game : allGame) {
 	    if (!this.games.containsKey(game.getGameType())) {
@@ -107,9 +109,12 @@ public class MiniGameManager implements DataMember {
 
 	MiniGame game = this.games.get(gameType);
 
-	// gameRoom블럭이 활성화 됫을시에만 반응
-	if (game.isActivated()) {
-	    game.processEvent(event);
+	if (game != null) {
+
+	    // gameRoom블럭이 활성화 됫을시에만 반응
+	    if (game.isActivated()) {
+		game.processEvent(event);
+	    }
 	}
     }
 

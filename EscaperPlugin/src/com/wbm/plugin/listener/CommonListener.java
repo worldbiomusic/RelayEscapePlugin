@@ -18,6 +18,8 @@ import org.bukkit.event.block.BlockIgniteEvent;
 import org.bukkit.event.block.BlockIgniteEvent.IgniteCause;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
@@ -33,8 +35,6 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.server.ServerListPingEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.util.Vector;
 
 import com.wbm.plugin.Main;
 import com.wbm.plugin.data.PlayerData;
@@ -48,10 +48,8 @@ import com.wbm.plugin.util.enums.RoomType;
 import com.wbm.plugin.util.general.BanItemTool;
 import com.wbm.plugin.util.general.BroadcastTool;
 import com.wbm.plugin.util.general.ChatColorTool;
-import com.wbm.plugin.util.general.ItemStackTool;
 import com.wbm.plugin.util.general.NPCManager;
 import com.wbm.plugin.util.general.PlayerTool;
-import com.wbm.plugin.util.general.PotionEffectTool;
 import com.wbm.plugin.util.general.SpawnLocationTool;
 import com.wbm.plugin.util.general.TPManager;
 import com.wbm.plugin.util.general.TeleportTool;
@@ -164,6 +162,12 @@ public class CommonListener implements Listener {
 	this.miniGameManager.processEvent(e);
     }
 
+    @EventHandler
+    public void onPVP(EntityDamageEvent e) {
+	if(e.getCause() == DamageCause.FALL) {
+	    e.setCancelled(true);
+	}
+    }
     @EventHandler
     public void onPlayerRespawn(PlayerRespawnEvent e) {
 	// 여러 RelayTime에 따라 리스폰 위치 조정업
@@ -283,73 +287,8 @@ public class CommonListener implements Listener {
 
     @EventHandler
     public void onPlayerMoveOnTheEventBlock(PlayerMoveEvent e) {
-	Player p = e.getPlayer();
-	Block b = p.getLocation().subtract(0, 1, 0).getBlock();
-
-	if (ItemStackTool.isSameWithMaterialNData(ItemStackTool.block2ItemStack(b), ShopGoods.JUMPING.getItemStack())) {
-//			p.sendMessage("JUMPING");
-	    p.setVelocity(new Vector(0, 0.65, 0));
-	} else if (ItemStackTool.isSameWithMaterialNData(ItemStackTool.block2ItemStack(b),
-		ShopGoods.RESPAWN.getItemStack())) {
-//			p.sendMessage("RESPAWN");
-	    TeleportTool.tp(p, SpawnLocationTool.RESPAWN);
-	} else if (ItemStackTool.isSameWithMaterialNData(ItemStackTool.block2ItemStack(b),
-		ShopGoods.TRAP.getItemStack())) {
-//			p.sendMessage("TRAP");
-
-	    if (p.getActivePotionEffects().size() >= 1) {
-		return;
-	    }
-
-	    PotionEffect potion = PotionEffectTool.getRandomDebuffPotionEffect();
-	    p.addPotionEffect(potion);
-	} else if (ItemStackTool.isSameWithMaterialNData(ItemStackTool.block2ItemStack(b),
-		ShopGoods.FLICKING.getItemStack())) {
-//			p.sendMessage("FLICKING");
-
-	    Material mat = b.getType();
-	    @SuppressWarnings("deprecation")
-	    byte data = b.getData();
-
-	    // 3초후 사라짐
-	    Bukkit.getScheduler().runTaskLater(Main.getInstance(), new Runnable() {
-
-		@Override
-		public void run() {
-		    b.setType(Material.AIR);
-		}
-	    }, 20 * 3);
-
-	    // 6초후 나타남
-	    Bukkit.getScheduler().runTaskLater(Main.getInstance(), new Runnable() {
-
-		@SuppressWarnings("deprecation")
-		@Override
-		public void run() {
-		    b.setType(mat);
-		    b.setData(data);
-		}
-	    }, 20 * 6);
-	} else if (ItemStackTool.isSameWithMaterialNData(ItemStackTool.block2ItemStack(b),
-		ShopGoods.SOUND_TERROR.getItemStack())) {
-//			p.sendMessage("RESPAWN");
-	    p.playSound(p.getLocation(), Sound.ENTITY_ZOMBIE_AMBIENT, 10, 1);
-	} else if (ItemStackTool.isSameWithMaterialNData(ItemStackTool.block2ItemStack(b),
-		ShopGoods.HURT.getItemStack())) {
-//			p.sendMessage("HURT");
-	    p.setHealth(p.getHealth() - 1);
-	} else if (ItemStackTool.isSameWithMaterialNData(ItemStackTool.block2ItemStack(b),
-		ShopGoods.UP_TP.getItemStack())) {
-//		p.sendMessage("FIX EYE");
-	    Location upLoc = p.getLocation().add(0, 3, 0);
-	    TeleportTool.tp(p, upLoc);
-	}else if (ItemStackTool.isSameWithMaterialNData(ItemStackTool.block2ItemStack(b),
-		ShopGoods.DOWN_TP.getItemStack())) {
-//		p.sendMessage("FIX EYE");
-	    Location downLoc = p.getLocation().subtract(0, 3, 0);
-	    TeleportTool.tp(p, downLoc);
-	}
-
+	// event block 리스너
+	EventBlockListener.processEventBlockEvent(e);
     }
 
     @EventHandler

@@ -128,6 +128,8 @@ public class Main extends JavaPlugin {
 
 	// TPManager
 	TPManager.registerLocation("PRACTICE_SPAWN", Setting.getLoationFromSTDLOC(33.5, 4, 28.5, 90, 0));
+	TPManager.registerLocation("LOBBY", SpawnLocationTool.LOBBY);
+	TPManager.registerLocation("MINI_GAME_VIEW", Setting.getLoationFromSTDLOC(-116, 3, 102, 90, 0));
 
 	// skindata
 	this.skinManager = new SkinManager();
@@ -307,24 +309,24 @@ public class Main extends JavaPlugin {
 	 * room (90, 0) 19.5, 6, 6.5 19.5, 5, 5.5 19.5, 4, 7.5
 	 */
 	List<Location> tokenLocs = new ArrayList<Location>();
-	tokenLocs.add(Setting.getLoationFromSTDLOC(12.5, 6, 5.5, -90, 0));
-	tokenLocs.add(Setting.getLoationFromSTDLOC(12.5, 5, 6.5, -90, 0));
-	tokenLocs.add(Setting.getLoationFromSTDLOC(12.5, 4, 4.5, -90, 0));
+	tokenLocs.add(Setting.getLoationFromSTDLOC(12.5, 6, 3.5, -90, 0));
+	tokenLocs.add(Setting.getLoationFromSTDLOC(12.5, 5, 4.5, -90, 0));
+	tokenLocs.add(Setting.getLoationFromSTDLOC(12.5, 4, 2.5, -90, 0));
 
 	List<Location> challengingLocs = new ArrayList<Location>();
-	challengingLocs.add(Setting.getLoationFromSTDLOC(14.5, 6, 1.5, 0, 0));
-	challengingLocs.add(Setting.getLoationFromSTDLOC(13.5, 5, 1.5, 0, 0));
-	challengingLocs.add(Setting.getLoationFromSTDLOC(15.5, 4, 1.5, 0, 0));
+	challengingLocs.add(Setting.getLoationFromSTDLOC(12.5, 6, -0.5, -90, 0));
+	challengingLocs.add(Setting.getLoationFromSTDLOC(12.5, 5, 0.5, -90, 0));
+	challengingLocs.add(Setting.getLoationFromSTDLOC(12.5, 4, -1.5, -90, 0));
 
 	List<Location> clearLocs = new ArrayList<Location>();
-	clearLocs.add(Setting.getLoationFromSTDLOC(17.5, 6, 1.5, 0, 0));
-	clearLocs.add(Setting.getLoationFromSTDLOC(16.5, 5, 1.5, 0, 0));
-	clearLocs.add(Setting.getLoationFromSTDLOC(18.5, 4, 1.5, 0, 0));
+	clearLocs.add(Setting.getLoationFromSTDLOC(19.5, 6, -0.5, 90, 0));
+	clearLocs.add(Setting.getLoationFromSTDLOC(19.5, 5, -1.5, 90, 0));
+	clearLocs.add(Setting.getLoationFromSTDLOC(19.5, 4, 0.5, 90, 0));
 
 	List<Location> roomLocs = new ArrayList<Location>();
-	roomLocs.add(Setting.getLoationFromSTDLOC(19.5, 6, 6.5, 90, 0));
-	roomLocs.add(Setting.getLoationFromSTDLOC(19.5, 5, 5.5, 90, 0));
-	roomLocs.add(Setting.getLoationFromSTDLOC(19.5, 4, 7.5, 90, 0));
+	roomLocs.add(Setting.getLoationFromSTDLOC(19.5, 6, 3.5, 90, 0));
+	roomLocs.add(Setting.getLoationFromSTDLOC(19.5, 5, 2.5, 90, 0));
+	roomLocs.add(Setting.getLoationFromSTDLOC(19.5, 4, 4.5, 90, 0));
 
 	// stage 에 드록
 	this.stageManager.registerLocations("tokenCount", tokenLocs);

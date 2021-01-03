@@ -29,10 +29,11 @@ public class FindTheRed extends SoloMiniGame {
 
     @Override
     public void processEvent(Event event) {
+	System.out.println("e passed");
 	if (event instanceof BlockBreakEvent) {
 	    BlockBreakEvent e = (BlockBreakEvent) event;
 	    Block b = e.getBlock();
-
+	    
 	    // score
 	    if (b.getType() == Material.RED_ROSE) {
 		BroadcastTool.sendMessage(this.getAllPlayer(), "+1");
@@ -49,6 +50,8 @@ public class FindTheRed extends SoloMiniGame {
 
     @Override
     public void runTaskAfterStartGame() {
+	super.runTaskAfterStartGame();
+
 	// 블럭 재정비
 	this.generateNewBlocks();
     }

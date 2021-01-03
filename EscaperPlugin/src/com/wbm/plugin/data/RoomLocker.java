@@ -9,6 +9,7 @@ import org.bukkit.World;
 import org.bukkit.inventory.ItemStack;
 
 import com.wbm.plugin.util.Setting;
+import com.wbm.plugin.util.general.ItemStackTool;
 
 public class RoomLocker
 {
@@ -16,7 +17,7 @@ public class RoomLocker
 	public static List<Location> mainLocker
 	= new ArrayList<>();
 	public static ItemStack mainLockerItem 
-	= new ItemStack(Material.CONCRETE);
+	= ItemStackTool.item(Material.CONCRETE, (byte)14);
 	
 	static {
 		mainLocker.add(Setting.getLoationFromSTDLOC(9, 5, 11));

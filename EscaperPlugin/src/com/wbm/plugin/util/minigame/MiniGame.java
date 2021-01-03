@@ -54,6 +54,10 @@ public abstract class MiniGame implements Serializable {
 
     };
 
+    public void runTaskAfterExitGame() {
+
+    }
+
     public void stopAllTasks() {
 	if (this.startTask != null) {
 	    this.startTask.cancel();
@@ -87,8 +91,8 @@ public abstract class MiniGame implements Serializable {
 	 * 게임 활성화, 퇴장 task 예약
 	 */
 	// 전체 공지로 게임 룸이 만들어졌다는것을 알리기 (플레이어 모집을 위해서)
-	BroadcastTool.sendMessageToEveryone("" + ChatColor.GREEN + ChatColor.BOLD + this.gameType.name()
-		+ ChatColor.WHITE + " minigame is made");
+	BroadcastTool.sendMessageToEveryone(
+		"" + ChatColor.GREEN + ChatColor.BOLD + this.gameType.name() + ChatColor.WHITE + " minigame is made");
 
 	// this.waitingTime 초 후 실행
 	this.reserveActivateGameTask();
@@ -119,6 +123,9 @@ public abstract class MiniGame implements Serializable {
 	    @Override
 	    public void run() {
 		exitGame(pDataManager);
+
+		// exit game 후에 실행할 작업
+		runTaskAfterExitGame();
 	    }
 	}, 20 * (getWaitingTime() + getTimeLimit()));
     }
@@ -131,7 +138,7 @@ public abstract class MiniGame implements Serializable {
 	this.registerPlayer(p);
 
 	// 게임룸 위치로 tp
-	Location gameRoom = this.gameType.getRoomLocation();
+	Location gameRoom = this.gameType.getSpawnLocation();
 	TeleportTool.tp(p, gameRoom);
 
 	// info 전달

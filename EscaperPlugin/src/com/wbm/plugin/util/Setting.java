@@ -35,6 +35,7 @@ public class Setting {
      * 
      * lobby: (16, 4, 16)
      */
+    
     public static Location getLoationFromSTDLOC(Location loc) {
 	return loc.add(Setting.STDLOC);
     }
