@@ -2,7 +2,9 @@ package com.wbm.plugin.data;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
@@ -16,8 +18,15 @@ import com.wbm.plugin.util.shop.ShopGoods;
 
 public class PlayerData implements Serializable {
     /*
-     * 속성 추가할때 고칠것 1.get, set method 2.toString()에 추가 3.constructor 관리 4.data저장하는것이면
-     * data부분도 관리
+     * 속성 추가할때 고려할 것
+     *
+     * 1.get, set method
+     *
+     * 2.toString()에 추가
+     *
+     * 3.constructor에서 초기화
+     *
+     * 4.transient 여부
      */
     private transient static final long serialVersionUID = 1L;
     private UUID uuid;
@@ -30,7 +39,32 @@ public class PlayerData implements Serializable {
     private int voted;
 
     private List<ShopGoods> goods;
+
+    // 부가적인 플레이어 기록 & 이스터에그 기록 & 비상용으로 추가할 변수 
+    // 추후에 언제든지 CheckList을 추가할 수 있음 (CheckList추가하는 곳은 생성자에 말고, GameManager의
+    // TODOListWhenplayerJoinServer()에 추가함 (생성자는 처음 들어온 사람들에게만 실행되므로 
+    // 이미 접속했던 유저들은 새로운 CheckList들을 업데이트 받지 못하기 때문에)
+    private Map<CheckList, Object> checkList;
     
+    public enum CheckList {
+	/*
+	 * 꼭 int가 아니어도 됨
+	 */
+	CHAT_COUNT(0),
+	KILL_COUNT(0),
+	JOIN_COUNT(0);
+	
+	Object initValue;
+	
+	CheckList(Object initValue) {
+	    this.initValue = initValue;
+	}
+	
+	public Object getInitValue() {
+	    return this.initValue;
+	}
+    }
+
     private transient MiniGameType minigame;
 
     public PlayerData(UUID uuid, String name, Role role) {
@@ -47,7 +81,9 @@ public class PlayerData implements Serializable {
 	this.voted = voted;
 
 	this.goods = new ArrayList<>();
-	
+
+	this.checkList = new HashMap<>();
+
 	this.minigame = null;
     }
 
@@ -215,22 +251,41 @@ public class PlayerData implements Serializable {
     }
 
     public MiniGameType getMinigame() {
-        return minigame;
+	return minigame;
     }
 
     public void setMinigame(MiniGameType minigame) {
-        this.minigame = minigame;
+	this.minigame = minigame;
     }
-    
+
     public void setNull() {
 	this.minigame = null;
+    }
+
+    public Map<CheckList, Object> getCheckList() {
+	return checkList;
+    }
+
+    public void setCheckList(CheckList key, Object value) {
+	this.checkList.put(key, value);
+    }
+
+    public void registerCheckList(CheckList key, Object value) {
+	if (!this.checkList.containsKey(key)) {
+	    this.checkList.put(key, value);
+	}
+    }
+
+    public Object getCheckListValue(CheckList key) {
+	return this.checkList.get(key);
     }
 
     @Override
     public String toString() {
 	return "PlayerData " + ", \nuuid: " + this.uuid + ", \nname: " + this.name + ", \nrole: " + this.role
 		+ ", \ntoken: " + this.token + ", \nchallengingCount: " + this.challengingCount + ", \nclearCount: "
-		+ this.clearCount + ", \nvoted: " + this.voted + ", \ngoods: " + this.goods+ ", \nminigame: " + this.minigame;
+		+ this.clearCount + ", \nvoted: " + this.voted + ", \ngoods: " + this.goods + ", \nminigame: "
+		+ this.minigame;
     }
 
 }

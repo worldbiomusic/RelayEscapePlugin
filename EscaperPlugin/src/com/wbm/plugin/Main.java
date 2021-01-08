@@ -58,7 +58,7 @@ public class Main extends JavaPlugin {
     RelayManager relayManager;
     DataManager dataManager;
     ShopManager shopManager;
-    GoodsListener itemUsingManager;
+    GoodsListener goodsListener;
     RankManager rankManager;
     NPCManager npcManager;
     StageManager stageManager;
@@ -151,9 +151,12 @@ public class Main extends JavaPlugin {
 
 	// RotationBlock
 	this.loopRotationBlock();
-	
+
 	// ranking system(stage) 업데이트
 	this.loopUpdateAllStage();
+
+	// setup Rank stages
+	this.setupRankStages();
     }
 
     void setupMain() {
@@ -180,24 +183,24 @@ public class Main extends JavaPlugin {
 
 	this.rankManager = new RankManager(this.pDataManager, this.roomManager);
 	this.stageManager = new StageManager(this.rankManager, this.npcManager);
-	// setup stages
-	this.setupStages();
 
-	this.relayManager = new RelayManager(this.pDataManager, this.roomManager,
-		this.miniGameManager);
-	this.gManager = new GameManager(this.pDataManager, this.roomManager, this.relayManager, this.miniGameManager);
-	this.itemUsingManager = new GoodsListener(this.pDataManager, this.roomManager, this.relayManager);
+	this.relayManager = new RelayManager(this.pDataManager, this.roomManager, this.miniGameManager);
+
 	this.shopManager = new ShopManager(this.pDataManager);
 
     }
 
     private void registerListeners() {
+	// 리스너 초기화
+	this.gManager = new GameManager(this.pDataManager, this.roomManager, this.relayManager, this.miniGameManager);
 	this.commonListener = new CommonListener(this.pDataManager, this.shopManager, this.banItems, this.npcManager,
 		this.skinManager, this.miniGameManager, this.relayManager);
+	this.goodsListener = new GoodsListener(this.pDataManager, this.roomManager, this.relayManager);
 
+	// 등록
 	this.registerEvent(this.gManager);
 	this.registerEvent(this.commonListener);
-	this.registerEvent(this.itemUsingManager);
+	this.registerEvent(this.goodsListener);
     }
 
     void registerEvent(Listener listener) {
@@ -298,7 +301,7 @@ public class Main extends JavaPlugin {
 	}, 20 * 10, 20 * 60 * 10);
     }
 
-    private void setupStages() {
+    private void setupRankStages() {
 	/*
 	 * token] yaw, pitch: (-90, 0) 12.5, 6, 5.5 12.5, 5, 6.5 12.5, 4, 4.5
 	 * 
@@ -426,7 +429,7 @@ public class Main extends JavaPlugin {
 	// ratating 시작
 	BlockRotateTool.startRotating();
     }
-    
+
     private void loopUpdateAllStage() {
 	Bukkit.getScheduler().scheduleSyncRepeatingTask(Main.getInstance(), new Runnable() {
 

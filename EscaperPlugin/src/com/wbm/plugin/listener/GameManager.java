@@ -15,6 +15,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 import com.wbm.plugin.data.PlayerData;
+import com.wbm.plugin.data.PlayerData.CheckList;
 import com.wbm.plugin.data.Room;
 import com.wbm.plugin.data.RoomLocation;
 import com.wbm.plugin.util.PlayerDataManager;
@@ -134,6 +135,13 @@ public class GameManager implements Listener {
 	
 	// 발광효과 제거
 	p.setGlowing(false);
+	
+	// 기본적인 checkList들 모두 등록 (업데이트 효과)
+	for(CheckList list : PlayerData.CheckList.values()) {
+	    PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
+	    pData.registerCheckList(list, list.getInitValue());
+	}
+	
     }
 
     void giveBasicGoods(Player p) {
