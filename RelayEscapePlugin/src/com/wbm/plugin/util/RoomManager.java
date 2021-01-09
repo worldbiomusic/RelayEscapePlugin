@@ -181,7 +181,7 @@ public class RoomManager implements DataMember {
 	    }
 
 	    // put room
-	    Room emptyRoom = new Room("empty", "worldbiomusic", emptyBlocks, LocalDateTime.of(2020, 11, 1, 0, 0));
+	    Room emptyRoom = new Room("empty", "?", emptyBlocks, LocalDateTime.of(2020, 11, 1, 0, 0));
 	    this.roomData.put("empty", emptyRoom);
 	}
 
@@ -198,7 +198,7 @@ public class RoomManager implements DataMember {
 	    baseBlocks.set(0, new BlockData(Material.GLOWSTONE, 0));
 
 	    // put room
-	    Room baseRoom = new Room("base", "worldbiomusic", baseBlocks, LocalDateTime.of(2020, 11, 1, 0, 0));
+	    Room baseRoom = new Room("base", "?", baseBlocks, LocalDateTime.of(2020, 11, 1, 0, 0));
 	    this.roomData.put("base", baseRoom);
 	}
 

@@ -7,6 +7,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
 
 import com.wbm.plugin.util.Setting;
@@ -62,7 +63,6 @@ public class BattleTown extends BattleMiniGame {
 	    // 처리 시작
 	    boolean victimIsDead = victim.getHealth() <= e.getFinalDamage();
 	    if (victimIsDead) {
-		BroadcastTool.debug("VICTIM DEAD!!!!!!!!!!!");
 		// victim은 맵 위에서 구경해야 함 (다른 미니게임 활동 못하게(게임 끝날때 위치이동때문예))
 		TeleportTool.tp(victim, this.getDeadPlayerRepsawnLocation());
 		PlayerTool.heal(victim);
@@ -70,19 +70,26 @@ public class BattleTown extends BattleMiniGame {
 		BroadcastTool.sendMessage(victim, "You have to stay this minigame area until minigame finish");
 		// damager
 		this.plusScore(damager, 1);
-		BroadcastTool.sendMessage(damager, "+1");
 
 		// killcount 증가
 		this.killCount += 1;
 
 		// 몇명남은지 체크 (1명 남으면 게임 종료)
-		int remainPlayers = this.getAllPlayer().size() - killCount;
-		if (remainPlayers <= 1) {
-		    this.exitGame(pDataManager);
-		}
+		this.checkGameFinish();
 	    }
+	}else if (event instanceof PlayerMoveEvent) {
+
+	    this.checkGameFinish();
 	}
 
+    }
+    
+    private void checkGameFinish() {
+	int remainPlayers = this.getAllPlayer().size() - killCount;
+	if (remainPlayers <= 1) {
+	    this.exitGame(pDataManager);
+	    return;
+	}
     }
 
     @Override

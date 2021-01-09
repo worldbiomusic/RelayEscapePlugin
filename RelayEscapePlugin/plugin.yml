@@ -5,7 +5,7 @@ description: worldbiomusic (discord -> worldbiomusic#7075)
 
 commands:
   re:
-    description: relay escaper plugin command
+    description: relay escape plugin command
     usage:  |  
           =========Command=========
           /re tutorial

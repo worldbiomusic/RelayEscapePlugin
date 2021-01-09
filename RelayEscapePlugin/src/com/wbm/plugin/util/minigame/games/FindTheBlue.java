@@ -10,10 +10,8 @@ import org.bukkit.event.Event;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
 
-import com.wbm.plugin.data.MiniGameLocation;
 import com.wbm.plugin.util.enums.MiniGameType;
 import com.wbm.plugin.util.general.BlockTool;
-import com.wbm.plugin.util.general.BroadcastTool;
 import com.wbm.plugin.util.general.ItemStackTool;
 import com.wbm.plugin.util.minigame.BattleMiniGame;
 
@@ -37,10 +35,8 @@ public class FindTheBlue extends BattleMiniGame{
 
 	    // score
 	    if (ItemStackTool.isSameWithMaterialNData(blockItem, plusItem)) {
-		BroadcastTool.sendMessage(p, "+1");
 		this.plusScore(p, 1);
 	    } else if (b.getType() == Material.YELLOW_FLOWER) {
-		BroadcastTool.sendMessage(p, "-2");
 		this.minusScore(p, 2);
 	    }
 
@@ -75,7 +71,7 @@ public class FindTheBlue extends BattleMiniGame{
 	int r = (int) (Math.random() * 16);
 	flowers.set(r, plusItem);
 
-	BlockTool.setBlockWithItemStack(MiniGameLocation.FIND_THE_BLUE_POS1, MiniGameLocation.FIND_THE_BLUE_POS2, flowers);
+	BlockTool.setBlockWithItemStack(this.getGamePos1(),this.getGamePos2(), flowers);
     }
     
 }

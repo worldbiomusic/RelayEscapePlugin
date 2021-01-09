@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.bukkit.entity.Player;
 
-import com.wbm.plugin.data.MiniGameLocation;
 import com.wbm.plugin.data.PlayerData;
 import com.wbm.plugin.util.PlayerDataManager;
 import com.wbm.plugin.util.enums.MiniGameType;
@@ -95,13 +94,11 @@ public abstract class SoloMiniGame extends MiniGame{
     }
 
     public void exitGame(PlayerDataManager pDataManager) {
+	super.exitGame(pDataManager);
 	/*
 	 * print game result 보상 지급 score rank 처리 player 퇴장 (lobby로) inventory 초기화 게임 초기화
 	 */
 	
-	// 미니게임 종료 공지
-	BroadcastTool.sendMessageToEveryone("" +ChatColor.RED +ChatColor.BOLD + this.gameType.name() +ChatColor.WHITE+ " minigame is end" + ChatColor.WHITE);
-
 	// print game result
 	this.printGameResult();
 
@@ -185,10 +182,6 @@ public abstract class SoloMiniGame extends MiniGame{
 
     }
 
-    public int getGameBlockCount() {
-	return MiniGameLocation.getGameBlockCount(this.gameType);
-    }
-
     public boolean isPlayerPlayingGame(Player p) {
 	return p.equals(this.player);
     }
@@ -238,10 +231,12 @@ public abstract class SoloMiniGame extends MiniGame{
 
     public void plusScore(int amount) {
 	this.score += amount;
+	BroadcastTool.sendMessage(this.getAllPlayer(), "+" + amount);
     }
 
     public void minusScore(int amount) {
 	this.score -= amount;
+	BroadcastTool.sendMessage(this.getAllPlayer(), "-" + amount);
     }
 
     public int getScore() {

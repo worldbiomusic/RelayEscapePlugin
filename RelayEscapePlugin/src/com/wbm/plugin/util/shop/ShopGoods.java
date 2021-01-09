@@ -42,7 +42,7 @@ public enum ShopGoods {
     UP_TP(ItemStackTool.item(Material.STAINED_GLASS, 1, (short) 1, (byte) 6, "UP_TP", "teleport player 3 block up"),
 	    GoodsRole.MAKING_BLOCK),
     DOWN_TP(ItemStackTool.item(Material.STAINED_GLASS, 1, (short) 1, (byte) 7, "DOWN_TP",
-	    "teleport player 1 block down"), GoodsRole.MAKING_BLOCK),
+	    "teleport player 3 block down"), GoodsRole.MAKING_BLOCK),
 
     // makingTool
     // 이 템으로 클릭시 list나오고 명령어로 가능하게 하기(명령어에서 이 템 가지고 있나 체크)

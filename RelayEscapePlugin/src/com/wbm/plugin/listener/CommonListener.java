@@ -289,6 +289,8 @@ public class CommonListener implements Listener {
     public void onPlayerMoveOnTheEventBlock(PlayerMoveEvent e) {
 	// event block 리스너
 	EventBlockListener.processEventBlockEvent(e);
+	// minigame
+	this.miniGameManager.processEvent(e);
     }
 
     @EventHandler

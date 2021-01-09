@@ -154,9 +154,6 @@ public class Main extends JavaPlugin {
 
 	// ranking system(stage) 업데이트
 	this.loopUpdateAllStage();
-
-	// setup Rank stages
-	this.setupRankStages();
     }
 
     void setupMain() {
@@ -183,6 +180,8 @@ public class Main extends JavaPlugin {
 
 	this.rankManager = new RankManager(this.pDataManager, this.roomManager);
 	this.stageManager = new StageManager(this.rankManager, this.npcManager);
+	// setup Rank stages
+	this.setupRankStages();
 
 	this.relayManager = new RelayManager(this.pDataManager, this.roomManager, this.miniGameManager);
 
@@ -244,6 +243,9 @@ public class Main extends JavaPlugin {
 
 		    Score token = sidebarObj.getScore("Token: " + pData.getToken());
 		    token.setScore(1);
+
+		    Score cash = sidebarObj.getScore("Cash: " + pData.getCash());
+		    cash.setScore(0);
 
 //		    int roomCNT = roomManager.getOwnRooms(p.getName()).size();
 //		    Score roomCount = sidebarObj.getScore("Room: " + roomCNT);
@@ -385,25 +387,73 @@ public class Main extends JavaPlugin {
 	 * red: 14 yellow: 4 lime: 5 cyan: 9
 	 */
 
-	List<Location> spawnLocs = new ArrayList<>();
-	spawnLocs.add(new Location(Setting.world, 14, 4, 14));
-	spawnLocs.add(new Location(Setting.world, 14, 4, 15));
-	spawnLocs.add(new Location(Setting.world, 14, 4, 16));
+	List<Location> spawnRotation1 = new ArrayList<>();
+	spawnRotation1.add(new Location(Setting.world, 14, 4, 14));
+	spawnRotation1.add(new Location(Setting.world, 14, 4, 15));
+	spawnRotation1.add(new Location(Setting.world, 14, 4, 16));
 
-	spawnLocs.add(new Location(Setting.world, 14, 4, 17));
-	spawnLocs.add(new Location(Setting.world, 15, 4, 17));
-	spawnLocs.add(new Location(Setting.world, 16, 4, 17));
+	spawnRotation1.add(new Location(Setting.world, 14, 4, 17));
+	spawnRotation1.add(new Location(Setting.world, 15, 4, 17));
+	spawnRotation1.add(new Location(Setting.world, 16, 4, 17));
 
-	spawnLocs.add(new Location(Setting.world, 17, 4, 17));
-	spawnLocs.add(new Location(Setting.world, 17, 4, 16));
-	spawnLocs.add(new Location(Setting.world, 17, 4, 15));
+	spawnRotation1.add(new Location(Setting.world, 17, 4, 17));
+	spawnRotation1.add(new Location(Setting.world, 17, 4, 16));
+	spawnRotation1.add(new Location(Setting.world, 17, 4, 15));
 
-	spawnLocs.add(new Location(Setting.world, 17, 4, 14));
-	spawnLocs.add(new Location(Setting.world, 16, 4, 14));
-	spawnLocs.add(new Location(Setting.world, 15, 4, 14));
+	spawnRotation1.add(new Location(Setting.world, 17, 4, 14));
+	spawnRotation1.add(new Location(Setting.world, 16, 4, 14));
+	spawnRotation1.add(new Location(Setting.world, 15, 4, 14));
 
-	Rotationer spawn = new Rotationer("spawn", 10 * 1, spawnLocs, Rotationer.Direction.CLOCK);
+	Rotationer spawn = new Rotationer("spawn", 10 * 2, spawnRotation1, Rotationer.Direction.CLOCK);
 	BlockRotateTool.registerRotation(spawn);
+	
+	
+	
+	
+	List<Location> spawnRotation2 = new ArrayList<>();
+	spawnRotation2.add(new Location(Setting.world, 14, 5, 14));
+	spawnRotation2.add(new Location(Setting.world, 14, 5, 15));
+	spawnRotation2.add(new Location(Setting.world, 14, 5, 16));
+                                                           
+	spawnRotation2.add(new Location(Setting.world, 14, 5, 17));
+	spawnRotation2.add(new Location(Setting.world, 15, 5, 17));
+	spawnRotation2.add(new Location(Setting.world, 16, 5, 17));
+                                                           
+	spawnRotation2.add(new Location(Setting.world, 17, 5, 17));
+	spawnRotation2.add(new Location(Setting.world, 17, 5, 16));
+	spawnRotation2.add(new Location(Setting.world, 17, 5, 15));
+                                                           
+	spawnRotation2.add(new Location(Setting.world, 17, 5, 14));
+	spawnRotation2.add(new Location(Setting.world, 16, 5, 14));
+	spawnRotation2.add(new Location(Setting.world, 15, 5, 14));
+
+	Rotationer spawn2 = new Rotationer("spawn2", 10 * 2, spawnRotation2, Rotationer.Direction.CLOCK);
+	BlockRotateTool.registerRotation(spawn2);
+	
+	
+	
+	
+	List<Location> spawnRotation3 = new ArrayList<>();
+	spawnRotation3.add(new Location(Setting.world, 14, 6, 14));
+	spawnRotation3.add(new Location(Setting.world, 14, 6, 15));
+	spawnRotation3.add(new Location(Setting.world, 14, 6, 16));
+                                                           
+	spawnRotation3.add(new Location(Setting.world, 14, 6, 17));
+	spawnRotation3.add(new Location(Setting.world, 15, 6, 17));
+	spawnRotation3.add(new Location(Setting.world, 16, 6, 17));
+                                                           
+	spawnRotation3.add(new Location(Setting.world, 17, 6, 17));
+	spawnRotation3.add(new Location(Setting.world, 17, 6, 16));
+	spawnRotation3.add(new Location(Setting.world, 17, 6, 15));
+                                                           
+	spawnRotation3.add(new Location(Setting.world, 17, 6, 14));
+	spawnRotation3.add(new Location(Setting.world, 16, 6, 14));
+	spawnRotation3.add(new Location(Setting.world, 15, 6, 14));
+                                                           
+	Rotationer spawn3 = new Rotationer("spawn3", 10 * 2, spawnRotation3, Rotationer.Direction.CLOCK);
+	BlockRotateTool.registerRotation(spawn3);
+	
+	
 
 	// spawn loof
 	List<Location> loofLocs = new ArrayList<>();
@@ -423,7 +473,7 @@ public class Main extends JavaPlugin {
 	loofLocs.add(new Location(Setting.world, 16, 7, 14));
 	loofLocs.add(new Location(Setting.world, 15, 7, 14));
 
-	Rotationer loof = new Rotationer("loof", 10 * 1, loofLocs, Rotationer.Direction.CLOCK);
+	Rotationer loof = new Rotationer("loof", 10 * 2, loofLocs, Rotationer.Direction.CLOCK);
 	BlockRotateTool.registerRotation(loof);
 
 	// ratating 시작

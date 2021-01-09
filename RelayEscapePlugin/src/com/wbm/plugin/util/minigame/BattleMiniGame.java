@@ -9,7 +9,6 @@ import java.util.Map.Entry;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
-import com.wbm.plugin.data.MiniGameLocation;
 import com.wbm.plugin.data.PlayerData;
 import com.wbm.plugin.util.PlayerDataManager;
 import com.wbm.plugin.util.enums.MiniGameType;
@@ -71,6 +70,12 @@ public abstract class BattleMiniGame extends MiniGame {
 	// MultiCooperativeMiniGame: master가 있으면 허락맡고 입장
 	// MultiBattleMiniGame: 인원수 full 아니면 그냥 입장
 
+	// 인원수 꽉 찬지 검사
+	if (this.checkPlayerCountFull()) {
+	    BroadcastTool.sendMessage(p, this.gameType.name() + " game player count is full");
+	    return;
+	}
+
 	// 먼저: token충분한지 검사
 	if (!pData.minusToken(this.getFee())) {
 	    BroadcastTool.sendMessage(p, "you need more token");
@@ -122,10 +127,7 @@ public abstract class BattleMiniGame extends MiniGame {
 	/*
 	 * print game result 보상 지급 score rank 처리 player 퇴장 (lobby로) inventory 초기화 게임 초기화
 	 */
-
-	// 미니게임 종료 공지
-	BroadcastTool.sendMessageToEveryone("" + ChatColor.RED + ChatColor.BOLD + this.gameType.name() + ChatColor.WHITE
-		+ " minigame is end" + ChatColor.WHITE);
+	super.exitGame(pDataManager);
 
 	// print game result
 	this.printGameResult();
@@ -157,7 +159,7 @@ public abstract class BattleMiniGame extends MiniGame {
 	    BroadcastTool.sendMessage(p, "=================================");
 
 	    // 전체플레이어 score 공개
-	    BroadcastTool.sendMessage(p, ""+ ChatColor.BOLD + "[ RANK ]");
+	    BroadcastTool.sendMessage(p, "" + ChatColor.BOLD + "[ RANK ]");
 	    List<Entry<String, Integer>> rank = MiniGameRankManager.getDescendingSortedMapEntrys(this.players);
 	    for (int i = 0; i < rank.size(); i++) {
 		Entry<String, Integer> entry = rank.get(i);
@@ -229,7 +231,7 @@ public abstract class BattleMiniGame extends MiniGame {
 
 	// REMAIN에서 1,2,3등 뺀 것에서 참가보상 계산
 //	BroadcastTool.debug("REMAIN: " + REMAIN);
-	int participationReward = (int)(REMAIN * ((double)1 / this.getAllPlayer().size()));
+	int participationReward = (int) (REMAIN * ((double) 1 / this.getAllPlayer().size()));
 //	BroadcastTool.debug("participationReward: " + participationReward);
 	// reward
 	for (Player p : this.getAllPlayer()) {
@@ -259,10 +261,6 @@ public abstract class BattleMiniGame extends MiniGame {
      * 이 메소드는 미니게임에서 플레이어들이 발생한 이벤트를 각 게임에서 처리해주는 범용 메소드 예) if(event instanceof
      * BlockBreakEvent) { BlockBreakEvent e = (BlockBreakEvent) event; // 생략 }
      */
-
-    public int getGameBlockCount() {
-	return MiniGameLocation.getGameBlockCount(this.gameType);
-    }
 
     public boolean isPlayerPlayingGame(Player p) {
 	return this.players.containsKey(p.getName());
@@ -330,11 +328,17 @@ public abstract class BattleMiniGame extends MiniGame {
     public void plusScore(Player p, int amount) {
 	int previousScore = this.players.get(p.getName());
 	this.players.put(p.getName(), previousScore + amount);
+
+	// info
+	BroadcastTool.sendMessage(p, "+" + amount);
     }
 
     public void minusScore(Player p, int amount) {
 	int previousScore = this.players.get(p.getName());
 	this.players.put(p.getName(), previousScore - amount);
+
+	// info
+	BroadcastTool.sendMessage(p, "-" + amount);
     }
 
     public List<Integer> getScore() {

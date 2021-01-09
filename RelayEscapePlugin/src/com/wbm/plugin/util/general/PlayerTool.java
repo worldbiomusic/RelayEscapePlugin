@@ -20,7 +20,11 @@ public class PlayerTool {
 
     public static void heal(Player p) {
 	p.setHealth(20);
-	p.setExhaustion(0);
+	p.setFoodLevel(20);
+    }
+
+    public static void setHungry(Player p, int amount) {
+	p.setFoodLevel(amount);
     }
 
     public static void hidePlayerFromAnotherPlayer(Player hideTarget, Player anotherPlayer) {
@@ -28,35 +32,35 @@ public class PlayerTool {
     }
 
     public static void hidePlayerFromOtherPlayers(Player hideTarget, List<Player> others) {
-	for(Player p : others) {
+	for (Player p : others) {
 	    p.hidePlayer(Main.getInstance(), hideTarget);
 	}
     }
 
     public static void hidePlayerFromEveryone(Player hideTarget) {
-	for(Player p : Bukkit.getOnlinePlayers()) {
+	for (Player p : Bukkit.getOnlinePlayers()) {
 	    p.hidePlayer(Main.getInstance(), hideTarget);
 	}
     }
-    
+
     public static void unhidePlayerFromAnotherPlayer(Player unhideTarget, Player anotherPlayer) {
 	anotherPlayer.showPlayer(Main.getInstance(), unhideTarget);
     }
 
     public static void unhidePlayerFromOtherPlayers(Player unhideTarget, List<Player> others) {
-	for(Player p : others) {
+	for (Player p : others) {
 	    p.showPlayer(Main.getInstance(), unhideTarget);
 	}
     }
 
     public static void unhidePlayerFromEveryone(Player unhideTarget) {
-	for(Player p : Bukkit.getOnlinePlayers()) {
+	for (Player p : Bukkit.getOnlinePlayers()) {
 	    p.showPlayer(Main.getInstance(), unhideTarget);
 	}
     }
-    
+
     public static void playSoundToEveryone(Sound sound) {
-	for(Player p : Bukkit.getOnlinePlayers()) {
+	for (Player p : Bukkit.getOnlinePlayers()) {
 	    p.playSound(p.getLocation(), sound, 10, 1);
 	}
     }

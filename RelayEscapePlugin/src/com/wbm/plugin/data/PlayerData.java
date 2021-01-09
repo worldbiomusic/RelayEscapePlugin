@@ -33,10 +33,13 @@ public class PlayerData implements Serializable {
     private String name;
     private transient Role role;
     private int token;
+    private int cash;
 
     private int challengingCount;
     private int clearCount;
     private int voted;
+    
+    private transient MiniGameType minigame;
 
     private List<ShopGoods> goods;
 
@@ -65,17 +68,16 @@ public class PlayerData implements Serializable {
 	}
     }
 
-    private transient MiniGameType minigame;
-
     public PlayerData(UUID uuid, String name, Role role) {
-	this(uuid, name, role, 0, 0, 0, 0);
+	this(uuid, name, role, 0, 0, 0, 0, 0);
     }
 
-    public PlayerData(UUID uuid, String name, Role role, int token, int challengingCount, int clearCount, int voted) {
+    public PlayerData(UUID uuid, String name, Role role, int token, int cash, int challengingCount, int clearCount, int voted) {
 	this.uuid = uuid;
 	this.name = name;
 	this.role = role;
 	this.token = token;
+	this.cash = cash;
 	this.challengingCount = challengingCount;
 	this.clearCount = clearCount;
 	this.voted = voted;
@@ -253,6 +255,10 @@ public class PlayerData implements Serializable {
     public MiniGameType getMinigame() {
 	return minigame;
     }
+    
+    public boolean isPlayingMiniGame() {
+	return this.minigame != null;
+    }
 
     public void setMinigame(MiniGameType minigame) {
 	this.minigame = minigame;
@@ -278,6 +284,24 @@ public class PlayerData implements Serializable {
 
     public Object getCheckListValue(CheckList key) {
 	return this.checkList.get(key);
+    }
+
+    public int getCash() {
+        return cash;
+    }
+
+    public void plusCash(int amount) {
+        this.cash += amount;
+    }
+    
+    public boolean minusCash(int amount) {
+	// cash도 마이너스가 될 순 없음
+	if(this.cash >= amount) {
+	    this.cash -= amount;
+	    return true;
+	}
+	
+	return false;
     }
 
     @Override

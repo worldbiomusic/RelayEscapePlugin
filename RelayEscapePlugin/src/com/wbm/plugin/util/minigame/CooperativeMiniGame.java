@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.bukkit.entity.Player;
 
-import com.wbm.plugin.data.MiniGameLocation;
 import com.wbm.plugin.data.PlayerData;
 import com.wbm.plugin.util.PlayerDataManager;
 import com.wbm.plugin.util.enums.MiniGameType;
@@ -121,6 +120,13 @@ public abstract class CooperativeMiniGame extends MiniGame {
 	 * waitingList에 등록될 조건(/re minigame ok <name>)
 	 * 
 	 */
+	
+	// 인원수 꽉 찬지 검사
+	if(this.checkPlayerCountFull()) {
+	    BroadcastTool.sendMessage(this.getMaster(), this.gameType.name() + " game player count is full");
+	    BroadcastTool.sendMessage(waiter, this.gameType.name() + " game player count is full");
+	    return;
+	}
 
 	// token충분한지 검사
 	if (!waiterPData.minusToken(this.getFee())) {
@@ -173,10 +179,7 @@ public abstract class CooperativeMiniGame extends MiniGame {
 	/*
 	 * print game result 보상 지급 score rank 처리 player 퇴장 (lobby로) inventory 초기화 게임 초기화
 	 */
-
-	// 미니게임 종료 공지
-	BroadcastTool.sendMessageToEveryone("" + ChatColor.RED + ChatColor.BOLD + this.gameType.name() + ChatColor.WHITE
-		+ " minigame is end" + ChatColor.WHITE);
+	super.exitGame(pDataManager);
 
 	// print game result
 	this.printGameResult();
@@ -264,10 +267,6 @@ public abstract class CooperativeMiniGame extends MiniGame {
      * BlockBreakEvent) { BlockBreakEvent e = (BlockBreakEvent) event; // 생략 }
      */
 
-    public int getGameBlockCount() {
-	return MiniGameLocation.getGameBlockCount(this.gameType);
-    }
-
     public boolean isPlayerPlayingGame(Player p) {
 	/*
 	 * master가 this.player에 들어가있으므로 this.player만 검사하면 됨
@@ -329,10 +328,12 @@ public abstract class CooperativeMiniGame extends MiniGame {
 
     public void plusScore(int amount) {
 	this.score += amount;
+	BroadcastTool.sendMessage(this.getAllPlayer(), "+" + amount);
     }
 
     public void minusScore(int amount) {
 	this.score -= amount;
+	BroadcastTool.sendMessage(this.getAllPlayer(), "-" + amount);
     }
 
     public int getScore() {

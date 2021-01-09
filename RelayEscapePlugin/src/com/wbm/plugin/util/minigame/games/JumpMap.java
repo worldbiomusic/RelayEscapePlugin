@@ -89,7 +89,6 @@ public class JumpMap extends SoloMiniGame {
 
 	// 처음에 timeLimit만큼 점수 주기
 	this.plusScore(this.getTimeLimit());
-	BroadcastTool.sendMessage(this.getAllPlayer(), "+" + this.getTimeLimit());
 
 	// finishTimer 체크시작
 	this.stopFinishTimer();
@@ -104,18 +103,19 @@ public class JumpMap extends SoloMiniGame {
 	    @Override
 	    public void run() {
 		minusScore(1);
-		BroadcastTool.sendMessage(getAllPlayer(), "-1");
 	    }
 	}, 0, 20 * this.minusDelay);
     }
 
     private void stopFinishTimer() {
 	Bukkit.getScheduler().cancelTask(this.finishTimer);
+	
+	BroadcastTool.debug("STOP JUMP MAP!!!!");
     }
 
     @Override
-    public void runTaskAfterExitGame() {
-        super.runTaskAfterExitGame();
+    public void runTaskBeforeExitGame() {
+        super.runTaskBeforeExitGame();
         
         this.stopFinishTimer();
     }

@@ -8,10 +8,8 @@ import org.bukkit.block.Block;
 import org.bukkit.event.Event;
 import org.bukkit.event.block.BlockBreakEvent;
 
-import com.wbm.plugin.data.MiniGameLocation;
 import com.wbm.plugin.util.enums.MiniGameType;
 import com.wbm.plugin.util.general.BlockTool;
-import com.wbm.plugin.util.general.BroadcastTool;
 import com.wbm.plugin.util.minigame.CooperativeMiniGame;
 
 public class FindTheYellow extends CooperativeMiniGame{
@@ -30,10 +28,8 @@ public class FindTheYellow extends CooperativeMiniGame{
 
 	    // score
 	    if (b.getType() == Material.YELLOW_FLOWER) {
-		BroadcastTool.sendMessage(this.getAllPlayer(), "+1");
 		this.plusScore(1);
 	    } else if (b.getType() == Material.RED_ROSE) {
-		BroadcastTool.sendMessage(this.getAllPlayer(), "-2");
 		this.minusScore(2);
 	    }
 
@@ -67,7 +63,7 @@ public class FindTheYellow extends CooperativeMiniGame{
 	int r = (int) (Math.random() * 16);
 	flowers.set(r, Material.YELLOW_FLOWER);
 
-	BlockTool.setBlockWithMaterial(MiniGameLocation.FIND_THE_YELLOW_POS1, MiniGameLocation.FIND_THE_YELLOW_POS2, flowers);
+	BlockTool.setBlockWithMaterial(this.getGamePos1(),this.getGamePos2(), flowers);
     }
     
 }

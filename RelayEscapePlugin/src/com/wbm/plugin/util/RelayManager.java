@@ -359,9 +359,14 @@ public class RelayManager {
 	// 6.다음 태스크 예약
 	this.reserveNextTask(this.currentTime.getAmount());
 
-	// 7.힐
+	// 7.힐 & 상태 효과 제거
 	for (Player p : Bukkit.getOnlinePlayers()) {
+	    // 힐
 	    PlayerTool.heal(p);
+	    // 보이기
+	    PlayerTool.unhidePlayerFromEveryone(p);
+	    // 발광효과 제거
+	    p.setGlowing(false);
 	}
 	
 	// 8.소리재생

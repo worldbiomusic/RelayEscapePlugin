@@ -166,6 +166,8 @@ public class GameManager implements Listener {
 
 //		// 일단 cancel
 	e.setCancelled(true);
+	
+	PlayerData pData = this.pDataManager.getPlayerData(e.getPlayer().getUniqueId());
 
 	// Main Room 체크
 	if (RoomLocation.getRoomTypeWithLocation(b.getLocation()) == RoomType.MAIN) {
@@ -173,7 +175,8 @@ public class GameManager implements Listener {
 	    this.onPlayerBreakBlockInMainRoom(e);
 	} else if (RoomLocation.getRoomTypeWithLocation(b.getLocation()) == RoomType.PRACTICE) {
 	    this.onPlayerBreakBlockInPracticeRoom(e);
-	} else { // MiniGame블럭은 위치검사가 따로 있기 때문에, 그리고 미니게임룸이 분리되있기때문에 룸 검사 안함
+	} else if (pData.isPlayingMiniGame()) {
+	    // minigame 플레이중일때만 e넘기기
 	    this.onPlayerBreakBlockInMiniGameRoom(e);
 	}
 

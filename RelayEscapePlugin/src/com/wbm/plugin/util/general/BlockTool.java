@@ -105,9 +105,14 @@ public class BlockTool
 	
 	@SuppressWarnings("deprecation")
 	public static boolean isAllSameBlock(Location pos1, Location pos2) {
-		// 전체와 비교할 ItemStack 가져오기
+		// 전체와 비교할 기준 ItemStack 가져오기
 		ItemStack STDItemStack = ItemStackTool.item(pos1.getBlock().getType(), pos1.getBlock().getData());
-		
+		return isAllSameBlockWithItemStack(pos1, pos2, STDItemStack);
+	}
+	
+	@SuppressWarnings("deprecation")
+	public static boolean isAllSameBlockWithItemStack(Location pos1, Location pos2, ItemStack targetItem) {
+		// 전체와 비교할 ItemStack 가져오기
 		int pos1X=(int)pos1.getX();
 		int pos2X=(int)pos2.getX();
 		int pos1Y=(int)pos1.getY();
@@ -142,7 +147,7 @@ public class BlockTool
 					Block locB = loc.getBlock();
 					ItemStack locItemStack = ItemStackTool.item(locB.getType(), locB.getData());
 					
-					if(!(ItemStackTool.isSameWithMaterialNData(STDItemStack, locItemStack))) {
+					if(!(ItemStackTool.isSameWithMaterialNData(targetItem, locItemStack))) {
 						// 하나라도 같지 않으면 false
 						return false;
 					}

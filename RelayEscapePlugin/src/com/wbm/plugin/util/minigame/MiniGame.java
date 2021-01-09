@@ -54,7 +54,7 @@ public abstract class MiniGame implements Serializable {
 
     };
 
-    public void runTaskAfterExitGame() {
+    public void runTaskBeforeExitGame() {
 
     }
 
@@ -125,7 +125,7 @@ public abstract class MiniGame implements Serializable {
 		exitGame(pDataManager);
 
 		// exit game 후에 실행할 작업
-		runTaskAfterExitGame();
+		runTaskBeforeExitGame();
 	    }
 	}, 20 * (getWaitingTime() + getTimeLimit()));
     }
@@ -208,6 +208,38 @@ public abstract class MiniGame implements Serializable {
 	return this.gameType.getTimeLimit();
     }
 
+    public int getGameBlockCount() {
+	return this.gameType.getGameBlockCount();
+    }
+
+    public Location getGamePos1() {
+	return this.gameType.getGamePos1();
+    }
+
+    public Location getGamePos2() {
+	return this.gameType.getGamePos2();
+    }
+
+    public void exitGame(PlayerDataManager pDataManager) {
+	// 미니게임 종료 공지
+	BroadcastTool.sendMessageToEveryone("" + ChatColor.RED + ChatColor.BOLD + this.gameType.name() + ChatColor.WHITE
+		+ " minigame is end" + ChatColor.WHITE);
+
+	// runTaskBeforeExitGame() 실행
+	this.runTaskBeforeExitGame();
+    }
+
+    public boolean checkPlayerCountFull() {
+	// 인원수 꽉 찬지 검사
+	int currentPlayerCount = this.getAllPlayer().size();
+	int maxPlayerCount = this.gameType.getMaxPlayerCount();
+	if (currentPlayerCount >= maxPlayerCount) {
+	    return true;
+	} else {
+	    return false;
+	}
+    }
+
     // ============sub class 들에서 상황에 맞게 각각 다르게 구현되어야 하는 메소드들=============
     public abstract void enterRoom(Player p, PlayerDataManager pDataManager);
 
@@ -217,8 +249,6 @@ public abstract class MiniGame implements Serializable {
     public abstract String[] getGameTutorialStrings();
 
     public abstract boolean isPlayerPlayingGame(Player p);
-
-    public abstract void exitGame(PlayerDataManager pDataManager);
 
     public abstract void processHandlingMiniGameExitDuringPlaying(Player p, PlayerDataManager pDataManager,
 	    MiniGame.ExitReason reason);

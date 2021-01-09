@@ -1,6 +1,10 @@
 package com.wbm.plugin.util.general;
 
 import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.entity.Entity;
+
+import com.wbm.plugin.util.Setting;
 
 public class LocationTool {
 
@@ -15,14 +19,14 @@ public class LocationTool {
 	double pos2Z = pos2.getZ();
 
 	/*
-	 * 마크에서 위치검사할때 1 ~ 5이면 1.0 ~ 5.999까지 되야 하기 때문에 
+	 * 마크에서 위치검사할때 1 ~ 5이면 1.0 ~ 5.999까지 되야 하기 때문에
 	 * 
 	 * LocationTool만 큰수에 1를 더해줘서 -0.001빼줘서 해당 수의 가장 큰값까지 검사
 	 */
 	double smallXPos = Math.min(pos1X, pos2X);
 	double smallYPos = Math.min(pos1Y, pos2Y);
 	double smallZPos = Math.min(pos1Z, pos2Z);
-	
+
 	double bigXPos = Math.floor((Math.max(pos1X, pos2X) + 1)) - 0.001;
 	double bigYPos = Math.floor((Math.max(pos1Y, pos2Y) + 1)) - 0.001;
 	double bigZPos = Math.floor((Math.max(pos1Z, pos2Z) + 1)) - 0.001;
@@ -74,4 +78,30 @@ public class LocationTool {
 	// 위에서 dx, dy, dz를 구할때 차이를 구하므로 3-1 = 2 즉 2칸만을 의미하게 되서 +1을 해줌
 	return (dx + 1) * (dy + 1) * (dz + 1);
     }
+    
+    public static void letEntityOnGround(Entity e) {
+	Location eLoc = e.getLocation();
+	int  y = (int) eLoc.getY();
+	
+	Location loc = Setting.getAbsoluteLocation(eLoc.getX(), y, eLoc.getZ());
+	for(int i = 0; i <= y; i++) {
+	    if(loc.clone().subtract(0,i,0).getBlock().getType() != Material.AIR) {
+		TeleportTool.tp(e, loc);
+		System.out.println("LOC: "+ loc);
+		break;
+	    }
+	}
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+

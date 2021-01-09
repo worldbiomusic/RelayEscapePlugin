@@ -12,15 +12,16 @@ import org.bukkit.event.block.BlockEvent;
 import org.bukkit.event.entity.EntityEvent;
 import org.bukkit.event.player.PlayerEvent;
 
-import com.wbm.plugin.data.MiniGameLocation;
 import com.wbm.plugin.util.PlayerDataManager;
 import com.wbm.plugin.util.config.DataMember;
 import com.wbm.plugin.util.enums.MiniGameType;
 import com.wbm.plugin.util.general.BroadcastTool;
 import com.wbm.plugin.util.minigame.games.BattleTown;
+import com.wbm.plugin.util.minigame.games.Critical;
 import com.wbm.plugin.util.minigame.games.FindTheBlue;
 import com.wbm.plugin.util.minigame.games.FindTheRed;
 import com.wbm.plugin.util.minigame.games.FindTheYellow;
+import com.wbm.plugin.util.minigame.games.FitTool;
 import com.wbm.plugin.util.minigame.games.JumpMap;
 import com.wbm.plugin.util.minigame.games.Painter;
 
@@ -48,6 +49,9 @@ public class MiniGameManager implements DataMember {
 	allGame.add(new FindTheBlue());
 	allGame.add(new BattleTown());
 	allGame.add(new JumpMap());
+	allGame.add(new FitTool());
+	allGame.add(new Critical());
+	
 
 	// 모든 미니게임 games에 등록
 	for (MiniGame game : allGame) {
@@ -88,13 +92,12 @@ public class MiniGameManager implements DataMember {
 	 *
 	 * [주의] 이벤트 넘겨주기 전에 꼭! 미니게임 장소에서 발생한 이벤트인지 체크해야 함!
 	 */
-
 	Location eventLoc;
 
 	if (event instanceof BlockEvent) { // 블럭 관련 이벤트
 	    BlockEvent blockEvent = (BlockEvent) event;
 	    eventLoc = blockEvent.getBlock().getLocation();
-	} else if (event instanceof EntityEvent) { // 엔티티 관련 이벤트
+	}else if (event instanceof EntityEvent) { // 엔티티 관련 이벤트
 	    EntityEvent entityEvent = (EntityEvent) event;
 	    eventLoc = entityEvent.getEntity().getLocation();
 	} else if (event instanceof PlayerEvent) { // 플레이어 관련 이벤트
@@ -104,11 +107,12 @@ public class MiniGameManager implements DataMember {
 	    // 처리할 이벤트 대상이 아닐땐 반환
 	    return;
 	}
-
-	MiniGameType gameType = MiniGameLocation.getMiniGameWithLocation(eventLoc);
-
+	
+	MiniGameType gameType =  MiniGameType.getMiniGameWithLocation(eventLoc);
+	
+	// ㅇ
 	MiniGame game = this.games.get(gameType);
-
+	
 	if (game != null) {
 
 	    // gameRoom블럭이 활성화 됫을시에만 반응

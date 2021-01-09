@@ -36,16 +36,28 @@ public class Setting {
      * lobby: (16, 4, 16)
      */
     
+    public static Location getAbsoluteLocation(Location loc) {
+	return loc;
+    }
+    
+    public static Location getAbsoluteLocation(double x, double y, double z) {
+	return new Location(Setting.world, x, y, z);
+    }
+    
+    public static Location getAbsoluteLocation(double x, double y, double z, float yaw, float pitch) {
+	return new Location(Setting.world, x, y, z, yaw, pitch);
+    }
+    
     public static Location getLoationFromSTDLOC(Location loc) {
-	return loc.add(Setting.STDLOC);
+	return loc.clone().add(Setting.STDLOC);
     }
 
     public static Location getLoationFromSTDLOC(double x, double y, double z) {
-	return new Location(Setting.world, x, y, z).add(Setting.STDLOC);
+	return new Location(Setting.world, x, y, z).clone().add(Setting.STDLOC);
     }
 
     public static Location getLoationFromSTDLOC(double x, double y, double z, float yaw, float pitch) {
-	return new Location(Setting.world, x, y, z, yaw, pitch).add(Setting.STDLOC);
+	return new Location(Setting.world, x, y, z, yaw, pitch).clone().add(Setting.STDLOC);
     }
     
     public static final String CoolDown_Subject_CHAT = "CHAT";
