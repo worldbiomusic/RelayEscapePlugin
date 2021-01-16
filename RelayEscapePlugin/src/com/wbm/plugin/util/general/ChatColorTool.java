@@ -20,4 +20,5 @@ public class ChatColorTool {
 	
 	return randomColor;
     }
+    
 }

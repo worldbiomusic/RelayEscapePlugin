@@ -122,7 +122,7 @@ public class PlayerData implements Serializable {
 	p.setGameMode(this.role.getGameMode());
 
 	// VIEWER && GHOST 굿즈가 있으면 서바이벌 -> 관전자 모드로 변경
-	if (this.role == Role.VIEWER && this.doesHaveGoods(ShopGoods.GHOST)) {
+	if (this.role == Role.VIEWER && this.hasGoods(ShopGoods.GHOST)) {
 	    p.setGameMode(GameMode.SPECTATOR);
 	}
     }
@@ -212,18 +212,18 @@ public class PlayerData implements Serializable {
     }
 
     public void addGoods(ShopGoods goods) {
-	if (!this.doesHaveGoods(goods)) {
+	if (!this.hasGoods(goods)) {
 	    this.goods.add(goods);
 	}
     }
 
     public void removeGoods(ShopGoods goods) {
-	if (this.doesHaveGoods(goods)) {
+	if (this.hasGoods(goods)) {
 	    this.goods.remove(goods);
 	}
     }
 
-    public boolean doesHaveGoods(ShopGoods goods) {
+    public boolean hasGoods(ShopGoods goods) {
 	return this.goods.contains(goods);
     }
 

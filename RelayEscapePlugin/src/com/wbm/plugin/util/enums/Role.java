@@ -5,9 +5,9 @@ import org.bukkit.GameMode;
 public enum Role {
     WAITER(GameMode.SURVIVAL),
     MAKER(GameMode.CREATIVE),
-    TESTER(GameMode.SURVIVAL),
-    CHALLENGER(GameMode.SURVIVAL),
-    VIEWER(GameMode.SURVIVAL);
+    TESTER(GameMode.ADVENTURE),
+    CHALLENGER(GameMode.ADVENTURE),
+    VIEWER(GameMode.ADVENTURE);
 
     GameMode gamemode;
 

@@ -72,7 +72,7 @@ public class Commands implements CommandExecutor {
 	    case "minigame":
 		return this.minigame(p, args);
 	    case "tutorial":
-		this.printTutorial(p, args);
+		return this.printTutorial(p, args);
 	    case "goods":
 		this.printGoods(p, args);
 		return true;
@@ -80,6 +80,56 @@ public class Commands implements CommandExecutor {
 	}
 
 	return false;
+    }
+
+    private boolean debugRoom(Player p, String[] args) {
+	/*
+	 * /re d room <roomType> [load | save | remove | update] <title>
+	 * 
+	 * /re d room <roomType> info
+	 */
+
+	String roomTypeString = args[2];
+	roomTypeString = roomTypeString.toUpperCase();
+	RoomType roomType = RoomType.valueOf(roomTypeString);
+	String cmd = args[3];
+
+	if (args.length == 4) {
+	    if (cmd.equalsIgnoreCase("info")) {
+		Room room = this.roomManager.getRoom(roomType);
+		BroadcastTool.sendMessage(p, room.toString());
+	    }
+	} else if (args.length == 5) {
+	    String roomTitle = args[4];
+	    if (cmd.equalsIgnoreCase("load")) {
+		if (this.roomManager.isExistRoomTitle(roomTitle)) {
+		    Room room = this.roomManager.getRoomData(roomTitle);
+		    this.roomManager.setRoom(roomType, room);
+		} else {
+		    BroadcastTool.sendMessage(p, "not exist room");
+		}
+	    } else if (cmd.equalsIgnoreCase("save")) {
+		// title이 존재하지 않는 룸일때 저장
+		if (!this.roomManager.isExistRoomTitle(roomTitle)) {
+		    this.roomManager.saveRoomData(roomType, p.getName(), roomTitle);
+		}
+	    } else if (cmd.equalsIgnoreCase("remove")) {
+		if (this.roomManager.removeRoom(roomTitle) == null) {
+		    BroadcastTool.sendMessage(p, "not exist room");
+		}
+	    } else if (cmd.equalsIgnoreCase("update")) {
+		// 이미있는 룸을 Maker는 유지하고 업데이트해서 변경
+		// [주의] 룸 DataBlock, maker제외하고 모두 초기화 됨
+		if (this.roomManager.isExistRoomTitle(roomTitle)) {
+		    Room room = this.roomManager.getRoomData(roomTitle);
+		    this.roomManager.saveRoomData(roomType, room.getMaker(), roomTitle);
+		} else {
+		    BroadcastTool.sendMessage(p, "not exist room");
+		}
+	    }
+	}
+
+	return true;
     }
 
     private boolean room(Player p, String[] args) {
@@ -180,9 +230,9 @@ public class Commands implements CommandExecutor {
 	}
 	if (this.relayManager.checkRoomAndRelayTimeAndRole(RoomType.MAIN, RelayTime.MAKING, Role.MAKER, p)) {
 	    String title = args[2];
-	    if(this.relayManager.isMainRoomTitleExist(title)) {
+	    if (this.relayManager.isMainRoomTitleExist(title)) {
 		BroadcastTool.sendMessage(p, "Room tile " + title + "is already exist");
-	    }else {
+	    } else {
 		this.relayManager.setMainRoomTitle(title);
 		BroadcastTool.sendMessage(p, "Room tile set to " + title);
 	    }
@@ -217,7 +267,7 @@ public class Commands implements CommandExecutor {
 	 * ROOM_MANAGER goods 가지고 있는지 검사
 	 */
 	PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
-	if (pData.doesHaveGoods(ShopGoods.ROOM_MANAGER)) {
+	if (pData.hasGoods(ShopGoods.ROOM_MANAGER)) {
 	    return true;
 	}
 	BroadcastTool.sendMessage(p, "you need \"ROOM_MANAGER\" for this command");
@@ -241,7 +291,7 @@ public class Commands implements CommandExecutor {
 		this.relayManager.resetRelay();
 		return true;
 	    case "pdata":
-		this.printPlayerData(p);
+		this.printPlayerData(p, args);
 		return true;
 	    case "allpdata":
 		this.printAllPlayerData(p);
@@ -256,20 +306,48 @@ public class Commands implements CommandExecutor {
 	    case "cmd":
 		this.printAllCMD(p, args);
 		return true;
+	    case "cash":
+		return this.cash(p, args);
+	    case "room":
+		return this.debugRoom(p, args);
 	    }
 	    return false;
 	}
 	return false;
     }
 
+    private boolean cash(Player p, String[] args) {
+	// /re d cash [plus | minus] <player> <amount>
+
+	String cmd = args[2];
+	Player targetP = Bukkit.getPlayer(args[3]);
+	int amount = Integer.parseInt(args[4]);
+
+	PlayerData targetPData = this.pDataManager.getPlayerData(targetP.getUniqueId());
+
+	if (cmd.equalsIgnoreCase("plus")) {
+	    targetPData.plusCash(amount);
+	} else if (cmd.equalsIgnoreCase("minus")) {
+	    targetPData.minusCash(amount);
+	}
+
+	// 캐쉬 잔액 알림
+	BroadcastTool.sendMessage(p, targetP.getName() + " cash is now " + targetPData.getCash());
+
+	return true;
+    }
+
     private void printAllCMD(Player p, String[] args) {
-	String cmd = "\n" + "/re d [relay | reset | pdata | allpdata]\r\n"
-		+ "/re d token [plus | minus] <player> <amount>\r\n" + "/re d rolechange <playerName> <role>\r\n"
-		+ "/re d goods init\r\n" + "/re d goods [add | remove] <player> <goods>\r\n"
-		+ "/re rank [tokenrank | challengingrank | clearrank | roomcountrank]\r\n"
-		+ "/re npc create <name> <skinName>\r\n" + "/re npc delete <name> \r\n"
-		+ "/re room [load | title] <title>\r\n" + "/re room [empty | list | finish]\r\n"
-		+ "/re minigame [ok | kick] <player>\r\n" + "/re minigame waitlist";
+	String cmd = "\n" + "/re d [relay | reset | pdata | allpdata]\n"
+		+ "/re d [token | cash] [plus | minus] <player> <amount>\n"
+		+ "/re d rolechange <playerName> <role>\n" + "/re d goods init\n"
+		+ "/re d goods [add | remove] <player> <goods>\n"
+		+ "/re d room <roomType> [load | save | remove | update] <title>\n" 
+		+ "/re d room <roomType> info\n"
+		+ "/re rank [tokenrank | challengingrank | clearrank | roomcountrank]\n"
+		+ "/re npc create <name> <skinName>\n" + "/re npc delete <name> \n"
+		+ "/re room [load | title] <title>\n" + "/re room [empty | list | finish]\n"
+		+ "/re minigame [ok | kick] <player>\n" + "/re minigame waitlist";
 
 	BroadcastTool.sendMessage(p, cmd);
     }
@@ -301,8 +379,17 @@ public class Commands implements CommandExecutor {
 	return true;
     }
 
-    private void printPlayerData(Player p) {
-	PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
+    private void printPlayerData(Player p, String[] args) {
+	// /re d pdata
+	// /re d pdata <player>
+	Player targetP = p;
+	// target있을떄 targetP 변경
+	if (args.length == 3) {
+	    String targetPName = args[2];
+	    targetP = Bukkit.getPlayer(targetPName);
+	}
+
+	PlayerData pData = this.pDataManager.getPlayerData(targetP.getUniqueId());
 	BroadcastTool.sendMessage(p, pData.toString());
     }
 
@@ -540,7 +627,9 @@ public class Commands implements CommandExecutor {
 
     private boolean goodsCmd(Player p, String[] args) {
 	/*
-	 * /re d goods init <player> /re d goods [add | remove] <player> <ShopGoods>
+	 * /re d goods init <player>
+	 * 
+	 * /re d goods [add | remove] <player> [<ShopGoods> | all]
 	 */
 	String option = args[2];
 	String playerName = args[3];

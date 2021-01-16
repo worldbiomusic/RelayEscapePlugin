@@ -19,11 +19,11 @@ public class RoomLocation {
     public static final Location PRACTICE_Pos2 = Setting.getLoationFromSTDLOC(35, 33, 35);
 
     // minigame
-    public static final Location MINIGAME_Pos1 = Setting.getLoationFromSTDLOC(10, 4, 21);
+    public static final Location MINIGAME_Pos1 = Setting.getLoationFromSTDLOC(10, 0, 21);
     public static final Location MINIGAME_Pos2 = Setting.getLoationFromSTDLOC(-4, 33, 35);
 
     // minigame
-    public static final Location FUN_Pos1 = Setting.getLoationFromSTDLOC(21, 4, 10);
+    public static final Location FUN_Pos1 = Setting.getLoationFromSTDLOC(21, 0, 10);
     public static final Location FUN_Pos2 = Setting.getLoationFromSTDLOC(35, 33, -4);
 
     // ROOM사이즈 (모든 룸 같은 크기)

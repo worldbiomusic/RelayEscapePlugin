@@ -8,9 +8,10 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.player.PlayerBucketEmptyEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
@@ -85,6 +86,7 @@ public class GameManager implements Listener {
 	if (this.pDataManager.isFirstJoin(uuid)) {
 	    String name = p.getName();
 	    pData = new PlayerData(uuid, name, role);
+	    pData.plusToken(50);
 	}
 	// 전에 들어온적 있을 때(바꿀것은 Role밖에 없음)
 	else {
@@ -132,16 +134,17 @@ public class GameManager implements Listener {
 
 	// 기본 굿즈 PlayerData에 제공
 	this.giveBasicGoods(p);
-	
-	// 발광효과 제거
+
+	// 상태효과 제거
+	PlayerTool.unhidePlayerFromEveryone(p);
 	p.setGlowing(false);
-	
+
 	// 기본적인 checkList들 모두 등록 (업데이트 효과)
-	for(CheckList list : PlayerData.CheckList.values()) {
+	for (CheckList list : PlayerData.CheckList.values()) {
 	    PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
 	    pData.registerCheckList(list, list.getInitValue());
 	}
-	
+
     }
 
     void giveBasicGoods(Player p) {
@@ -149,14 +152,21 @@ public class GameManager implements Listener {
 	 * 기본굿즈: ShopGoods.CHEST, ShopGoods.HIGH_5, ShopGoods.MAKINGTIME_5
 	 */
 	PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
-	ShopGoods[] basicGoods = { ShopGoods.CHEST, ShopGoods.HIGH_5, ShopGoods.MAKINGTIME_5, ShopGoods.FINISH, ShopGoods.GOODS_LIST };
+	ShopGoods[] basicGoods = { ShopGoods.CHEST, ShopGoods.HIGH_5, ShopGoods.MAKINGTIME_5, ShopGoods.FINISH,
+		ShopGoods.GOODS_LIST };
 
 	// PlayerData의 goods리스트에 지급
 	for (ShopGoods good : basicGoods) {
-	    if (!pData.doesHaveGoods(good)) {
+	    if (!pData.hasGoods(good)) {
 		pData.addGoods(good);
 	    }
 	}
+    }
+
+    @EventHandler
+    public void onChallengerTouchCore(PlayerInteractEvent e) {
+	// challenger와 tester는 모험모드여서 클릭대신 상호작용 이벤트 사용
+	this.onTesterAndChallengerTouchCore(e);
     }
 
     @EventHandler
@@ -166,12 +176,11 @@ public class GameManager implements Listener {
 
 //		// 일단 cancel
 	e.setCancelled(true);
-	
+
 	PlayerData pData = this.pDataManager.getPlayerData(e.getPlayer().getUniqueId());
 
 	// Main Room 체크
 	if (RoomLocation.getRoomTypeWithLocation(b.getLocation()) == RoomType.MAIN) {
-	    this.onTesterAndChallengerBreakCore(e);
 	    this.onPlayerBreakBlockInMainRoom(e);
 	} else if (RoomLocation.getRoomTypeWithLocation(b.getLocation()) == RoomType.PRACTICE) {
 	    this.onPlayerBreakBlockInPracticeRoom(e);
@@ -233,53 +242,56 @@ public class GameManager implements Listener {
     }
 
 //	@EventHandler
-    public void onTesterAndChallengerBreakCore(BlockBreakEvent e) {
+    public void onTesterAndChallengerTouchCore(PlayerInteractEvent e) {
 	// Tester, Challenger의 core부수는 상황
-	Block block = e.getBlock();
-	Material mat = block.getType();
+	Block block = e.getClickedBlock();
 
 	Player p = e.getPlayer();
 	UUID pUuid = p.getUniqueId();
 	PlayerData pData = this.pDataManager.getPlayerData(pUuid);
 	Role role = pData.getRole();
+	if (e.getAction() == Action.LEFT_CLICK_BLOCK || e.getAction() == Action.RIGHT_CLICK_BLOCK) {
+	    if (RoomLocation.getRoomTypeWithLocation(block.getLocation()) == RoomType.MAIN) {
+		Material mat = block.getType();
+		// core체크
+		if (mat.equals(Material.GLOWSTONE)) {
+		    // Role별로 권한 체크
+		    // Time: Challenging / Role: Challenger
+		    if (role == Role.CHALLENGER) {
+			// resetRelaySettings
+			this.relayManager.resetRelaySetting();
 
-	// core체크
-	if (mat.equals(Material.GLOWSTONE)) {
-	    // Role별로 권한 체크
-	    // Time: Challenging / Role: Challenger
-	    if (role == Role.CHALLENGER) {
-		// resetRelaySettings
-		this.relayManager.resetRelaySetting();
+			// 1. 현재 Maker에게 이제 Challenger라는 메세지 전송
+			// -> core부수면 바로 waitingTime이 시작되므로 relayManager에서 관리
 
-		// 1. 현재 Maker에게 이제 Challenger라는 메세지 전송
-		// -> core부수면 바로 waitingTime이 시작되므로 relayManager에서 관리
+			// 2. 클리어한 maker는 pDataManager의 maker로 등록
+			this.pDataManager.registerMaker(p);
 
-		// 2. 클리어한 maker는 pDataManager의 maker로 등록
-		this.pDataManager.registerMaker(p);
+			// 3. main room clearCount +1, time측정 후 초기화
+			this.roomManager.getRoom(RoomType.MAIN).addClearCount(1);
+			this.roomManager.recordMainRoomDurationTime();
+			this.roomManager.setRoomEmpty(RoomType.MAIN);
 
-		// 3. main room clearCount +1, time측정 후 초기화
-		this.roomManager.getRoom(RoomType.MAIN).addClearCount(1);
-		this.roomManager.recordMainRoomDurationTime();
-		this.roomManager.setRoomEmpty(RoomType.MAIN);
+			// 4.next relay 시작
+			this.relayManager.startNextTime();
 
-		// 4.next relay 시작
-		this.relayManager.startNextTime();
+			// 5.player token +, clearCount +1
+			int token = PlayerTool.onlinePlayersCount() / 2;
+			pData.plusToken(token);
+			pData.addClearCount(1);
+		    }
+		    // Time: Testing / Role: Tester
+		    else if (role == Role.TESTER) {
+			// 1.save room, set main room
+			String title = this.relayManager.getMainRoomTitle();
+			this.roomManager.saveRoomData(RoomType.MAIN, p.getName(), title);
+			Room mainRoom = this.roomManager.getRoomData(title);
+			this.roomManager.setRoom(RoomType.MAIN, mainRoom);
 
-		// 5.player token +, clearCount +1
-		int token = PlayerTool.onlinePlayersCount() / 2;
-		pData.plusToken(token);
-		pData.addClearCount(1);
-	    }
-	    // Time: Testing / Role: Tester
-	    else if (role == Role.TESTER) {
-		// 1.save room, set main room
-		String title = this.relayManager.getMainRoomTitle();
-		this.roomManager.saveRoomData(RoomType.MAIN, p, title);
-		Room mainRoom = this.roomManager.getRoomData(title);
-		this.roomManager.setRoom(RoomType.MAIN, mainRoom);
-
-		// 2.next relay 시작
-		this.relayManager.startNextTime();
+			// 2.next relay 시작
+			this.relayManager.startNextTime();
+		    }
+		}
 	    }
 	}
     }
@@ -351,23 +363,6 @@ public class GameManager implements Listener {
 		}
 	    }
 	}
-    }
-
-    @EventHandler
-    public void onPlayerPlaceBucket(PlayerBucketEmptyEvent e) {
-	Player p = e.getPlayer();
-	UUID uuid = p.getUniqueId();
-	PlayerData pData = this.pDataManager.getPlayerData(uuid);
-	Role role = pData.getRole();
-
-	// Role별로 권한 체크
-	if (role == Role.MAKER) {
-	    Material mat = e.getBucket();
-	    if (this.banItems.containsItem(mat)) {
-		e.setCancelled(true);
-	    }
-	}
-
     }
 
     @EventHandler

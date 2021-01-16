@@ -17,14 +17,54 @@ public enum ShopGoods {
      */
 
     // makingBlock
+
+    // basic
     GLOWSTONE(ItemStackTool.item(Material.GLOWSTONE), GoodsRole.MAKING_BLOCK),
     DIRT(ItemStackTool.item(Material.DIRT), GoodsRole.MAKING_BLOCK),
+
+    // 1f
     COBBLESTONE(ItemStackTool.item(Material.COBBLESTONE), GoodsRole.MAKING_BLOCK),
     JACK_O_LANTERN(ItemStackTool.item(Material.JACK_O_LANTERN), GoodsRole.MAKING_BLOCK),
     GLASS(ItemStackTool.item(Material.GLASS), GoodsRole.MAKING_BLOCK),
     FENCE(ItemStackTool.item(Material.FENCE), GoodsRole.MAKING_BLOCK),
     WHITE_WOOL(ItemStackTool.item(Material.WOOL, (byte) 0), GoodsRole.MAKING_BLOCK),
     BLACK_WOOL(ItemStackTool.item(Material.WOOL, (byte) 15), GoodsRole.MAKING_BLOCK),
+
+    // 2f
+    COAL_BLOCK(ItemStackTool.item(Material.COAL_BLOCK), GoodsRole.MAKING_BLOCK),
+    REDSTONE_BLOCK(ItemStackTool.item(Material.REDSTONE_BLOCK), GoodsRole.MAKING_BLOCK),
+    LAPIS_BLOCK(ItemStackTool.item(Material.LAPIS_BLOCK), GoodsRole.MAKING_BLOCK),
+    IRON_BLOCK(ItemStackTool.item(Material.IRON_BLOCK), GoodsRole.MAKING_BLOCK),
+    GOLD_BLOCK(ItemStackTool.item(Material.GOLD_BLOCK), GoodsRole.MAKING_BLOCK),
+    DIAMOND_BLOCK(ItemStackTool.item(Material.DIAMOND_BLOCK), GoodsRole.MAKING_BLOCK),
+
+    // 3f
+    WOOD(ItemStackTool.item(Material.WOOD), GoodsRole.MAKING_BLOCK),
+    ACACIA_STAIRS(ItemStackTool.item(Material.ACACIA_STAIRS), GoodsRole.MAKING_BLOCK),
+    WOOD_STEP(ItemStackTool.item(Material.WOOD_STEP), GoodsRole.MAKING_BLOCK),
+    LOG(ItemStackTool.item(Material.LOG), GoodsRole.MAKING_BLOCK),
+    LOG2(ItemStackTool.item(Material.LOG, (byte) 2), GoodsRole.MAKING_BLOCK),
+    LOG3(ItemStackTool.item(Material.LOG, (byte) 3), GoodsRole.MAKING_BLOCK),
+
+    // 4f
+    GRASS(ItemStackTool.item(Material.GRASS), GoodsRole.MAKING_BLOCK),
+    DIRT2(ItemStackTool.item(Material.DIRT, (byte) 2), GoodsRole.MAKING_BLOCK),
+    GRAVEL(ItemStackTool.item(Material.GRAVEL), GoodsRole.MAKING_BLOCK),
+    STONE(ItemStackTool.item(Material.STONE), GoodsRole.MAKING_BLOCK),
+    STONE6(ItemStackTool.item(Material.STONE, (byte) 6), GoodsRole.MAKING_BLOCK),
+    STONE2(ItemStackTool.item(Material.STONE, (byte) 2), GoodsRole.MAKING_BLOCK),
+
+    // 5f
+    SANDSTONE(ItemStackTool.item(Material.SANDSTONE), GoodsRole.MAKING_BLOCK),
+    SANDSTONE2(ItemStackTool.item(Material.SANDSTONE, (byte) 2), GoodsRole.MAKING_BLOCK),
+    SMOOTH_STAIRS(ItemStackTool.item(Material.SMOOTH_STAIRS), GoodsRole.MAKING_BLOCK),
+    STEP1(ItemStackTool.item(Material.STEP, (byte) 1), GoodsRole.MAKING_BLOCK),
+    SANDSTONE1(ItemStackTool.item(Material.SANDSTONE, (byte) 1), GoodsRole.MAKING_BLOCK),
+    SAND(ItemStackTool.item(Material.SAND, (byte) 2), GoodsRole.MAKING_BLOCK),
+
+    // 6f
+    WATER_BUCKET(ItemStackTool.item(Material.WATER_BUCKET), GoodsRole.MAKING_BLOCK),
+    SLIME_BLOCK(ItemStackTool.item(Material.SLIME_BLOCK), GoodsRole.MAKING_BLOCK),
 
     // event making block
     JUMPING(ItemStackTool.item(Material.STAINED_GLASS, 1, (short) 1, (byte) 0, "JUMPING", "super jump event block"),
@@ -67,6 +107,7 @@ public enum ShopGoods {
      * 
      * PlayerData에서 getRoomSettingGoodsHighestValue(kind)메소드로 최대값 가져올 수 있게 규칙을 정함
      */
+    // ROOM_SETTING
     HIGH_5(ItemStackTool.item(Material.TRIPWIRE_HOOK, "HIGH_5", "allow room high limit up to 5"),
 	    GoodsRole.ROOM_SETTING),
     HIGH_10(ItemStackTool.item(Material.TRIPWIRE_HOOK, "HIGH_10", "allow room high limit up to 10"),
@@ -79,15 +120,8 @@ public enum ShopGoods {
 	    GoodsRole.ROOM_SETTING),
     HIGH_30(ItemStackTool.item(Material.TRIPWIRE_HOOK, "HIGH_30", "allow room high limit up to 30"),
 	    GoodsRole.ROOM_SETTING),
-    HIGH_35(ItemStackTool.item(Material.TRIPWIRE_HOOK, "HIGH_35", "allow room high limit up to 35"),
-	    GoodsRole.ROOM_SETTING),
-    HIGH_40(ItemStackTool.item(Material.TRIPWIRE_HOOK, "HIGH_40", "allow room high limit up to 40"),
-	    GoodsRole.ROOM_SETTING),
-    HIGH_45(ItemStackTool.item(Material.TRIPWIRE_HOOK, "HIGH_45", "allow room high limit up to 45"),
-	    GoodsRole.ROOM_SETTING),
-    HIGH_50(ItemStackTool.item(Material.TRIPWIRE_HOOK, "HIGH_50", "allow room high limit up to 50"),
-	    GoodsRole.ROOM_SETTING),
 
+    // 제작시간 굿즈
     MAKINGTIME_5(ItemStackTool.item(Material.TRIPWIRE_HOOK, "MAKINGTIME_5", "MakingTime increases to 5 min"),
 	    GoodsRole.ROOM_SETTING),
     MAKINGTIME_10(ItemStackTool.item(Material.TRIPWIRE_HOOK, "MAKINGTIME_10", "MakingTime increases to 10 min"),
@@ -106,8 +140,20 @@ public enum ShopGoods {
 	    "can move other player's view easily"), GoodsRole.VIEWING),
 
     // ALWAYS
-    GOODS_LIST(ItemStackTool.item(Material.PAPER, 1, (short) 1, (byte) 3, "GOODS_LIST",
-	    "open Goods List GUI"), GoodsRole.ALWAYS);
+    GOODS_LIST(ItemStackTool.item(Material.PAPER, 1, (short) 1, (byte) 3, "GOODS_LIST", "open Goods List GUI"),
+	    GoodsRole.ALWAYS),
+
+    /*
+     * CASH
+     */
+    CHAT(ItemStackTool.item(Material.TORCH, "CHAT", "player can chat"), GoodsRole.IN_POCKET),
+    TOKEN_500(ItemStackTool.item(Material.EMERALD, "TOKEN_500", "Click to get 500 Token"), GoodsRole.ALWAYS),
+    COLOR_CHAT(ItemStackTool.item(Material.NAME_TAG, "COLOR_CHAT", "Your name will be changed with random color"),
+	    GoodsRole.ALWAYS),
+
+    // battle kit
+    CHAIN_BOOTS(ItemStackTool.item(Material.CHAINMAIL_BOOTS, "CHAIN_BOOTS", "it's just chain boots"),
+	    GoodsRole.BATTLE);
 
     ItemStack item;
     GoodsRole goodsRole;
@@ -115,6 +161,30 @@ public enum ShopGoods {
     ShopGoods(ItemStack item, GoodsRole goodsRole) {
 	this.item = item;
 	this.goodsRole = goodsRole;
+
+//	Material.WOOD
+//	Material.ACACIA_STAIRS
+//	Material.step
+//	Material.LOG
+//	Material.LOG, 2
+//	Material.LOG, 3
+
+//	Material.GRASS
+//	Material.DIRT
+//	Material.GRAVEL
+//	Material.STONE;
+//	Material.STONE, 6
+//	Material.STONE, 2
+
+//	Material.SANDSTONE
+//	Material.SANDSTONE, 2
+//	Material.SMOOTH_STAIRS
+//	Material.STEP, 1
+//	Material.SANDSTONE, 1
+//	Material.SAND
+
+//	Material.WATER_BUCKET
+//	Material.SLIME_BLOCK
     }
 
     public GoodsRole getGoodsRole() {
@@ -157,7 +227,7 @@ public enum ShopGoods {
 
     public boolean isRoleGood(Role role) {
 	/*
-	 * 해당 굿즈가 역할에 맞는 굿즈인지 검사 
+	 * 해당 굿즈가 역할에 맞는 굿즈인지 검사
 	 */
 	if (this.goodsRole == GoodsRole.WAITING && role == Role.WAITER
 		|| this.goodsRole == GoodsRole.MAKING && role == Role.MAKER

@@ -6,6 +6,7 @@ import java.util.List;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
+import org.bukkit.potion.PotionEffect;
 
 import com.wbm.plugin.Main;
 
@@ -21,6 +22,17 @@ public class PlayerTool {
     public static void heal(Player p) {
 	p.setHealth(20);
 	p.setFoodLevel(20);
+    }
+    
+    public static void removeAllState(Player p) {
+	// unhide
+	unhidePlayerFromEveryone(p);
+	// set glow off
+	p.setGlowing(false);
+	// 모든 포션효과 제거
+	for(PotionEffect potion : p.getActivePotionEffects()) {
+	    p.removePotionEffect(potion.getType());
+	}
     }
 
     public static void setHungry(Player p, int amount) {

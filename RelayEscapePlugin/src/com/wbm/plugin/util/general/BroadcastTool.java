@@ -7,9 +7,11 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
+import com.wbm.plugin.util.Setting;
+
 public class BroadcastTool {
     // broadcast해줄때 앞에 "[serverName] " 붙여주는 기능
-    public static String prefix;
+    public static String prefix = "";
 
     public static void setMessagePrefix(String name) {
 	prefix = name;
@@ -31,7 +33,7 @@ public class BroadcastTool {
 	    sendMessage(p, msg);
 	}
     }
-    
+
     public static void sendMessageToEveryoneWithoutPrefix(String msg) {
 	for (Player p : Bukkit.getOnlinePlayers()) {
 	    p.sendMessage(msg);
@@ -117,7 +119,9 @@ public class BroadcastTool {
     }
 
     public static void debug(String msg) {
-	Bukkit.getConsoleSender().sendMessage("" + ChatColor.BOLD + ChatColor.RED + "[Debug] " + msg);
+	if (Setting.DEBUG) {
+	    Bukkit.getConsoleSender().sendMessage("" + ChatColor.BOLD + ChatColor.RED + "[Debug] " + msg);
+	}
     }
 
     public static void reportBug(String msg) {

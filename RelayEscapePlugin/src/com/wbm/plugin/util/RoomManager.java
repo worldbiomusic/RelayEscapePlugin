@@ -82,18 +82,27 @@ public class RoomManager implements DataMember {
 	return this.roomData.get(title);
     }
 
-    public String saveRoomData(RoomType roomType, Player p, String roomTitle) {
+    public String saveRoomData(RoomType roomType, String maker, String roomTitle) {
 
 	// room data 가져오기
 	List<BlockData> blockDatas = this.getRoomBlockDatas(roomType);
 
 	// room 객체 생성
-	Room room = new Room(roomTitle, p.getName(), blockDatas, LocalDateTime.now());
+	Room room = new Room(roomTitle, maker, blockDatas, LocalDateTime.now());
 
 	// rooms 에 저장
 	this.roomData.put(roomTitle, room);
 
 	return roomTitle;
+    }
+
+    public boolean updateRoom(String title, Room room) {
+	if(this.isExistRoomTitle(title)) {
+	    this.roomData.put(title, room);
+	    return true;
+	} else {
+	    return false;
+	}
     }
 
     public String getNextTitleWithMakerName(String maker) {
@@ -282,10 +291,11 @@ public class RoomManager implements DataMember {
 	}
     }
 
+    @SuppressWarnings("deprecation")
     void fillBlocks(List<Location> locs, ItemStack item) {
 	for (Location loc : locs) {
 	    loc.getBlock().setType(item.getType());
-	    loc.getBlock().getState().setData(item.getData());
+	    loc.getBlock().setData(item.getData().getData());
 	    loc.getBlock().getState().update();
 	}
     }
@@ -357,9 +367,13 @@ public class RoomManager implements DataMember {
     public int getAllRoomCount() {
 	return this.roomData.size();
     }
-    
+
     public boolean isExistRoomTitle(String title) {
 	return this.roomData.containsKey(title);
+    }
+
+    public Room removeRoom(String title) {
+	return this.roomData.remove(title);
     }
 
     @SuppressWarnings("unchecked")

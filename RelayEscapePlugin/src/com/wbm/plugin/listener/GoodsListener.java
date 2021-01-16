@@ -3,6 +3,7 @@ package com.wbm.plugin.listener;
 import java.util.List;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -23,6 +24,7 @@ import com.wbm.plugin.util.enums.RelayTime;
 import com.wbm.plugin.util.enums.Role;
 import com.wbm.plugin.util.enums.RoomType;
 import com.wbm.plugin.util.general.BroadcastTool;
+import com.wbm.plugin.util.general.ChatColorTool;
 import com.wbm.plugin.util.general.InventoryTool;
 import com.wbm.plugin.util.general.ItemStackTool;
 import com.wbm.plugin.util.general.PlayerTool;
@@ -85,35 +87,54 @@ public class GoodsListener implements Listener {
 	} else if (role == Role.WAITER && good.getGoodsRole() == GoodsRole.WAITING) {
 	    this.useWaitingGoods(p, good);
 	}
-	
+
 	// 굿즈의 GoodsRole이 ALWAYS면 항상 사용할 수 있게
-	if(good.getGoodsRole() == GoodsRole.ALWAYS) {
+	if (good.getGoodsRole() == GoodsRole.ALWAYS) {
 	    this.useAlwaysGoods(p, good);
 	}
     }
 
     private void useAlwaysGoods(Player p, ShopGoods good) {
-	
-	if (good == ShopGoods.GOODS_LIST) {
+	PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
+	switch (good) {
+	case GOODS_LIST:
 	    // goods들을 포함한 GUI inventory 보여주기 (클락 불가능)
 	    String title = p.getName() + "'s GoodS List";
-	    Inventory inv=Bukkit.createInventory(null, 54, title);
-	    
-	    PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
-	    for(ShopGoods g : pData.getGoods()) {
+	    Inventory inv = Bukkit.createInventory(null, 54, title);
+
+	    for (ShopGoods g : pData.getGoods()) {
 		inv.addItem(g.getItemStack());
 	    }
-	    
+
 	    p.openInventory(inv);
+	    break;
+	case TOKEN_500:
+	    // token 500 추가
+	    pData.plusToken(500);
+	    // 클릭시 playerData에서 굿즈 제거
+	    pData.removeGoods(ShopGoods.TOKEN_500);
+	    // 클릭시 현재 인벤토리에서 굿즈 제거
+	    InventoryTool.removeItemFromPlayer(p, ShopGoods.TOKEN_500.getItemStack());
+	    // 알림
+	    BroadcastTool.sendMessage(p, "You got 500 Token!");
+	    break;
+	case COLOR_CHAT:
+	    // 알림
+	    ChatColor c = ChatColorTool.random();
+	    p.setDisplayName(c + p.getName() + ChatColor.WHITE);
+	    BroadcastTool.sendMessage(p, "Your name color set to: " + c + c.name());
+	    break;
+	default:
+	    return;
 	}
     }
-    
+
     @EventHandler
     public void onPlayerClickGoodsListInventory(InventoryClickEvent e) {
 	Player p = (Player) e.getWhoClicked();
 	String title = p.getName() + "'s GoodS List";
 	Inventory inv = e.getInventory();
-	if(inv.getTitle().equalsIgnoreCase(title)) { 
+	if (inv.getTitle().equalsIgnoreCase(title)) {
 	    e.setCancelled(true);
 	}
 
@@ -182,7 +203,7 @@ public class GoodsListener implements Listener {
 	    // 자신이 구입한 Goods(MakingBLock)만 인벤토리에 추가
 	    for (ShopGoods makingBlock : ShopGoods.getGoodsWithGoodsRole(GoodsRole.MAKING_BLOCK)) {
 		PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
-		if (pData.doesHaveGoods(makingBlock)) {
+		if (pData.hasGoods(makingBlock)) {
 		    inv.addItem(makingBlock.getItemStack());
 		}
 	    }
@@ -216,8 +237,8 @@ public class GoodsListener implements Listener {
 
 	    // main hand에 모드 바뀐것으로 굿즈 체인지
 	    p.getInventory().setItemInMainHand(blockChanger);
-	}else if (good == ShopGoods.HIDE) {
-	 // 플레이어가 들고있는 굿즈의 lore중의 3번째줄을 true or false로 변경
+	} else if (good == ShopGoods.HIDE) {
+	    // 플레이어가 들고있는 굿즈의 lore중의 3번째줄을 true or false로 변경
 	    ItemStack hideGoods = p.getInventory().getItemInMainHand();
 	    ItemMeta meta = hideGoods.getItemMeta();
 	    // lore 조정
@@ -260,7 +281,7 @@ public class GoodsListener implements Listener {
 
 	    BroadcastTool.sendMessageToEveryone(reductionTime + " sec reduced by " + p.getName());
 	} else if (good == ShopGoods.SUPER_STAR) {
-	 // 플레이어가 들고있는 굿즈의 lore중의 3번째줄을 true or false로 변경
+	    // 플레이어가 들고있는 굿즈의 lore중의 3번째줄을 true or false로 변경
 	    ItemStack superStar = p.getInventory().getItemInMainHand();
 	    ItemMeta meta = superStar.getItemMeta();
 	    // lore 조정

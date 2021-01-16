@@ -633,13 +633,13 @@ public class RelayManager {
 	    PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
 	    // 플레이어 역할에 맞는 굿즈 제공
 	    for (ShopGoods good : ShopGoods.getPlayerRoleGoods(pData.getRole())) {
-		if (pData.doesHaveGoods(good)) {
+		if (pData.hasGoods(good)) {
 		    InventoryTool.addItemToPlayer(p, good.getItemStack());
 		}
 	    }
 	    // 항상 가지고 있어야 하는 굿즈(ALWAYS) 제공
 	    for (ShopGoods good : ShopGoods.getGoodsWithGoodsRole(GoodsRole.ALWAYS)) {
-		if (pData.doesHaveGoods(good)) {
+		if (pData.hasGoods(good)) {
 		    InventoryTool.addItemToPlayer(p, good.getItemStack());
 		}
 	    }

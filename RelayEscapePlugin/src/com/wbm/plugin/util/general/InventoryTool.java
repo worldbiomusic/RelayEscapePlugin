@@ -36,6 +36,12 @@ public class InventoryTool {
 	Inventory inv = p.getInventory();
 	inv.remove(item);
     }
+    
+//    public static void removeItemWithDisplayNameFromPlayer(Player p, ItemStack item) {
+//	Inventory inv = p.getInventory();
+//	inv.remove(arg0);
+//	
+//    }
 
     public static void clearPlayerInv(Player p) {
 	p.getInventory().clear();

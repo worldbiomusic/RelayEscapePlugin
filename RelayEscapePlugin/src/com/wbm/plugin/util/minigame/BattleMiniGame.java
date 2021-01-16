@@ -16,6 +16,8 @@ import com.wbm.plugin.util.general.BroadcastTool;
 import com.wbm.plugin.util.general.InventoryTool;
 import com.wbm.plugin.util.general.SpawnLocationTool;
 import com.wbm.plugin.util.general.TeleportTool;
+import com.wbm.plugin.util.shop.GoodsRole;
+import com.wbm.plugin.util.shop.ShopGoods;
 
 import net.md_5.bungee.api.ChatColor;
 
@@ -104,7 +106,17 @@ public abstract class BattleMiniGame extends MiniGame {
     public void runTaskAfterStartGame() {
 	this.SUM = this.players.size() * this.getFee();
 //	BroadcastTool.debug("SUM: " + this.SUM);
-    };
+
+	// 기본 BATTLE 굿즈 제공
+	for (Player p : this.getAllPlayer()) {
+	    PlayerData pData = pDataManager.getPlayerData(p.getUniqueId());
+	    for (ShopGoods battleGood : ShopGoods.getGoodsWithGoodsRole(GoodsRole.BATTLE)) {
+		if (pData.hasGoods(battleGood)) {
+		    InventoryTool.addItemToPlayer(p, battleGood.getItemStack());
+		}
+	    }
+	}
+    }
 
     private void prepareGame() {
 	/*

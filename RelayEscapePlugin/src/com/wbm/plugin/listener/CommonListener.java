@@ -1,5 +1,7 @@
 package com.wbm.plugin.listener;
 
+import java.util.UUID;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -25,6 +27,8 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.inventory.InventoryCreativeEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.event.player.PlayerBucketEmptyEvent;
+import org.bukkit.event.player.PlayerBucketFillEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -41,6 +45,7 @@ import com.wbm.plugin.data.PlayerData;
 import com.wbm.plugin.data.RoomLocation;
 import com.wbm.plugin.util.PlayerDataManager;
 import com.wbm.plugin.util.RelayManager;
+import com.wbm.plugin.util.Setting;
 import com.wbm.plugin.util.enums.MiniGameType;
 import com.wbm.plugin.util.enums.RelayTime;
 import com.wbm.plugin.util.enums.Role;
@@ -48,6 +53,7 @@ import com.wbm.plugin.util.enums.RoomType;
 import com.wbm.plugin.util.general.BanItemTool;
 import com.wbm.plugin.util.general.BroadcastTool;
 import com.wbm.plugin.util.general.ChatColorTool;
+import com.wbm.plugin.util.general.CoolDownManager;
 import com.wbm.plugin.util.general.NPCManager;
 import com.wbm.plugin.util.general.PlayerTool;
 import com.wbm.plugin.util.general.SpawnLocationTool;
@@ -89,45 +95,59 @@ public class CommonListener implements Listener {
 
     @EventHandler
     public void onPlayerChat(AsyncPlayerChatEvent e) {
-	PlayerTool.playSoundToEveryone(Sound.BLOCK_END_PORTAL_FRAME_FILL);
+	/*
+	 * cash 굿즈 CHAT을 가지면 채팅 가능
+	 */
+	Player p = e.getPlayer();
+	PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
 
-//	Player p = e.getPlayer();
-//
-//	// chat 쿨다운 관리
-//	if (CoolDownManager.addPlayer(Setting.CoolDown_Subject_CHAT, p)) {
-//	    String msg = e.getMessage();
-//
-//	    String translatedMsg = "";
-//	    switch (msg) {
-//	    case "1":
-//		translatedMsg = "HI";
-//		break;
-//	    case "2":
-//		translatedMsg = "BYE";
-//		break;
-//	    case "3":
-//		translatedMsg = "FUXX";
-//		break;
-//	    case "4":
-//		translatedMsg = "FOLLOW ME";
-//		break;
-//	    case "5":
-//		translatedMsg = "VOTE";
-//		break;
-//	    case "6":
-//		translatedMsg = "PASS";
-//		break;
-//	    default:
-//		e.setCancelled(true);
-//		return;
-//
-//	    }
-//
-//	    e.setMessage(translatedMsg);
-//	} else {
-//	    BroadcastTool.sendMessage(p, "too fast chat");
-//	    e.setCancelled(true);
-//	}
+	// chat 쿨다운 관리
+	if (CoolDownManager.addPlayer(Setting.CoolDown_Subject_CHAT, p)) {
+	    
+	    // CHAT가지고 있을떄
+	    if (pData.hasGoods(ShopGoods.CHAT)) {
+		// 동작 필요 x
+		// 소리 재생
+		PlayerTool.playSoundToEveryone(Sound.BLOCK_END_PORTAL_FRAME_FILL);
+	    } else {
+
+		String msg = e.getMessage();
+
+		String translatedMsg = "";
+		switch (msg) {
+		case "1":
+		    translatedMsg = "HI";
+		    break;
+		case "2":
+		    translatedMsg = "BYE";
+		    break;
+		case "3":
+		    translatedMsg = "FUXX";
+		    break;
+		case "4":
+		    translatedMsg = "FOLLOW ME";
+		    break;
+		case "5":
+		    translatedMsg = "VOTE";
+		    break;
+		case "6":
+		    translatedMsg = "PASS";
+		    break;
+		default:
+		    e.setCancelled(true);
+		    return;
+
+		}
+
+		e.setMessage(translatedMsg);
+		// 소리 재생
+		    PlayerTool.playSoundToEveryone(Sound.BLOCK_END_PORTAL_FRAME_FILL);
+	    }
+
+	} else {
+	    BroadcastTool.sendMessage(p, "too fast chat");
+	    e.setCancelled(true);
+	}
 
     }
 
@@ -164,10 +184,15 @@ public class CommonListener implements Listener {
 
     @EventHandler
     public void onPVP(EntityDamageEvent e) {
-	if(e.getCause() == DamageCause.FALL) {
+	if (e.getCause() == DamageCause.FALL) {
+	    e.setCancelled(true);
+	} else if ((e.getEntity() instanceof Player)
+		&& e.getCause().equals(EntityDamageEvent.DamageCause.SUFFOCATION)) {
 	    e.setCancelled(true);
 	}
+
     }
+
     @EventHandler
     public void onPlayerRespawn(PlayerRespawnEvent e) {
 	// 여러 RelayTime에 따라 리스폰 위치 조정업
@@ -212,10 +237,11 @@ public class CommonListener implements Listener {
 		    // SHOP click
 		    if (lines[0].equals("[SHOP]")) {
 			String goods = lines[1];
-			String[] tokenStr = lines[2].split(" ");
+			String[] costString = lines[2].split(" ");
+			String type = costString[0];
+			int cost = Integer.parseInt(costString[1]);
 			// 띄어쓰기 기분으로 2번째를 token number로 봄
-			int cost = Integer.parseInt(tokenStr[1]);
-			this.shopManager.purchase(p, goods, cost);
+			this.shopManager.purchase(p, goods, type, cost);
 		    }
 		}
 	    }
@@ -244,24 +270,6 @@ public class CommonListener implements Listener {
 		BroadcastTool.debug("only " + ShopGoods.CHEST.name() + " inventory is allowed");
 		e.setCancelled(true);
 	    }
-	}
-    }
-
-    @EventHandler(priority = EventPriority.MONITOR)
-    public void onPlayerPlaceBannedItem(BlockPlaceEvent e) {
-	Player p = e.getPlayer();
-	// banItem인지 확인!!!!!!!!!!
-	// 놓인 block 체크
-	Block block = e.getBlock();
-	Material blockMat = block.getType();
-	// mainhand 체크
-	ItemStack item = p.getInventory().getItemInMainHand();
-
-	if (this.banItems.containsItem(blockMat) || this.banItems.containsItem(item)
-		|| blockMat.equals(Material.CHEST)) {
-	    BroadcastTool.sendMessage(p, "banned item");
-	    e.setCancelled(true);
-	    return;
 	}
     }
 
@@ -490,7 +498,71 @@ public class CommonListener implements Listener {
 	    }
 	}
     }
+    
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onOPBreakBlock(BlockBreakEvent e) {
+	// 허용
+	Player p = e.getPlayer();
+	if(p.isOp()) {
+	    e.setCancelled(false);
+	}
+    }
+    
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onPlayerPlaceBannedItem(BlockPlaceEvent e) {
+	Player p = e.getPlayer();
+	// banItem인지 확인!!!!!!!!!!
+	// 놓인 block 체크
+	Block block = e.getBlock();
+	Material blockMat = block.getType();
+	// mainhand 체크
+	ItemStack item = p.getInventory().getItemInMainHand();
 
+	if (this.banItems.containsItem(blockMat) || this.banItems.containsItem(item)
+		|| blockMat.equals(Material.CHEST)) {
+	    BroadcastTool.sendMessage(p, "banned item");
+	    e.setCancelled(true);
+	}
+	
+	// OP이면 허용
+	if(p.isOp()) {
+	    e.setCancelled(false);
+	}
+    }
+
+    @EventHandler(priority=EventPriority.MONITOR)
+    public void onPlayerEmptyBucket(PlayerBucketEmptyEvent e) {
+	Player p = e.getPlayer();
+	UUID uuid = p.getUniqueId();
+	PlayerData pData = this.pDataManager.getPlayerData(uuid);
+	Role role = pData.getRole();
+
+	// Role별로 권한 체크
+	if (role == Role.MAKER) {
+	    Material mat = e.getBucket();
+	    if (this.banItems.containsItem(mat)) {
+		e.setCancelled(true);
+	    }
+	}
+	
+	// OP허용
+	if(p.isOp()) {
+	    e.setCancelled(false);
+	}
+    }
+    
+    @EventHandler(priority=EventPriority.MONITOR)
+    public void onPlayerFillBucket(PlayerBucketFillEvent e) {
+	Player p = e.getPlayer();
+	
+	e.setCancelled(true);
+	
+	// OP허용
+	if(p.isOp()) {
+	    e.setCancelled(false);
+	}
+    }
+    
     @EventHandler
     public void onPlayerHitByArrow(EntityDamageByEntityEvent e) {
 //	System.out.println("ENTITY HITTTTTT");
@@ -505,6 +577,7 @@ public class CommonListener implements Listener {
 //	    }
 //	}
     }
+    
 }
 //
 //

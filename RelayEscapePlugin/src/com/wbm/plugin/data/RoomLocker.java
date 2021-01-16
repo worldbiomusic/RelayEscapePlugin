@@ -16,7 +16,7 @@ public class RoomLocker
 	public static World w = Setting.world;
 	public static List<Location> mainLocker
 	= new ArrayList<>();
-	public static ItemStack mainLockerItem 
+	public static ItemStack mainLockerItem
 	= ItemStackTool.item(Material.CONCRETE, (byte)14);
 	
 	static {

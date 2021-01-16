@@ -27,7 +27,7 @@ public enum MiniGameType {
     // Battle
     FIND_THE_BLUE(Setting.getAbsoluteLocation(-103, 5, 120), Setting.getAbsoluteLocation(-106, 5, 123),
 	    new Location(Setting.world, -104, 4, 115, 0, 0), 5, 30, 30, 4),
-    BATTLE_TOWN(Setting.getAbsoluteLocation(-36, 4, 203), Setting.getAbsoluteLocation(55, 26, 98),
+    BATTLE_TOWN(Setting.getAbsoluteLocation(-37, 0, 98), Setting.getAbsoluteLocation(55, 26, 203),
 	    new Location(Setting.world, 8, 5, 153, 90, 0), 5, 30, 180, 10),
     MAKE_HOLE(Setting.getAbsoluteLocation(-36, 4, 203), Setting.getAbsoluteLocation(55, 26, 98),
 	    new Location(Setting.world, 8, 5, 153, 90, 0), 5, 30, 180, 10),
