@@ -19,7 +19,7 @@ public enum MiniGameType {
     JUMP_MAP(Setting.getAbsoluteLocation(-37, 31, 224), Setting.getAbsoluteLocation(35, 3, 303),
 	    new Location(Setting.world, -36, 4, 225), 5, 10, 60 * 3, 1),
     FIT_TOOL(Setting.getAbsoluteLocation(-82, 4, 138), Setting.getAbsoluteLocation(-85, 6, 138),
-	    new Location(Setting.world, -83, 4, 130), 5, 10, 30, 1),
+	    new Location(Setting.world, -83, 4, 130), 5, 10, 60, 1),
 
     // Cooperative
     FIND_THE_YELLOW(Setting.getAbsoluteLocation(-88, 5, 120), Setting.getAbsoluteLocation(-91, 5, 123),

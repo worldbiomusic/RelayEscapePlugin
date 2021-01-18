@@ -338,12 +338,10 @@ public class Commands implements CommandExecutor {
     }
 
     private void printAllCMD(Player p, String[] args) {
-	String cmd = "\n" + "/re d [relay | reset | pdata | allpdata]\n"
-		+ "/re d [token | cash] [plus | minus] <player> <amount>\n"
-		+ "/re d rolechange <playerName> <role>\n" + "/re d goods init\n"
-		+ "/re d goods [add | remove] <player> <goods>\n"
-		+ "/re d room <roomType> [load | save | remove | update] <title>\n" 
-		+ "/re d room <roomType> info\n"
+	String cmd = "\n" + "/re d [relay | reset | pdata <player> | allpdata]\n"
+		+ "/re d [token | cash] [plus | minus] <player> <amount>\n" + "/re d rolechange <playerName> <role>\n"
+		+ "/re d goods init\n" + "/re d goods [add | remove] <player> <goods>\n"
+		+ "/re d room <roomType> [load | save | remove | update] <title>\n" + "/re d room <roomType> info\n"
 		+ "/re rank [tokenrank | challengingrank | clearrank | roomcountrank]\n"
 		+ "/re npc create <name> <skinName>\n" + "/re npc delete <name> \n"
 		+ "/re room [load | title] <title>\n" + "/re room [empty | list | finish]\n"
@@ -361,9 +359,9 @@ public class Commands implements CommandExecutor {
 	String order = args[2];
 	String pName = args[3];
 	int token = Integer.parseInt(args[4]);
-	Player targetP = Bukkit.getPlayer(pName);
+	UUID uuid = Bukkit.getPlayerUniqueId(pName);
 
-	PlayerData pData = this.pDataManager.getPlayerData(targetP.getUniqueId());
+	PlayerData pData = this.pDataManager.getPlayerData(uuid);
 	if (order.equalsIgnoreCase("plus")) {
 	    pData.plusToken(token);
 	} else if (order.equalsIgnoreCase("minus")) {
@@ -374,7 +372,10 @@ public class Commands implements CommandExecutor {
 
 	// info
 	BroadcastTool.sendMessage(p, pName + "token " + order + " to " + token);
-	BroadcastTool.sendMessage(targetP, "your token" + order + " to " + token + " by " + p.getName());
+	Player targetP = Bukkit.getPlayer(pName);
+	if (targetP != null) {
+	    BroadcastTool.sendMessage(targetP, "your token" + order + " to " + token);
+	}
 
 	return true;
     }
@@ -382,15 +383,14 @@ public class Commands implements CommandExecutor {
     private void printPlayerData(Player p, String[] args) {
 	// /re d pdata
 	// /re d pdata <player>
-	Player targetP = p;
 	// target있을떄 targetP 변경
 	if (args.length == 3) {
 	    String targetPName = args[2];
-	    targetP = Bukkit.getPlayer(targetPName);
-	}
-
-	PlayerData pData = this.pDataManager.getPlayerData(targetP.getUniqueId());
-	BroadcastTool.sendMessage(p, pData.toString());
+	    UUID uuid = Bukkit.getPlayerUniqueId(targetPName);
+	    
+	    PlayerData pData = this.pDataManager.getPlayerData(uuid);
+	    BroadcastTool.sendMessage(p, pData.toString());
+	} 
     }
 
     private void printAllPlayerData(Player p) {
@@ -681,9 +681,9 @@ public class Commands implements CommandExecutor {
 	tutorials.add("=========      Tutorial       =========");
 	tutorials.add("=================================");
 	tutorials.add("- Player: MAKER or CHALLENGER");
-	tutorials.add("- You can become a Maker if you clear MainRoom in ChallengingTime");
+	tutorials.add("- You can become a Maker if you right-click core(glowstone) MainRoom in ChallengingTime");
 	tutorials.add("- Token is server money");
-	tutorials.add("- Time: Waiting->Making->Testing->Challenging->Waiting...");
+	tutorials.add("- Time: Waiting->Making->Testing->Challenging->Waiting...(cycle)");
 	tutorials.add("- You can play MiniGame in MakingTime and TestingTime");
 	tutorials.add("- Chat: enter number 1 ~ 9");
 	tutorials.add("- Commands: /re");
@@ -691,6 +691,23 @@ public class Commands implements CommandExecutor {
 		"- Discord: " + ChatColor.YELLOW + ChatColor.BOLD + " https://discord.gg/yRFHkPKqBX" + ChatColor.WHITE);
 	tutorials.add("=================================");
 	tutorials.add("=========         END         =========");
+	tutorials.add("=================================");
+
+	tutorials.add("=================================");
+	tutorials.add("=========      튜토리얼       =========");
+	tutorials.add("=================================");
+	tutorials.add("- 플레이어: 메이커 or 도전자");
+	tutorials.add("- 룸의 코어(발광석)을 찾아 우클릭 하면 메이커가 될 수 있습니다");
+	tutorials.add("- 토큰은 서버의 가상화폐입니다");
+	tutorials.add("- 릴레이 순서: Waiting->Making->Testing->Challenging->Waiting...(반복)");
+	tutorials.add("- Making 과 Testing 시간에만 미니게임을 즐길 수 있습니다");
+	tutorials.add("- 채팅: 1번 ~ 9번을 입력하면 됩니다 (ex.1 = HI)");
+	tutorials.add("- 커맨드 자세히 보기: /re");
+	tutorials.add(
+		"- Discord: " + ChatColor.YELLOW + ChatColor.BOLD + " https://discord.gg/yRFHkPKqBX" + ChatColor.WHITE);
+
+	tutorials.add("=================================");
+	tutorials.add("=========         끝         =========");
 	tutorials.add("=================================");
 
 	for (String msg : tutorials) {

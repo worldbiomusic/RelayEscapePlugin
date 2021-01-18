@@ -65,6 +65,14 @@ public enum ShopGoods {
     // 6f
     WATER_BUCKET(ItemStackTool.item(Material.WATER_BUCKET), GoodsRole.MAKING_BLOCK),
     SLIME_BLOCK(ItemStackTool.item(Material.SLIME_BLOCK), GoodsRole.MAKING_BLOCK),
+    BARRIER(ItemStackTool.item(Material.BARRIER), GoodsRole.MAKING_BLOCK),
+    PACKED_ICE(ItemStackTool.item(Material.PACKED_ICE), GoodsRole.MAKING_BLOCK),
+
+    
+    // 7f
+    CACTUS(ItemStackTool.item(Material.CACTUS), GoodsRole.MAKING_BLOCK),
+    WEB(ItemStackTool.item(Material.WEB), GoodsRole.MAKING_BLOCK),
+    
 
     // event making block
     JUMPING(ItemStackTool.item(Material.STAINED_GLASS, 1, (short) 1, (byte) 0, "JUMPING", "super jump event block"),

@@ -164,9 +164,10 @@ public class GameManager implements Listener {
     }
 
     @EventHandler
-    public void onChallengerTouchCore(PlayerInteractEvent e) {
+    public void onChallengerClickCore(PlayerInteractEvent e) {
 	// challenger와 tester는 모험모드여서 클릭대신 상호작용 이벤트 사용
-	this.onTesterAndChallengerTouchCore(e);
+	this.onTesterAndChallengerClickCore(e);
+	this.onPlayerBreakBlockInPracticeRoom(e);
     }
 
     @EventHandler
@@ -182,8 +183,6 @@ public class GameManager implements Listener {
 	// Main Room 체크
 	if (RoomLocation.getRoomTypeWithLocation(b.getLocation()) == RoomType.MAIN) {
 	    this.onPlayerBreakBlockInMainRoom(e);
-	} else if (RoomLocation.getRoomTypeWithLocation(b.getLocation()) == RoomType.PRACTICE) {
-	    this.onPlayerBreakBlockInPracticeRoom(e);
 	} else if (pData.isPlayingMiniGame()) {
 	    // minigame 플레이중일때만 e넘기기
 	    this.onPlayerBreakBlockInMiniGameRoom(e);
@@ -204,24 +203,28 @@ public class GameManager implements Listener {
 	}
     }
 
-    private void onPlayerBreakBlockInPracticeRoom(BlockBreakEvent e) {
+    private void onPlayerBreakBlockInPracticeRoom(PlayerInteractEvent e) {
 	Player p = e.getPlayer();
 	PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
 	Role role = pData.getRole();
 	RelayTime time = this.relayManager.getCurrentTime();
+	Block b = e.getClickedBlock();
 
-	if (time == RelayTime.MAKING || time == RelayTime.TESTING) {
-	    if (role == Role.WAITER) {
-		Block b = e.getBlock();
+	if (e.getAction() == Action.RIGHT_CLICK_BLOCK) {
+	    if (RoomLocation.getRoomTypeWithLocation(b.getLocation()) == RoomType.PRACTICE) {
+		if (time == RelayTime.MAKING || time == RelayTime.TESTING) {
+		    if (role == Role.WAITER) {
 
-		// core 부수면 token: 인원수 / 3 지급
-		if (b.getType() == Material.GLOWSTONE) {
-		    int token = Bukkit.getOnlinePlayers().size() / 2;
-		    BroadcastTool.sendMessage(p, "you clear practice room");
-		    BroadcastTool.sendMessage(p, "token + " + token);
+			// core 부수면 token: 인원수 / 3 지급
+			if (b.getType() == Material.GLOWSTONE) {
+			    int token = Bukkit.getOnlinePlayers().size() / 2;
+			    BroadcastTool.sendMessage(p, "you clear practice room");
+			    BroadcastTool.sendMessage(p, "token + " + token);
 
-		    // block 사라지게 (1회용)
-		    b.setType(Material.AIR);
+			    // block 사라지게 (1회용)
+			    b.setType(Material.AIR);
+			}
+		    }
 		}
 	    }
 	}
@@ -241,58 +244,99 @@ public class GameManager implements Listener {
 	}
     }
 
-//	@EventHandler
-    public void onTesterAndChallengerTouchCore(PlayerInteractEvent e) {
+    public void onTesterAndChallengerClickCore(PlayerInteractEvent e) {
 	// Tester, Challenger의 core부수는 상황
 	Block block = e.getClickedBlock();
 
 	Player p = e.getPlayer();
 	UUID pUuid = p.getUniqueId();
 	PlayerData pData = this.pDataManager.getPlayerData(pUuid);
-	Role role = pData.getRole();
-	if (e.getAction() == Action.LEFT_CLICK_BLOCK || e.getAction() == Action.RIGHT_CLICK_BLOCK) {
-	    if (RoomLocation.getRoomTypeWithLocation(block.getLocation()) == RoomType.MAIN) {
-		Material mat = block.getType();
-		// core체크
-		if (mat.equals(Material.GLOWSTONE)) {
-		    // Role별로 권한 체크
-		    // Time: Challenging / Role: Challenger
-		    if (role == Role.CHALLENGER) {
-			// resetRelaySettings
-			this.relayManager.resetRelaySetting();
-
-			// 1. 현재 Maker에게 이제 Challenger라는 메세지 전송
-			// -> core부수면 바로 waitingTime이 시작되므로 relayManager에서 관리
-
-			// 2. 클리어한 maker는 pDataManager의 maker로 등록
-			this.pDataManager.registerMaker(p);
-
-			// 3. main room clearCount +1, time측정 후 초기화
-			this.roomManager.getRoom(RoomType.MAIN).addClearCount(1);
-			this.roomManager.recordMainRoomDurationTime();
-			this.roomManager.setRoomEmpty(RoomType.MAIN);
-
-			// 4.next relay 시작
-			this.relayManager.startNextTime();
-
-			// 5.player token +, clearCount +1
-			int token = PlayerTool.onlinePlayersCount() / 2;
-			pData.plusToken(token);
-			pData.addClearCount(1);
-		    }
-		    // Time: Testing / Role: Tester
-		    else if (role == Role.TESTER) {
-			// 1.save room, set main room
-			String title = this.relayManager.getMainRoomTitle();
-			this.roomManager.saveRoomData(RoomType.MAIN, p.getName(), title);
-			Room mainRoom = this.roomManager.getRoomData(title);
-			this.roomManager.setRoom(RoomType.MAIN, mainRoom);
-
-			// 2.next relay 시작
-			this.relayManager.startNextTime();
-		    }
-		}
+	if (e.getAction() == Action.RIGHT_CLICK_BLOCK) {
+	    Material mat = block.getType();
+	    // GLOWSTONE인지 체크
+	    if (!mat.equals(Material.GLOWSTONE)) {
+		return;
 	    }
+	    // 블럭의 위치가 MAIN룸 내부인지 체크
+	    if (RoomLocation.getRoomTypeWithLocation(block.getLocation()) == RoomType.MAIN) {
+		// 플레이어가 MAIN, TESTING, TESER 체크
+		if (this.relayManager.checkRoomAndRelayTimeAndRole(RoomType.MAIN, RelayTime.TESTING, Role.TESTER, p)) {
+		    // 1.save room, set main room
+		    String title = this.relayManager.getMainRoomTitle();
+		    this.roomManager.saveRoomData(RoomType.MAIN, p.getName(), title);
+		    Room mainRoom = this.roomManager.getRoomData(title);
+		    this.roomManager.setRoom(RoomType.MAIN, mainRoom);
+
+		    // 2.next relay 시작
+		    this.relayManager.startNextTime();
+		}
+		// 플레이어가 MAIN, CHALLENGING, CHALLENGER 체크
+		else if (this.relayManager.checkRoomAndRelayTimeAndRole(RoomType.MAIN, RelayTime.CHALLENGING,
+			Role.CHALLENGER, p)) {
+		    // resetRelaySettings
+		    this.relayManager.resetRelaySetting();
+
+		    // 1. 현재 Maker에게 이제 Challenger라는 메세지 전송
+		    // -> core부수면 바로 waitingTime이 시작되므로 relayManager에서 관리
+
+		    // 2. 클리어한 maker는 pDataManager의 maker로 등록
+		    this.pDataManager.registerMaker(p);
+
+		    // 3. main room clearCount +1, time측정 후 초기화
+		    this.roomManager.getRoom(RoomType.MAIN).addClearCount(1);
+		    this.roomManager.recordMainRoomDurationTime();
+		    this.roomManager.setRoomEmpty(RoomType.MAIN);
+
+		    // 4.next relay 시작
+		    this.relayManager.startNextTime();
+
+		    // 5.player token +, clearCount +1
+		    int token = PlayerTool.onlinePlayersCount() / 2;
+		    pData.plusToken(token);
+		    pData.addClearCount(1);
+		}
+
+	    }
+//	    if (RoomLocation.getRoomTypeWithLocation(block.getLocation()) == RoomType.MAIN) {
+//
+//		// core체크
+//		// Role별로 권한 체크
+//		// Time: Challenging / Role: Challenger
+//		if (role == Role.CHALLENGER) {
+//		    // resetRelaySettings
+//		    this.relayManager.resetRelaySetting();
+//
+//		    // 1. 현재 Maker에게 이제 Challenger라는 메세지 전송
+//		    // -> core부수면 바로 waitingTime이 시작되므로 relayManager에서 관리
+//
+//		    // 2. 클리어한 maker는 pDataManager의 maker로 등록
+//		    this.pDataManager.registerMaker(p);
+//
+//		    // 3. main room clearCount +1, time측정 후 초기화
+//		    this.roomManager.getRoom(RoomType.MAIN).addClearCount(1);
+//		    this.roomManager.recordMainRoomDurationTime();
+//		    this.roomManager.setRoomEmpty(RoomType.MAIN);
+//
+//		    // 4.next relay 시작
+//		    this.relayManager.startNextTime();
+//
+//		    // 5.player token +, clearCount +1
+//		    int token = PlayerTool.onlinePlayersCount() / 2;
+//		    pData.plusToken(token);
+//		    pData.addClearCount(1);
+//		}
+//		// Time: Testing / Role: Tester
+//		else if (role == Role.TESTER) {
+//		    // 1.save room, set main room
+//		    String title = this.relayManager.getMainRoomTitle();
+//		    this.roomManager.saveRoomData(RoomType.MAIN, p.getName(), title);
+//		    Room mainRoom = this.roomManager.getRoomData(title);
+//		    this.roomManager.setRoom(RoomType.MAIN, mainRoom);
+//
+//		    // 2.next relay 시작
+//		    this.relayManager.startNextTime();
+//		}
+//	    }
 	}
     }
 
@@ -340,7 +384,6 @@ public class GameManager implements Listener {
 //	    String kind = ShopGoods.HIGH_10.name().split("_")[0];
 	    String kind = "HIGH";
 	    int allowedHigh = pData.getRoomSettingGoodsHighestValue(kind);
-	    ;
 
 	    // 높이제한 검사
 	    if (blockHigh > allowedHigh) {

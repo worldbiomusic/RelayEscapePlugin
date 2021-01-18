@@ -73,8 +73,7 @@ public class RelayManager {
 
     private MiniGameManager miniGameManager;
 
-    public RelayManager(PlayerDataManager pDataManager, RoomManager roomManager,
-	    MiniGameManager miniGameManager) {
+    public RelayManager(PlayerDataManager pDataManager, RoomManager roomManager, MiniGameManager miniGameManager) {
 	this.pDataManager = pDataManager;
 	this.roomManager = roomManager;
 
@@ -250,9 +249,6 @@ public class RelayManager {
 	// common todo list
 	RelayTimeCommonTODOList();
 
-	// unlock main room
-	this.roomManager.unlockRoom(RoomType.MAIN);
-
 	// maker(waiter) 관리
 	if (this.getMaker() == null) {
 	    BroadcastTool.printConsoleMessage(ChatColor.RED + "[Bug] No Maker in WaitingTime!!!!");
@@ -269,9 +265,6 @@ public class RelayManager {
 	// common todo list
 	RelayTimeCommonTODOList();
 
-	// Main Room Locker
-	this.roomManager.lockRoom(RoomType.MAIN);
-
 	// practice room 설정
 	Room randomRoom = this.roomManager.getRandomRoomData();
 	this.roomManager.setRoom(RoomType.PRACTICE, randomRoom);
@@ -286,7 +279,7 @@ public class RelayManager {
     }
 
     private void startChallenging() {
-	
+
 //	 RelayTime 관리
 	this.currentTime = RelayTime.CHALLENGING;
 
@@ -340,6 +333,8 @@ public class RelayManager {
 	 * 7.힐
 	 * 
 	 * 8.소리재생
+	 * 
+	 * 9.룸 lock
 	 */
 
 //	2.역할 변경
@@ -368,19 +363,37 @@ public class RelayManager {
 	    // 발광효과 제거
 	    p.setGlowing(false);
 	}
-	
+
 	// 8.소리재생
 	this.playSoundToEveryone();
+
+	this.manageLockingRoom();
+    }
+
+    private void manageLockingRoom() {
+	RelayTime time = this.getCurrentTime();
+	switch (time) {
+	case MAKING:
+	case TESTING:
+	case CHALLENGING:
+	    // lock main room
+	    this.roomManager.lockRoom(RoomType.MAIN);
+	    break;
+	case WAITING:
+	    // unlock main room
+	    this.roomManager.unlockRoom(RoomType.MAIN);
+	    break;
+	}
     }
 
     private void playSoundToEveryone() {
-	if(this.currentTime == RelayTime.WAITING) {
+	if (this.currentTime == RelayTime.WAITING) {
 	    PlayerTool.playSoundToEveryone(Sound.BLOCK_END_PORTAL_SPAWN);
-	} else if(this.currentTime == RelayTime.MAKING) {
+	} else if (this.currentTime == RelayTime.MAKING) {
 	    PlayerTool.playSoundToEveryone(Sound.BLOCK_ANVIL_USE);
-	} else if(this.currentTime == RelayTime.TESTING) {
+	} else if (this.currentTime == RelayTime.TESTING) {
 	    PlayerTool.playSoundToEveryone(Sound.BLOCK_ANVIL_DESTROY);
-	} else if(this.currentTime == RelayTime.CHALLENGING) {
+	} else if (this.currentTime == RelayTime.CHALLENGING) {
 	    PlayerTool.playSoundToEveryone(Sound.ENTITY_ENDERMEN_TELEPORT);
 	}
     }
@@ -393,7 +406,7 @@ public class RelayManager {
 	    InventoryTool.clearAllPlayerInv();
 	}
 	this.giveGoodsToEveryone();
-	
+
     }
 
     private void reserveNextTask(int durationTime) {
@@ -625,7 +638,7 @@ public class RelayManager {
     private void giveGoodsToEveryone() {
 	/*
 	 * playerData가 가지고 있는 good중 해당 role에 맞는 good만을 인벤토리에 추가함 이 메소드가 실행되기 전에 선행되야 하는
-	 * 것: player role 변경! 
+	 * 것: player role 변경!
 	 * 
 	 * * 각 Role에 맞는 Goods중에서 가지고 있는 Goods 인벤에 지급
 	 */
@@ -643,7 +656,7 @@ public class RelayManager {
 		    InventoryTool.addItemToPlayer(p, good.getItemStack());
 		}
 	    }
-	    
+
 	}
     }
 

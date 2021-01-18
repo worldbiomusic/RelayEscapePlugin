@@ -368,9 +368,10 @@ public class Main extends JavaPlugin {
 	    public void run() {
 		List<String> tips = new ArrayList<>();
 		tips.add("Discord " + ChatColor.WHITE + ":" + ChatColor.GREEN + ChatColor.UNDERLINE + ChatColor.BOLD
-			+ " https://discord.gg/yRFHkPKqBX" + ChatColor.WHITE);
+			+ " https://discord.gg/8f2nyYDgRV" + ChatColor.WHITE);
 		tips.add("Tutorial: /re tutorial");
-		tips.add("Server Name is Relay Escape");
+		tips.add("CHAT: 1 ~ 9 (ex. 1 = HI)");
+		tips.add("Reconnect is good way to go to spawn or give up Room");
 
 		// random tip 고르기
 		String randomTip = tips.get((int) (Math.random() * tips.size()));

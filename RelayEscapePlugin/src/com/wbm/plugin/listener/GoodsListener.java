@@ -17,6 +17,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import com.wbm.plugin.data.PlayerData;
+import com.wbm.plugin.data.RoomLocation;
 import com.wbm.plugin.util.PlayerDataManager;
 import com.wbm.plugin.util.RelayManager;
 import com.wbm.plugin.util.RoomManager;
@@ -73,25 +74,52 @@ public class GoodsListener implements Listener {
 	    return;
 
 	// Main room, making time, maker
-	if (!(e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.RIGHT_CLICK_BLOCK)) {
-	    return;
+	if (e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.RIGHT_CLICK_BLOCK) {
+	    if (this.relayManager.checkRoomAndRelayTimeAndRole(RoomType.MAIN, RelayTime.MAKING, Role.MAKER, p)
+		    && good.getGoodsRole() == GoodsRole.MAKING) {
+		this.useMakingGoods(p, good);
+	    } else if (role == Role.TESTER && good.getGoodsRole() == GoodsRole.TESTING) {
+		this.useTestingGoods(p, good);
+	    } else if (role == Role.CHALLENGER && good.getGoodsRole() == GoodsRole.CHALLENGING) {
+		this.useChallengingGoods(p, good);
+	    } else if (role == Role.WAITER && good.getGoodsRole() == GoodsRole.WAITING) {
+		this.useWaitingGoods(p, good);
+	    }
+
+	    // 굿즈의 GoodsRole이 ALWAYS면 항상 사용할 수 있게
+	    if (good.getGoodsRole() == GoodsRole.ALWAYS) {
+		this.useAlwaysGoods(p, good);
+	    }
+	}
+    }
+
+    private Inventory getPlayerGoodsListInv(Player p, int page) {
+	// 0~44 Goods 표시
+	// 45 ~ 53 페이지 도구 표시
+	int goodsIndex = page * 45;
+	PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
+	List<ShopGoods> goods = pData.getGoods();
+
+	String title = p.getName() + "'s Goods List";
+	Inventory inv = Bukkit.createInventory(null, 54, title);
+
+	// 45 46 47 48 49 50 51 52 53
+	inv.setItem(48, ItemStackTool.item(Material.LEVER, "previous page"));
+	inv.setItem(49, ItemStackTool.item(Material.PAPER, "PAGE: " + page));
+	inv.setItem(50, ItemStackTool.item(Material.REDSTONE_TORCH_ON, "next page"));
+
+	// inventory는 무조건 0~44칸까지만 채워짐
+	int invIndex = 0;
+	for (int i = goodsIndex; i < goodsIndex + 45; i++) {
+	    if (i >= goods.size()) {
+		// 표시할 i인덱스가 플레이어가 가지고 있는 굿즈 갯수보다 많으면 끝내기
+		break;
+	    }
+	    ShopGoods good = goods.get(i);
+	    inv.setItem(invIndex++, good.getItemStack());
 	}
 
-	if (this.relayManager.checkRoomAndRelayTimeAndRole(RoomType.MAIN, RelayTime.MAKING, Role.MAKER, p)
-		&& good.getGoodsRole() == GoodsRole.MAKING) {
-	    this.useMakingGoods(p, good);
-	} else if (role == Role.TESTER && good.getGoodsRole() == GoodsRole.TESTING) {
-	    this.useTestingGoods(p, good);
-	} else if (role == Role.CHALLENGER && good.getGoodsRole() == GoodsRole.CHALLENGING) {
-	    this.useChallengingGoods(p, good);
-	} else if (role == Role.WAITER && good.getGoodsRole() == GoodsRole.WAITING) {
-	    this.useWaitingGoods(p, good);
-	}
-
-	// 굿즈의 GoodsRole이 ALWAYS면 항상 사용할 수 있게
-	if (good.getGoodsRole() == GoodsRole.ALWAYS) {
-	    this.useAlwaysGoods(p, good);
-	}
+	return inv;
     }
 
     private void useAlwaysGoods(Player p, ShopGoods good) {
@@ -99,12 +127,7 @@ public class GoodsListener implements Listener {
 	switch (good) {
 	case GOODS_LIST:
 	    // goods들을 포함한 GUI inventory 보여주기 (클락 불가능)
-	    String title = p.getName() + "'s GoodS List";
-	    Inventory inv = Bukkit.createInventory(null, 54, title);
-
-	    for (ShopGoods g : pData.getGoods()) {
-		inv.addItem(g.getItemStack());
-	    }
+	    Inventory inv = this.getPlayerGoodsListInv(p, 0);
 
 	    p.openInventory(inv);
 	    break;
@@ -132,10 +155,42 @@ public class GoodsListener implements Listener {
     @EventHandler
     public void onPlayerClickGoodsListInventory(InventoryClickEvent e) {
 	Player p = (Player) e.getWhoClicked();
-	String title = p.getName() + "'s GoodS List";
+	String title = p.getName() + "'s Goods List";
 	Inventory inv = e.getInventory();
 	if (inv.getTitle().equalsIgnoreCase(title)) {
 	    e.setCancelled(true);
+
+	    ItemStack item = e.getCurrentItem();
+	    if (item == null) {
+		return;
+	    }
+	    ItemMeta meta = item.getItemMeta();
+	    if (meta == null) {
+		return;
+	    }
+	    String displayName = meta.getDisplayName();
+
+	    // page 구하기
+	    ItemStack pageItem = inv.getItem(49);
+	    String pageString = pageItem.getItemMeta().getDisplayName().split(" ")[1];
+	    int page = Integer.parseInt(pageString);
+
+	    // previous, next click 구현
+	    if (displayName != null) {
+		if (displayName.equalsIgnoreCase("previous page")) {
+		    if (page >= 1) {
+			Inventory preInv = this.getPlayerGoodsListInv(p, page - 1);
+			p.openInventory(preInv);
+		    }
+		} else if (displayName.equalsIgnoreCase("next page")) {
+
+		    if (inv.getItem(44) != null) {
+			Inventory nextInv = this.getPlayerGoodsListInv(p, page + 1);
+			p.openInventory(nextInv);
+		    }
+		}
+	    }
+
 	}
 
     }
@@ -183,9 +238,26 @@ public class GoodsListener implements Listener {
 
     void useMakingGoods(Player p, ShopGoods good) {
 	if (good == ShopGoods.UNDER_BLOCK) {
+	    PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
 	    // 발밑에 블럭 생성
-	    Location underFootLoc = p.getLocation();
-	    p.getWorld().getBlockAt(underFootLoc).setType(Material.DIRT);
+	    Location underFootLoc = p.getLocation().clone();
+	    // 높이 제한 검사 (Goods) (4시작인데 4에 놓으면 0이므로 +1 을 해줌)
+	    int blockHigh = (int) (underFootLoc.getY() - ((int) RoomLocation.MAIN_Pos1.getY())) + 1;
+
+	    // HIGH_## 굿즈중에서 가장 높은 굿즈 검색
+//	    String kind = ShopGoods.HIGH_10.name().split("_")[0];
+	    String kind = "HIGH";
+	    int allowedHigh = pData.getRoomSettingGoodsHighestValue(kind);
+
+	    // 높이제한 검사
+	    if (blockHigh > allowedHigh) {
+		// 높이제한보다 높을때 취소
+		BroadcastTool.sendMessage(p, "you can place block up to " + allowedHigh);
+		BroadcastTool.sendMessage(p, "HIGH_## Goods can highten your limit");
+		return;
+	    } else {
+		p.getWorld().getBlockAt(underFootLoc).setType(Material.DIRT);
+	    }
 	} else if (good == ShopGoods.SPAWN) {
 	    // spawn
 	    p.teleport(SpawnLocationTool.RESPAWN);

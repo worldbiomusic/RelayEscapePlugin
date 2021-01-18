@@ -25,6 +25,7 @@ import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCreativeEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
@@ -132,6 +133,15 @@ public class CommonListener implements Listener {
 		    break;
 		case "6":
 		    translatedMsg = "PASS";
+		    break;
+		case "7":
+		    translatedMsg = "WOW";
+		    break;
+		case "8":
+		    translatedMsg = "LOL";
+		    break;
+		case "9":
+		    translatedMsg = "...";
 		    break;
 		default:
 		    e.setCancelled(true);
@@ -439,14 +449,17 @@ public class CommonListener implements Listener {
     @EventHandler
     public void setServerMOTD(ServerListPingEvent e) {
 	e.setMaxPlayers(20);
+	
 
-	String motd = "" + ChatColorTool.random() + ChatColor.BOLD + "Relay";
+	String motd = "              " + ChatColorTool.random() + ChatColor.BOLD + "Relay";
 	motd += "" + ChatColorTool.random() + ChatColor.BOLD + " Escape ";
 	motd += ChatColor.WHITE + "[";
 	motd += ChatColorTool.random() + "1.12.2";
 	motd += ChatColor.WHITE + " - ";
-	motd += ChatColorTool.random() + "1.16.4";
-	motd += ChatColor.WHITE + "]";
+	motd += ChatColorTool.random() + "1.16";
+	motd += ChatColor.WHITE + "]\n";
+	motd += ChatColor.WHITE + "                    NOW: ";
+	motd += "" +ChatColor.WHITE + ChatColor.BOLD + this.relayManager.getCurrentTime().name();
 	e.setMotd(motd);
     }
 
@@ -561,6 +574,10 @@ public class CommonListener implements Listener {
 	if(p.isOp()) {
 	    e.setCancelled(false);
 	}
+    }
+    
+    @EventHandler
+    public void onPlayerClickInventoryEvent(InventoryClickEvent e) {
     }
     
     @EventHandler
