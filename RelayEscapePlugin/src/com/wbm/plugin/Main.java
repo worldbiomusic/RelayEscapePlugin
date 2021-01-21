@@ -31,6 +31,7 @@ import com.wbm.plugin.util.Setting;
 import com.wbm.plugin.util.StageManager;
 import com.wbm.plugin.util.config.ConfigTest;
 import com.wbm.plugin.util.config.DataManager;
+import com.wbm.plugin.util.discord.DiscordBot;
 import com.wbm.plugin.util.enums.Role;
 import com.wbm.plugin.util.enums.RoomType;
 import com.wbm.plugin.util.general.BanItemTool;
@@ -73,6 +74,7 @@ public class Main extends JavaPlugin {
     SpawnLocationTool respawnManager;
     BanItemTool banItems;
     SkinManager skinManager;
+    DiscordBot discordBot;
 
     static Main main;
 
@@ -154,7 +156,12 @@ public class Main extends JavaPlugin {
 
 	// ranking system(stage) 업데이트
 	this.loopUpdateAllStage();
+	
+	// discord bot 실행
+	this.setupDiscordBot();
     }
+
+    
 
     void setupMain() {
 	this.server = this.getServer();
@@ -300,7 +307,7 @@ public class Main extends JavaPlugin {
 		    Bukkit.getServer().dispatchCommand(Bukkit.getServer().getConsoleSender(), (cmd));
 		}
 	    }
-	}, 20 * 10, 20 * 60 * 10);
+	}, 20 * 10, 20 * 60 * 60);
     }
 
     private void setupRankStages() {
@@ -368,7 +375,7 @@ public class Main extends JavaPlugin {
 	    public void run() {
 		List<String> tips = new ArrayList<>();
 		tips.add("Discord " + ChatColor.WHITE + ":" + ChatColor.GREEN + ChatColor.UNDERLINE + ChatColor.BOLD
-			+ " https://discord.gg/8f2nyYDgRV" + ChatColor.WHITE);
+			+ " https://discord.gg/EwXk9Cd2Ya" + ChatColor.WHITE);
 		tips.add("Tutorial: /re tutorial");
 		tips.add("CHAT: 1 ~ 9 (ex. 1 = HI)");
 		tips.add("Reconnect is good way to go to spawn or give up Room");
@@ -489,6 +496,10 @@ public class Main extends JavaPlugin {
 		stageManager.updateAllStage();
 	    }
 	}, 0, 20 * 60 * 5);
+    }
+    
+    private void setupDiscordBot() {
+	this.discordBot = new DiscordBot();
     }
 
 //	void makeKits() {

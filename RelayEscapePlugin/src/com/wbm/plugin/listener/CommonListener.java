@@ -2,7 +2,6 @@ package com.wbm.plugin.listener;
 
 import java.util.UUID;
 
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -41,7 +40,6 @@ import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.server.ServerListPingEvent;
 import org.bukkit.inventory.ItemStack;
 
-import com.wbm.plugin.Main;
 import com.wbm.plugin.data.PlayerData;
 import com.wbm.plugin.data.RoomLocation;
 import com.wbm.plugin.util.PlayerDataManager;
@@ -104,7 +102,7 @@ public class CommonListener implements Listener {
 
 	// chat 쿨다운 관리
 	if (CoolDownManager.addPlayer(Setting.CoolDown_Subject_CHAT, p)) {
-	    
+
 	    // CHAT가지고 있을떄
 	    if (pData.hasGoods(ShopGoods.CHAT)) {
 		// 동작 필요 x
@@ -151,7 +149,7 @@ public class CommonListener implements Listener {
 
 		e.setMessage(translatedMsg);
 		// 소리 재생
-		    PlayerTool.playSoundToEveryone(Sound.BLOCK_END_PORTAL_FRAME_FILL);
+		PlayerTool.playSoundToEveryone(Sound.BLOCK_END_PORTAL_FRAME_FILL);
 	    }
 
 	} else {
@@ -395,7 +393,7 @@ public class CommonListener implements Listener {
     @EventHandler
     public void onPlayerBreakTokenBlock(BlockBreakEvent e) {
 	/*
-	 * Token Block 부쉈을때 토큰 지급후 블럭 1분후 등장
+	 * Token Block 부쉈을때 토큰 지급후 블럭 재등장
 	 */
 	Block b = e.getBlock();
 	Location loc = b.getLocation();
@@ -422,34 +420,27 @@ public class CommonListener implements Listener {
 	    // 블럭 없에기
 	    b.setType(Material.AIR);
 
-	    // 일정시간후 블럭 다시 나타나기
-	    Bukkit.getScheduler().runTaskLater(Main.getInstance(), new Runnable() {
+	    // 확률 조정해서 블럭 다시 생기기
+	    double r = Math.random();
+	    Material block = Material.IRON_BLOCK;
 
-		@Override
-		public void run() {
-		    double r = Math.random();
-		    Material block = Material.IRON_BLOCK;
+	    if (r < 0.7) {
+		block = Material.IRON_BLOCK;
+	    } else if (r < 0.85) {
+		block = Material.GOLD_BLOCK;
+	    } else if (r < 0.95) {
+		block = Material.DIAMOND_BLOCK;
+	    } else if (r < 1) {
+		block = Material.EMERALD_BLOCK;
+	    }
 
-		    if (r < 0.5) {
-			block = Material.IRON_BLOCK;
-		    } else if (r < 0.8) {
-			block = Material.GOLD_BLOCK;
-		    } else if (r < 0.95) {
-			block = Material.DIAMOND_BLOCK;
-		    } else if (r < 1) {
-			block = Material.EMERALD_BLOCK;
-		    }
-
-		    b.setType(block);
-		}
-	    }, 20 * 60 * 1);
+	    b.setType(block);
 	}
     }
 
     @EventHandler
     public void setServerMOTD(ServerListPingEvent e) {
 	e.setMaxPlayers(20);
-	
 
 	String motd = "              " + ChatColorTool.random() + ChatColor.BOLD + "Relay";
 	motd += "" + ChatColorTool.random() + ChatColor.BOLD + " Escape ";
@@ -459,7 +450,7 @@ public class CommonListener implements Listener {
 	motd += ChatColorTool.random() + "1.16";
 	motd += ChatColor.WHITE + "]\n";
 	motd += ChatColor.WHITE + "                    NOW: ";
-	motd += "" +ChatColor.WHITE + ChatColor.BOLD + this.relayManager.getCurrentTime().name();
+	motd += "" + ChatColor.WHITE + ChatColor.BOLD + this.relayManager.getCurrentTime().name();
 	e.setMotd(motd);
     }
 
@@ -511,16 +502,16 @@ public class CommonListener implements Listener {
 	    }
 	}
     }
-    
+
     @EventHandler(priority = EventPriority.MONITOR)
     public void onOPBreakBlock(BlockBreakEvent e) {
 	// 허용
 	Player p = e.getPlayer();
-	if(p.isOp()) {
+	if (p.isOp()) {
 	    e.setCancelled(false);
 	}
     }
-    
+
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerPlaceBannedItem(BlockPlaceEvent e) {
 	Player p = e.getPlayer();
@@ -536,14 +527,14 @@ public class CommonListener implements Listener {
 	    BroadcastTool.sendMessage(p, "banned item");
 	    e.setCancelled(true);
 	}
-	
+
 	// OP이면 허용
-	if(p.isOp()) {
+	if (p.isOp()) {
 	    e.setCancelled(false);
 	}
     }
 
-    @EventHandler(priority=EventPriority.MONITOR)
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerEmptyBucket(PlayerBucketEmptyEvent e) {
 	Player p = e.getPlayer();
 	UUID uuid = p.getUniqueId();
@@ -557,29 +548,29 @@ public class CommonListener implements Listener {
 		e.setCancelled(true);
 	    }
 	}
-	
+
 	// OP허용
-	if(p.isOp()) {
+	if (p.isOp()) {
 	    e.setCancelled(false);
 	}
     }
-    
-    @EventHandler(priority=EventPriority.MONITOR)
+
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerFillBucket(PlayerBucketFillEvent e) {
 	Player p = e.getPlayer();
-	
+
 	e.setCancelled(true);
-	
+
 	// OP허용
-	if(p.isOp()) {
+	if (p.isOp()) {
 	    e.setCancelled(false);
 	}
     }
-    
+
     @EventHandler
     public void onPlayerClickInventoryEvent(InventoryClickEvent e) {
     }
-    
+
     @EventHandler
     public void onPlayerHitByArrow(EntityDamageByEntityEvent e) {
 //	System.out.println("ENTITY HITTTTTT");
@@ -594,7 +585,7 @@ public class CommonListener implements Listener {
 //	    }
 //	}
     }
-    
+
 }
 //
 //

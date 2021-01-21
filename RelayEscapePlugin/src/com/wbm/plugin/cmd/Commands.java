@@ -688,7 +688,7 @@ public class Commands implements CommandExecutor {
 	tutorials.add("- Chat: enter number 1 ~ 9");
 	tutorials.add("- Commands: /re");
 	tutorials.add(
-		"- Discord: " + ChatColor.YELLOW + ChatColor.BOLD + " https://discord.gg/yRFHkPKqBX" + ChatColor.WHITE);
+		"- Discord: " + ChatColor.YELLOW + ChatColor.BOLD + " https://discord.gg/EwXk9Cd2Ya" + ChatColor.WHITE);
 	tutorials.add("=================================");
 	tutorials.add("=========         END         =========");
 	tutorials.add("=================================");
@@ -704,7 +704,7 @@ public class Commands implements CommandExecutor {
 	tutorials.add("- 채팅: 1번 ~ 9번을 입력하면 됩니다 (ex.1 = HI)");
 	tutorials.add("- 커맨드 자세히 보기: /re");
 	tutorials.add(
-		"- Discord: " + ChatColor.YELLOW + ChatColor.BOLD + " https://discord.gg/yRFHkPKqBX" + ChatColor.WHITE);
+		"- Discord: " + ChatColor.YELLOW + ChatColor.BOLD + " https://discord.gg/EwXk9Cd2Ya" + ChatColor.WHITE);
 
 	tutorials.add("=================================");
 	tutorials.add("=========         끝         =========");

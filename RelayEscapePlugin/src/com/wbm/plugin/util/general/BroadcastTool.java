@@ -5,6 +5,7 @@ import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import com.wbm.plugin.util.Setting;
@@ -20,6 +21,11 @@ public class BroadcastTool {
     // sendMessage
     public static void sendMessage(Player p, String msg) {
 	p.sendMessage(prefix + msg);
+    }
+    
+    // sendMessage
+    public static void sendMessage(CommandSender sender, String msg) {
+	sender.sendMessage(prefix + msg);
     }
 
     public static void sendMessage(List<Player> many, String msg) {

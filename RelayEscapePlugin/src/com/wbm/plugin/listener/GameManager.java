@@ -152,8 +152,8 @@ public class GameManager implements Listener {
 	 * 기본굿즈: ShopGoods.CHEST, ShopGoods.HIGH_5, ShopGoods.MAKINGTIME_5
 	 */
 	PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
-	ShopGoods[] basicGoods = { ShopGoods.CHEST, ShopGoods.HIGH_5, ShopGoods.MAKINGTIME_5, ShopGoods.FINISH,
-		ShopGoods.GOODS_LIST };
+	ShopGoods[] basicGoods = { ShopGoods.DIRT, ShopGoods.GLOWSTONE, ShopGoods.CHEST, ShopGoods.HIGH_5,
+		ShopGoods.MAKINGTIME_5, ShopGoods.FINISH, ShopGoods.GOODS_LIST };
 
 	// PlayerData의 goods리스트에 지급
 	for (ShopGoods good : basicGoods) {

@@ -49,7 +49,14 @@ public class EventBlockListener {
     }
 
     private static void JUMPING(Player p, Block b) {
-	p.setVelocity(new Vector(0, 0.65, 0));
+	Location pLoc = p.getLocation().clone();
+	
+	double dirX = pLoc.getDirection().multiply(0.05).getX();
+	double dirZ = pLoc.getDirection().multiply(0.05).getZ();
+	
+//	System.out.println(dirX+":"+dirZ);
+	
+	p.setVelocity(new Vector(dirX, 0.65, dirZ));
     }
 
     private static void RESPAWN(Player p, Block b) {

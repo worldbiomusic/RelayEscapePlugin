@@ -268,10 +268,6 @@ public class GoodsListener implements Listener {
 	    // makingBlock들을 담고 있는 인벤토리 오픈
 	    Inventory inv = Bukkit.createInventory(null, 54, ShopGoods.CHEST.name());
 
-	    // 기본 MakingBlock제공
-	    inv.addItem(ShopGoods.GLOWSTONE.getItemStack());
-	    inv.addItem(ShopGoods.DIRT.getItemStack());
-
 	    // 자신이 구입한 Goods(MakingBLock)만 인벤토리에 추가
 	    for (ShopGoods makingBlock : ShopGoods.getGoodsWithGoodsRole(GoodsRole.MAKING_BLOCK)) {
 		PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
