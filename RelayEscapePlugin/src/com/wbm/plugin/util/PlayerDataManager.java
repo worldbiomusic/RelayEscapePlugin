@@ -58,6 +58,15 @@ public class PlayerDataManager implements DataMember
 	public PlayerData getPlayerData(UUID uuid) {
 		return this.playerData.get(uuid);
 	}
+	
+	public PlayerData getPlayerData(String name) {
+	    for(PlayerData pData : this.getPlayerData().values()) {
+		if(pData.getName().equalsIgnoreCase(name)) {
+		    return pData;
+		}
+	    }
+	    return null;
+	}
 
 	public boolean isFirstJoin(UUID uuid)
 	{

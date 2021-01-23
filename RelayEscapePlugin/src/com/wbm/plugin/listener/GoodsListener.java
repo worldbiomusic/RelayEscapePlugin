@@ -21,9 +21,6 @@ import com.wbm.plugin.data.RoomLocation;
 import com.wbm.plugin.util.PlayerDataManager;
 import com.wbm.plugin.util.RelayManager;
 import com.wbm.plugin.util.RoomManager;
-import com.wbm.plugin.util.enums.RelayTime;
-import com.wbm.plugin.util.enums.Role;
-import com.wbm.plugin.util.enums.RoomType;
 import com.wbm.plugin.util.general.BroadcastTool;
 import com.wbm.plugin.util.general.ChatColorTool;
 import com.wbm.plugin.util.general.InventoryTool;
@@ -57,8 +54,6 @@ public class GoodsListener implements Listener {
 	 * [Challenger] watch(시간 단축)
 	 */
 	Player p = e.getPlayer();
-	PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
-	Role role = pData.getRole();
 	ItemStack item = e.getItem();
 	ShopGoods good = null;
 
@@ -75,21 +70,25 @@ public class GoodsListener implements Listener {
 
 	// Main room, making time, maker
 	if (e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.RIGHT_CLICK_BLOCK) {
-	    if (this.relayManager.checkRoomAndRelayTimeAndRole(RoomType.MAIN, RelayTime.MAKING, Role.MAKER, p)
-		    && good.getGoodsRole() == GoodsRole.MAKING) {
-		this.useMakingGoods(p, good);
-	    } else if (role == Role.TESTER && good.getGoodsRole() == GoodsRole.TESTING) {
-		this.useTestingGoods(p, good);
-	    } else if (role == Role.CHALLENGER && good.getGoodsRole() == GoodsRole.CHALLENGING) {
-		this.useChallengingGoods(p, good);
-	    } else if (role == Role.WAITER && good.getGoodsRole() == GoodsRole.WAITING) {
-		this.useWaitingGoods(p, good);
-	    }
+//	    if (this.relayManager.checkRoomAndRelayTimeAndRole(RoomType.MAIN, RelayTime.MAKING, Role.MAKER, p)
+//		    && good.isRoleGood(Role.MAKER)) {
+//		this.useMakingGoods(p, good);
+//	    } else if (good.isRoleGood(Role.TESTER)) {
+//		this.useTestingGoods(p, good);
+//	    } else if (good.isRoleGood(Role.CHALLENGER)) {
+//		this.useChallengingGoods(p, good);
+//	    } else if (good.isRoleGood(Role.WAITER)) {
+//		this.useWaitingGoods(p, good);
+//	    }
+	    
+	    
 
-	    // 굿즈의 GoodsRole이 ALWAYS면 항상 사용할 수 있게
-	    if (good.getGoodsRole() == GoodsRole.ALWAYS) {
-		this.useAlwaysGoods(p, good);
-	    }
+//	    // 굿즈의 GoodsRole이 ALWAYS면 항상 사용할 수 있게
+//	    if (good.isGoodsRoleGoods(GoodsRole.ALWAYS)) {
+//		this.useAlwaysGoods(p, good);
+//	    }
+	    
+	    this.useGoods(p, good);
 	}
     }
 
@@ -148,7 +147,6 @@ public class GoodsListener implements Listener {
 	    BroadcastTool.sendMessage(p, "Your name color set to: " + c + c.name());
 	    break;
 	default:
-	    return;
 	}
     }
 
@@ -376,5 +374,152 @@ public class GoodsListener implements Listener {
 
     private void useWaitingGoods(Player p, ShopGoods good) {
 
+    }
+
+    private void useGoods(Player p, ShopGoods good) {
+	PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
+	if (good == ShopGoods.GOODS_LIST) {
+	    // goods들을 포함한 GUI inventory 보여주기 (클락 불가능)
+	    Inventory inv = this.getPlayerGoodsListInv(p, 0);
+	    p.openInventory(inv);
+	} else if (good == ShopGoods.TOKEN_500) {
+	    // token 500 추가
+	    pData.plusToken(500);
+	    // 클릭시 playerData에서 굿즈 제거
+	    pData.removeGoods(ShopGoods.TOKEN_500);
+	    // 클릭시 현재 인벤토리에서 굿즈 제거
+	    InventoryTool.removeItemFromPlayer(p, ShopGoods.TOKEN_500.getItemStack());
+	    // 알림
+	    BroadcastTool.sendMessage(p, "You got 500 Token!");
+	} else if (good == ShopGoods.COLOR_CHAT) {
+	    // 알림
+	    ChatColor c = ChatColorTool.random();
+	    p.setDisplayName(c + p.getName() + ChatColor.WHITE);
+	    BroadcastTool.sendMessage(p, "Your name color set to: " + c + c.name());
+	} else if (good == ShopGoods.UNDER_BLOCK) {
+	    // 발밑에 블럭 생성
+	    Location underFootLoc = p.getLocation().clone();
+	    // 높이 제한 검사 (Goods) (4시작인데 4에 놓으면 0이므로 +1 을 해줌)
+	    int blockHigh = (int) (underFootLoc.getY() - ((int) RoomLocation.MAIN_Pos1.getY())) + 1;
+
+	    // HIGH_## 굿즈중에서 가장 높은 굿즈 검색
+//	    String kind = ShopGoods.HIGH_10.name().split("_")[0];
+	    String kind = "HIGH";
+	    int allowedHigh = pData.getRoomSettingGoodsHighestValue(kind);
+
+	    // 높이제한 검사
+	    if (blockHigh > allowedHigh) {
+		// 높이제한보다 높을때 취소
+		BroadcastTool.sendMessage(p, "you can place block up to " + allowedHigh);
+		BroadcastTool.sendMessage(p, "HIGH_## Goods can highten your limit");
+		return;
+	    } else {
+		p.getWorld().getBlockAt(underFootLoc).setType(Material.DIRT);
+	    }
+	} else if (good == ShopGoods.SPAWN) {
+	    // spawn
+	    p.teleport(SpawnLocationTool.RESPAWN);
+	} else if (good == ShopGoods.ROOM_MANAGER) {
+	    // room list출력
+	    this.roomManager.printRoomList(p);
+	} else if (good == ShopGoods.CHEST) {
+	    // makingBlock들을 담고 있는 인벤토리 오픈
+	    Inventory inv = Bukkit.createInventory(null, 54, ShopGoods.CHEST.name());
+
+	    // 자신이 구입한 Goods(MakingBLock)만 인벤토리에 추가
+	    for (ShopGoods makingBlock : ShopGoods.getGoodsWithGoodsRole(GoodsRole.MAKING_BLOCK)) {
+		if (pData.hasGoods(makingBlock)) {
+		    inv.addItem(makingBlock.getItemStack());
+		}
+	    }
+	    p.openInventory(inv);
+	} else if (good == ShopGoods.FINISH) {
+	    // room finish 실행
+	    if (!this.relayManager.isCorePlaced()) {
+		BroadcastTool.sendMessage(p, "core is not placed");
+		return;
+	    } else {
+		this.relayManager.startNextTime();
+	    }
+	} else if (good == ShopGoods.BLOCK_CHANGER) {
+	    // 플레이어가 들고있는 굿즈의 lore중의 3번째줄을 true or false로 변경
+	    ItemStack blockChanger = p.getInventory().getItemInMainHand();
+	    ItemMeta meta = blockChanger.getItemMeta();
+	    // lore 조정
+	    List<String> lores = meta.getLore();
+	    String mode = lores.get(2);
+	    if (mode.equalsIgnoreCase("on")) {
+		lores.set(2, "off");
+		BroadcastTool.sendMessage(p, good.name() + " mode set to off");
+	    } else if (mode.equalsIgnoreCase("off")) {
+		lores.set(2, "on");
+		BroadcastTool.sendMessage(p, good.name() + " mode set to on");
+	    }
+	    meta.setLore(lores);
+
+	    // meta 설정
+	    blockChanger.setItemMeta(meta);
+
+	    // main hand에 모드 바뀐것으로 굿즈 체인지
+	    p.getInventory().setItemInMainHand(blockChanger);
+	} else if (good == ShopGoods.HIDE) {
+	    // 플레이어가 들고있는 굿즈의 lore중의 3번째줄을 true or false로 변경
+	    ItemStack hideGoods = p.getInventory().getItemInMainHand();
+	    ItemMeta meta = hideGoods.getItemMeta();
+	    // lore 조정
+	    List<String> lores = meta.getLore();
+	    String mode = lores.get(2);
+	    if (mode.equalsIgnoreCase("on")) {
+		lores.set(2, "off");
+		BroadcastTool.sendMessage(p, good.name() + " mode set to off");
+		// unhide
+		PlayerTool.unhidePlayerFromEveryone(p);
+	    } else if (mode.equalsIgnoreCase("off")) {
+		lores.set(2, "on");
+		BroadcastTool.sendMessage(p, good.name() + " mode set to on");
+		// hide
+		PlayerTool.hidePlayerFromEveryone(p);
+	    }
+	    meta.setLore(lores);
+
+	    // meta 설정
+	    hideGoods.setItemMeta(meta);
+
+	    // main hand에 모드 바뀐것으로 굿즈 체인지
+	    p.getInventory().setItemInMainHand(hideGoods);
+	} else if (good == ShopGoods.REDUCE_TIME) {
+	    // ChallengingTime 남은 시간(1/(player수+1)) 단축
+	    int leftTime = this.relayManager.getLeftTime();
+	    int reductionTime = leftTime / (Bukkit.getOnlinePlayers().size() + 1);
+	    this.relayManager.reduceTime(reductionTime);
+
+	    // 사용한후에 삭제
+	    InventoryTool.removeItemFromPlayer(p, good.getItemStack());
+
+	    BroadcastTool.sendMessageToEveryone(reductionTime + " sec reduced by " + p.getName());
+	} else if (good == ShopGoods.SUPER_STAR) {
+	    // 플레이어가 들고있는 굿즈의 lore중의 3번째줄을 true or false로 변경
+	    ItemStack superStar = p.getInventory().getItemInMainHand();
+	    ItemMeta meta = superStar.getItemMeta();
+	    // lore 조정
+	    List<String> lores = meta.getLore();
+	    String mode = lores.get(2);
+	    if (mode.equalsIgnoreCase("on")) {
+		lores.set(2, "off");
+		BroadcastTool.sendMessage(p, good.name() + " mode set to off");
+		p.setGlowing(false);
+	    } else if (mode.equalsIgnoreCase("off")) {
+		lores.set(2, "on");
+		BroadcastTool.sendMessage(p, good.name() + " mode set to on");
+		p.setGlowing(true);
+	    }
+	    meta.setLore(lores);
+
+	    // meta 설정
+	    superStar.setItemMeta(meta);
+
+	    // main hand에 모드 바뀐것으로 굿즈 체인지
+	    p.getInventory().setItemInMainHand(superStar);
+	}
     }
 }

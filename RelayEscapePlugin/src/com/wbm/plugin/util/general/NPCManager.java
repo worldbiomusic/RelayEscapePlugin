@@ -192,7 +192,7 @@ public class NPCManager implements DataMember {
 		    connection.sendPacket(new PacketPlayOutPlayerInfo(
 			    PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, npc));
 		}
-	    }, 20 * 2);
+	    }, 20 * 3);
 	}
     }
 

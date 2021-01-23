@@ -1,5 +1,6 @@
 package com.wbm.plugin.listener;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import org.bukkit.ChatColor;
@@ -45,6 +46,7 @@ import com.wbm.plugin.data.RoomLocation;
 import com.wbm.plugin.util.PlayerDataManager;
 import com.wbm.plugin.util.RelayManager;
 import com.wbm.plugin.util.Setting;
+import com.wbm.plugin.util.discord.DiscordBot;
 import com.wbm.plugin.util.enums.MiniGameType;
 import com.wbm.plugin.util.enums.RelayTime;
 import com.wbm.plugin.util.enums.Role;
@@ -75,9 +77,11 @@ public class CommonListener implements Listener {
     SkinManager skinManager;
     MiniGameManager miniGameManager;
     RelayManager relayManager;
+    DiscordBot discordBot;
 
     public CommonListener(PlayerDataManager pDataManager, ShopManager shopManager, BanItemTool banItems, NPCManager npc,
-	    SkinManager skinManager, MiniGameManager miniGameManager, RelayManager relayManager) {
+	    SkinManager skinManager, MiniGameManager miniGameManager, RelayManager relayManager,
+	    DiscordBot discordBot) {
 	this.pDataManager = pDataManager;
 	this.shopManager = shopManager;
 	this.banItems = banItems;
@@ -85,6 +89,7 @@ public class CommonListener implements Listener {
 	this.skinManager = skinManager;
 	this.miniGameManager = miniGameManager;
 	this.relayManager = relayManager;
+	this.discordBot = discordBot;
     }
 
     @EventHandler
@@ -103,54 +108,65 @@ public class CommonListener implements Listener {
 	// chat 쿨다운 관리
 	if (CoolDownManager.addPlayer(Setting.CoolDown_Subject_CHAT, p)) {
 
-	    // CHAT가지고 있을떄
-	    if (pData.hasGoods(ShopGoods.CHAT)) {
-		// 동작 필요 x
-		// 소리 재생
-		PlayerTool.playSoundToEveryone(Sound.BLOCK_END_PORTAL_FRAME_FILL);
-	    } else {
+//	    // CHAT가지고 있을떄
+//	    if (pData.hasGoods(ShopGoods.CHAT)) {
+//		// 동작 필요 x
+//		// 소리 재생
+//		PlayerTool.playSoundToEveryone(Sound.BLOCK_END_PORTAL_FRAME_FILL);
+//		String discordChat = "[" + p.getName() + "] " + e.getMessage();
+//		this.discordBot.sendMsgWithChannel("server-chat", discordChat);
+//	    } else {
+//
+//		String msg = e.getMessage();
+//
+//		String translatedMsg = "";
+//		switch (msg) {
+//		case "1":
+//		    translatedMsg = "HI";
+//		    break;
+//		case "2":
+//		    translatedMsg = "BYE";
+//		    break;
+//		case "3":
+//		    translatedMsg = "FUXX";
+//		    break;
+//		case "4":
+//		    translatedMsg = "FOLLOW ME";
+//		    break;
+//		case "5":
+//		    translatedMsg = "VOTE";
+//		    break;
+//		case "6":
+//		    translatedMsg = "PASS";
+//		    break;
+//		case "7":
+//		    translatedMsg = "WOW";
+//		    break;
+//		case "8":
+//		    translatedMsg = "LOL";
+//		    break;
+//		case "9":
+//		    translatedMsg = "...";
+//		    break;
+//		default:
+//		    e.setCancelled(true);
+//		    return;
+//
+//		}
+//
+//		e.setMessage(translatedMsg);
+//		// 소리 재생
+//		PlayerTool.playSoundToEveryone(Sound.BLOCK_END_PORTAL_FRAME_FILL);
+//
+//		String discordChat = "[" + p.getName() + "] " + translatedMsg;
+//		this.discordBot.sendMsgWithChannel("server-chat", discordChat);
+//	    }
 
-		String msg = e.getMessage();
-
-		String translatedMsg = "";
-		switch (msg) {
-		case "1":
-		    translatedMsg = "HI";
-		    break;
-		case "2":
-		    translatedMsg = "BYE";
-		    break;
-		case "3":
-		    translatedMsg = "FUXX";
-		    break;
-		case "4":
-		    translatedMsg = "FOLLOW ME";
-		    break;
-		case "5":
-		    translatedMsg = "VOTE";
-		    break;
-		case "6":
-		    translatedMsg = "PASS";
-		    break;
-		case "7":
-		    translatedMsg = "WOW";
-		    break;
-		case "8":
-		    translatedMsg = "LOL";
-		    break;
-		case "9":
-		    translatedMsg = "...";
-		    break;
-		default:
-		    e.setCancelled(true);
-		    return;
-
-		}
-
-		e.setMessage(translatedMsg);
-		// 소리 재생
-		PlayerTool.playSoundToEveryone(Sound.BLOCK_END_PORTAL_FRAME_FILL);
-	    }
+	    // 소리 재생
+	    PlayerTool.playSoundToEveryone(Sound.BLOCK_END_PORTAL_FRAME_FILL);
+	    LocalDateTime now = LocalDateTime.now();
+	    String discordChat = now.getHour() + ":" + now.getMinute() + " [" + p.getName() + "] " + e.getMessage();
+	    this.discordBot.sendMsgWithChannel("server-chat", discordChat);
 
 	} else {
 	    BroadcastTool.sendMessage(p, "too fast chat");

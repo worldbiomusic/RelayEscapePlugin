@@ -40,91 +40,55 @@
 클래스 세부 설명
 
 - ## cmd
-> - [Commands][Commands]: 
+> - [Commands](Commands.md): 
 
 - ## data
-> - [BlockData][BlockData]: Room의 블럭을 저장할때 사용하는 클래스
-> - [MiniGameLocation][MiniGameLocation]: 미니게임 위치 관련
-> - [PlayerData][PlayerData]: 서버에서 관리하는 플레이어 데이터 관련
-> - [Room][Room]: 룸 
-> - [RoomLocation][RoomLocation]: 룸 위치 관련
-> - [RoomLocker][RoomLocker]: 룸 블럭 잠금관련(꼭 룸에 종속되진 않음)
+> - [BlockData](BlockData.md): Room의 블럭을 저장할때 사용하는 클래스
+> - [MiniGameLocation](MiniGameLocation.md): 미니게임 위치 관련
+> - [PlayerData](PlayerData.md): 서버에서 관리하는 플레이어 데이터 관련
+> - [Room](Room.md): 룸 
+> - [RoomLocation](RoomLocation.md): 룸 위치 관련
+> - [RoomLocker](RoomLocker.md): 룸 블럭 잠금관련(꼭 룸에 종속되진 않음)
 
 - ## listerner
 - 모든 이벤트를 CommndListener에서 순서를 관리하고 다른 클래스로 넘겨줄까 고민중!
-> - [CommonListener][CommonListener]: 
-> - [GameManager][GameManager]: 
-> - [GoodsListener][GoodsListener]: 
-> - [EventBlockListener][EventBlockListener]: 
+> - [CommonListener](CommonListener.md): 
+> - [GameManager](GameManager.md): 
+> - [GoodsListener](GoodsListener.md): 
+> - [EventBlockListener](EventBlockListener.md): 
 
 - ## util
-> - [Main][Main]: 
-> - [PlayerDataManager][PlayerDataManager]: 
-> - [RankManager][RankManager]: 
-> - [RelayManager][RelayManager]: 
-> - [RoomManager][RoomManager]: 
-> - [Setting][Setting]: 
-> - [StageManager][StageManager]: 
+> - [Main](Main.md): 
+> - [PlayerDataManager](PlayerDataManager.md): 
+> - [RankManager](RankManager.md): 
+> - [RelayManager](RelayManager.md): 
+> - [RoomManager](RoomManager.md): 
+> - [Setting](Setting.md): 
+> - [StageManager](StageManager.md): 
 
 - ## util.config
-> - [DataManager][DataManager]: 
-> - [DataMember][DataMember]: 
+> - [DataManager](DataManager.md): 
+> - [DataMember](DataMember.md): 
 
 - ## util.enum
-> - [MiniGameType][MiniGameType]: 
-> - [RelayTime][RelayTime]: 
-> - [Role][Role]: 
-> - [RolePermission][RolePermission]: 
-> - [RoomType][RoomType]: 
+> - [MiniGameType](MiniGameType.md): 
+> - [RelayTime](RelayTime.md): 
+> - [Role](Role.md): 
+> - [RolePermission](RolePermission.md): 
+> - [RoomType](RoomType.md): 
 
 - ## util.minigame
-> - [MiniGameManager][MiniGameManager]: 
-> - [MiniGame][MiniGame]: 
-> - [SoloMiniGame][SoloMiniGame]: 
-> - [CooperativeMiniGame][CooperativeMiniGame]: 
-> - [BattleMiniGame][BattleMiniGame]: 
-> - [MiniGameRankManager][MiniGameRankManager]: SoloMiniGame, CooperativeMiniGame의 rank를  계산해주는 클래스
+> - [MiniGameManager](MiniGameManager.md): 
+> - [MiniGame](MiniGame.md): 
+> - [SoloMiniGame](SoloMiniGame.md): 
+> - [CooperativeMiniGame](CooperativeMiniGame.md): 
+> - [BattleMiniGame](BattleMiniGame.md): 
+> - [MiniGameRankManager](MiniGameRankManager.md): SoloMiniGame, CooperativeMiniGame의 rank를  계산해주는 클래스
 
 - ## util.shop
-> - [GoodsRole][GoodsRole]: 
-> - [ShopGoods][ShopGoods]: 
-> - [ShopManager][ShopManager]: 
-
-
-[Commands]: https://github.com/worldbiomusic/RelayEscapePlugin/blob/edit-wiki/EscaperPlugin/wiki/Commands.md
-[BlockData]: https://github.com/worldbiomusic/RelayEscapePlugin/blob/edit-wiki/EscaperPlugin/wiki/BlockData.md
-[MiniGameLocation]: https://github.com/worldbiomusic/RelayEscapePlugin/blob/edit-wiki/EscaperPlugin/wiki/MiniGameLocation.md
-[PlayerData]: https://github.com/worldbiomusic/RelayEscapePlugin/blob/edit-wiki/EscaperPlugin/wiki/PlayerData.md
-[Room]: https://github.com/worldbiomusic/RelayEscapePlugin/blob/edit-wiki/EscaperPlugin/wiki/Room.md
-[RoomLocation]: https://github.com/worldbiomusic/RelayEscapePlugin/blob/edit-wiki/EscaperPlugin/wiki/RoomLocation.md
-[RoomLocker]: https://github.com/worldbiomusic/RelayEscapePlugin/blob/edit-wiki/EscaperPlugin/wiki/RoomLocker.md
-[CommonListener]: https://github.com/worldbiomusic/RelayEscapePlugin/blob/edit-wiki/EscaperPlugin/wiki/CommonListener.md
-[GameManager]: https://github.com/worldbiomusic/RelayEscapePlugin/blob/edit-wiki/EscaperPlugin/wiki/GameManager.md
-[GoodsListener]: https://github.com/worldbiomusic/RelayEscapePlugin/blob/edit-wiki/EscaperPlugin/wiki/GoodsListener.md
-[Main]: https://github.com/worldbiomusic/RelayEscapePlugin/blob/edit-wiki/EscaperPlugin/wiki/Main.md
-[PlayerDataManager]: https://github.com/worldbiomusic/RelayEscapePlugin/blob/edit-wiki/EscaperPlugin/wiki/PlayerDataManager.md
-[RankManager]: https://github.com/worldbiomusic/RelayEscapePlugin/blob/edit-wiki/EscaperPlugin/wiki/RankManager.md
-[RelayManager]: https://github.com/worldbiomusic/RelayEscapePlugin/blob/edit-wiki/EscaperPlugin/wiki/RelayManager.md
-[RoomManager]: https://github.com/worldbiomusic/RelayEscapePlugin/blob/edit-wiki/EscaperPlugin/wiki/RoomManager.md
-[Setting]: https://github.com/worldbiomusic/RelayEscapePlugin/blob/edit-wiki/EscaperPlugin/wiki/Setting.md
-[DataManager]: https://github.com/worldbiomusic/RelayEscapePlugin/blob/edit-wiki/EscaperPlugin/wiki/DataManager.md
-[DataMember]: https://github.com/worldbiomusic/RelayEscapePlugin/blob/edit-wiki/EscaperPlugin/wiki/DataMember.md
-[MiniGameType]: https://github.com/worldbiomusic/RelayEscapePlugin/blob/edit-wiki/EscaperPlugin/wiki/MiniGameType.md
-[RelayTime]: https://github.com/worldbiomusic/RelayEscapePlugin/blob/edit-wiki/EscaperPlugin/wiki/RelayTime.md
-[Role]: https://github.com/worldbiomusic/RelayEscapePlugin/blob/edit-wiki/EscaperPlugin/wiki/Role.md
-[RolePermission]: https://github.com/worldbiomusic/RelayEscapePlugin/blob/edit-wiki/EscaperPlugin/wiki/RolePermission.md
-[RoomType]: https://github.com/worldbiomusic/RelayEscapePlugin/blob/edit-wiki/EscaperPlugin/wiki/RoomType.md
-[MiniGameManager]: https://github.com/worldbiomusic/RelayEscapePlugin/blob/edit-wiki/EscaperPlugin/wiki/MiniGameManager.md
-[MiniGame]: https://github.com/worldbiomusic/RelayEscapePlugin/blob/edit-wiki/EscaperPlugin/wiki/MiniGame.md
-[SoloMiniGame]: https://github.com/worldbiomusic/RelayEscapePlugin/blob/edit-wiki/EscaperPlugin/wiki/SoloMiniGame.md
-[CooperativeMiniGame]: https://github.com/worldbiomusic/RelayEscapePlugin/blob/edit-wiki/EscaperPlugin/wiki/CooperativeMiniGame.md
-[BattleMiniGame]: https://github.com/worldbiomusic/RelayEscapePlugin/blob/edit-wiki/EscaperPlugin/wiki/BattleMiniGame.md
-[MiniGameRankManager]: https://github.com/worldbiomusic/RelayEscapePlugin/blob/edit-wiki/EscaperPlugin/wiki/MiniGameRankManager.md
-[GoodsRole]: https://github.com/worldbiomusic/RelayEscapePlugin/blob/edit-wiki/EscaperPlugin/wiki/GoodsRole.md
-[ShopGoods]: https://github.com/worldbiomusic/RelayEscapePlugin/blob/edit-wiki/EscaperPlugin/wiki/ShopGoods.md
-[ShopManager]: https://github.com/worldbiomusic/RelayEscapePlugin/blob/edit-wiki/EscaperPlugin/wiki/ShopManager.md
-[StageManager]: https://github.com/worldbiomusic/RelayEscapePlugin/blob/edit-wiki/EscaperPlugin/wiki/StageManager.md
-
+> - [GoodsRole](GoodsRole.md): 
+> - [ShopGoods](ShopGoods.md): 
+> - [ShopManager](ShopManager.md): 
 
 
 

@@ -20,7 +20,7 @@
 > - try to pass the room
 
 ## `Viewer`
-> - survival or spectator
+> - adventure
 > - jus watch challengers playing own room (room maker cannot challenge own room) 
 -------------------
 -------------------
@@ -39,7 +39,7 @@
 > - 룸을 만들어야 한다
 
 ## `Tester`
-> - survival
+> - adventure
 > - should pass the room
 > - 룸 테스트를 통과해야 한다
 

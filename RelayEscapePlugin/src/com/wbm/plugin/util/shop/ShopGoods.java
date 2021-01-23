@@ -4,9 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import com.wbm.plugin.data.PlayerData;
+import com.wbm.plugin.util.PlayerDataManager;
 import com.wbm.plugin.util.enums.Role;
+import com.wbm.plugin.util.general.InventoryTool;
 import com.wbm.plugin.util.general.ItemStackTool;
 
 public enum ShopGoods {
@@ -68,11 +72,9 @@ public enum ShopGoods {
     BARRIER(ItemStackTool.item(Material.BARRIER), GoodsRole.MAKING_BLOCK),
     PACKED_ICE(ItemStackTool.item(Material.PACKED_ICE), GoodsRole.MAKING_BLOCK),
 
-    
     // 7f
     CACTUS(ItemStackTool.item(Material.CACTUS), GoodsRole.MAKING_BLOCK),
     WEB(ItemStackTool.item(Material.WEB), GoodsRole.MAKING_BLOCK),
-    
 
     // event making block
     JUMPING(ItemStackTool.item(Material.STAINED_GLASS, 1, (short) 1, (byte) 0, "JUMPING", "super jump event block"),
@@ -97,7 +99,8 @@ public enum ShopGoods {
     ROOM_MANAGER(ItemStackTool.item(Material.BOOK, "ROOM_MANAGER", "can load room which you made before"),
 	    GoodsRole.MAKING),
     UNDER_BLOCK(ItemStackTool.item(Material.STICK, "UNDER_BLOCK", "create stone under your foot"), GoodsRole.MAKING),
-    SPAWN(ItemStackTool.item(Material.WOOD_DOOR, "SPAWN", "teleport to spawn"), GoodsRole.MAKING),
+    SPAWN(ItemStackTool.item(Material.WOOD_DOOR, "SPAWN", "teleport to spawn"), GoodsRole.MAKING, GoodsRole.TESTING,
+	    GoodsRole.CHALLENGING, GoodsRole.VIEWING),
     CHEST(ItemStackTool.item(Material.CHEST, "CHEST", "open inventory which has blocks you can use"), GoodsRole.MAKING),
     FINISH(ItemStackTool.item(Material.ARROW, "FINISH", "finish MakingTime and go next to the TesetingTime"),
 	    GoodsRole.MAKING),
@@ -106,7 +109,7 @@ public enum ShopGoods {
 		    "Change the block immediately with the block you are holding", "===Mode===", "off"),
 	    GoodsRole.MAKING),
     HIDE(ItemStackTool.item(Material.BOWL, "HIDE", "You can hide you from everyone", "===Mode===", "off"),
-	    GoodsRole.MAKING),
+	    GoodsRole.MAKING, GoodsRole.TESTING),
 
     /*
      * 밑의 ROOM_SETTING 관련 굿즈 제작시 지켜야 하는 사항
@@ -160,47 +163,44 @@ public enum ShopGoods {
 	    GoodsRole.ALWAYS),
 
     // battle kit
-    CHAIN_BOOTS(ItemStackTool.item(Material.CHAINMAIL_BOOTS, "CHAIN_BOOTS", "it's just chain boots"),
-	    GoodsRole.BATTLE);
+    CHAIN_BOOTS(ItemStackTool.item(Material.CHAINMAIL_BOOTS, "CHAIN_BOOTS", "it's just chain boots"), GoodsRole.BATTLE);
 
     ItemStack item;
-    GoodsRole goodsRole;
+    List<GoodsRole> goodsRole;
 
-    ShopGoods(ItemStack item, GoodsRole goodsRole) {
+    ShopGoods(ItemStack item, GoodsRole... goodsRole) {
 	this.item = item;
-	this.goodsRole = goodsRole;
 
-//	Material.WOOD
-//	Material.ACACIA_STAIRS
-//	Material.step
-//	Material.LOG
-//	Material.LOG, 2
-//	Material.LOG, 3
-
-//	Material.GRASS
-//	Material.DIRT
-//	Material.GRAVEL
-//	Material.STONE;
-//	Material.STONE, 6
-//	Material.STONE, 2
-
-//	Material.SANDSTONE
-//	Material.SANDSTONE, 2
-//	Material.SMOOTH_STAIRS
-//	Material.STEP, 1
-//	Material.SANDSTONE, 1
-//	Material.SAND
-
-//	Material.WATER_BUCKET
-//	Material.SLIME_BLOCK
-    }
-
-    public GoodsRole getGoodsRole() {
-	return this.goodsRole;
+	this.goodsRole = new ArrayList<>();
+	for (GoodsRole role : goodsRole) {
+	    this.goodsRole.add(role);
+	}
     }
 
     public ItemStack getItemStack() {
 	return this.item;
+    }
+
+    public boolean equals(ShopGoods other) {
+	return this.name().equals(other.name());
+    }
+
+    public static List<ShopGoods> getGoodsWithGoodsRole(GoodsRole role) {
+	/*
+	 * 굿즈 역할로 구분된 굿즈 리스트 반환
+	 */
+	List<ShopGoods> goods = new ArrayList<>();
+	for (ShopGoods good : ShopGoods.values()) {
+	    if (good.isGoodsRoleGoods(role)) {
+		goods.add(good);
+	    }
+	}
+	return goods;
+    }
+
+    public boolean isGoodsRoleGoods(GoodsRole r) {
+	// 굿즈의 역할이 맞는지
+	return this.goodsRole.contains(r);
     }
 
     public static List<ShopGoods> getPlayerRoleGoods(Role role) {
@@ -216,35 +216,53 @@ public enum ShopGoods {
 	return goods;
     }
 
-    public static List<ShopGoods> getGoodsWithGoodsRole(GoodsRole role) {
-	/*
-	 * 굿즈 역할로 구분된 굿즈 리스트 반환
-	 */
-	List<ShopGoods> goods = new ArrayList<>();
-	for (ShopGoods good : ShopGoods.values()) {
-	    if (good.goodsRole == role) {
-		goods.add(good);
-	    }
-	}
-	return goods;
-    }
-
-    public boolean equals(ShopGoods other) {
-	return this.name().equals(other.name());
-    }
-
     public boolean isRoleGood(Role role) {
 	/*
 	 * 해당 굿즈가 역할에 맞는 굿즈인지 검사
 	 */
-	if (this.goodsRole == GoodsRole.WAITING && role == Role.WAITER
-		|| this.goodsRole == GoodsRole.MAKING && role == Role.MAKER
-		|| this.goodsRole == GoodsRole.TESTING && role == Role.TESTER
-		|| this.goodsRole == GoodsRole.CHALLENGING && role == Role.CHALLENGER
-		|| this.goodsRole == GoodsRole.VIEWING && role == Role.VIEWER) {
-	    return true;
+
+	switch (role) {
+	case WAITER:
+	    return this.goodsRole.contains(GoodsRole.WAITING);
+	case MAKER:
+	    return this.goodsRole.contains(GoodsRole.MAKING);
+	case TESTER:
+	    return this.goodsRole.contains(GoodsRole.TESTING);
+	case CHALLENGER:
+	    return this.goodsRole.contains(GoodsRole.CHALLENGING);
+	case VIEWER:
+	    return this.goodsRole.contains(GoodsRole.VIEWING);
+	default:
+	    return false;
+	}
+    }
+
+    public static void giveGoodsToPleyer(PlayerDataManager pDataManager, Player p) {
+	/*
+	 * playerData가 가지고 있는 good중 해당 role에 맞는 good만을 인벤토리에 추가함 이 메소드가 실행되기 전에 선행되야 하는
+	 * 것: player role 변경!
+	 * 
+	 * * 각 Role에 맞는 Goods중에서 가지고 있는 Goods 인벤에 지급
+	 */
+	PlayerData pData = pDataManager.getPlayerData(p.getUniqueId());
+	// 플레이어 역할에 맞는 굿즈 제공
+	for (ShopGoods good : ShopGoods.getPlayerRoleGoods(pData.getRole())) {
+	    if (pData.hasGoods(good)) {
+		InventoryTool.addItemToPlayer(p, good.getItemStack());
+	    }
+	}
+	// 항상 가지고 있어야 하는 굿즈(ALWAYS) 제공
+	for (ShopGoods good : ShopGoods.getGoodsWithGoodsRole(GoodsRole.ALWAYS)) {
+	    if (pData.hasGoods(good)) {
+		InventoryTool.addItemToPlayer(p, good.getItemStack());
+	    }
 	}
 
-	return false;
+    }
+
+    public static void giveGoodsToPleyers(PlayerDataManager pDataManager, List<Player> players) {
+	for (Player p : players) {
+	    giveGoodsToPleyer(pDataManager, p);
+	}
     }
 }

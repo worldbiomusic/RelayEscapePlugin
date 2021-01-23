@@ -10,22 +10,22 @@
 
 -----
 # RelayTime List
-## [WaitingTime][WaitingTime]
+## [WaitingTime](WaitingTime.md)
 - Time when waiter can prepare
 > - Maker(`Waiter`): prepare for next Time
 > - Challenger(`Waiter`): prepare for next Time
 
-## [MakingTime][MakingTime]
+## [MakingTime](MakingTime.md)
 - Time when maker can create room
 > - Maker(`Maker`): make room(should put core block)
 > - Challenger(`Waiter`): enjoy other rooms
 
-## [TestingTime][TestingTime]
+## [TestingTime](TestingTime.md)
 - Time when tester try to pass the room test
 > - Maker(`Tester`): should clear own room for certainty
 > - Challenger(`Waiter`): enjoy other rooms
 
-## [ChallengingTime][ChallengingTime]
+## [ChallengingTime](ChallengingTime.md)
 - Time when challenger try to find the core
 > - Maker(`Viewer`): just watch
 > - Challenger(`Challenger`): try to find the core
@@ -44,30 +44,25 @@
 
 -----
 # RelayTime List
-## [WaitingTime][WaitingTime]
+## [WaitingTime](WaitingTime.md)
 - 모든 플레이어가 준비를 하는 타임
 > - Maker(`Waiter`): 다음 시간 준비
 > - Challenger(`Waiter`): 다음 시간 준비
 
-## [MakingTime][MakingTime]
+## [MakingTime](MakingTime.md)
 - 메이커가 룸을 만드는 타임
 > - Maker(`Maker`): 룸을 만듬(코어 놓아야 함)
 > - Challenger(`Waiter`): 서버 즐기기
 
-## [TestingTime][TestingTime]
+## [TestingTime](TestingTime.md)
 - 테스터가 만든 룸을 테스트하는 타임
 > - Maker(`Tester`): 확실성을 위해서 테스트를 성공해야 함
 > - Challenger(`Waiter`): 서버 즐기기
 
-## [ChallengingTime][ChallengingTime]
+## [ChallengingTime](ChallengingTime.md)
 - 도전자들이 도전하는 타임
 > - Maker(`Viewer`): 관전
 > - Challenger(`Challenger`): 코어를 찾기
 
 
 
-
-[WaitingTime]: https://github.com/worldbiomusic/RelayEscape/wiki/WaitingTime
-[MakingTime]: https://github.com/worldbiomusic/RelayEscape/wiki/MakingTime
-[TestingTime]: https://github.com/worldbiomusic/RelayEscape/wiki/TestingTime
-[ChallengingTime]: https://github.com/worldbiomusic/RelayEscape/wiki/ChallengingTime

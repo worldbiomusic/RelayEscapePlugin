@@ -3,9 +3,9 @@
 - by paying tokens and playing the game within a given time, you can get rewards for each minigame ranking section
 
 # Type
-- [Solo-MiniGame][Solo-MiniGame]: a minigame that you can challenge yourself
-- [Cooperative-MiniGame][Cooperative-MiniGame]: a minigame that wo or more players can enjoy in cooperative
-- [Battle-MiniGame][Battle-MiniGame]: a minigame that two players can battle each other
+- [Solo-MiniGame](Solo-MiniGame.md): a minigame that you can challenge yourself
+- [Cooperative-MiniGame](Cooperative-MiniGame.md): a minigame that wo or more players can enjoy in cooperative
+- [Battle-MiniGame](Battle-MiniGame.md): a minigame that two players can battle each other
 
 # Ranking Update
 only 1 highest score was scored (not duplicate)
@@ -31,7 +31,7 @@ Rewards are paid based on the rank score quartile(ascending order)
 - Unavoidancable exceptions are handled normally until the game is played and receive reward(RelayTime changed)
 
 # Sign
-> [MINIGAME]  
+> [MINI_GAME]  
 > `game title`  
 > TOKEN `amount`  
 > `game type`  
@@ -43,9 +43,9 @@ Rewards are paid based on the rank score quartile(ascending order)
 - 토큰을 지불하고 주어진 시간내에 게임을 해서 달성한 스코어로 각 미니게임 랭크순위 구간에 따른 보상을 얻을 수 있음
 
 # 타입
-- [솔로 미니게임][Solo-MiniGame]: 혼자서 도전할 수 있는 미니게임
-- [협동 미니게임][Cooperative-MiniGame]: 2인이상이서 협동해서 즐길 수 있는 미니게임
-- [배틀 미니게임][Battle-MiniGame]: 2명이서 서로 배틀할 수 있는 미니게임
+- [솔로 미니게임](Solo-MiniGame.md): 혼자서 도전할 수 있는 미니게임
+- [협동 미니게임](Cooperative-MiniGame.md): 2인이상이서 협동해서 즐길 수 있는 미니게임
+- [배틀 미니게임](Battle-MiniGame.md): 2명이서 서로 배틀할 수 있는 미니게임
 
 # 랭크 업데이트
 최고점수 1개만 기록됨(중복 안됨)
@@ -70,34 +70,7 @@ Rewards are paid based on the rank score quartile(ascending order)
 - 어쩔 수 없는 예외는 게임이 진행된 구간까지 정상적으로 처리되어 종료됩니다 (RelayTime의 변경)
 
 # 표지판
-> [MINIGAME]  
+> [MINI_GAME]  
 > `game title`  
 > TOKEN `amount`  
 > `game type`  
-
-
-
-
-
-
-
-
-
-[Solo-MiniGame]: https://github.com/worldbiomusic/RelayEscape/wiki/Solo-MiniGame
-[Cooperative-MiniGame]: https://github.com/worldbiomusic/RelayEscape/wiki/Cooperative-MiniGame
-[Battle-MiniGame]: https://github.com/worldbiomusic/RelayEscape/wiki/Battle-MiniGame
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

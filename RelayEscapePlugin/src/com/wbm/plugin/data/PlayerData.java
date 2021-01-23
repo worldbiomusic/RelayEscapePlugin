@@ -238,7 +238,7 @@ public class PlayerData implements Serializable {
 	int maxValue = Integer.MIN_VALUE;
 	// 굿즈중에서 가장 높은 굿즈 검색
 	for (ShopGoods good : this.getGoods()) {
-	    if (good.getGoodsRole() == GoodsRole.ROOM_SETTING) {
+	    if (good.isGoodsRoleGoods(GoodsRole.ROOM_SETTING)) {
 		// 이름이 kind로 시작할떄 뒤에 숫자만 가져오기
 		if (good.name().startsWith(kind)) {
 		    String goodsStirng = good.name().split("_")[1];

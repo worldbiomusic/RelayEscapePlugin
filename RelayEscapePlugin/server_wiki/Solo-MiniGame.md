@@ -9,8 +9,10 @@
 - Only 1 score is recorded as your best score
 
 # Game Kinds
-- [FIND_THE_RED][FIND_THE_RED]: find and break the red flower 
-- [PAINTER][PAINTER]: unify into one block
+- [FIND_THE_RED](FIND_THE_RED.md)
+- [PAINTER](PAINTER.md)
+- [JUMP_MAP](JUMP_MAP.md)
+- [FIT_TOOL](FIT_TOOL.md)
 
 ---------------------------------------------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------------------------------------------
@@ -26,11 +28,10 @@
 - 자신의 최고 점수로 1개만 기록됨
 
 # 게임 종류
-- [FIND_THE_RED][FIND_THE_RED]: 빨간꽃 부수기
-- [PAINTER][PAINTER]: 하나의 블럭으로 통일하기
+- [FIND_THE_RED](FIND_THE_RED.md)
+- [PAINTER](PAINTER.md)
+- [JUMP_MAP](JUMP_MAP.md)
+- [FIT_TOOL](FIT_TOOL.md)
 
 
 
-
-[FIND_THE_RED]: https://github.com/worldbiomusic/RelayEscape/wiki/FIND_THE_RED
-[PAINTER]: https://github.com/worldbiomusic/RelayEscape/wiki/PAINTER

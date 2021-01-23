@@ -9,7 +9,6 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.scheduler.BukkitTask;
 
 import com.wbm.plugin.Main;
@@ -73,13 +72,13 @@ public class Critical extends BattleMiniGame {
 		    BroadcastTool.sendMessage(victim, "You have to stay here until minigame finish");
 		    // damager
 		    this.plusScore(damager, 1);
+		    BroadcastTool.sendMessage(damager, "you kill " + victim.getName());
 
 		    // killcount 증가
 		    this.killCount += 1;
 
 		    // 몇명남은지 체크 (1명 남으면 게임 종료)
 		    this.checkGameFinish();
-
 		}
 
 		// 때리는 순서 다음차례로 넘어가기
@@ -88,17 +87,18 @@ public class Critical extends BattleMiniGame {
 		// hit 타이머 시작
 		this.startHitTimer();
 
-		// 다른 모든 사람들 땅에 닿게
-		this.letPlayersOnGround();
+//		// 다른 모든 사람들 땅에 닿게
+//		this.letPlayersOnGround();
 	    }
-	} else if (event instanceof PlayerMoveEvent) {
-	    PlayerMoveEvent e = (PlayerMoveEvent) event;
-	    Player p = e.getPlayer();
-
-	    if (!this.checkHitPlayer(p)) {
-		this.letPlayersOnGround();
-	    }
-	}
+	} 
+//	else if (event instanceof PlayerMoveEvent) {
+//	    PlayerMoveEvent e = (PlayerMoveEvent) event;
+//	    Player p = e.getPlayer();
+//
+//	    if (!this.checkHitPlayer(p)) {
+//		this.letPlayersOnGround();
+//	    }
+//	}
     }
 
     private void checkGameFinish() {

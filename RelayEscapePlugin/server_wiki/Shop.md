@@ -9,10 +9,10 @@ TOKEN `amount`
 
 
 # type of goods sold
-- [MAKING_BLOCK][MAKING_BLOCK]: block that can placed in MakingTime
-- [MAKING_TOOL][MAKING_TOOL]: tool that can be useful in MakingTime
-- [EVENT_BLOCK][EVENT_BLOCK]: block that can be placed and executed in MakingTime
-- [CASH_TOOL][CASH_TOOL]: goods that can derestrict some server rules
+- [MAKING_BLOCK](MAKING_BLOCK.md): block that can placed in MakingTime
+- [TOOL](TOOL.md): tool that can be useful in MakingTime
+- [EVENT_BLOCK](EVENT_BLOCK.md): block that can be placed and executed in MakingTime
+- [CASH_TOOL](CASH_TOOL.md): goods that can derestrict some server rules
 
 ---------------------------------------------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------------------------------------------
@@ -28,22 +28,8 @@ TOKEN `amount`
 
 
 # 판매되는 굿즈 종류
-- [MAKING_BLOCK][MAKING_BLOCK]: MakingTime때 사용가능한 블럭
-- [MAKING_TOOL][MAKING_TOOL]: MakingTime때 유용하게 사용가능한 도구
-- [EVENT_BLOCK][EVENT_BLOCK]: MakingTime에 설치할 수 있는 이벤트 블럭
-- [CASH_TOOL][CASH_TOOL]: 서버 룰 제한을 해제할 수 있는 것
-
-
-
-[MAKING_BLOCK]: https://github.com/worldbiomusic/RelayEscape/wiki/MAKING_BLOCK
-[MAKING_TOOL]: https://github.com/worldbiomusic/RelayEscape/wiki/MAKING_TOOL
-[EVENT_BLOCK]: https://github.com/worldbiomusic/RelayEscape/wiki/EVENT_BLOCK
-[CASH_TOOL]: https://github.com/worldbiomusic/RelayEscape/wiki/CASH_TOOL
-
-
-
-
-
-
-
+- [MAKING_BLOCK](MAKING_BLOCK.md): MakingTime때 사용가능한 블럭
+- [TOOL](TOOL.md): MakingTime때 유용하게 사용가능한 도구
+- [EVENT_BLOCK](EVENT_BLOCK.md): MakingTime에 설치할 수 있는 이벤트 블럭
+- [CASH_TOOL](CASH_TOOL.md): 서버 룰 제한을 해제할 수 있는 것
 

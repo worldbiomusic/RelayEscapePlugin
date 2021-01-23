@@ -70,6 +70,7 @@ public abstract class CooperativeMiniGame extends MiniGame {
 
     @Override
     public void enterRoom(Player p, PlayerDataManager pDataManager) {
+	super.enterRoom(p, pDataManager);
 	PlayerData pData = pDataManager.getPlayerData(p.getUniqueId());
 
 	// 사람 들어있는지 확인
@@ -193,12 +194,6 @@ public abstract class CooperativeMiniGame extends MiniGame {
 	    names += all.getName() + ", ";
 	}
 	MiniGameRankManager.updatePlayerRankData(this.rankData, names, this.score);
-
-	// player lobby로 tp
-	TeleportTool.tp(this.players, SpawnLocationTool.LOBBY);
-
-	// inventory 초기화
-	InventoryTool.clearPlayerInv(this.players);
 
 	// pData minigame 초기화
 	for (Player p : this.getAllPlayer()) {

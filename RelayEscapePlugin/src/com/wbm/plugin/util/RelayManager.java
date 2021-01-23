@@ -25,7 +25,6 @@ import com.wbm.plugin.util.general.SpawnLocationTool;
 import com.wbm.plugin.util.general.TeleportTool;
 import com.wbm.plugin.util.minigame.MiniGame;
 import com.wbm.plugin.util.minigame.MiniGameManager;
-import com.wbm.plugin.util.shop.GoodsRole;
 import com.wbm.plugin.util.shop.ShopGoods;
 
 /* TODO: RelayTime의 Making -> Building, Challenging -> Finding으로 변경
@@ -258,6 +257,9 @@ public class RelayManager {
     private void startMaking() {
 //	 RelayTime 관리
 	this.currentTime = RelayTime.MAKING;
+	
+	// make room empty
+	this.roomManager.setRoomEmpty(RoomType.MAIN);
 
 	// room basic title 을 "maker이름 + n"으로 설정
 	this.mainRoomTitle = this.roomManager.getNextTitleWithMakerName(this.getMaker().getName());
@@ -405,7 +407,8 @@ public class RelayManager {
 	} else {
 	    InventoryTool.clearAllPlayerInv();
 	}
-	this.giveGoodsToEveryone();
+	
+	ShopGoods.giveGoodsToPleyers(pDataManager, new ArrayList<Player>(Bukkit.getOnlinePlayers()));
 
     }
 
@@ -635,30 +638,6 @@ public class RelayManager {
 //	}
 //    }
 
-    private void giveGoodsToEveryone() {
-	/*
-	 * playerData가 가지고 있는 good중 해당 role에 맞는 good만을 인벤토리에 추가함 이 메소드가 실행되기 전에 선행되야 하는
-	 * 것: player role 변경!
-	 * 
-	 * * 각 Role에 맞는 Goods중에서 가지고 있는 Goods 인벤에 지급
-	 */
-	for (Player p : Bukkit.getOnlinePlayers()) {
-	    PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
-	    // 플레이어 역할에 맞는 굿즈 제공
-	    for (ShopGoods good : ShopGoods.getPlayerRoleGoods(pData.getRole())) {
-		if (pData.hasGoods(good)) {
-		    InventoryTool.addItemToPlayer(p, good.getItemStack());
-		}
-	    }
-	    // 항상 가지고 있어야 하는 굿즈(ALWAYS) 제공
-	    for (ShopGoods good : ShopGoods.getGoodsWithGoodsRole(GoodsRole.ALWAYS)) {
-		if (pData.hasGoods(good)) {
-		    InventoryTool.addItemToPlayer(p, good.getItemStack());
-		}
-	    }
-
-	}
-    }
 
     public void changeEveryoneRoleWithRelayTime(Player p) {
 	/*

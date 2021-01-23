@@ -22,6 +22,7 @@ import com.wbm.plugin.data.RoomLocation;
 import com.wbm.plugin.util.PlayerDataManager;
 import com.wbm.plugin.util.RelayManager;
 import com.wbm.plugin.util.RoomManager;
+import com.wbm.plugin.util.StageManager;
 import com.wbm.plugin.util.enums.RelayTime;
 import com.wbm.plugin.util.enums.Role;
 import com.wbm.plugin.util.enums.RoomType;
@@ -44,13 +45,15 @@ public class GameManager implements Listener {
     RelayManager relayManager;
     BanItemTool banItems;
     MiniGameManager miniGameManager;
+    StageManager stageManager;
 
     public GameManager(PlayerDataManager pDataManager, RoomManager roomManager, RelayManager relayManager,
-	    MiniGameManager miniGameManager) {
+	    MiniGameManager miniGameManager, StageManager stageManager) {
 	this.pDataManager = pDataManager;
 	this.roomManager = roomManager;
 	this.relayManager = relayManager;
 	this.miniGameManager = miniGameManager;
+	this.stageManager = stageManager;
 
 	// init
 	this.init();
@@ -129,15 +132,17 @@ public class GameManager implements Listener {
 	    TeleportTool.tp(p, SpawnLocationTool.JOIN);
 	}
 
-	// 인벤 초기화
-	InventoryTool.clearPlayerInv(p);
+	// 인벤 초기화 후 굿즈 제공
+	this.giveGoods(p);
 
-	// 기본 굿즈 PlayerData에 제공
+	// 기본 굿즈 PlayerData에 추가
 	this.giveBasicGoods(p);
 
 	// 상태효과 제거
 	PlayerTool.unhidePlayerFromEveryone(p);
 	p.setGlowing(false);
+	PlayerTool.heal(p);
+	PlayerTool.removeAllPotionEffects(p);
 
 	// 기본적인 checkList들 모두 등록 (업데이트 효과)
 	for (CheckList list : PlayerData.CheckList.values()) {
@@ -145,6 +150,16 @@ public class GameManager implements Listener {
 	    pData.registerCheckList(list, list.getInitValue());
 	}
 
+	// update stage
+	stageManager.updateAllStage();
+
+    }
+
+    void giveGoods(Player p) {
+	InventoryTool.clearPlayerInv(p);
+	ShopGoods.giveGoodsToPleyer(pDataManager, p);
+	// 예외] REDUCE_TIME은 RelayTIme이 바뀔때 처음에만 지급
+	InventoryTool.removeItemFromPlayer(p, ShopGoods.REDUCE_TIME.getItemStack());
     }
 
     void giveBasicGoods(Player p) {
@@ -153,7 +168,7 @@ public class GameManager implements Listener {
 	 */
 	PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
 	ShopGoods[] basicGoods = { ShopGoods.DIRT, ShopGoods.GLOWSTONE, ShopGoods.CHEST, ShopGoods.HIGH_5,
-		ShopGoods.MAKINGTIME_5, ShopGoods.FINISH, ShopGoods.GOODS_LIST };
+		ShopGoods.MAKINGTIME_5, ShopGoods.FINISH, ShopGoods.GOODS_LIST, ShopGoods.SPAWN };
 
 	// PlayerData의 goods리스트에 지급
 	for (ShopGoods good : basicGoods) {

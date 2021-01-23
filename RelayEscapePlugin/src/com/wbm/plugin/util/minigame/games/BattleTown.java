@@ -73,6 +73,7 @@ public class BattleTown extends BattleMiniGame {
 
 		// killcount 증가
 		this.killCount += 1;
+		BroadcastTool.sendMessage(damager, "you kill " + victim.getName());
 
 		// 몇명남은지 체크 (1명 남으면 게임 종료)
 		this.checkGameFinish();

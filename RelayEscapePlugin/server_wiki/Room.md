@@ -6,21 +6,17 @@
 15 x 30 x 15 blocks
 
 # Room List
-## [Main Room][Main Room]
+## [Main Room](Main-Room.md)
 > - MakingTime,  TestingTime and ChallengingTime use this room
-> - earn token: O
 
-## [Practice Room][Practice Room]
+## [Practice Room](Practice-Room.md)
 > - Random room will be placed in this room when MakingTime and TestingTime
-> - earn token: O
 
-## [MiniGame Room][MiniGame Room]
+## [MiniGame Room](MiniGame-Room.md)
 > - There are various minigame with rank system
-> - earn token: O
 
-## [Fun Room][Fun Room]
+## [Fun Room](Fun-Room.md)
 > - can experience some funny things
-> - earn token: X 
 ---------------------------------------------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------------------------------------------
@@ -32,29 +28,17 @@
 15 x 30 x 15 블럭
 
 # Room List
-## [Main Room][Main Room]
+## [Main Room](Main-Room.md)
 > - MakingTime,  TestingTime and ChallengingTime일때 사용한다
-> - 토큰 얻기: O
 
-## [Practice Room][Practice Room]
+## [Practice Room](Practice-Room.md)
 > - 랜덤한 룸들을 MakingTime and TestingTime때 즐길 수 있다
-> - 토큰 얻기: O
 
-## [MiniGame Room][MiniGame Room]
+## [MiniGame Room](MiniGame-Room.md)
 > - 랭크시스템에 의한 많은 미니게임
-> - 토큰 얻기: O
 
-## [Fun Room][Fun Room]
+## [Fun Room](Fun-Room.md)
 > - 몇가지 재밌는것들
-> - 토큰 얻기: X
 
-
-
-
-
-[Main Room]: https://github.com/worldbiomusic/RelayEscape/wiki/Main-Room
-[Practice Room]: https://github.com/worldbiomusic/RelayEscape/wiki/Practice-Room
-[MiniGame Room]: https://github.com/worldbiomusic/RelayEscape/wiki/MiniGame-Room
-[Fun Room]: https://github.com/worldbiomusic/RelayEscape/wiki/Fun-Room
 
 

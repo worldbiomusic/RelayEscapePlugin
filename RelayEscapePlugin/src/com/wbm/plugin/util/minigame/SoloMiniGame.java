@@ -56,6 +56,7 @@ public abstract class SoloMiniGame extends MiniGame{
 
     @Override
     public void enterRoom(Player p, PlayerDataManager pDataManager) {
+	super.enterRoom(p, pDataManager);
 	PlayerData pData = pDataManager.getPlayerData(p.getUniqueId());
 
 	// 사람 들어있는지 확인
@@ -108,11 +109,6 @@ public abstract class SoloMiniGame extends MiniGame{
 	// score rank 처리
 	MiniGameRankManager.updatePlayerRankData(this.rankData, this.player.getName(), this.score);
 
-	// player lobby로 tp
-	TeleportTool.tp(this.player, SpawnLocationTool.LOBBY);
-
-	// inventory 초기화
-	InventoryTool.clearPlayerInv(this.player);
 
 	// pData minigame 초기화
 	PlayerData pData = pDataManager.getPlayerData(this.player.getUniqueId());

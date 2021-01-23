@@ -32,7 +32,9 @@ public enum MiniGameType {
     MAKE_HOLE(Setting.getAbsoluteLocation(-36, 4, 203), Setting.getAbsoluteLocation(55, 26, 98),
 	    new Location(Setting.world, 8, 5, 153, 90, 0), 5, 30, 180, 10),
     CRITICAL(Setting.getAbsoluteLocation(-112, 4, 114), Setting.getAbsoluteLocation(-115, 6, 122),
-	    new Location(Setting.world, -113, 4, 115, 90, 0), 5, 10, 180, 4);
+	    new Location(Setting.world, -113, 4, 115, 90, 0), 5, 30, 180, 4),
+    BANG(Setting.getAbsoluteLocation(-103, 10, 114), Setting.getAbsoluteLocation(-106, 8, 123),
+	    new Location(Setting.world, -104, 8, 115, 0, 0), 5, 30, 60, 4);
 
     // pos1, pos2는 이벤트에 반응하는 위치 area를 나타냄
     private Location pos1, pos2;

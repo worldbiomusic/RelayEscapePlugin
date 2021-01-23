@@ -16,6 +16,7 @@ import com.wbm.plugin.util.PlayerDataManager;
 import com.wbm.plugin.util.config.DataMember;
 import com.wbm.plugin.util.enums.MiniGameType;
 import com.wbm.plugin.util.general.BroadcastTool;
+import com.wbm.plugin.util.minigame.games.Bang;
 import com.wbm.plugin.util.minigame.games.BattleTown;
 import com.wbm.plugin.util.minigame.games.Critical;
 import com.wbm.plugin.util.minigame.games.FindTheBlue;
@@ -51,6 +52,7 @@ public class MiniGameManager implements DataMember {
 	allGame.add(new JumpMap());
 	allGame.add(new FitTool());
 	allGame.add(new Critical());
+	allGame.add(new Bang());
 	
 
 	// 모든 미니게임 games에 등록

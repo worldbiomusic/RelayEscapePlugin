@@ -9,6 +9,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
+import org.bukkit.potion.PotionEffect;
 import org.bukkit.scheduler.BukkitTask;
 
 import com.wbm.plugin.Main;
@@ -17,7 +18,11 @@ import com.wbm.plugin.util.PlayerDataManager;
 import com.wbm.plugin.util.enums.MiniGameType;
 import com.wbm.plugin.util.general.BroadcastTool;
 import com.wbm.plugin.util.general.Counter;
+import com.wbm.plugin.util.general.InventoryTool;
+import com.wbm.plugin.util.general.PlayerTool;
+import com.wbm.plugin.util.general.SpawnLocationTool;
 import com.wbm.plugin.util.general.TeleportTool;
+import com.wbm.plugin.util.shop.ShopGoods;
 
 import net.md_5.bungee.api.ChatColor;
 
@@ -227,6 +232,22 @@ public abstract class MiniGame implements Serializable {
 
 	// runTaskBeforeExitGame() 실행
 	this.runTaskBeforeExitGame();
+
+	// 모든 플레이어 상태 원상복구
+	for (Player p : this.getAllPlayer()) {
+	    // 힐, 배고픔 충전
+	    PlayerTool.heal(p);
+	    // 포션효과 제거
+	    PlayerTool.removeAllPotionEffects(p);
+	}
+
+	// Goods제공
+	InventoryTool.clearPlayerInv(this.getAllPlayer());
+	ShopGoods.giveGoodsToPleyers(pDataManager, this.getAllPlayer());
+
+	// player lobby로 tp
+	TeleportTool.tp(this.getAllPlayer(), SpawnLocationTool.LOBBY);
+
     }
 
     public boolean checkPlayerCountFull() {
@@ -240,8 +261,19 @@ public abstract class MiniGame implements Serializable {
 	}
     }
 
+    public void enterRoom(Player p, PlayerDataManager pDataManager) {
+	// 모든 플레이어 상태 초기화
+	// 힐, 배고픔 충전
+	PlayerTool.heal(p);
+	// 포션효과 제거
+	PlayerTool.removeAllPotionEffects(p);
+
+	// inv초기화
+	InventoryTool.clearPlayerInv(this.getAllPlayer());
+    }
+    
+    
     // ============sub class 들에서 상황에 맞게 각각 다르게 구현되어야 하는 메소드들=============
-    public abstract void enterRoom(Player p, PlayerDataManager pDataManager);
 
     public abstract void processEvent(Event event);
 

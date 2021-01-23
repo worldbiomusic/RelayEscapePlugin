@@ -25,7 +25,7 @@
 > - `/re goods`: 굿즈 리스트 출력
 > - `/re room empty`: 만약 ROOM_MANAGER굿즈를 가지고 있다면 룸을 비어있게 만듭니다
 > - `/re room load <roomTitle>`: 만약 ROOM_MANAGER굿즈를 가지고 있다면 룸에 <roomTitle>룸을 로드합니다
-> - `/re room title <roomTitle>`: MakingTime때 자신의 룸 제목을 결정합니다 (base: name + <number>)
+> - `/re room title <roomTitle>`: MakingTime때 자신의 룸 제목을 결정합니다 (base: name + number)
 > - `/re room finish`: MakingTime을 끝내고 TestingTime을 시작합니다
 > - `/re minigame waitlist`: Cooperative 미니게임에서 방장일때 기다리는 플레이어 목록을 출력합니다
 > - `/re minigame [ok|kick] <playerName>`: Cooperative 미니게임에서 방장일때 플레이어를 [허락/퇴장] 시킵니다

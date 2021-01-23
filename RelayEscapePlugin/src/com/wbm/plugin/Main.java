@@ -156,12 +156,7 @@ public class Main extends JavaPlugin {
 
 	// ranking system(stage) 업데이트
 	this.loopUpdateAllStage();
-	
-	// discord bot 실행
-	this.setupDiscordBot();
     }
-
-    
 
     void setupMain() {
 	this.server = this.getServer();
@@ -194,13 +189,17 @@ public class Main extends JavaPlugin {
 
 	this.shopManager = new ShopManager(this.pDataManager);
 
+	// discord bot 실행
+	this.setupDiscordBot();
+
     }
 
     private void registerListeners() {
 	// 리스너 초기화
-	this.gManager = new GameManager(this.pDataManager, this.roomManager, this.relayManager, this.miniGameManager);
+	this.gManager = new GameManager(this.pDataManager, this.roomManager, this.relayManager, this.miniGameManager,
+		this.stageManager);
 	this.commonListener = new CommonListener(this.pDataManager, this.shopManager, this.banItems, this.npcManager,
-		this.skinManager, this.miniGameManager, this.relayManager);
+		this.skinManager, this.miniGameManager, this.relayManager, this.discordBot);
 	this.goodsListener = new GoodsListener(this.pDataManager, this.roomManager, this.relayManager);
 
 	// 등록
@@ -414,54 +413,46 @@ public class Main extends JavaPlugin {
 
 	Rotationer spawn = new Rotationer("spawn", 10 * 2, spawnRotation1, Rotationer.Direction.CLOCK);
 	BlockRotateTool.registerRotation(spawn);
-	
-	
-	
-	
+
 	List<Location> spawnRotation2 = new ArrayList<>();
 	spawnRotation2.add(new Location(Setting.world, 14, 5, 14));
 	spawnRotation2.add(new Location(Setting.world, 14, 5, 15));
 	spawnRotation2.add(new Location(Setting.world, 14, 5, 16));
-                                                           
+
 	spawnRotation2.add(new Location(Setting.world, 14, 5, 17));
 	spawnRotation2.add(new Location(Setting.world, 15, 5, 17));
 	spawnRotation2.add(new Location(Setting.world, 16, 5, 17));
-                                                           
+
 	spawnRotation2.add(new Location(Setting.world, 17, 5, 17));
 	spawnRotation2.add(new Location(Setting.world, 17, 5, 16));
 	spawnRotation2.add(new Location(Setting.world, 17, 5, 15));
-                                                           
+
 	spawnRotation2.add(new Location(Setting.world, 17, 5, 14));
 	spawnRotation2.add(new Location(Setting.world, 16, 5, 14));
 	spawnRotation2.add(new Location(Setting.world, 15, 5, 14));
 
 	Rotationer spawn2 = new Rotationer("spawn2", 10 * 2, spawnRotation2, Rotationer.Direction.CLOCK);
 	BlockRotateTool.registerRotation(spawn2);
-	
-	
-	
-	
+
 	List<Location> spawnRotation3 = new ArrayList<>();
 	spawnRotation3.add(new Location(Setting.world, 14, 6, 14));
 	spawnRotation3.add(new Location(Setting.world, 14, 6, 15));
 	spawnRotation3.add(new Location(Setting.world, 14, 6, 16));
-                                                           
+
 	spawnRotation3.add(new Location(Setting.world, 14, 6, 17));
 	spawnRotation3.add(new Location(Setting.world, 15, 6, 17));
 	spawnRotation3.add(new Location(Setting.world, 16, 6, 17));
-                                                           
+
 	spawnRotation3.add(new Location(Setting.world, 17, 6, 17));
 	spawnRotation3.add(new Location(Setting.world, 17, 6, 16));
 	spawnRotation3.add(new Location(Setting.world, 17, 6, 15));
-                                                           
+
 	spawnRotation3.add(new Location(Setting.world, 17, 6, 14));
 	spawnRotation3.add(new Location(Setting.world, 16, 6, 14));
 	spawnRotation3.add(new Location(Setting.world, 15, 6, 14));
-                                                           
+
 	Rotationer spawn3 = new Rotationer("spawn3", 10 * 2, spawnRotation3, Rotationer.Direction.CLOCK);
 	BlockRotateTool.registerRotation(spawn3);
-	
-	
 
 	// spawn loof
 	List<Location> loofLocs = new ArrayList<>();
@@ -497,9 +488,9 @@ public class Main extends JavaPlugin {
 	    }
 	}, 0, 20 * 60 * 5);
     }
-    
+
     private void setupDiscordBot() {
-	this.discordBot = new DiscordBot();
+	this.discordBot = new DiscordBot(this.pDataManager);
     }
 
 //	void makeKits() {

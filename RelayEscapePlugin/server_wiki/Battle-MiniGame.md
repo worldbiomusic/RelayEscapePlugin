@@ -18,7 +18,10 @@
 > - Participation Reward: (total players in minigame)% of REMAIN
 
 # Game Kinds
-- FIND_THE_BLUE
+- [BATTLE_TOWN](BATTLE_TOWN.md)
+- [FIND_THE_BLUE](FIND_THE_BLUE.md)
+- [CRITICAL](BANG.md)
+- [BANG](BANG.md)
 
 
 
@@ -46,6 +49,9 @@
  
 
 # 게임 종류
-- FIND_THE_BLUE
+- [BATTLE_TOWN](BATTLE_TOWN.md)
+- [FIND_THE_BLUE](FIND_THE_BLUE.md)
+- [CRITICAL](BANG.md)
+- [BANG](BANG.md)
 
 

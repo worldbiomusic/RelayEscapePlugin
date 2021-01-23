@@ -76,4 +76,10 @@ public class PlayerTool {
 	    p.playSound(p.getLocation(), sound, 10, 1);
 	}
     }
+    
+    public static void removeAllPotionEffects(Player p) {
+	for(PotionEffect effect : p.getActivePotionEffects()) {
+	    p.removePotionEffect(effect.getType());
+	}
+    }
 }
