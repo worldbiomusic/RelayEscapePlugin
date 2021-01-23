@@ -421,9 +421,9 @@ public class CommonListener implements Listener {
 	    } else if (b.getType() == Material.GOLD_BLOCK) {
 		bonusToken = 2;
 	    } else if (b.getType() == Material.DIAMOND_BLOCK) {
-		bonusToken = 3;
+		bonusToken = 10;
 	    } else if (b.getType() == Material.EMERALD_BLOCK) {
-		bonusToken = 4;
+		bonusToken = 50;
 	    } else {
 		return;
 	    }
@@ -444,7 +444,7 @@ public class CommonListener implements Listener {
 		block = Material.IRON_BLOCK;
 	    } else if (r < 0.85) {
 		block = Material.GOLD_BLOCK;
-	    } else if (r < 0.95) {
+	    } else if (r < 0.97) {
 		block = Material.DIAMOND_BLOCK;
 	    } else if (r < 1) {
 		block = Material.EMERALD_BLOCK;

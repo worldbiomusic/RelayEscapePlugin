@@ -23,8 +23,8 @@ public class JumpMap extends SoloMiniGame {
      * 
      */
     private static final long serialVersionUID = 1L;
-    int finishTimer;
-    int minusDelay;
+    transient int finishTimer;
+    transient int minusDelay;
 
     public JumpMap() {
 	super(MiniGameType.JUMP_MAP);

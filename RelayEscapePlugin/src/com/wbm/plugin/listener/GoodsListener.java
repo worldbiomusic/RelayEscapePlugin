@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -80,14 +81,12 @@ public class GoodsListener implements Listener {
 //	    } else if (good.isRoleGood(Role.WAITER)) {
 //		this.useWaitingGoods(p, good);
 //	    }
-	    
-	    
 
 //	    // 굿즈의 GoodsRole이 ALWAYS면 항상 사용할 수 있게
 //	    if (good.isGoodsRoleGoods(GoodsRole.ALWAYS)) {
 //		this.useAlwaysGoods(p, good);
 //	    }
-	    
+
 	    this.useGoods(p, good);
 	}
     }
@@ -520,6 +519,15 @@ public class GoodsListener implements Listener {
 
 	    // main hand에 모드 바뀐것으로 굿즈 체인지
 	    p.getInventory().setItemInMainHand(superStar);
+	} else if (good == ShopGoods.GM_CHANGER) {
+	    GameMode mode = p.getGameMode();
+	    if (mode == GameMode.SURVIVAL) {
+		p.setGameMode(GameMode.CREATIVE);
+		BroadcastTool.sendMessage(p, "change to CREATIVE");
+	    } else if (mode == GameMode.CREATIVE) {
+		p.setGameMode(GameMode.SURVIVAL);
+		BroadcastTool.sendMessage(p, "change to SURVIVAL");
+	    }
 	}
     }
 }

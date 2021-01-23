@@ -64,7 +64,7 @@ public class Setting {
     public static final String CoolDown_Subject_CMD_ROOM = "CMD_ROOM";
     
     // RelayTime time amount
-    public static final int WAITING_TIME = 60;
+    public static final int WAITING_TIME = 30;
     public static final int MAKING_TIME = 60 * 5;
     public static final int TESTING_TIME = 60 * 10;
     public static final int CHALLENGING_TIME = 60 * 10;

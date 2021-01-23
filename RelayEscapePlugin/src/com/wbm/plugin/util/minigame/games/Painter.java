@@ -23,9 +23,9 @@ public class Painter extends SoloMiniGame {
     /**
     * 
     */
-    private static final long serialVersionUID = 1L;
-    private List<Material> mats;
-    Material mat1, mat2;
+    transient private static final long serialVersionUID = 1L;
+    transient private List<Material> mats;
+    transient Material mat1, mat2;
 
     public Painter() {
 	super(MiniGameType.PAINTER);

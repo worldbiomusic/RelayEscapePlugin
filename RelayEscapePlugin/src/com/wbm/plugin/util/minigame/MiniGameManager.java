@@ -26,6 +26,8 @@ import com.wbm.plugin.util.minigame.games.FitTool;
 import com.wbm.plugin.util.minigame.games.JumpMap;
 import com.wbm.plugin.util.minigame.games.Painter;
 
+import net.md_5.bungee.api.ChatColor;
+
 public class MiniGameManager implements DataMember {
     // MiniGame 체크하기 위한 Map (이용중이면 true, 비어있으면 false)
     private Map<MiniGameType, MiniGame> games;
@@ -58,6 +60,7 @@ public class MiniGameManager implements DataMember {
 	// 모든 미니게임 games에 등록
 	for (MiniGame game : allGame) {
 	    if (!this.games.containsKey(game.getGameType())) {
+		System.out.println(ChatColor.RED + "ADD NEW MINIGAME: " + game.gameType.name());
 		this.games.put(game.getGameType(), game);
 	    }
 	}

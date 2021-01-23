@@ -13,7 +13,7 @@ public enum MiniGameType {
     FIND_THE_RED(Setting.getAbsoluteLocation(-73, 5, 120), Setting.getAbsoluteLocation(-76, 5, 123),
 	    new Location(Setting.world, -74, 4, 115, 0, 0), 5, 10, 30, 1),
     PAINTER(Setting.getAbsoluteLocation(-82, 4, 123), Setting.getAbsoluteLocation(-85, 6, 123),
-	    new Location(Setting.world, -83, 4, 115, 0, 0), 5, 10, 30, 1),
+	    new Location(Setting.world, -83, 4, 115, 0, 0), 5, 10, 60, 1),
     COPY_BLOCK(Setting.getAbsoluteLocation(-73, 4, 138), Setting.getAbsoluteLocation(-76, 6, 138),
 	    new Location(Setting.world, -74, 4, 130), 5, 10, 30, 1),
     JUMP_MAP(Setting.getAbsoluteLocation(-37, 31, 224), Setting.getAbsoluteLocation(35, 3, 303),

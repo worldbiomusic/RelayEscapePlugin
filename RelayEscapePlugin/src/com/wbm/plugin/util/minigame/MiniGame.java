@@ -269,7 +269,7 @@ public abstract class MiniGame implements Serializable {
 	PlayerTool.removeAllPotionEffects(p);
 
 	// inv초기화
-	InventoryTool.clearPlayerInv(this.getAllPlayer());
+	InventoryTool.clearPlayerInv(p);
     }
     
     

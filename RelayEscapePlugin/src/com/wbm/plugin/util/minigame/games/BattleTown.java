@@ -23,8 +23,8 @@ public class BattleTown extends BattleMiniGame {
     /**
      * 
      */
-    private static final long serialVersionUID = 1L;
-    private int killCount;
+    transient private static final long serialVersionUID = 1L;
+    transient private int killCount;
 
     public BattleTown() {
 	super(MiniGameType.BATTLE_TOWN);

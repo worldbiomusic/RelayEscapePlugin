@@ -110,7 +110,8 @@ public enum ShopGoods {
 	    GoodsRole.MAKING),
     HIDE(ItemStackTool.item(Material.BOWL, "HIDE", "You can hide you from everyone", "===Mode===", "off"),
 	    GoodsRole.MAKING, GoodsRole.TESTING),
-
+    GM_CHANGER(ItemStackTool.item(Material.FLINT, "GM_CHANGER", "You can change to survival or creative"),
+	    GoodsRole.MAKING),
     /*
      * 밑의 ROOM_SETTING 관련 굿즈 제작시 지켜야 하는 사항
      * 

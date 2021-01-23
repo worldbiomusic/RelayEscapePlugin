@@ -22,7 +22,7 @@ public class FitTool extends SoloMiniGame {
      */
     private static final long serialVersionUID = 1L;
 
-    List<Material> randomBlocks;
+    transient List<Material> randomBlocks;
 
     public FitTool() {
 	super(MiniGameType.FIT_TOOL);

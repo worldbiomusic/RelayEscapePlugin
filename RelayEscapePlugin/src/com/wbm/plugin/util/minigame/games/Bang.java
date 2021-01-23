@@ -26,17 +26,17 @@ public class Bang extends BattleMiniGame {
     /*
      * 
      */
-    private static final long serialVersionUID = 1L;
+    transient private static final long serialVersionUID = 1L;
 
-    private ItemStack bangItem;
+    transient  private ItemStack bangItem;
 
-    private List<Location> locs;
+    transient private List<Location> locs;
 
-    private Location bangBlock;
+    transient private Location bangBlock;
 
-    private BukkitTask bangTask;
+    transient private BukkitTask bangTask;
 
-    int killCount;
+    transient int killCount;
 
     public Bang() {
 	super(MiniGameType.BANG);

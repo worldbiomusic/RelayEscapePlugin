@@ -23,16 +23,16 @@ import com.wbm.plugin.util.minigame.BattleMiniGame;
 
 public class Critical extends BattleMiniGame {
 
-    private static final long serialVersionUID = 1L;
+    transient private static final long serialVersionUID = 1L;
 
-    int killCount;
-    List<Player> deadPlayers;
-    int hitIndex;
+    transient int killCount;
+    transient List<Player> deadPlayers;
+    transient int hitIndex;
 
-    int hitTimeLeft;
-    final int hitTimeLimit = 10;
+    transient int hitTimeLeft;
+    transient final int hitTimeLimit = 10;
 
-    BukkitTask hitTask;
+    transient BukkitTask hitTask;
 
     public Critical() {
 	super(MiniGameType.CRITICAL);
@@ -166,6 +166,9 @@ public class Critical extends BattleMiniGame {
     private void nextHitIndex() {
 	Player hitPlayer = null;
 	while (true) {
+	    if(this.getAllPlayer().size() == 0) {
+		return;
+	    }
 	    this.hitIndex = (this.hitIndex + 1) % this.getAllPlayer().size();
 	    hitPlayer = this.getAllPlayer().get(this.hitIndex);
 	    if (!this.isPlayerDead(hitPlayer)) {
