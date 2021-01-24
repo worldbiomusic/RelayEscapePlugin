@@ -297,16 +297,18 @@ public class GameManager implements Listener {
 		    // 2. 클리어한 maker는 pDataManager의 maker로 등록
 		    this.pDataManager.registerMaker(p);
 
-		    // 3. main room clearCount +1, time측정 후 초기화
-		    this.roomManager.getRoom(RoomType.MAIN).addClearCount(1);
+		    // 3. main room clearCount +1, time측정 후 초기화, 제작자에게 토큰 지급
+		    Room room = this.roomManager.getRoom(RoomType.MAIN);
+		    room.addClearCount(1);
 		    this.roomManager.recordMainRoomDurationTime();
+		    this.roomManager.plusTokenToRoomMaker(pDataManager, room, this.getRoomMakerToken());
 		    this.roomManager.setRoomEmpty(RoomType.MAIN);
 
 		    // 4.next relay 시작
 		    this.relayManager.startNextTime();
 
 		    // 5.player token +, clearCount +1
-		    int token = PlayerTool.onlinePlayersCount() / 2;
+		    int token = PlayerTool.onlinePlayersCount() * 5;
 		    pData.plusToken(token);
 		    pData.addClearCount(1);
 		}
@@ -353,6 +355,23 @@ public class GameManager implements Listener {
 //		}
 //	    }
 	}
+    }
+
+    int getRoomMakerToken() {
+	// maker의 방이 클리어됬을때 사용한 시간이 ChallengingTime의 절반에 가까울 수록 토큰을 많이 얻는다
+	// 현재 토큰 기준은 10개
+	int tokenMax = 10;
+	int challengingTimeMax = RelayTime.CHALLENGING.getAmount();
+	int midTime = challengingTimeMax / 2;
+	int challengingLeftTime = this.relayManager.getLeftTime();
+	// 밑의 공식이 map같은 함수역할
+	int roomMakerToken = (int) (tokenMax - Math.round(Math.abs(midTime - challengingLeftTime) * ((double)tokenMax / midTime)));
+
+//	System.out.println("challengingTimeMax: " + challengingTimeMax);
+//	System.out.println("midTime: " + midTime);
+//	System.out.println("challengingLeftTime: " + challengingLeftTime);
+//	System.out.println("roomMakerToken: " + roomMakerToken);
+	return roomMakerToken;
     }
 
 //	@EventHandler

@@ -78,13 +78,13 @@ public class BattleTown extends BattleMiniGame {
 		// 몇명남은지 체크 (1명 남으면 게임 종료)
 		this.checkGameFinish();
 	    }
-	}else if (event instanceof PlayerMoveEvent) {
+	} else if (event instanceof PlayerMoveEvent) {
 
 	    this.checkGameFinish();
 	}
 
     }
-    
+
     private void checkGameFinish() {
 	int remainPlayers = this.getAllPlayer().size() - killCount;
 	if (remainPlayers <= 1) {
@@ -96,6 +96,10 @@ public class BattleTown extends BattleMiniGame {
     @Override
     public void runTaskAfterStartGame() {
 	super.runTaskAfterStartGame();
+
+	// setup variables
+	this.initVariables();
+
 	// 기본 킷
 	for (Player p : this.getAllPlayer()) {
 	    InventoryTool.addItemToPlayer(p, new ItemStack(Material.WOOD_SWORD));
@@ -103,6 +107,9 @@ public class BattleTown extends BattleMiniGame {
 	    InventoryTool.addItemToPlayer(p, new ItemStack(Material.BOW));
 	    InventoryTool.addItemToPlayer(p, new ItemStack(Material.ARROW, 10));
 	}
+    }
+
+    private void initVariables() {
 	// killcount 초기화
 	this.killCount = 0;
     }

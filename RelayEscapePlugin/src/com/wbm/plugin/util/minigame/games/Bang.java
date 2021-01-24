@@ -28,7 +28,7 @@ public class Bang extends BattleMiniGame {
      */
     transient private static final long serialVersionUID = 1L;
 
-    transient  private ItemStack bangItem;
+    transient private ItemStack bangItem;
 
     transient private List<Location> locs;
 
@@ -40,7 +40,10 @@ public class Bang extends BattleMiniGame {
 
     public Bang() {
 	super(MiniGameType.BANG);
+    }
 
+    void initVariables() {
+//	setup
 	this.bangItem = ItemStackTool.item(Material.WOOD_SWORD);
 
 	this.locs = new ArrayList<>();
@@ -50,6 +53,10 @@ public class Bang extends BattleMiniGame {
 	locs.add(Setting.getAbsoluteLocation(-102.5, 8, 118.5));
 
 	this.bangBlock = Setting.getAbsoluteLocation(-104, 9, 118);
+
+	this.killCount = 0;
+
+	
     }
 
     @Override
@@ -84,7 +91,7 @@ public class Bang extends BattleMiniGame {
 		    // damager
 		    this.plusScore(damager, 1);
 		    BroadcastTool.sendMessage(damager, "you kill " + victim.getName());
-		    
+
 		    // killcount 증가
 		    this.killCount += 1;
 
@@ -106,6 +113,17 @@ public class Bang extends BattleMiniGame {
     @Override
     public void runTaskAfterStartGame() {
 	super.runTaskAfterStartGame();
+	
+	// setup variables
+	this.initVariables();
+	
+	// bang블럭 생성
+	bangBlock.getBlock().setType(Material.CONCRETE);
+
+	// task 취소
+	if (this.bangTask != null) {
+	    this.bangTask.cancel();
+	}
 
 	this.startBangTimer();
     }
@@ -119,12 +137,12 @@ public class Bang extends BattleMiniGame {
 	    p.setHealth(1);
 	    PlayerTool.setHungry(p, 1);
 	}
-	
-	
-	// 랜덤 타임 시작
-	int maxBagnTime = 15;
 
-	int randomBangTime = (int) (Math.random() * maxBagnTime);
+	// 랜덤 타임 시작
+	int maxBagnTime = this.gameType.getTimeLimit() / 2;
+
+	// 최소 5초 후 시작
+	int randomBangTime = (int) (Math.random() * maxBagnTime) + 5;
 
 	this.bangTask = Bukkit.getScheduler().runTaskLater(Main.getInstance(), new Runnable() {
 
@@ -145,7 +163,6 @@ public class Bang extends BattleMiniGame {
 	    }
 	}, 20 * randomBangTime);
 
-	
     }
 
     @Override
@@ -163,7 +180,7 @@ public class Bang extends BattleMiniGame {
 
     @Override
     public String[] getGameTutorialStrings() {
-	String[] tutorial = {"hit with bangItem: +1", "die: game over"};
+	String[] tutorial = { "hit with bangItem: +1", "die: game over" };
 	return tutorial;
     }
 

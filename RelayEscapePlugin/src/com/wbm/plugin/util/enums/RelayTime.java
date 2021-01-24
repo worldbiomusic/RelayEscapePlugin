@@ -15,7 +15,7 @@ public enum RelayTime
 	TESTING(Setting.TESTING_TIME),
 	CHALLENGING(Setting.CHALLENGING_TIME);
 	
-	private int time;
+	private final int time;
 	
 	RelayTime(int time) {
 		this.time = time;

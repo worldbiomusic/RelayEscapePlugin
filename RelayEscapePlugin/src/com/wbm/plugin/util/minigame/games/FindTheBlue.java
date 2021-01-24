@@ -15,10 +15,10 @@ import com.wbm.plugin.util.general.BlockTool;
 import com.wbm.plugin.util.general.ItemStackTool;
 import com.wbm.plugin.util.minigame.BattleMiniGame;
 
-public class FindTheBlue extends BattleMiniGame{
+public class FindTheBlue extends BattleMiniGame {
 
     private static final long serialVersionUID = 1L;
-    transient private static ItemStack plusItem = ItemStackTool.item(Material.RED_ROSE, (byte)1);
+    transient private static ItemStack plusItem = ItemStackTool.item(Material.RED_ROSE, (byte) 1);
 
     public FindTheBlue() {
 	super(MiniGameType.FIND_THE_BLUE);
@@ -47,18 +47,26 @@ public class FindTheBlue extends BattleMiniGame{
 
     @Override
     public String[] getGameTutorialStrings() {
-	String[] msg = { "Break Yellow flower: +1", "Break Blue flower: -2", };
+	String[] msg = { "Break Blue flower: +1", "Break Yellow flower: -2", };
 
 	return msg;
     }
-    
+
     @Override
     public void runTaskAfterStartGame() {
 	super.runTaskAfterStartGame();
+
+	// setup variables
+	this.initVariables();
+
 	// 블럭 재정비
 	this.generateNewBlocks();
     }
-    
+
+    private void initVariables() {
+	
+    }
+
     private void generateNewBlocks() {
 	// 블럭 재정비
 	ItemStack yellow = new ItemStack(Material.YELLOW_FLOWER);
@@ -71,9 +79,9 @@ public class FindTheBlue extends BattleMiniGame{
 	int r = (int) (Math.random() * 16);
 	flowers.set(r, plusItem);
 
-	BlockTool.setBlockWithItemStack(this.getGamePos1(),this.getGamePos2(), flowers);
+	BlockTool.setBlockWithItemStack(this.getGamePos1(), this.getGamePos2(), flowers);
     }
-    
+
 }
 
 //

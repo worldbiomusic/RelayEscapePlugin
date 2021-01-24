@@ -22,13 +22,11 @@ public class FitTool extends SoloMiniGame {
      */
     private static final long serialVersionUID = 1L;
 
-    transient List<Material> randomBlocks;
+    transient static List<Material> randomBlocks;
 
-    public FitTool() {
-	super(MiniGameType.FIT_TOOL);
-
+    static {
 	// randomBlocks초기화
-	this.randomBlocks = new ArrayList<>();
+	randomBlocks = new ArrayList<>();
 
 	// pickaxe
 	randomBlocks.add(Material.STONE);
@@ -56,6 +54,10 @@ public class FitTool extends SoloMiniGame {
 
 	// etc
 	randomBlocks.add(Material.WOOL);
+    }
+
+    public FitTool() {
+	super(MiniGameType.FIT_TOOL);
 
     }
 
@@ -84,11 +86,18 @@ public class FitTool extends SoloMiniGame {
     public void runTaskAfterStartGame() {
 	super.runTaskAfterStartGame();
 
+	// setup variables
+	this.initVariables();
+
 	// 블럭 재정비
 	this.generateRandomBlocks();
 
 	// Tool 지급
 	this.giveTools();
+    }
+
+    private void initVariables() {
+
     }
 
     private void giveTools() {

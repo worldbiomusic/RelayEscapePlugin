@@ -14,6 +14,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import com.wbm.plugin.data.BlockData;
+import com.wbm.plugin.data.PlayerData;
 import com.wbm.plugin.data.Room;
 import com.wbm.plugin.data.RoomLocation;
 import com.wbm.plugin.data.RoomLocker;
@@ -97,7 +98,7 @@ public class RoomManager implements DataMember {
     }
 
     public boolean updateRoom(String title, Room room) {
-	if(this.isExistRoomTitle(title)) {
+	if (this.isExistRoomTitle(title)) {
 	    this.roomData.put(title, room);
 	    return true;
 	} else {
@@ -190,7 +191,7 @@ public class RoomManager implements DataMember {
 	    }
 
 	    // put room
-	    Room emptyRoom = new Room("empty", "?", emptyBlocks, LocalDateTime.of(2020, 11, 1, 0, 0));
+	    Room emptyRoom = new Room("empty", "worldbiomusic", emptyBlocks, LocalDateTime.of(2020, 11, 1, 0, 0));
 	    this.roomData.put("empty", emptyRoom);
 	}
 
@@ -207,7 +208,7 @@ public class RoomManager implements DataMember {
 	    baseBlocks.set(0, new BlockData(Material.GLOWSTONE, 0));
 
 	    // put room
-	    Room baseRoom = new Room("base", "?", baseBlocks, LocalDateTime.of(2020, 11, 1, 0, 0));
+	    Room baseRoom = new Room("base", "worldbiomusic", baseBlocks, LocalDateTime.of(2020, 11, 1, 0, 0));
 	    this.roomData.put("base", baseRoom);
 	}
 
@@ -374,6 +375,12 @@ public class RoomManager implements DataMember {
 
     public Room removeRoom(String title) {
 	return this.roomData.remove(title);
+    }
+
+    public void plusTokenToRoomMaker(PlayerDataManager pDataManager, Room room, int token) {
+	String maker = room.getMaker();
+	PlayerData roomMakerPData = pDataManager.getPlayerData(maker);
+	roomMakerPData.plusToken(token);
     }
 
     @SuppressWarnings("unchecked")

@@ -109,14 +109,14 @@ public class JumpMap extends SoloMiniGame {
 
     private void stopFinishTimer() {
 	Bukkit.getScheduler().cancelTask(this.finishTimer);
-	
+
 	BroadcastTool.debug("STOP JUMP MAP!!!!");
     }
 
     @Override
     public void runTaskBeforeExitGame() {
-        super.runTaskBeforeExitGame();
-        
-        this.stopFinishTimer();
+	super.runTaskBeforeExitGame();
+
+	this.stopFinishTimer();
     }
 }

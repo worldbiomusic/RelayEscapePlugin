@@ -30,13 +30,13 @@ public class Critical extends BattleMiniGame {
     transient int hitIndex;
 
     transient int hitTimeLeft;
-    transient final int hitTimeLimit = 10;
+    transient static final int hitTimeLimit = 10;
 
     transient BukkitTask hitTask;
 
     public Critical() {
 	super(MiniGameType.CRITICAL);
-	this.deadPlayers = new ArrayList<>();
+
     }
 
     @Override
@@ -78,7 +78,9 @@ public class Critical extends BattleMiniGame {
 		    this.killCount += 1;
 
 		    // 몇명남은지 체크 (1명 남으면 게임 종료)
-		    this.checkGameFinish();
+		    if(this.checkGameFinish()) {
+			return;
+		    }
 		}
 
 		// 때리는 순서 다음차례로 넘어가기
@@ -90,7 +92,7 @@ public class Critical extends BattleMiniGame {
 //		// 다른 모든 사람들 땅에 닿게
 //		this.letPlayersOnGround();
 	    }
-	} 
+	}
 //	else if (event instanceof PlayerMoveEvent) {
 //	    PlayerMoveEvent e = (PlayerMoveEvent) event;
 //	    Player p = e.getPlayer();
@@ -101,17 +103,18 @@ public class Critical extends BattleMiniGame {
 //	}
     }
 
-    private void checkGameFinish() {
+    private boolean checkGameFinish() {
 	int remainPlayers = this.getAllPlayer().size() - killCount;
 	if (remainPlayers <= 1) {
 	    this.exitGame(pDataManager);
-	    return;
+	    return true;
 	}
+	return false;
     }
 
     private void startHitTimer() {
 	this.stopHitTask();
-	hitTimeLeft = this.hitTimeLimit;
+	hitTimeLeft = hitTimeLimit;
 
 	this.hitTask = Bukkit.getScheduler().runTaskTimer(Main.getInstance(), new Runnable() {
 	    @Override
@@ -127,32 +130,35 @@ public class Critical extends BattleMiniGame {
 		    // hit 타이머 시작
 		    startHitTimer();
 
-		    // 다른 모든 사람들 땅에 닿게
-		    letPlayersOnGround();
-		    
-		 // 몇명남은지 체크 (1명 남으면 게임 종료)
-		    checkGameFinish();
+//		    // 다른 모든 사람들 땅에 닿게
+//		    letPlayersOnGround();
+
+//		    // 몇명남은지 체크 (1명 남으면 게임 종료)
+//		    if (checkGameFinish()) {
+//			return;
+//		    }
 		}
 	    }
 	}, 0, 20 * 1);
     }
-    
+
     Player getHitPlayer() {
 	return this.getAllPlayer().get(this.hitIndex);
     }
 
     void stopHitTask() {
-	if (this.hitTask != null)
+	if (this.hitTask != null) {
 	    this.hitTask.cancel();
-    }
-
-    private void letPlayersOnGround() {
-	for (Player p : this.getAllPlayer()) {
-	    if (!this.deadPlayers.contains(p)) {
-		LocationTool.letEntityOnGround(p);
-	    }
 	}
     }
+
+//    private void letPlayersOnGround() {
+//	for (Player p : this.getAllPlayer()) {
+//	    if (!this.deadPlayers.contains(p)) {
+//		LocationTool.letEntityOnGround(p);
+//	    }
+//	}
+//    }
 
     boolean isPlayerDead(Player p) {
 	for (Player deadP : this.deadPlayers) {
@@ -166,7 +172,7 @@ public class Critical extends BattleMiniGame {
     private void nextHitIndex() {
 	Player hitPlayer = null;
 	while (true) {
-	    if(this.getAllPlayer().size() == 0) {
+	    if (this.getAllPlayer().size() == 0) {
 		return;
 	    }
 	    this.hitIndex = (this.hitIndex + 1) % this.getAllPlayer().size();
@@ -188,17 +194,11 @@ public class Critical extends BattleMiniGame {
     public void runTaskAfterStartGame() {
 	super.runTaskAfterStartGame();
 
+	// setup variables
+	this.initVariables();
+
 	// kit
 	InventoryTool.addItemToPlayers(this.getAllPlayer(), ItemStackTool.item(Material.WOOD_SWORD));
-
-	// killcount 초기화
-	this.killCount = 0;
-
-	// deadPlayes 초기화
-	this.deadPlayers.clear();
-
-	// hitIndex 초기화
-	this.hitIndex = 0;
 
 	// hungry 조절
 	for (Player p : this.getAllPlayer()) {
@@ -207,6 +207,29 @@ public class Critical extends BattleMiniGame {
 
 	// hit timer 시작
 	this.startHitTimer();
+    }
+
+    private void initVariables() {
+
+	/*
+	 * transient int killCount; transient List<Player> deadPlayers; transient int
+	 * hitIndex;
+	 * 
+	 * transient int hitTimeLeft; transient static final int hitTimeLimit = 10;
+	 * 
+	 * transient BukkitTask hitTask;
+	 */
+
+	// killcount 초기화
+	this.killCount = 0;
+
+	// deadPlayes 초기화
+	this.deadPlayers = new ArrayList<>();
+
+	// hitIndex 초기화
+	this.hitIndex = 0;
+
+	this.hitTimeLeft = 0;
     }
 
     @Override

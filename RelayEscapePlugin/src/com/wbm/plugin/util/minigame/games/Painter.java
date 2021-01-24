@@ -29,8 +29,10 @@ public class Painter extends SoloMiniGame {
 
     public Painter() {
 	super(MiniGameType.PAINTER);
+    }
 
-	// setup
+    void initVariables() {
+//	setup
 	this.mats = new ArrayList<>();
 	this.mats.add(Material.COAL_ORE);
 	this.mats.add(Material.IRON_ORE);
@@ -40,6 +42,9 @@ public class Painter extends SoloMiniGame {
 
     @Override
     public void runTaskAfterStartGame() {
+	// setup variables
+	this.initVariables();
+
 	// select random material
 	selectRandomMat1Mat2();
 

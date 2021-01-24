@@ -15,7 +15,7 @@ public class DiscordBot {
     PlayerDataManager pDataManager;
     public DiscordBot(PlayerDataManager pDataManager) {
 	this.pDataManager= pDataManager;
-	this.setupDiscordBot();
+//	this.setupDiscordBot();
     }
 
     public void setupDiscordBot() {

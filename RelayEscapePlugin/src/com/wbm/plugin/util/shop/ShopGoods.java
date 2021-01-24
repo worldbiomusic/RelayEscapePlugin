@@ -76,6 +76,14 @@ public enum ShopGoods {
     CACTUS(ItemStackTool.item(Material.CACTUS), GoodsRole.MAKING_BLOCK),
     WEB(ItemStackTool.item(Material.WEB), GoodsRole.MAKING_BLOCK),
 
+    // 8f
+    STONE_PLATE(ItemStackTool.item(Material.STONE_PLATE), GoodsRole.MAKING_BLOCK),
+    LEVER(ItemStackTool.item(Material.LEVER), GoodsRole.MAKING_BLOCK),
+    TRAP_DOOR(ItemStackTool.item(Material.TRAP_DOOR), GoodsRole.MAKING_BLOCK),
+    LAMP(ItemStackTool.item(Material.REDSTONE_LAMP_OFF), GoodsRole.MAKING_BLOCK),
+    IRON_DOOR(ItemStackTool.item(Material.IRON_DOOR), GoodsRole.MAKING_BLOCK),
+    
+    
     // event making block
     JUMPING(ItemStackTool.item(Material.STAINED_GLASS, 1, (short) 1, (byte) 0, "JUMPING", "super jump event block"),
 	    GoodsRole.MAKING_BLOCK),
@@ -145,7 +153,7 @@ public enum ShopGoods {
     REDUCE_TIME(ItemStackTool.item(Material.WATCH, "HALF_TIME", "delete half of challenging time"),
 	    GoodsRole.CHALLENGING),
     SUPER_STAR(ItemStackTool.item(Material.GLOWSTONE_DUST, "SUPER_STAR", "you are now supre star", "===Mode===", "off"),
-	    GoodsRole.CHALLENGING),
+	    GoodsRole.ALWAYS),
 
     // viewrTool
     GHOST(ItemStackTool.item(Material.GHAST_TEAR, 1, (short) 1, (byte) 3, "GHOST",

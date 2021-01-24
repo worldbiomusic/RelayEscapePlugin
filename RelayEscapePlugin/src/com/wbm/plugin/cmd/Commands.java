@@ -252,11 +252,25 @@ public class Commands implements CommandExecutor {
 
 	if (time == RelayTime.MAKING) {
 	    if (role == Role.MAKER) {
+
+		// room finish 실행
 		if (!this.relayManager.isCorePlaced()) {
 		    BroadcastTool.sendMessage(p, "core is not placed");
-		} else {
-		    this.relayManager.startNextTime();
+		    return true;
 		}
+
+//		     MakingTime때 최소 60초는 지나야 맵 테스트할 수 있음
+		int leftTime = this.relayManager.getLeftTime();
+		int timeLimit = this.relayManager.getCurrentTime().getAmount() - 60;
+
+		if (leftTime > timeLimit) {
+		    BroadcastTool.sendMessage(p, "You can use this goods after " + (leftTime - timeLimit) + " sec");
+		    return true;
+		}
+		
+		// 위의 상황을 모두 건너면 다음타임 실행
+		this.relayManager.startNextTime();
+
 	    }
 	}
 	return true;
@@ -387,10 +401,10 @@ public class Commands implements CommandExecutor {
 	if (args.length == 3) {
 	    String targetPName = args[2];
 	    UUID uuid = Bukkit.getPlayerUniqueId(targetPName);
-	    
+
 	    PlayerData pData = this.pDataManager.getPlayerData(uuid);
 	    BroadcastTool.sendMessage(p, pData.toString());
-	} 
+	}
     }
 
     private void printAllPlayerData(Player p) {
