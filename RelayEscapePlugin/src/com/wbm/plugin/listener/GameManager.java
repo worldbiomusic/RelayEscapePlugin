@@ -22,6 +22,7 @@ import com.wbm.plugin.data.RoomLocation;
 import com.wbm.plugin.util.PlayerDataManager;
 import com.wbm.plugin.util.RelayManager;
 import com.wbm.plugin.util.RoomManager;
+import com.wbm.plugin.util.Setting;
 import com.wbm.plugin.util.StageManager;
 import com.wbm.plugin.util.enums.RelayTime;
 import com.wbm.plugin.util.enums.Role;
@@ -182,7 +183,7 @@ public class GameManager implements Listener {
     public void onChallengerClickCore(PlayerInteractEvent e) {
 	// challenger와 tester는 모험모드여서 클릭대신 상호작용 이벤트 사용
 	this.onTesterAndChallengerClickCore(e);
-	this.onPlayerBreakBlockInPracticeRoom(e);
+	this.onPlayerClickBlockInPracticeRoom(e);
     }
 
     @EventHandler
@@ -218,7 +219,7 @@ public class GameManager implements Listener {
 	}
     }
 
-    private void onPlayerBreakBlockInPracticeRoom(PlayerInteractEvent e) {
+    private void onPlayerClickBlockInPracticeRoom(PlayerInteractEvent e) {
 	Player p = e.getPlayer();
 	PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
 	Role role = pData.getRole();
@@ -230,9 +231,9 @@ public class GameManager implements Listener {
 		if (time == RelayTime.MAKING || time == RelayTime.TESTING) {
 		    if (role == Role.WAITER) {
 
-			// core 부수면 token: 인원수 / 3 지급
+			// core 부수면 token: 인원수 * 3 지급
 			if (b.getType() == Material.GLOWSTONE) {
-			    int token = Bukkit.getOnlinePlayers().size() / 2;
+			    int token = Setting.PRACTICE_ROOM_CLEAR_TOKEN;
 			    BroadcastTool.sendMessage(p, "you clear practice room");
 			    BroadcastTool.sendMessage(p, "token + " + token);
 
@@ -308,8 +309,7 @@ public class GameManager implements Listener {
 		    this.relayManager.startNextTime();
 
 		    // 5.player token +, clearCount +1
-		    int token = PlayerTool.onlinePlayersCount() * 5;
-		    pData.plusToken(token);
+		    pData.plusToken(Setting.MAIN_ROOM_CLEAR_TOKEN);
 		    pData.addClearCount(1);
 		}
 

@@ -1,6 +1,5 @@
 package com.wbm.plugin.util.minigame;
 
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,7 +8,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
-import org.bukkit.potion.PotionEffect;
 import org.bukkit.scheduler.BukkitTask;
 
 import com.wbm.plugin.Main;
@@ -26,7 +24,12 @@ import com.wbm.plugin.util.shop.ShopGoods;
 
 import net.md_5.bungee.api.ChatColor;
 
-public abstract class MiniGame implements Serializable {
+public abstract class MiniGame {
+    /*
+     * 미니게임 랭크는 단순히 MiniGameRankManager에서 관리하고,
+     * 
+     * 미니게임 처리로직은 MiniGame에서 관리함
+     */
     public enum ExitReason {
 	SELF_EXIT, RELAY_TIME_CHANGED; // Unavoidancable_exit으로 바꾸기
     }
@@ -45,11 +48,11 @@ public abstract class MiniGame implements Serializable {
 	this.startTask = this.exitTask = this.timerTask = null;
     }
 
-    transient static protected PlayerDataManager pDataManager;
+      static protected PlayerDataManager pDataManager;
+    public static MiniGameRankManager miniGameRankManager;
 
-    transient private static final long serialVersionUID = 1L;
-    transient protected boolean activated;
-    transient protected BukkitTask startTask, exitTask, timerTask;
+      protected boolean activated;
+      protected BukkitTask startTask, exitTask, timerTask;
     protected MiniGameType gameType;
 
     // 각 미니게임의 랭크데이터 관리 변수(BattleMiniGame은 사용 안함)
@@ -158,7 +161,7 @@ public abstract class MiniGame implements Serializable {
 	this.printGameTutorial(p);
 
 	// print all rank
-	MiniGameRankManager.printAllRank(this.rankData, p);
+	miniGameRankManager.printAllRank(this.gameType, p);
     }
 
     public void printGameTutorial(Player p) {

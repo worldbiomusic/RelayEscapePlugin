@@ -45,6 +45,7 @@ import com.wbm.plugin.util.general.TPManager;
 import com.wbm.plugin.util.general.TeleportTool;
 import com.wbm.plugin.util.general.skin.SkinManager;
 import com.wbm.plugin.util.minigame.MiniGameManager;
+import com.wbm.plugin.util.minigame.MiniGameRankManager;
 import com.wbm.plugin.util.shop.ShopGoods;
 import com.wbm.plugin.util.shop.ShopManager;
 
@@ -64,6 +65,7 @@ public class Main extends JavaPlugin {
     NPCManager npcManager;
     StageManager stageManager;
     MiniGameManager miniGameManager;
+    MiniGameRankManager miniGameRankManager; 
 
     // command executor
     Commands dCmd;
@@ -167,14 +169,15 @@ public class Main extends JavaPlugin {
 	this.dataManager = new DataManager(this.getDataFolder().getPath());
 
 	this.pDataManager = new PlayerDataManager(this.ct);
-	this.miniGameManager = new MiniGameManager(this.pDataManager);
+	this.miniGameRankManager = new MiniGameRankManager();
+	this.miniGameManager = new MiniGameManager(this.pDataManager, this.miniGameRankManager);
 	this.dataManager.registerMember(this.pDataManager);
-
 	this.roomManager = new RoomManager();
+	
 	this.dataManager.registerMember(this.roomManager);
 	this.dataManager.registerMember(this.npcManager);
 	this.dataManager.registerMember(this.skinManager);
-	this.dataManager.registerMember(this.miniGameManager);
+	this.dataManager.registerMember(this.miniGameRankManager);
 
 //		// distribute datas (이 메소드는 this.dataManager.registerMember <- 이 메소드들이
 //		// 마지막다음에 바로 실행되어야 함 

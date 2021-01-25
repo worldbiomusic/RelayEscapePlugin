@@ -46,15 +46,13 @@ public abstract class CooperativeMiniGame extends MiniGame {
      * 미니게임 데이터가 없는것을 초기화해서 파일저장하려고, 나중에 파일에 저장되면 데이터 불러올때 저장된것으로 대체가 됨 = 처음에 한번
      * 초기화를 위해서 필요한 코드)
      */
-    private static final long serialVersionUID = 1L;
-
     // 방장=master
-    transient private Player master;
+      private Player master;
     // 모든 플레이어들(방장 포함)
-    transient private List<Player> players;
-    transient protected int score;
+      private List<Player> players;
+      protected int score;
 
-    transient private List<Player> waitPlayers;
+      private List<Player> waitPlayers;
 
     public CooperativeMiniGame(MiniGameType gameType) {
 	super(gameType);
@@ -193,7 +191,7 @@ public abstract class CooperativeMiniGame extends MiniGame {
 	for (Player all : this.players) {
 	    names += all.getName() + ", ";
 	}
-	MiniGameRankManager.updatePlayerRankData(this.rankData, names, this.score);
+	miniGameRankManager.updatePlayerRankData(this.gameType, names, this.score);
 
 	// pData minigame 초기화
 	for (Player p : this.getAllPlayer()) {
@@ -236,8 +234,8 @@ public abstract class CooperativeMiniGame extends MiniGame {
 
 	    // 1,2,3,4분위 안에 속해있을떄 token 지급
 	    for (int i = 1; i <= 4; i++) {
-		String quartilePlayerName = MiniGameRankManager.getQuartilePlayerName(this.rankData, i);
-		int quartileScore = MiniGameRankManager.getScore(this.rankData, quartilePlayerName);
+		String quartilePlayerName = miniGameRankManager.getQuartilePlayerName(this.gameType, i);
+		int quartileScore = miniGameRankManager.getScore(this.gameType, quartilePlayerName);
 		if (this.score <= quartileScore) {
 		    int rewardToken = (int) ((i / (double) 2) * this.getFee());
 		    BroadcastTool.sendMessage(all, "Your team is in " + i + " quartile");

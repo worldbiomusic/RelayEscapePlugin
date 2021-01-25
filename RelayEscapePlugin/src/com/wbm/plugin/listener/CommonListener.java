@@ -1,6 +1,5 @@
 package com.wbm.plugin.listener;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 import org.bukkit.ChatColor;
@@ -103,7 +102,7 @@ public class CommonListener implements Listener {
 	 * cash 굿즈 CHAT을 가지면 채팅 가능
 	 */
 	Player p = e.getPlayer();
-	PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
+//	PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
 
 	// chat 쿨다운 관리
 	if (CoolDownManager.addPlayer(Setting.CoolDown_Subject_CHAT, p)) {
@@ -162,12 +161,46 @@ public class CommonListener implements Listener {
 //		this.discordBot.sendMsgWithChannel("server-chat", discordChat);
 //	    }
 
+	    String msg = e.getMessage();
+
+	    String translatedMsg = msg;
+	    switch (msg) {
+	    case "1":
+		translatedMsg = "HI";
+		break;
+	    case "2":
+		translatedMsg = "BYE";
+		break;
+	    case "3":
+		translatedMsg = "FUXX";
+		break;
+	    case "4":
+		translatedMsg = "FOLLOW ME";
+		break;
+	    case "5":
+		translatedMsg = "OK";
+		break;
+	    case "6":
+		translatedMsg = "PASS";
+		break;
+	    case "7":
+		translatedMsg = "WOW";
+		break;
+	    case "8":
+		translatedMsg = "LOL";
+		break;
+	    case "9":
+		translatedMsg = "...";
+		break;
+	    }
+
 	    // 소리 재생
 	    PlayerTool.playSoundToEveryone(Sound.BLOCK_END_PORTAL_FRAME_FILL);
-	    LocalDateTime now = LocalDateTime.now();
-	    String discordChat = now.getHour() + ":" + now.getMinute() + " [" + p.getName() + "] " + e.getMessage();
-	    this.discordBot.sendMsgWithChannel("server-chat", discordChat);
-
+	    String discordChat = "[" + p.getName() + "] " + translatedMsg;
+	    this.discordBot.sendMsgToChannelWithTime(Setting.DISCORD_CH_SERVER_CHAT, discordChat);
+	    
+	    // 메세지 설정
+	    e.setMessage(translatedMsg);
 	} else {
 	    BroadcastTool.sendMessage(p, "too fast chat");
 	    e.setCancelled(true);
@@ -315,6 +348,9 @@ public class CommonListener implements Listener {
 	if (npc.getNPCs() == null || npc.getNPCs().isEmpty())
 	    return;
 	npc.sendAllNPCPacketToPlayer(p);
+
+	// discord info
+	this.discordBot.sendMsgToChannelWithTime(Setting.DISCORD_CH_SERVER_CHAT, pName + " join the server");
     }
 
     @EventHandler
@@ -373,6 +409,9 @@ public class CommonListener implements Listener {
 
 	// player가 플레이중이던 미니게임 종료
 	this.miniGameManager.handleMiniGameExitDuringPlaying(p, MiniGame.ExitReason.SELF_EXIT);
+
+	// discord info
+	this.discordBot.sendMsgToChannelWithTime(Setting.DISCORD_CH_SERVER_CHAT, p.getName() + " quit the server");
     }
 
     @EventHandler

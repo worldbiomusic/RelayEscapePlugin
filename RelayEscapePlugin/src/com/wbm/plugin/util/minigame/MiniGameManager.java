@@ -13,7 +13,6 @@ import org.bukkit.event.entity.EntityEvent;
 import org.bukkit.event.player.PlayerEvent;
 
 import com.wbm.plugin.util.PlayerDataManager;
-import com.wbm.plugin.util.config.DataMember;
 import com.wbm.plugin.util.enums.MiniGameType;
 import com.wbm.plugin.util.general.BroadcastTool;
 import com.wbm.plugin.util.minigame.games.Bang;
@@ -26,25 +25,29 @@ import com.wbm.plugin.util.minigame.games.FitTool;
 import com.wbm.plugin.util.minigame.games.JumpMap;
 import com.wbm.plugin.util.minigame.games.Painter;
 
-import net.md_5.bungee.api.ChatColor;
-
-public class MiniGameManager implements DataMember {
+public class MiniGameManager {
     // MiniGame 체크하기 위한 Map (이용중이면 true, 비어있으면 false)
     private Map<MiniGameType, MiniGame> games;
 
+    // 미니게임 랭크 데이터 저장하는 클래스
+    MiniGameRankManager miniGameRankManager;
+
     PlayerDataManager pDataManager;
 
-    public MiniGameManager(PlayerDataManager pDataManager) {
+    public MiniGameManager(PlayerDataManager pDataManager, MiniGameRankManager miniGameRankManager) {
 	this.pDataManager = pDataManager;
+	this.miniGameRankManager = miniGameRankManager;
 
 	this.games = new HashMap<>();
-
-	this.registerGames();
+	this.initMiniGame();
     }
 
-    public void registerGames() {
+    private void initMiniGame() {
+	// 모든 미니게임에서 편하게 접근할 수 있게 static으로 저장
 	MiniGame.pDataManager = this.pDataManager;
+	MiniGame.miniGameRankManager = this.miniGameRankManager;
 
+	// 미니게임 생성
 	List<MiniGame> allGame = new ArrayList<>();
 	allGame.add(new FindTheRed());
 	allGame.add(new Painter());
@@ -55,14 +58,10 @@ public class MiniGameManager implements DataMember {
 	allGame.add(new FitTool());
 	allGame.add(new Critical());
 	allGame.add(new Bang());
-	
 
-	// 모든 미니게임 games에 등록
+	// rankData에 등록안된 모든 미니게임 등록
 	for (MiniGame game : allGame) {
-	    if (!this.games.containsKey(game.getGameType())) {
-		System.out.println(ChatColor.RED + "ADD NEW MINIGAME: " + game.gameType.name());
-		this.games.put(game.getGameType(), game);
-	    }
+	    this.games.put(game.getGameType(), game);
 	}
     }
 
@@ -102,7 +101,7 @@ public class MiniGameManager implements DataMember {
 	if (event instanceof BlockEvent) { // 블럭 관련 이벤트
 	    BlockEvent blockEvent = (BlockEvent) event;
 	    eventLoc = blockEvent.getBlock().getLocation();
-	}else if (event instanceof EntityEvent) { // 엔티티 관련 이벤트
+	} else if (event instanceof EntityEvent) { // 엔티티 관련 이벤트
 	    EntityEvent entityEvent = (EntityEvent) event;
 	    eventLoc = entityEvent.getEntity().getLocation();
 	} else if (event instanceof PlayerEvent) { // 플레이어 관련 이벤트
@@ -112,12 +111,12 @@ public class MiniGameManager implements DataMember {
 	    // 처리할 이벤트 대상이 아닐땐 반환
 	    return;
 	}
-	
-	MiniGameType gameType =  MiniGameType.getMiniGameWithLocation(eventLoc);
-	
+
+	MiniGameType gameType = MiniGameType.getMiniGameWithLocation(eventLoc);
+
 	// ㅇ
 	MiniGame game = this.games.get(gameType);
-	
+
 	if (game != null) {
 
 	    // gameRoom블럭이 활성화 됫을시에만 반응
@@ -176,33 +175,33 @@ public class MiniGameManager implements DataMember {
 	return null;
     }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public void installData(Object obj) {
-	/*
-	 * [주의] MiniGame클래스의 생성자에서 만들어도 여기서 저장된 데이터가 불러들이면 생성자에서 한 행동은 모두 없어지고 저장되었던
-	 * 데이터로 "교체"됨! -> 생성자에서 특정 변수 선언하지 말고, static class나 method에 인자로 넘겨서 사용
-	 */
-	this.games = (Map<MiniGameType, MiniGame>) obj;
-
-	// 추가된 미니게임 있으면 추가
-	this.registerGames();
-
-	// 저장된 미니게임을 불러오면 transient변수들은 초기화를 따로 해줘야 함
-	for (MiniGame game : this.games.values()) {
-	    game.initGameSettings();
-	}
-    }
-
-    @Override
-    public Object getData() {
-	return this.games;
-    }
-
-    @Override
-    public String getDataMemberName() {
-	// TODO Auto-generated method stub
-	return "minigame";
-    }
+//    @SuppressWarnings("unchecked")
+//    @Override
+//    public void installData(Object obj) {
+//	/*
+//	 * [주의] MiniGame클래스의 생성자에서 만들어도 여기서 저장된 데이터가 불러들이면 생성자에서 한 행동은 모두 없어지고 저장되었던
+//	 * 데이터로 "교체"됨! -> 생성자에서 특정 변수 선언하지 말고, static class나 method에 인자로 넘겨서 사용
+//	 */
+//	this.games = (Map<MiniGameType, MiniGame>) obj;
+//
+//	// 추가된 미니게임 있으면 추가
+//	this.registerGames();
+//
+//	// 저장된 미니게임을 불러오면 transient변수들은 초기화를 따로 해줘야 함
+//	for (MiniGame game : this.games.values()) {
+//	    game.initGameSettings();
+//	}
+//    }
+//
+//    @Override
+//    public Object getData() {
+//	return this.games;
+//    }
+//
+//    @Override
+//    public String getDataMemberName() {
+//	// TODO Auto-generated method stub
+//	return "minigame";
+//    }
 
 }

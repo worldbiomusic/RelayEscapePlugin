@@ -23,7 +23,6 @@ import net.md_5.bungee.api.ChatColor;
 
 public abstract class BattleMiniGame extends MiniGame {
 
-    private static final long serialVersionUID = 1L;
     /*
      * 모든 배틀 미니게임은 이 클래스를 상속받아서 만들어져야 함
      * 
@@ -49,10 +48,10 @@ public abstract class BattleMiniGame extends MiniGame {
      */
 
     // BattleMiniGame에서는 players로 Rank판단 가능
-    transient private Map<String, Integer> players;
+      private Map<String, Integer> players;
 
     // 게임 시작시 SUM(fee token 합) 값 저장(플레이어 나가면 몇명참가인지 못셈)
-    transient int SUM;
+      int SUM;
 
     public BattleMiniGame(MiniGameType gameType) {
 	super(gameType);
@@ -167,7 +166,7 @@ public abstract class BattleMiniGame extends MiniGame {
 
 	    // 전체플레이어 score 공개
 	    BroadcastTool.sendMessage(p, "" + ChatColor.BOLD + "[ RANK ]");
-	    List<Entry<String, Integer>> rank = MiniGameRankManager.getDescendingSortedMapEntrys(this.players);
+	    List<Entry<String, Integer>> rank = miniGameRankManager.getDescendingSortedMapEntrys(this.players);
 	    for (int i = 0; i < rank.size(); i++) {
 		Entry<String, Integer> entry = rank.get(i);
 		String name = entry.getKey();
@@ -212,7 +211,7 @@ public abstract class BattleMiniGame extends MiniGame {
 	 */
 
 	// this.players의 int값을 기준으로 내림차순으로 랭크된 플레이어 목록
-	List<Entry<String, Integer>> rank = MiniGameRankManager.getDescendingSortedMapEntrys(this.players);
+	List<Entry<String, Integer>> rank = miniGameRankManager.getDescendingSortedMapEntrys(this.players);
 
 	int firstReward = (int) (this.SUM * 0.3);
 	int secondReward = (int) (this.SUM * 0.2);

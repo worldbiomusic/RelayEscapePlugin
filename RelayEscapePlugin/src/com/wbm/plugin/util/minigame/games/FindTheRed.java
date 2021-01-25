@@ -16,7 +16,6 @@ public class FindTheRed extends SoloMiniGame {
     /**
      * 
      */
-    private static final long serialVersionUID = 1L;
 
     /*
      * 게임소개 노랑꽃중에서 빨간꽃을 부수면 점수 얻는 게임

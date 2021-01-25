@@ -20,11 +20,49 @@ public class FitTool extends SoloMiniGame {
     /**
      * 
      */
-    private static final long serialVersionUID = 1L;
 
-    transient static List<Material> randomBlocks;
+    List<Material> randomBlocks;
 
-    static {
+    public FitTool() {
+	super(MiniGameType.FIT_TOOL);
+
+	// setup variables
+	this.initVariables();
+    }
+
+    @Override
+    public void processEvent(Event event) {
+	// 부순블럭은 없어지게
+	// 모두 부섰나 체크
+	// 모두부수면 +1하고 랜덤 블럭으로 재생성
+
+	if (event instanceof BlockBreakEvent) {
+	    BlockBreakEvent e = (BlockBreakEvent) event;
+	    // 일단 블럭 없어지게 설정
+	    Block b = e.getBlock();
+	    b.setType(Material.AIR);
+
+	    if (this.checkEmpty()) {
+		this.generateRandomBlocks();
+
+		this.plusScore(1);
+	    }
+	}
+
+    }
+
+    @Override
+    public void runTaskAfterStartGame() {
+	super.runTaskAfterStartGame();
+
+	// 블럭 재정비
+	this.generateRandomBlocks();
+
+	// Tool 지급
+	this.giveTools();
+    }
+
+    private void initVariables() {
 	// randomBlocks초기화
 	randomBlocks = new ArrayList<>();
 
@@ -54,50 +92,6 @@ public class FitTool extends SoloMiniGame {
 
 	// etc
 	randomBlocks.add(Material.WOOL);
-    }
-
-    public FitTool() {
-	super(MiniGameType.FIT_TOOL);
-
-    }
-
-    @Override
-    public void processEvent(Event event) {
-	// 부순블럭은 없어지게
-	// 모두 부섰나 체크
-	// 모두부수면 +1하고 랜덤 블럭으로 재생성
-
-	if (event instanceof BlockBreakEvent) {
-	    BlockBreakEvent e = (BlockBreakEvent) event;
-	    // 일단 블럭 없어지게 설정
-	    Block b = e.getBlock();
-	    b.setType(Material.AIR);
-
-	    if (this.checkEmpty()) {
-		this.generateRandomBlocks();
-
-		this.plusScore(1);
-	    }
-	}
-
-    }
-
-    @Override
-    public void runTaskAfterStartGame() {
-	super.runTaskAfterStartGame();
-
-	// setup variables
-	this.initVariables();
-
-	// 블럭 재정비
-	this.generateRandomBlocks();
-
-	// Tool 지급
-	this.giveTools();
-    }
-
-    private void initVariables() {
-
     }
 
     private void giveTools() {

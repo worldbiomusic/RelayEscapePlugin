@@ -16,7 +16,6 @@ import com.wbm.plugin.util.general.TeleportTool;
 import net.md_5.bungee.api.ChatColor;
 
 public abstract class SoloMiniGame extends MiniGame{
-    private static final long serialVersionUID = 1L;
     /*
      * 모든 솔로 미니게임은 이 클래스를 상속받아서 만들어져야 함
      * 
@@ -40,9 +39,9 @@ public abstract class SoloMiniGame extends MiniGame{
      * 미니게임 데이터가 없는것을 초기화해서 파일저장하려고, 나중에 파일에 저장되면 데이터 불러올때 저장된것으로 대체가 됨 = 처음에 한번
      * 초기화를 위해서 필요한 코드)
      */
-    transient private Player player;
+      private Player player;
     
-    transient protected int score;
+      protected int score;
 
     public SoloMiniGame(MiniGameType gameType) {
 	super(gameType);
@@ -107,7 +106,7 @@ public abstract class SoloMiniGame extends MiniGame{
 	this.payReward(pDataManager);
 
 	// score rank 처리
-	MiniGameRankManager.updatePlayerRankData(this.rankData, this.player.getName(), this.score);
+	miniGameRankManager.updatePlayerRankData(this.gameType, this.player.getName(), this.score);
 
 
 	// pData minigame 초기화
@@ -141,8 +140,8 @@ public abstract class SoloMiniGame extends MiniGame{
 
 	// 1,2,3,4분위 안에 속해있을떄 token 지급
 	for (int i = 1; i <= 4; i++) {
-	    String quartilePlayerName = MiniGameRankManager.getQuartilePlayerName(this.rankData, i);
-	    int quartileScore = MiniGameRankManager.getScore(this.rankData, quartilePlayerName);
+	    String quartilePlayerName = miniGameRankManager.getQuartilePlayerName(this.gameType, i);
+	    int quartileScore = miniGameRankManager.getScore(this.gameType, quartilePlayerName);
 	    if (this.score <= quartileScore) {
 		int rewardToken = (int) ((i / (double) 2) * this.getFee());
 		BroadcastTool.sendMessage(this.player, "Your score is in the top " + i + " quartile");
@@ -173,7 +172,7 @@ public abstract class SoloMiniGame extends MiniGame{
 
 	// 자신 최고 점수 출력
 	BroadcastTool.sendMessage(p, "");
-	int lastScore = MiniGameRankManager.getScore(this.rankData, p.getName());
+	int lastScore = miniGameRankManager.getScore(this.gameType, p.getName());
 	BroadcastTool.sendMessage(p, "Your last score: " + lastScore);
 
     }

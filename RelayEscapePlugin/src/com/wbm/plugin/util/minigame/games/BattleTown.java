@@ -23,11 +23,13 @@ public class BattleTown extends BattleMiniGame {
     /**
      * 
      */
-    transient private static final long serialVersionUID = 1L;
-    transient private int killCount;
+    private int killCount;
 
     public BattleTown() {
 	super(MiniGameType.BATTLE_TOWN);
+
+	// setup variables
+	this.initVariables();
     }
 
     @Override
@@ -96,9 +98,6 @@ public class BattleTown extends BattleMiniGame {
     @Override
     public void runTaskAfterStartGame() {
 	super.runTaskAfterStartGame();
-
-	// setup variables
-	this.initVariables();
 
 	// 기본 킷
 	for (Player p : this.getAllPlayer()) {

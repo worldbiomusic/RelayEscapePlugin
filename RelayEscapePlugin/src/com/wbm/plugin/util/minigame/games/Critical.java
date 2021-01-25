@@ -16,27 +16,26 @@ import com.wbm.plugin.util.enums.MiniGameType;
 import com.wbm.plugin.util.general.BroadcastTool;
 import com.wbm.plugin.util.general.InventoryTool;
 import com.wbm.plugin.util.general.ItemStackTool;
-import com.wbm.plugin.util.general.LocationTool;
 import com.wbm.plugin.util.general.PlayerTool;
 import com.wbm.plugin.util.general.TeleportTool;
 import com.wbm.plugin.util.minigame.BattleMiniGame;
 
 public class Critical extends BattleMiniGame {
 
-    transient private static final long serialVersionUID = 1L;
+    int killCount;
+    List<Player> deadPlayers;
+    int hitIndex;
 
-    transient int killCount;
-    transient List<Player> deadPlayers;
-    transient int hitIndex;
+    int hitTimeLeft;
+    static final int hitTimeLimit = 10;
 
-    transient int hitTimeLeft;
-    transient static final int hitTimeLimit = 10;
-
-    transient BukkitTask hitTask;
+    BukkitTask hitTask;
 
     public Critical() {
 	super(MiniGameType.CRITICAL);
 
+	// setup variables
+	this.initVariables();
     }
 
     @Override
@@ -78,7 +77,7 @@ public class Critical extends BattleMiniGame {
 		    this.killCount += 1;
 
 		    // 몇명남은지 체크 (1명 남으면 게임 종료)
-		    if(this.checkGameFinish()) {
+		    if (this.checkGameFinish()) {
 			return;
 		    }
 		}
@@ -194,9 +193,6 @@ public class Critical extends BattleMiniGame {
     public void runTaskAfterStartGame() {
 	super.runTaskAfterStartGame();
 
-	// setup variables
-	this.initVariables();
-
 	// kit
 	InventoryTool.addItemToPlayers(this.getAllPlayer(), ItemStackTool.item(Material.WOOD_SWORD));
 
@@ -210,15 +206,6 @@ public class Critical extends BattleMiniGame {
     }
 
     private void initVariables() {
-
-	/*
-	 * transient int killCount; transient List<Player> deadPlayers; transient int
-	 * hitIndex;
-	 * 
-	 * transient int hitTimeLeft; transient static final int hitTimeLimit = 10;
-	 * 
-	 * transient BukkitTask hitTask;
-	 */
 
 	// killcount 초기화
 	this.killCount = 0;

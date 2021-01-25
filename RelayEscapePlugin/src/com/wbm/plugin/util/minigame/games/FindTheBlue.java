@@ -17,8 +17,7 @@ import com.wbm.plugin.util.minigame.BattleMiniGame;
 
 public class FindTheBlue extends BattleMiniGame {
 
-    private static final long serialVersionUID = 1L;
-    transient private static ItemStack plusItem = ItemStackTool.item(Material.RED_ROSE, (byte) 1);
+      private static ItemStack plusItem = ItemStackTool.item(Material.RED_ROSE, (byte) 1);
 
     public FindTheBlue() {
 	super(MiniGameType.FIND_THE_BLUE);
@@ -56,15 +55,8 @@ public class FindTheBlue extends BattleMiniGame {
     public void runTaskAfterStartGame() {
 	super.runTaskAfterStartGame();
 
-	// setup variables
-	this.initVariables();
-
 	// 블럭 재정비
 	this.generateNewBlocks();
-    }
-
-    private void initVariables() {
-	
     }
 
     private void generateNewBlocks() {

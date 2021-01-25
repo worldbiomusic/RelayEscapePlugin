@@ -257,7 +257,7 @@ public class RelayManager {
     private void startMaking() {
 //	 RelayTime 관리
 	this.currentTime = RelayTime.MAKING;
-	
+
 	// make room empty
 	this.roomManager.setRoomEmpty(RoomType.MAIN);
 
@@ -302,8 +302,10 @@ public class RelayManager {
 	// common todo list
 	RelayTimeCommonTODOList();
 
-	// room challeningCount + 1
-	this.roomManager.getRoom(RoomType.MAIN).addChallengingCount(1);
+	// room challeningCount + 1 (최소 1명 이상 서버에 플레이어가 존재할 때)
+	if (PlayerTool.onlinePlayersCount() >= 1) {
+	    this.roomManager.getRoom(RoomType.MAIN).addChallengingCount(1);
+	}
 
 	// start recording room duration time
 	this.roomManager.startMainRoomDurationTime();
@@ -406,10 +408,8 @@ public class RelayManager {
 	    InventoryTool.clearPlayerInv(this.getMaker());
 	} else {
 	    InventoryTool.clearAllPlayerInv();
+	    ShopGoods.giveGoodsToPleyers(pDataManager, new ArrayList<Player>(Bukkit.getOnlinePlayers()));
 	}
-	
-	ShopGoods.giveGoodsToPleyers(pDataManager, new ArrayList<Player>(Bukkit.getOnlinePlayers()));
-
     }
 
     private void reserveNextTask(int durationTime) {
@@ -637,7 +637,6 @@ public class RelayManager {
 //	    }
 //	}
 //    }
-
 
     public void changeEveryoneRoleWithRelayTime(Player p) {
 	/*

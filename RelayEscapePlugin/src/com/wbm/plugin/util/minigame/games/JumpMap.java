@@ -22,9 +22,8 @@ public class JumpMap extends SoloMiniGame {
      * 호박부섰을떄 finishTimer stop하기, 후에 exitGame()
      * 
      */
-    private static final long serialVersionUID = 1L;
-    transient int finishTimer;
-    transient int minusDelay;
+    int finishTimer;
+    int minusDelay;
 
     public JumpMap() {
 	super(MiniGameType.JUMP_MAP);

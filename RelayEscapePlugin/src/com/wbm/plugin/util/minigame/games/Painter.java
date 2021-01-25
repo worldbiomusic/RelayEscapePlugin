@@ -23,12 +23,14 @@ public class Painter extends SoloMiniGame {
     /**
     * 
     */
-    transient private static final long serialVersionUID = 1L;
-    transient private List<Material> mats;
-    transient Material mat1, mat2;
+    private List<Material> mats;
+    Material mat1, mat2;
 
     public Painter() {
 	super(MiniGameType.PAINTER);
+
+	// setup variables
+	this.initVariables();
     }
 
     void initVariables() {
@@ -42,8 +44,6 @@ public class Painter extends SoloMiniGame {
 
     @Override
     public void runTaskAfterStartGame() {
-	// setup variables
-	this.initVariables();
 
 	// select random material
 	selectRandomMat1Mat2();
@@ -53,7 +53,6 @@ public class Painter extends SoloMiniGame {
 
 	// 곡괭이 지급
 	InventoryTool.addItemToPlayers(this.getAllPlayer(), ItemStackTool.item(Material.IRON_PICKAXE));
-
     }
 
     @Override

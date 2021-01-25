@@ -26,20 +26,22 @@ public class Bang extends BattleMiniGame {
     /*
      * 
      */
-    transient private static final long serialVersionUID = 1L;
 
-    transient private ItemStack bangItem;
+    private ItemStack bangItem;
 
-    transient private List<Location> locs;
+    private List<Location> locs;
 
-    transient private Location bangBlock;
+    private Location bangBlock;
 
-    transient private BukkitTask bangTask;
+    private BukkitTask bangTask;
 
-    transient int killCount;
+    int killCount;
 
     public Bang() {
 	super(MiniGameType.BANG);
+
+	// setup variables
+	this.initVariables();
     }
 
     void initVariables() {
@@ -56,7 +58,6 @@ public class Bang extends BattleMiniGame {
 
 	this.killCount = 0;
 
-	
     }
 
     @Override
@@ -113,10 +114,7 @@ public class Bang extends BattleMiniGame {
     @Override
     public void runTaskAfterStartGame() {
 	super.runTaskAfterStartGame();
-	
-	// setup variables
-	this.initVariables();
-	
+
 	// bang블럭 생성
 	bangBlock.getBlock().setType(Material.CONCRETE);
 

@@ -14,7 +14,6 @@ import com.wbm.plugin.util.minigame.CooperativeMiniGame;
 
 public class FindTheYellow extends CooperativeMiniGame{
 
-    private static final long serialVersionUID = 1L;
 
     public FindTheYellow() {
 	super(MiniGameType.FIND_THE_YELLOW);

@@ -35,19 +35,24 @@ public class Setting {
      * 
      * lobby: (16, 4, 16)
      */
-    
+
+    public static final String DISCORD_CH_SERVER_CHAT = "server-chat";
+
+    public static final int MAIN_ROOM_CLEAR_TOKEN = Bukkit.getOnlinePlayers().size() * 1;
+    public static final int PRACTICE_ROOM_CLEAR_TOKEN = Bukkit.getOnlinePlayers().size() * 1;
+
     public static Location getAbsoluteLocation(Location loc) {
 	return loc;
     }
-    
+
     public static Location getAbsoluteLocation(double x, double y, double z) {
 	return new Location(Setting.world, x, y, z);
     }
-    
+
     public static Location getAbsoluteLocation(double x, double y, double z, float yaw, float pitch) {
 	return new Location(Setting.world, x, y, z, yaw, pitch);
     }
-    
+
     public static Location getLoationFromSTDLOC(Location loc) {
 	return loc.clone().add(Setting.STDLOC);
     }
@@ -59,19 +64,17 @@ public class Setting {
     public static Location getLoationFromSTDLOC(double x, double y, double z, float yaw, float pitch) {
 	return new Location(Setting.world, x, y, z, yaw, pitch).clone().add(Setting.STDLOC);
     }
-    
+
     public static final String CoolDown_Subject_CHAT = "CHAT";
     public static final String CoolDown_Subject_CMD_ROOM = "CMD_ROOM";
-    
+
     // RelayTime time amount
     public static final int WAITING_TIME = 30;
     public static final int MAKING_TIME = 60 * 5;
     public static final int TESTING_TIME = 60 * 10;
     public static final int CHALLENGING_TIME = 60 * 10;
-    
-    
-}
 
+}
 
 //
 //
