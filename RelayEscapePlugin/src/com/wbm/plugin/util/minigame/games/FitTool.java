@@ -25,9 +25,6 @@ public class FitTool extends SoloMiniGame {
 
     public FitTool() {
 	super(MiniGameType.FIT_TOOL);
-
-	// setup variables
-	this.initVariables();
     }
 
     @Override
@@ -62,7 +59,9 @@ public class FitTool extends SoloMiniGame {
 	this.giveTools();
     }
 
-    private void initVariables() {
+    @Override
+    public void initGameSettings() {
+	super.initGameSettings();
 	// randomBlocks초기화
 	randomBlocks = new ArrayList<>();
 

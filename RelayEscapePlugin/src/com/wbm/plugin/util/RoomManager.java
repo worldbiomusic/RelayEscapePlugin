@@ -49,7 +49,7 @@ public class RoomManager implements DataMember {
     // 현재 roomType에 맞는 실제 room data
     Map<RoomType, Room> rooms;
 
-    private double durationTime;
+    private double durationStartTime;
 
     public RoomManager() {
 	this.roomData = new HashMap<>();
@@ -60,16 +60,15 @@ public class RoomManager implements DataMember {
     }
 
     public void recordMainRoomDurationTime() {
-	double secDuration = (int) ((System.currentTimeMillis() - this.durationTime) / 1000);
-	double minDuration = secDuration / 60;
-
+	int secDuration = Math.round((float)((System.currentTimeMillis() - this.durationStartTime) / 1000));
+	System.out.println("secDuration: " + secDuration);
 	Room mainRoom = this.rooms.get(RoomType.MAIN);
 	// room avgDurationTime 업데이트
-	mainRoom.addNewAvgDurationTime(minDuration);
+	mainRoom.addNewAvgDurationTime(secDuration);
     }
 
     public void startMainRoomDurationTime() {
-	this.durationTime = System.currentTimeMillis();
+	this.durationStartTime = System.currentTimeMillis();
     }
 
     public Room getRoom(RoomType roomType) {

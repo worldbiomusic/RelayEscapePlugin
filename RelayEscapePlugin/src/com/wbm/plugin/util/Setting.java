@@ -41,6 +41,10 @@ public class Setting {
     public static final int MAIN_ROOM_CLEAR_TOKEN = Bukkit.getOnlinePlayers().size() * 1;
     public static final int PRACTICE_ROOM_CLEAR_TOKEN = Bukkit.getOnlinePlayers().size() * 1;
 
+    public static final int MinimunMakingTime = 60;
+    
+    public static final int DATA_SAVE_DELAY = 20 * 60 * 60;
+
     public static Location getAbsoluteLocation(Location loc) {
 	return loc;
     }

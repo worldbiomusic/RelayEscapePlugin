@@ -22,6 +22,7 @@ import com.wbm.plugin.data.RoomLocation;
 import com.wbm.plugin.util.PlayerDataManager;
 import com.wbm.plugin.util.RelayManager;
 import com.wbm.plugin.util.RoomManager;
+import com.wbm.plugin.util.Setting;
 import com.wbm.plugin.util.general.BroadcastTool;
 import com.wbm.plugin.util.general.ChatColorTool;
 import com.wbm.plugin.util.general.InventoryTool;
@@ -91,30 +92,42 @@ public class GoodsListener implements Listener {
 	}
     }
 
-    private Inventory getPlayerGoodsListInv(Player p, int page) {
+    private Inventory getPlayerGoodsPageInv(Player p, String invTitle, int page, GoodsRole... goodsRoles) {
 	// 0~44 Goods 표시
 	// 45 ~ 53 페이지 도구 표시
 	int goodsIndex = page * 45;
 	PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
 	List<ShopGoods> goods = pData.getGoods();
+//	System.out.println("GOODS SIZE: " + goods.size());
 
-	String title = p.getName() + "'s Goods List";
-	Inventory inv = Bukkit.createInventory(null, 54, title);
+	Inventory inv = Bukkit.createInventory(null, 54, invTitle);
 
 	// 45 46 47 48 49 50 51 52 53
 	inv.setItem(48, ItemStackTool.item(Material.LEVER, "previous page"));
-	inv.setItem(49, ItemStackTool.item(Material.PAPER, "PAGE: " + page));
+	inv.setItem(49, ItemStackTool.item(Material.PAPER, "PAGE " + page));
 	inv.setItem(50, ItemStackTool.item(Material.REDSTONE_TORCH_ON, "next page"));
 
 	// inventory는 무조건 0~44칸까지만 채워짐
 	int invIndex = 0;
-	for (int i = goodsIndex; i < goodsIndex + 45; i++) {
+	for (int i = goodsIndex; invIndex < 45; i++) {
 	    if (i >= goods.size()) {
+//		System.out.println("I:" +i);
 		// 표시할 i인덱스가 플레이어가 가지고 있는 굿즈 갯수보다 많으면 끝내기
 		break;
 	    }
 	    ShopGoods good = goods.get(i);
-	    inv.setItem(invIndex++, good.getItemStack());
+//	    System.out.println("["+i+"] GOODS NAME: " + good.name());
+	    for (GoodsRole goodRole : goodsRoles) {
+//		if (good == ShopGoods.SLIME_BLOCK) {
+//		    System.out.println("GOOD_ROLE: " + good.goodsRole);
+//		    System.out.println("equal goods role: " + goodRole);
+//		    System.out.println("t of f: " + good.isGoodsRoleGoods(goodRole));
+//		}
+		if (good.isGoodsRoleGoods(goodRole)) {
+		    inv.setItem(invIndex++, good.getItemStack());
+		    break;
+		}
+	    }
 	}
 
 	return inv;
@@ -149,45 +162,64 @@ public class GoodsListener implements Listener {
 //	}
 //    }
 
+//    private void openGUIInventory(Player p, GoodsRole... goodsRoles) {
+//
+//    }
+
     @EventHandler
     public void onPlayerClickGoodsListInventory(InventoryClickEvent e) {
 	Player p = (Player) e.getWhoClicked();
-	String title = p.getName() + "'s Goods List";
 	Inventory inv = e.getInventory();
-	if (inv.getTitle().equalsIgnoreCase(title)) {
+	String invTitle = e.getInventory().getTitle();
+	GoodsRole[] goodsRoles = null;
+
+	// 해당되는 title을 가지고 있는 inventory만 클릭 반응
+	if (invTitle.equalsIgnoreCase(ShopGoods.CHEST.name())) {
+	    goodsRoles = new GoodsRole[] { GoodsRole.MAKING_BLOCK };
+	    e.setCancelled(false);
+	} else if (invTitle.equalsIgnoreCase(p.getName() + "'s Goods List")) {
+	    goodsRoles = GoodsRole.values();
 	    e.setCancelled(true);
+	} else {
+	    return;
+	}
 
-	    ItemStack item = e.getCurrentItem();
-	    if (item == null) {
-		return;
-	    }
-	    ItemMeta meta = item.getItemMeta();
-	    if (meta == null) {
-		return;
-	    }
-	    String displayName = meta.getDisplayName();
+	ItemStack item = e.getCurrentItem();
+	if (item == null) {
+	    return;
+	}
+	ItemMeta meta = item.getItemMeta();
+	if (meta == null) {
+	    return;
+	}
+	String displayName = meta.getDisplayName();
 
-	    // page 구하기
-	    ItemStack pageItem = inv.getItem(49);
-	    String pageString = pageItem.getItemMeta().getDisplayName().split(" ")[1];
-	    int page = Integer.parseInt(pageString);
+	// page 구하기
+	ItemStack pageItem = inv.getItem(49);
+	String pageString = pageItem.getItemMeta().getDisplayName().split(" ")[1];
+	int page = Integer.parseInt(pageString);
 
-	    // previous, next click 구현
-	    if (displayName != null) {
-		if (displayName.equalsIgnoreCase("previous page")) {
-		    if (page >= 1) {
-			Inventory preInv = this.getPlayerGoodsListInv(p, page - 1);
-			p.openInventory(preInv);
-		    }
-		} else if (displayName.equalsIgnoreCase("next page")) {
-
-		    if (inv.getItem(44) != null) {
-			Inventory nextInv = this.getPlayerGoodsListInv(p, page + 1);
-			p.openInventory(nextInv);
-		    }
+	// previous, next click 구현
+	if (displayName != null) {
+	    if (displayName.equalsIgnoreCase("previous page")) {
+		e.setCancelled(true);
+		if (page >= 1) {
+		    // page 0부터 시작함
+		    page--;
+		    Inventory nextInv = this.getPlayerGoodsPageInv(p, invTitle, page, goodsRoles);
+		    p.openInventory(nextInv);
 		}
+	    } else if (displayName.equalsIgnoreCase("next page")) {
+		e.setCancelled(true);
+		if (inv.getItem(44) != null) {
+		    // 44칸이 비어있으면 꽉 안 찬 것임
+		    page++;
+		    Inventory nextInv = this.getPlayerGoodsPageInv(p, invTitle, page, goodsRoles);
+		    p.openInventory(nextInv);
+		}
+	    } else if (displayName.contains("PAGE")) {
+		e.setCancelled(true);
 	    }
-
 	}
 
     }
@@ -392,7 +424,8 @@ public class GoodsListener implements Listener {
 	PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
 	if (good == ShopGoods.GOODS_LIST) {
 	    // goods들을 포함한 GUI inventory 보여주기 (클락 불가능)
-	    Inventory inv = this.getPlayerGoodsListInv(p, 0);
+	    Inventory inv = this.getPlayerGoodsPageInv(p, p.getName() + "'s Goods List", 0, GoodsRole.values());
+//	    Inventory inv = this.getPlayerGoodsPageInv(p, p.getName() + "'s Goods List", 0, GoodsRole.MAKING_BLOCK);
 	    p.openInventory(inv);
 	} else if (good == ShopGoods.TOKEN_500) {
 	    // token 500 추가
@@ -435,16 +468,20 @@ public class GoodsListener implements Listener {
 	    // room list출력
 	    this.roomManager.printRoomList(p);
 	} else if (good == ShopGoods.CHEST) {
-	    // makingBlock들을 담고 있는 인벤토리 오픈
-	    Inventory inv = Bukkit.createInventory(null, 54, ShopGoods.CHEST.name());
 
-	    // 자신이 구입한 Goods(MakingBLock)만 인벤토리에 추가
-	    for (ShopGoods makingBlock : ShopGoods.getGoodsWithGoodsRole(GoodsRole.MAKING_BLOCK)) {
-		if (pData.hasGoods(makingBlock)) {
-		    inv.addItem(makingBlock.getItemStack());
-		}
-	    }
+	    Inventory inv = this.getPlayerGoodsPageInv(p, ShopGoods.CHEST.name(), 0, GoodsRole.MAKING_BLOCK);
 	    p.openInventory(inv);
+
+//	    // makingBlock들을 담고 있는 인벤토리 오픈
+//	    Inventory inv = Bukkit.createInventory(null, 54, ShopGoods.CHEST.name());
+//
+//	    // 자신이 구입한 Goods(MakingBLock)만 인벤토리에 추가
+//	    for (ShopGoods makingBlock : ShopGoods.getGoodsWithGoodsRole(GoodsRole.MAKING_BLOCK)) {
+//		if (pData.hasGoods(makingBlock)) {
+//		    inv.addItem(makingBlock.getItemStack());
+//		}
+//	    }
+//	    p.openInventory(inv);
 	} else if (good == ShopGoods.FINISH) {
 	    // room finish 실행
 	    if (!this.relayManager.isCorePlaced()) {
@@ -454,7 +491,9 @@ public class GoodsListener implements Listener {
 
 //	     MakingTime때 최소 60초는 지나야 맵 테스트할 수 있음
 	    int leftTime = this.relayManager.getLeftTime();
-	    int timeLimit = this.relayManager.getCurrentTime().getAmount() - 60;
+	    int highestMakingTime = pData.getRoomSettingGoodsHighestValue("MAKINGTIME");
+	    highestMakingTime *= 60;
+	    int timeLimit = highestMakingTime - Setting.MinimunMakingTime;
 
 	    if (leftTime > timeLimit) {
 		BroadcastTool.sendMessage(p, "You can use this goods after " + (leftTime - timeLimit) + " sec");

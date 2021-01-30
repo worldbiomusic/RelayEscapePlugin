@@ -82,6 +82,7 @@ public enum ShopGoods {
     TRAP_DOOR(ItemStackTool.item(Material.TRAP_DOOR), GoodsRole.MAKING_BLOCK),
     LAMP(ItemStackTool.item(Material.REDSTONE_LAMP_OFF), GoodsRole.MAKING_BLOCK),
     IRON_DOOR(ItemStackTool.item(Material.IRON_DOOR), GoodsRole.MAKING_BLOCK),
+    SOUL_SAND(ItemStackTool.item(Material.SOUL_SAND), GoodsRole.MAKING_BLOCK),
     
     
     // event making block
@@ -101,15 +102,17 @@ public enum ShopGoods {
 	    GoodsRole.MAKING_BLOCK),
     DOWN_TP(ItemStackTool.item(Material.STAINED_GLASS, 1, (short) 1, (byte) 7, "DOWN_TP",
 	    "teleport player 3 block down"), GoodsRole.MAKING_BLOCK),
+    HEAL(ItemStackTool.item(Material.STAINED_GLASS, 1, (short) 1, (byte) 8, "HEAL",
+	    "heal player's everything"), GoodsRole.MAKING_BLOCK),
 
     // makingTool
     // 이 템으로 클릭시 list나오고 명령어로 가능하게 하기(명령어에서 이 템 가지고 있나 체크)
     ROOM_MANAGER(ItemStackTool.item(Material.BOOK, "ROOM_MANAGER", "can load room which you made before"),
 	    GoodsRole.MAKING),
     UNDER_BLOCK(ItemStackTool.item(Material.STICK, "UNDER_BLOCK", "create stone under your foot"), GoodsRole.MAKING),
-    SPAWN(ItemStackTool.item(Material.WOOD_DOOR, "SPAWN", "teleport to spawn"), GoodsRole.MAKING, GoodsRole.TESTING,
+    SPAWN(ItemStackTool.item(Material.GOLD_NUGGET, "SPAWN", "teleport to spawn"), GoodsRole.MAKING, GoodsRole.TESTING,
 	    GoodsRole.CHALLENGING, GoodsRole.VIEWING),
-    CHEST(ItemStackTool.item(Material.CHEST, "CHEST", "open inventory which has blocks you can use"), GoodsRole.MAKING),
+    CHEST(ItemStackTool.item(Material.CLAY_BRICK, "CHEST", "open inventory which has blocks you can use"), GoodsRole.MAKING),
     FINISH(ItemStackTool.item(Material.ARROW, "FINISH", "finish MakingTime and go next to the TesetingTime"),
 	    GoodsRole.MAKING),
     BLOCK_CHANGER(
@@ -169,13 +172,13 @@ public enum ShopGoods {
     CHAT(ItemStackTool.item(Material.TORCH, "CHAT", "player can chat"), GoodsRole.IN_POCKET),
     TOKEN_500(ItemStackTool.item(Material.EMERALD, "TOKEN_500", "Click to get 500 Token"), GoodsRole.ALWAYS),
     COLOR_CHAT(ItemStackTool.item(Material.NAME_TAG, "COLOR_CHAT", "Your name will be changed with random color"),
-	    GoodsRole.ALWAYS),
+	    GoodsRole.ALWAYS);
 
     // battle kit
-    CHAIN_BOOTS(ItemStackTool.item(Material.CHAINMAIL_BOOTS, "CHAIN_BOOTS", "it's just chain boots"), GoodsRole.BATTLE);
+//    CHAIN_BOOTS(ItemStackTool.item(Material.CHAINMAIL_BOOTS, "CHAIN_BOOTS", "it's just chain boots"), GoodsRole.BATTLE);
 
-    ItemStack item;
-    List<GoodsRole> goodsRole;
+    public ItemStack item;
+    public List<GoodsRole> goodsRole;
 
     ShopGoods(ItemStack item, GoodsRole... goodsRole) {
 	this.item = item;

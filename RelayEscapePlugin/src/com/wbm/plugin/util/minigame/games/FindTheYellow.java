@@ -12,8 +12,7 @@ import com.wbm.plugin.util.enums.MiniGameType;
 import com.wbm.plugin.util.general.BlockTool;
 import com.wbm.plugin.util.minigame.CooperativeMiniGame;
 
-public class FindTheYellow extends CooperativeMiniGame{
-
+public class FindTheYellow extends CooperativeMiniGame {
 
     public FindTheYellow() {
 	super(MiniGameType.FIND_THE_YELLOW);
@@ -43,13 +42,13 @@ public class FindTheYellow extends CooperativeMiniGame{
 
 	return msg;
     }
-    
+
     @Override
     public void runTaskAfterStartGame() {
 	// 블럭 재정비
 	this.generateNewBlocks();
     }
-    
+
     private void generateNewBlocks() {
 	// 블럭 재정비
 	Material yellow = Material.RED_ROSE;
@@ -64,7 +63,12 @@ public class FindTheYellow extends CooperativeMiniGame{
 
 	BlockTool.setBlockWithMaterial(this.getGamePos1(),this.getGamePos2(), flowers);
     }
-    
+
+    @Override
+    public void initGameSettings() {
+	super.initGameSettings();
+    }
+
 }
 
 //

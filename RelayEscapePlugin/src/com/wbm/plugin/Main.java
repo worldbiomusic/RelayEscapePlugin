@@ -46,6 +46,7 @@ import com.wbm.plugin.util.general.TeleportTool;
 import com.wbm.plugin.util.general.skin.SkinManager;
 import com.wbm.plugin.util.minigame.MiniGameManager;
 import com.wbm.plugin.util.minigame.MiniGameRankManager;
+import com.wbm.plugin.util.shop.GoodsRole;
 import com.wbm.plugin.util.shop.ShopGoods;
 import com.wbm.plugin.util.shop.ShopManager;
 
@@ -65,7 +66,7 @@ public class Main extends JavaPlugin {
     NPCManager npcManager;
     StageManager stageManager;
     MiniGameManager miniGameManager;
-    MiniGameRankManager miniGameRankManager; 
+    MiniGameRankManager miniGameRankManager;
 
     // command executor
     Commands dCmd;
@@ -123,11 +124,14 @@ public class Main extends JavaPlugin {
 	;
 	this.respawnManager = new SpawnLocationTool(loc, loc, lobby);
 
-	// banItem (후원 banItems는 따로 만들기)
+	// banItem
 	this.banItems = new BanItemTool();
 	this.banItems.banAllItem();
+	// MakingBLock 예외로 설치 가능
 	for (ShopGoods goods : ShopGoods.values()) {
-	    this.banItems.unbanItem(goods.getItemStack().getType());
+	    if (goods.isGoodsRoleGoods(GoodsRole.MAKING_BLOCK)) {
+		this.banItems.unbanItem(goods.getItemStack().getType());
+	    }
 	}
 
 	// TPManager
@@ -153,8 +157,8 @@ public class Main extends JavaPlugin {
 	// TIP
 	this.loopTips();
 
-	// RotationBlock
-	this.loopRotationBlock();
+	// RotationBlock (렉 많이 걸림)
+//	this.loopRotationBlock();
 
 	// ranking system(stage) 업데이트
 	this.loopUpdateAllStage();
@@ -172,8 +176,9 @@ public class Main extends JavaPlugin {
 	this.miniGameRankManager = new MiniGameRankManager();
 	this.miniGameManager = new MiniGameManager(this.pDataManager, this.miniGameRankManager);
 	this.dataManager.registerMember(this.pDataManager);
+	this.dataManager.loopSavingData(Setting.DATA_SAVE_DELAY); // save 데이터 주기 설정
 	this.roomManager = new RoomManager();
-	
+
 	this.dataManager.registerMember(this.roomManager);
 	this.dataManager.registerMember(this.npcManager);
 	this.dataManager.registerMember(this.skinManager);
@@ -194,7 +199,6 @@ public class Main extends JavaPlugin {
 
 	// discord bot 실행
 	this.setupDiscordBot();
-
     }
 
     private void registerListeners() {
@@ -415,7 +419,7 @@ public class Main extends JavaPlugin {
 	spawnRotation1.add(new Location(Setting.world, 15, 4, 14));
 
 	Rotationer spawn = new Rotationer("spawn", 10 * 2, spawnRotation1, Rotationer.Direction.CLOCK);
-	BlockRotateTool.registerRotation(spawn);
+	BlockRotateTool.registerRotationer(spawn);
 
 	List<Location> spawnRotation2 = new ArrayList<>();
 	spawnRotation2.add(new Location(Setting.world, 14, 5, 14));
@@ -435,7 +439,7 @@ public class Main extends JavaPlugin {
 	spawnRotation2.add(new Location(Setting.world, 15, 5, 14));
 
 	Rotationer spawn2 = new Rotationer("spawn2", 10 * 2, spawnRotation2, Rotationer.Direction.CLOCK);
-	BlockRotateTool.registerRotation(spawn2);
+	BlockRotateTool.registerRotationer(spawn2);
 
 	List<Location> spawnRotation3 = new ArrayList<>();
 	spawnRotation3.add(new Location(Setting.world, 14, 6, 14));
@@ -455,7 +459,7 @@ public class Main extends JavaPlugin {
 	spawnRotation3.add(new Location(Setting.world, 15, 6, 14));
 
 	Rotationer spawn3 = new Rotationer("spawn3", 10 * 2, spawnRotation3, Rotationer.Direction.CLOCK);
-	BlockRotateTool.registerRotation(spawn3);
+	BlockRotateTool.registerRotationer(spawn3);
 
 	// spawn loof
 	List<Location> loofLocs = new ArrayList<>();
@@ -476,7 +480,7 @@ public class Main extends JavaPlugin {
 	loofLocs.add(new Location(Setting.world, 15, 7, 14));
 
 	Rotationer loof = new Rotationer("loof", 10 * 2, loofLocs, Rotationer.Direction.CLOCK);
-	BlockRotateTool.registerRotation(loof);
+	BlockRotateTool.registerRotationer(loof);
 
 	// ratating 시작
 	BlockRotateTool.startRotating();
@@ -488,6 +492,9 @@ public class Main extends JavaPlugin {
 	    @Override
 	    public void run() {
 		stageManager.updateAllStage();
+
+		// gc 실행
+		System.gc();
 	    }
 	}, 0, 20 * 60 * 5);
     }

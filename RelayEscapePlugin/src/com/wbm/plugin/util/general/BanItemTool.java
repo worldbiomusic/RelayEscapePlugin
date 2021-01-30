@@ -8,13 +8,13 @@ import org.bukkit.inventory.ItemStack;
 
 public class BanItemTool
 {
-	public static void main(String[] args)
-	{
-		System.out.println(Material.values().length);
-		for(Material mat : Material.values()) {
-			System.out.println(mat.name());
-		}
-	}
+//	public static void main(String[] args)
+//	{
+//		System.out.println(Material.values().length);
+//		for(Material mat : Material.values()) {
+//			System.out.println(mat.name());
+//		}
+//	}
 	
 	List<Material> items;
 	

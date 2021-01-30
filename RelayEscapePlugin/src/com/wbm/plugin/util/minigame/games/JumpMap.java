@@ -27,7 +27,7 @@ public class JumpMap extends SoloMiniGame {
 
     public JumpMap() {
 	super(MiniGameType.JUMP_MAP);
-	this.minusDelay = 5;
+	
     }
 
     @Override
@@ -116,6 +116,14 @@ public class JumpMap extends SoloMiniGame {
     public void runTaskBeforeExitGame() {
 	super.runTaskBeforeExitGame();
 
+	this.stopFinishTimer();
+    }
+
+    @Override
+    public void initGameSettings() {
+	super.initGameSettings();
+	
+	this.minusDelay = 5;
 	this.stopFinishTimer();
     }
 }

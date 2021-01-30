@@ -27,9 +27,6 @@ public class BattleTown extends BattleMiniGame {
 
     public BattleTown() {
 	super(MiniGameType.BATTLE_TOWN);
-
-	// setup variables
-	this.initVariables();
     }
 
     @Override
@@ -108,7 +105,9 @@ public class BattleTown extends BattleMiniGame {
 	}
     }
 
-    private void initVariables() {
+    @Override
+    public void initGameSettings() {
+	super.initGameSettings();
 	// killcount 초기화
 	this.killCount = 0;
     }

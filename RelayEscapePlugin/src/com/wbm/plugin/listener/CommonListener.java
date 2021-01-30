@@ -57,7 +57,6 @@ import com.wbm.plugin.util.general.CoolDownManager;
 import com.wbm.plugin.util.general.NPCManager;
 import com.wbm.plugin.util.general.PlayerTool;
 import com.wbm.plugin.util.general.SpawnLocationTool;
-import com.wbm.plugin.util.general.TPManager;
 import com.wbm.plugin.util.general.TeleportTool;
 import com.wbm.plugin.util.general.skin.SkinManager;
 import com.wbm.plugin.util.minigame.MiniGame;
@@ -78,6 +77,8 @@ public class CommonListener implements Listener {
     RelayManager relayManager;
     DiscordBot discordBot;
 
+    EventBlockListener eventBlockListener;
+
     public CommonListener(PlayerDataManager pDataManager, ShopManager shopManager, BanItemTool banItems, NPCManager npc,
 	    SkinManager skinManager, MiniGameManager miniGameManager, RelayManager relayManager,
 	    DiscordBot discordBot) {
@@ -89,6 +90,8 @@ public class CommonListener implements Listener {
 	this.miniGameManager = miniGameManager;
 	this.relayManager = relayManager;
 	this.discordBot = discordBot;
+
+	eventBlockListener = new EventBlockListener();
     }
 
     @EventHandler
@@ -198,7 +201,7 @@ public class CommonListener implements Listener {
 	    PlayerTool.playSoundToEveryone(Sound.BLOCK_END_PORTAL_FRAME_FILL);
 	    String discordChat = "[" + p.getName() + "] " + translatedMsg;
 	    this.discordBot.sendMsgToChannelWithTime(Setting.DISCORD_CH_SERVER_CHAT, discordChat);
-	    
+
 	    // 메세지 설정
 	    e.setMessage(translatedMsg);
 	} else {
@@ -356,7 +359,7 @@ public class CommonListener implements Listener {
     @EventHandler
     public void onPlayerMoveOnTheEventBlock(PlayerMoveEvent e) {
 	// event block 리스너
-	EventBlockListener.processEventBlockEvent(e);
+	this.eventBlockListener.processEventBlockEvent(e);
 	// minigame
 	this.miniGameManager.processEvent(e);
     }
@@ -369,7 +372,7 @@ public class CommonListener implements Listener {
 	if (b != null) {
 	    if (b.getType() == Material.SIGN || b.getType() == Material.SIGN_POST
 		    || b.getType() == Material.WALL_SIGN) {
-		if (e.getAction() == Action.RIGHT_CLICK_BLOCK || e.getAction() == Action.LEFT_CLICK_BLOCK) {
+		if (e.getAction() == Action.RIGHT_CLICK_BLOCK) {
 		    // room, time, role 체크
 		    if (this.relayManager.checkRoomAndRelayTimeAndRole(RoomType.MINI_GAME, RelayTime.MAKING,
 			    Role.WAITER, p)
@@ -521,9 +524,11 @@ public class CommonListener implements Listener {
 	/*
 	 * [TP]
 	 * 
-	 * <tp title>
+	 * <title>
 	 * 
 	 * TOKEN <amount>
+	 * 
+	 * <x> <y> <z>
 	 */
 	Player p = e.getPlayer();
 	Block b = e.getClickedBlock();
@@ -542,12 +547,20 @@ public class CommonListener implements Listener {
 		    // TP sign click
 		    if (lines[0].equals("[TP]")) {
 			String locTitle = lines[1];
-			String[] tokenStr = lines[2].split(" ");
+			String tokenStr = lines[2].split(" ")[1];
 			// 띄어쓰기 기분으로 2번째를 token number로 봄
-			int cost = Integer.parseInt(tokenStr[1]);
+			int cost = Integer.parseInt(tokenStr);
+
+			// 좌표
+			String[] locs = lines[3].split(" ");
+			int x = Integer.parseInt(locs[0]);
+			int y = Integer.parseInt(locs[1]);
+			int z = Integer.parseInt(locs[2]);
+
 			if (pData.minusToken(cost)) {
-			    Location targetLoc = TPManager.getLocation(locTitle);
-			    TeleportTool.tp(p, targetLoc);
+//	    Location targetLoc = TPManager.getLocation(locTitle);
+//		    TeleportTool.tp(p, targetLoc);
+			    TeleportTool.tp(p, x, y, z);
 			    BroadcastTool.sendMessage(p, "teleport to " + locTitle);
 			} else {
 			    BroadcastTool.sendMessage(p, "you need more token");
@@ -577,7 +590,8 @@ public class CommonListener implements Listener {
 	// mainhand 체크
 	ItemStack item = p.getInventory().getItemInMainHand();
 
-	if (this.banItems.containsItem(blockMat) || this.banItems.containsItem(item)
+	// this.banItems.containsItem(blockMat) || 
+	if (this.banItems.containsItem(item)
 		|| blockMat.equals(Material.CHEST)) {
 	    BroadcastTool.sendMessage(p, "banned item");
 	    e.setCancelled(true);

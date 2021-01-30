@@ -11,14 +11,20 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.util.Vector;
 
 import com.wbm.plugin.Main;
+import com.wbm.plugin.data.RoomLocation;
+import com.wbm.plugin.util.enums.RoomType;
 import com.wbm.plugin.util.general.ItemStackTool;
+import com.wbm.plugin.util.general.PlayerTool;
 import com.wbm.plugin.util.general.PotionEffectTool;
-import com.wbm.plugin.util.general.SpawnLocationTool;
 import com.wbm.plugin.util.general.TeleportTool;
 import com.wbm.plugin.util.shop.ShopGoods;
 
 public class EventBlockListener {
-    public static void processEventBlockEvent(PlayerMoveEvent e) {
+    public EventBlockListener() {
+
+    }
+
+    public void processEventBlockEvent(PlayerMoveEvent e) {
 	Player p = e.getPlayer();
 	Block b = p.getLocation().subtract(0, 1, 0).getBlock();
 
@@ -45,25 +51,30 @@ public class EventBlockListener {
 	} else if (ItemStackTool.isSameWithMaterialNData(ItemStackTool.block2ItemStack(b),
 		ShopGoods.DOWN_TP.getItemStack())) {
 	    DOWN_TP(p, b);
+	} else if (ItemStackTool.isSameWithMaterialNData(ItemStackTool.block2ItemStack(b),
+		ShopGoods.HEAL.getItemStack())) {
+	    HEAL(p, b);
 	}
     }
 
-    private static void JUMPING(Player p, Block b) {
+    private void JUMPING(Player p, Block b) {
 	Location pLoc = p.getLocation().clone();
-	
+
 	double dirX = pLoc.getDirection().multiply(0.05).getX();
 	double dirZ = pLoc.getDirection().multiply(0.05).getZ();
-	
+
 //	System.out.println(dirX+":"+dirZ);
-	
+
 	p.setVelocity(new Vector(dirX, 0.65, dirZ));
     }
 
-    private static void RESPAWN(Player p, Block b) {
-	TeleportTool.tp(p, SpawnLocationTool.RESPAWN);
+    private void RESPAWN(Player p, Block b) {
+	RoomType roomType = RoomLocation.getRoomTypeWithLocation(b.getLocation());
+	Location respawnLoc = RoomLocation.getRoomSpawnLocation(roomType);
+	TeleportTool.tp(p, respawnLoc);
     }
 
-    private static void TRAP(Player p, Block b) {
+    private void TRAP(Player p, Block b) {
 	if (p.getActivePotionEffects().size() >= 1) {
 	    return;
 	}
@@ -72,7 +83,7 @@ public class EventBlockListener {
 	p.addPotionEffect(potion);
     }
 
-    private static void FLICKING(Player p, Block b) {
+    private void FLICKING(Player p, Block b) {
 	Material mat = b.getType();
 	@SuppressWarnings("deprecation")
 	byte data = b.getData();
@@ -98,27 +109,31 @@ public class EventBlockListener {
 	}, 20 * 6);
     }
 
-    private static void SOUND_TERROR(Player p, Block b) {
+    private void SOUND_TERROR(Player p, Block b) {
 	p.playSound(p.getLocation(), Sound.ENTITY_ZOMBIE_AMBIENT, 10, 1);
     }
 
-    private static void HURT(Player p, Block b) {
+    private void HURT(Player p, Block b) {
 	p.setHealth(Math.floor(p.getHealth() - 1));
 
     }
 
-    private static void UP_TP(Player p, Block b) {
+    private void UP_TP(Player p, Block b) {
 	Location upLoc = p.getLocation().add(0, 3, 0);
 	TeleportTool.tp(p, upLoc);
 
     }
 
-    private static void DOWN_TP(Player p, Block b) {
+    private void DOWN_TP(Player p, Block b) {
 	Location downLoc = p.getLocation().subtract(0, 3, 0);
 	TeleportTool.tp(p, downLoc);
 
     }
 
+    private void HEAL(Player p, Block b) {
+	PlayerTool.heal(p);
+	PlayerTool.removeAllPotionEffects(p);
+    }
 }
 
 //

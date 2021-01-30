@@ -38,31 +38,29 @@ public class PlayerData implements Serializable {
     private int challengingCount;
     private int clearCount;
     private int voted;
-    
+
     private transient MiniGameType minigame;
 
     private List<ShopGoods> goods;
 
-    // 부가적인 플레이어 기록 & 이스터에그 기록 & 비상용으로 추가할 변수 
+    // 부가적인 플레이어 기록 & 이스터에그 기록 & 비상용으로 추가할 변수
     // 추후에 언제든지 CheckList을 추가할 수 있음 (CheckList추가하는 곳은 생성자에 말고, GameManager의
-    // TODOListWhenplayerJoinServer()에 추가함 (생성자는 처음 들어온 사람들에게만 실행되므로 
+    // TODOListWhenplayerJoinServer()에 추가함 (생성자는 처음 들어온 사람들에게만 실행되므로
     // 이미 접속했던 유저들은 새로운 CheckList들을 업데이트 받지 못하기 때문에)
     private Map<CheckList, Object> checkList;
-    
+
     public enum CheckList {
 	/*
 	 * 꼭 int가 아니어도 됨
 	 */
-	CHAT_COUNT(0),
-	KILL_COUNT(0),
-	JOIN_COUNT(0);
-	
+	CHAT_COUNT(0), KILL_COUNT(0), JOIN_COUNT(0);
+
 	Object initValue;
-	
+
 	CheckList(Object initValue) {
 	    this.initValue = initValue;
 	}
-	
+
 	public Object getInitValue() {
 	    return this.initValue;
 	}
@@ -72,7 +70,8 @@ public class PlayerData implements Serializable {
 	this(uuid, name, role, 0, 0, 0, 0, 0);
     }
 
-    public PlayerData(UUID uuid, String name, Role role, int token, int cash, int challengingCount, int clearCount, int voted) {
+    public PlayerData(UUID uuid, String name, Role role, int token, int cash, int challengingCount, int clearCount,
+	    int voted) {
 	this.uuid = uuid;
 	this.name = name;
 	this.role = role;
@@ -211,9 +210,13 @@ public class PlayerData implements Serializable {
 	this.goods = makingGoods;
     }
 
-    public void addGoods(ShopGoods goods) {
-	if (!this.hasGoods(goods)) {
+    public boolean addGoods(ShopGoods goods) {
+	// 이미 가지고 있는 굿즈는 추가 안함
+	if (this.hasGoods(goods)) {
+	    return false;
+	} else {
 	    this.goods.add(goods);
+	    return true;
 	}
     }
 
@@ -255,7 +258,7 @@ public class PlayerData implements Serializable {
     public MiniGameType getMinigame() {
 	return minigame;
     }
-    
+
     public boolean isPlayingMiniGame() {
 	return this.minigame != null;
     }
@@ -287,20 +290,20 @@ public class PlayerData implements Serializable {
     }
 
     public int getCash() {
-        return cash;
+	return cash;
     }
 
     public void plusCash(int amount) {
-        this.cash += amount;
+	this.cash += amount;
     }
-    
+
     public boolean minusCash(int amount) {
 	// cash도 마이너스가 될 순 없음
-	if(this.cash >= amount) {
+	if (this.cash >= amount) {
 	    this.cash -= amount;
 	    return true;
 	}
-	
+
 	return false;
     }
 

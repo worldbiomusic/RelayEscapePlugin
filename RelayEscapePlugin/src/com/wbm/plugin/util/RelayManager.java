@@ -281,6 +281,7 @@ public class RelayManager {
     }
 
     private void startChallenging() {
+	System.gc();
 
 //	 RelayTime 관리
 	this.currentTime = RelayTime.CHALLENGING;
@@ -359,6 +360,18 @@ public class RelayManager {
 	this.reserveNextTask(this.currentTime.getAmount());
 
 	// 7.힐 & 상태 효과 제거
+	this.healEverything();
+
+	// 8.소리재생
+	this.playSoundToEveryone();
+
+	this.manageLockingRoom();
+    }
+
+    void healEverything() {
+	if (this.currentTime == RelayTime.TESTING) {
+	    return;
+	}
 	for (Player p : Bukkit.getOnlinePlayers()) {
 	    // 힐
 	    PlayerTool.heal(p);
@@ -367,11 +380,6 @@ public class RelayManager {
 	    // 발광효과 제거
 	    p.setGlowing(false);
 	}
-
-	// 8.소리재생
-	this.playSoundToEveryone();
-
-	this.manageLockingRoom();
     }
 
     private void manageLockingRoom() {

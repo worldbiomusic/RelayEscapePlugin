@@ -1,18 +1,33 @@
 package com.wbm.plugin;
 
-import java.time.LocalDateTime;
+import java.awt.Color;
+import java.awt.MouseInfo;
+import java.awt.Point;
+import java.awt.PointerInfo;
+import java.awt.Robot;
+import java.awt.event.InputEvent;
 
-public class Test
-{
-	public static void main(String[] args)
-	{
-		LocalDateTime today = LocalDateTime.now();
+public class Test {
+    public static void main(String[] args) {
+	try {
+	    // 1510 25
+	    // 1510 125
+
+	    PointerInfo pt;
+
+	    while (true) {
+		Robot r = new Robot();
 		
-		System.out.println(today.getMonth());
-		System.out.println(today.getMonthValue());
-		System.out.println(today.getDayOfMonth());
-		System.out.println(today.getHour());
-		System.out.println(today.getMinute());
-		System.out.println(today.getSecond());
+		    r.mousePress(InputEvent.BUTTON1_DOWN_MASK);
+		    r.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
+		
+		Thread.sleep(10);
+	    }
+
+	} catch (Exception e) {
+	    // TODO Auto-generated catch block
+	    e.printStackTrace();
 	}
+
+    }
 }

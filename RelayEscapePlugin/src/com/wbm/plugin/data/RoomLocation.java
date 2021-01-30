@@ -5,26 +5,31 @@ import org.bukkit.Location;
 import com.wbm.plugin.util.Setting;
 import com.wbm.plugin.util.enums.RoomType;
 import com.wbm.plugin.util.general.LocationTool;
+import com.wbm.plugin.util.general.SpawnLocationTool;
 
 /*
  * 알아둘것!: RoomLocation은 Room의 블럭을 초기화 할 범위, 블럭 break place범위를 나타내는 범위!
  */
 public class RoomLocation {
-    // main
+    // MAIN
     public static final Location MAIN_Pos1 = Setting.getLoationFromSTDLOC(-4, 4, -4);
     public static final Location MAIN_Pos2 = Setting.getLoationFromSTDLOC(10, 33, 10);
+    public static final Location MAIN_SPAWN = SpawnLocationTool.JOIN;
 
-    // practice
+    // PRACTICE
     public static final Location PRACTICE_Pos1 = Setting.getLoationFromSTDLOC(21, 4, 21);
     public static final Location PRACTICE_Pos2 = Setting.getLoationFromSTDLOC(35, 33, 35);
+    public static final Location PRACTICE_SPAWN = Setting.getLoationFromSTDLOC(33.5, 4, 28.5);
 
-    // minigame
+    // MINIGAME
     public static final Location MINIGAME_Pos1 = Setting.getLoationFromSTDLOC(10, 0, 21);
     public static final Location MINIGAME_Pos2 = Setting.getLoationFromSTDLOC(-4, 33, 35);
+    public static final Location MINIGAME_SPAWN = SpawnLocationTool.LOBBY;
 
-    // minigame
+    // FUN
     public static final Location FUN_Pos1 = Setting.getLoationFromSTDLOC(21, 0, 10);
     public static final Location FUN_Pos2 = Setting.getLoationFromSTDLOC(35, 33, -4);
+    public static final Location FUN_SPAWN = SpawnLocationTool.LOBBY;
 
     // ROOM사이즈 (모든 룸 같은 크기)
     public static final int ROOM_SIZE_X = Math.abs((int) (MAIN_Pos1.getX() - MAIN_Pos2.getX()));
@@ -62,6 +67,21 @@ public class RoomLocation {
 	}
 
 	return null;
+    }
+
+    public static Location getRoomSpawnLocation(RoomType roomType) {
+	switch (roomType) {
+	case MAIN:
+	    return MAIN_SPAWN;
+	case PRACTICE:
+	    return PRACTICE_SPAWN;
+	case MINI_GAME:
+	    return MINIGAME_SPAWN;
+	case FUN:
+	    return FUN_SPAWN;
+	default:
+	    return null;
+	}
     }
 
 }

@@ -24,9 +24,9 @@ public class Room implements Serializable
 	private int clearCount;
 	private LocalDateTime birth;
 	private int voted;
-	// min 단위
+	// sec 단위
 	// avgDurationTime = 
-	// ((avgDurationTime * clearCount) + new DurationTime )/ challengingCount + 1
+	// ((avgDurationTime * clearCount) + new DurationTime ) / challengingCount + 1
 	private double avgDurationTime;
 	
 	public Room(String title
@@ -154,10 +154,8 @@ public class Room implements Serializable
 		allDurationTime += amount;
 		allDurationTime /= this.clearCount;
 		
-		// 소수점 첫재짜리까지만 저장
-		allDurationTime = Math.round(allDurationTime * 10) / (double)10;
-		
-		this.avgDurationTime = allDurationTime;
+		// 소수점 반올림
+		this.avgDurationTime = Math.round(allDurationTime);
 	}
 
 	@Override

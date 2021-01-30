@@ -39,12 +39,11 @@ public class Bang extends BattleMiniGame {
 
     public Bang() {
 	super(MiniGameType.BANG);
-
-	// setup variables
-	this.initVariables();
     }
 
-    void initVariables() {
+    @Override
+    public void initGameSettings() {
+	super.initGameSettings();
 //	setup
 	this.bangItem = ItemStackTool.item(Material.WOOD_SWORD);
 
@@ -58,6 +57,10 @@ public class Bang extends BattleMiniGame {
 
 	this.killCount = 0;
 
+	// task 취소
+	if (this.bangTask != null) {
+	    this.bangTask.cancel();
+	}
     }
 
     @Override
@@ -171,7 +174,7 @@ public class Bang extends BattleMiniGame {
 	bangBlock.getBlock().setType(Material.CONCRETE);
 
 	// task 취소
-	if (this.bangBlock != null) {
+	if (this.bangTask != null) {
 	    this.bangTask.cancel();
 	}
     }

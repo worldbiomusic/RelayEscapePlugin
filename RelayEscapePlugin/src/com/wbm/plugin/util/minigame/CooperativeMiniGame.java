@@ -126,6 +126,12 @@ public abstract class CooperativeMiniGame extends MiniGame {
 	    BroadcastTool.sendMessage(waiter, this.gameType.name() + " game player count is full");
 	    return;
 	}
+	
+	// wait list에 있는 플레이어인지 체크
+	if(!this.waitPlayers.contains(waiter)) {
+	    BroadcastTool.sendMessage(this.getMaster(), waiter + " is not in waitList");
+	    return;
+	}
 
 	// token충분한지 검사
 	if (!waiterPData.minusToken(this.getFee())) {

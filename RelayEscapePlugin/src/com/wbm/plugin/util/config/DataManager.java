@@ -9,6 +9,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.bukkit.Bukkit;
+
+import com.wbm.plugin.Main;
+
 public class DataManager
 /*
  * 여러개 클래스의 java Serializable로 Object read/write해주는 클래스 여기서 사용되는 클래스들은
@@ -135,4 +139,13 @@ public class DataManager
 	return data;
     }
 
+    public void loopSavingData(int delay) {
+	// save메소드를 일정 주기로 실행해서 데이터 중간중간 저장
+	Bukkit.getScheduler().scheduleSyncRepeatingTask(Main.getInstance(), new Runnable() {
+	    @Override
+	    public void run() {
+		save();
+	    }
+	},delay , delay);
+    }
 }

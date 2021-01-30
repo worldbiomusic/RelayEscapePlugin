@@ -33,9 +33,6 @@ public class Critical extends BattleMiniGame {
 
     public Critical() {
 	super(MiniGameType.CRITICAL);
-
-	// setup variables
-	this.initVariables();
     }
 
     @Override
@@ -205,8 +202,10 @@ public class Critical extends BattleMiniGame {
 	this.startHitTimer();
     }
 
-    private void initVariables() {
-
+    @Override
+    public void initGameSettings() {
+	super.initGameSettings();
+	
 	// killcount 초기화
 	this.killCount = 0;
 
@@ -217,6 +216,8 @@ public class Critical extends BattleMiniGame {
 	this.hitIndex = 0;
 
 	this.hitTimeLeft = 0;
+	
+	this.stopHitTask();
     }
 
     @Override

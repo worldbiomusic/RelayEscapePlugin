@@ -7,6 +7,7 @@ import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.GameMode;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -25,6 +26,8 @@ import com.wbm.plugin.util.enums.RoomType;
 import com.wbm.plugin.util.general.BroadcastTool;
 import com.wbm.plugin.util.general.CoolDownManager;
 import com.wbm.plugin.util.general.NPCManager;
+import com.wbm.plugin.util.general.SpawnLocationTool;
+import com.wbm.plugin.util.general.TeleportTool;
 import com.wbm.plugin.util.minigame.CooperativeMiniGame;
 import com.wbm.plugin.util.minigame.MiniGame;
 import com.wbm.plugin.util.minigame.MiniGameManager;
@@ -76,30 +79,105 @@ public class Commands implements CommandExecutor {
 	    case "goods":
 		this.printGoods(p, args);
 		return true;
+	    case "ghost":
+		return this.ghostMode(p, args);
 	    }
 	}
 
 	return false;
     }
 
+    private boolean ghostMode(Player p, String[] args) {
+	// /re ghost
+	// 조건 1.자신의 역할이 viewer일 때, 2.GHOST굿즈 가지고 있을 때
+	// SPECTATOR <-> ADVENTURE 변경
+	PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
+	if (pData.getRole() == Role.VIEWER) {
+	    if (pData.hasGoods(ShopGoods.GHOST)) {
+		GameMode gm = p.getGameMode();
+		if (gm == Role.VIEWER.getGameMode()) {
+		    p.setGameMode(GameMode.SPECTATOR);
+		    BroadcastTool.sendMessage(p, "Gamemode changed to " + GameMode.SPECTATOR.name());
+		} else {
+		    p.setGameMode(Role.VIEWER.getGameMode());
+		    BroadcastTool.sendMessage(p, "Gamemode changed to " + Role.VIEWER.getGameMode().name());
+		}
+		// 게임모드 변경후 join으로 이동
+		TeleportTool.tp(p, SpawnLocationTool.JOIN);
+	    }else {
+		BroadcastTool.sendMessage(p, "You need GHOST goods");
+	    }
+	} else {
+	    BroadcastTool.sendMessage(p, "Only Viewer can use");
+	}
+	return true;
+    }
+
     private boolean debugRoom(Player p, String[] args) {
 	/*
-	 * /re d room <roomType> [load | save | remove | update] <title>
+	 * 구조 엉망... (cmd로 분기해서 만들기)
 	 * 
-	 * /re d room <roomType> info
+	 * /re d room [load | save | update] <roomType> <title>
+	 * 
+	 * /re d room [remove | changemaker | info] <title>
+	 * 
+	 * /re d room changemaker <title> <changedTitle>
+	 * 
+	 * /re d room roominfo <roomType>
 	 */
+	String cmd = args[2];
+	if (cmd.equalsIgnoreCase("roominfo")) {
+	    // /re d room roominfo <roomType>
+	    String roomTypeString = args[3];
+	    roomTypeString = roomTypeString.toUpperCase();
+	    RoomType roomType = RoomType.valueOf(roomTypeString);
 
-	String roomTypeString = args[2];
-	roomTypeString = roomTypeString.toUpperCase();
-	RoomType roomType = RoomType.valueOf(roomTypeString);
-	String cmd = args[3];
+	    Room room = this.roomManager.getRoom(roomType);
+	    BroadcastTool.sendMessage(p, room.toString());
+	} else if (cmd.equalsIgnoreCase("changeMaker")) {
+	    // /re d room changemaker <title> <maker>
+	    String title = args[3];
+	    String maker = args[4];
+	    if (this.roomManager.isExistRoomTitle(title)) {
+		// 이미있는 룸을 Maker는 변경
+		Room room = this.roomManager.getRoomData(title);
+		// PlayerDataManger에 존재하는 플레이어일때만 저장
+		if (this.pDataManager.getPlayerData(maker) != null) {
+		    room.setMaker(maker);
+		} else {
+		    BroadcastTool.sendMessage(p, "not exist player");
+		}
+	    } else {
+		BroadcastTool.sendMessage(p, "not exist room");
+	    }
+	}
 
-	if (args.length == 4) {
+	else if (args.length == 4) {
+	    // /re d room [remove | changemaker | info] <title>
+	    String roomTitle = args[3];
+	    Room room = null;
+
+	    // 존재하는 룸인지 체크
+	    if (this.roomManager.isExistRoomTitle(roomTitle)) {
+		room = this.roomManager.getRoomData(roomTitle);
+	    } else {
+		BroadcastTool.sendMessage(p, "not exist room");
+		return true;
+	    }
+
 	    if (cmd.equalsIgnoreCase("info")) {
-		Room room = this.roomManager.getRoom(roomType);
 		BroadcastTool.sendMessage(p, room.toString());
+	    } else if (cmd.equalsIgnoreCase("remove")) {
+		if (this.roomManager.removeRoom(roomTitle) == null) {
+		    BroadcastTool.sendMessage(p, "not exist room");
+		}
 	    }
 	} else if (args.length == 5) {
+	    // /re d room [load | save | update] <roomType> <title>
+	    String roomTypeString = args[3];
+	    roomTypeString = roomTypeString.toUpperCase();
+	    RoomType roomType = RoomType.valueOf(roomTypeString);
+
 	    String roomTitle = args[4];
 	    if (cmd.equalsIgnoreCase("load")) {
 		if (this.roomManager.isExistRoomTitle(roomTitle)) {
@@ -112,10 +190,6 @@ public class Commands implements CommandExecutor {
 		// title이 존재하지 않는 룸일때 저장
 		if (!this.roomManager.isExistRoomTitle(roomTitle)) {
 		    this.roomManager.saveRoomData(roomType, p.getName(), roomTitle);
-		}
-	    } else if (cmd.equalsIgnoreCase("remove")) {
-		if (this.roomManager.removeRoom(roomTitle) == null) {
-		    BroadcastTool.sendMessage(p, "not exist room");
 		}
 	    } else if (cmd.equalsIgnoreCase("update")) {
 		// 이미있는 룸을 Maker는 유지하고 업데이트해서 변경
@@ -267,7 +341,7 @@ public class Commands implements CommandExecutor {
 		    BroadcastTool.sendMessage(p, "You can use this goods after " + (leftTime - timeLimit) + " sec");
 		    return true;
 		}
-		
+
 		// 위의 상황을 모두 건너면 다음타임 실행
 		this.relayManager.startNextTime();
 
@@ -354,12 +428,15 @@ public class Commands implements CommandExecutor {
     private void printAllCMD(Player p, String[] args) {
 	String cmd = "\n" + "/re d [relay | reset | pdata <player> | allpdata]\n"
 		+ "/re d [token | cash] [plus | minus] <player> <amount>\n" + "/re d rolechange <playerName> <role>\n"
-		+ "/re d goods init\n" + "/re d goods [add | remove] <player> <goods>\n"
+		+ "/re d goods [init | addall] <player>\n" + "/re d goods [add | remove] <player> <goods>\n"
 		+ "/re d room <roomType> [load | save | remove | update] <title>\n" + "/re d room <roomType> info\n"
 		+ "/re rank [tokenrank | challengingrank | clearrank | roomcountrank]\n"
 		+ "/re npc create <name> <skinName>\n" + "/re npc delete <name> \n"
-		+ "/re room [load | title] <title>\n" + "/re room [empty | list | finish]\n"
-		+ "/re minigame [ok | kick] <player>\n" + "/re minigame waitlist";
+		+ "/re d room [load | save | update] <roomType> <title>\n"
+		+ "/re d room [remove | changemaker | info] <title>\n"
+		+ "/re d room changemaker <title> <changedTitle>\n" + "/re d room roominfo <roomType>\n"
+		+ "/re room [empty | list | finish]\n" + "/re minigame [ok | kick] <player>\n"
+		+ "/re minigame waitlist";
 
 	BroadcastTool.sendMessage(p, cmd);
     }
@@ -641,9 +718,9 @@ public class Commands implements CommandExecutor {
 
     private boolean goodsCmd(Player p, String[] args) {
 	/*
-	 * /re d goods init <player>
+	 * /re d goods [init | addall] <player>
 	 * 
-	 * /re d goods [add | remove] <player> [<ShopGoods> | all]
+	 * /re d goods [add | remove] <player> <ShopGoods>
 	 */
 	String option = args[2];
 	String playerName = args[3];
@@ -654,6 +731,11 @@ public class Commands implements CommandExecutor {
 	    case "init":
 		pData.makeEmptyGoods();
 		BroadcastTool.sendMessage(p, playerName + " goods made empty");
+		return true;
+	    case "addall":
+		for (ShopGoods good : ShopGoods.values()) {
+		    pData.addGoods(good);
+		}
 		return true;
 	    case "add":
 	    case "remove":

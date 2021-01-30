@@ -48,11 +48,11 @@ public abstract class MiniGame {
 	this.startTask = this.exitTask = this.timerTask = null;
     }
 
-      static protected PlayerDataManager pDataManager;
+    static protected PlayerDataManager pDataManager;
     public static MiniGameRankManager miniGameRankManager;
 
-      protected boolean activated;
-      protected BukkitTask startTask, exitTask, timerTask;
+    protected boolean activated;
+    protected BukkitTask startTask, exitTask, timerTask;
     protected MiniGameType gameType;
 
     // 각 미니게임의 랭크데이터 관리 변수(BattleMiniGame은 사용 안함)
@@ -154,6 +154,19 @@ public abstract class MiniGame {
 
 	// pdata에 미니게임 등록
 	pData.setMinigame(this.gameType);
+
+	// 플레이어 상태 초기화
+	this.makePlayerPureState(p);
+    }
+
+    void makePlayerPureState(Player p) {
+	// 플레이어 상태 초기화
+	// 상태 초기화
+	PlayerTool.removeAllState(p);
+	// 힐, 배고픔 충전
+	PlayerTool.heal(p);
+	// inv초기화
+	InventoryTool.clearPlayerInv(p);
     }
 
     void notifyInfo(Player p) {
@@ -265,17 +278,8 @@ public abstract class MiniGame {
     }
 
     public void enterRoom(Player p, PlayerDataManager pDataManager) {
-	// 모든 플레이어 상태 초기화
-	// 힐, 배고픔 충전
-	PlayerTool.heal(p);
-	// 포션효과 제거
-	PlayerTool.removeAllPotionEffects(p);
-
-	// inv초기화
-	InventoryTool.clearPlayerInv(p);
     }
-    
-    
+
     // ============sub class 들에서 상황에 맞게 각각 다르게 구현되어야 하는 메소드들=============
 
     public abstract void processEvent(Event event);

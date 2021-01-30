@@ -28,12 +28,11 @@ public class Painter extends SoloMiniGame {
 
     public Painter() {
 	super(MiniGameType.PAINTER);
-
-	// setup variables
-	this.initVariables();
     }
 
-    void initVariables() {
+    @Override
+    public void initGameSettings() {
+	super.initGameSettings();
 //	setup
 	this.mats = new ArrayList<>();
 	this.mats.add(Material.COAL_ORE);

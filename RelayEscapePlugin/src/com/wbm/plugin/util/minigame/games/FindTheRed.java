@@ -28,7 +28,7 @@ public class FindTheRed extends SoloMiniGame {
     public void processEvent(Event event) {
 	if (event instanceof BlockBreakEvent) {
 	    BlockBreakEvent e = (BlockBreakEvent) event;
-	    
+
 	    Block b = e.getBlock();
 
 	    // score
@@ -70,7 +70,11 @@ public class FindTheRed extends SoloMiniGame {
 	int r = (int) (Math.random() * 16);
 	flowers.set(r, Material.RED_ROSE);
 
-	BlockTool.setBlockWithMaterial(this.getGamePos1(),this.getGamePos2(), flowers);
+	BlockTool.setBlockWithMaterial(this.getGamePos1(), this.getGamePos2(), flowers);
     }
 
+    @Override
+    public void initGameSettings() {
+	super.initGameSettings();
+    }
 }
