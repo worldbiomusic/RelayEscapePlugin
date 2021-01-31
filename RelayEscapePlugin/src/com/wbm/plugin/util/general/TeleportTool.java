@@ -12,7 +12,7 @@ public class TeleportTool
 {
 	static Map<String, Location> locations;
 	
-	public static void tp(Entity src, int x, int y, int z) {
+	public static void tp(Entity src, double x, double y, double z) {
 		src.teleport(new Location(src.getWorld(), x, y, z));
 	}
 	

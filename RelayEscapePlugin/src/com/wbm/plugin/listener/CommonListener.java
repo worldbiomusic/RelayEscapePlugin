@@ -37,6 +37,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.event.server.ServerListPingEvent;
 import org.bukkit.inventory.ItemStack;
 
@@ -546,6 +547,11 @@ public class CommonListener implements Listener {
 
 		    // TP sign click
 		    if (lines[0].equals("[TP]")) {
+			if (pData.isPlayingMiniGame()) {
+			    BroadcastTool.sendMessage(p, "you can't use TP sign while playing Minigame");
+			    return;
+			}
+
 			String locTitle = lines[1];
 			String tokenStr = lines[2].split(" ")[1];
 			// 띄어쓰기 기분으로 2번째를 token number로 봄
@@ -553,9 +559,9 @@ public class CommonListener implements Listener {
 
 			// 좌표
 			String[] locs = lines[3].split(" ");
-			int x = Integer.parseInt(locs[0]);
-			int y = Integer.parseInt(locs[1]);
-			int z = Integer.parseInt(locs[2]);
+			double x = Double.parseDouble(locs[0]);
+			double y = Double.parseDouble(locs[1]);
+			double z = Double.parseDouble(locs[2]);
 
 			if (pData.minusToken(cost)) {
 //	    Location targetLoc = TPManager.getLocation(locTitle);
@@ -569,6 +575,24 @@ public class CommonListener implements Listener {
 		}
 	    }
 	}
+
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onPlayerSneaking(PlayerToggleSneakEvent e) {
+	Player p = e.getPlayer();
+	PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
+	if (pData.isPlayingMiniGame()) {
+	    this.miniGameManager.processEvent(e);
+	}
+
+//	Boolean isSneaking = player.isSneaking();
+//	System.out.println("SNEAKING: " + isSneaking);
+//	if (isSneaking) {
+//	    e.getPlayer().sendMessage("YES SNEAK");
+//	} else {
+//	    e.getPlayer().sendMessage("NO SNEAK");
+//	}
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
@@ -590,9 +614,8 @@ public class CommonListener implements Listener {
 	// mainhand 체크
 	ItemStack item = p.getInventory().getItemInMainHand();
 
-	// this.banItems.containsItem(blockMat) || 
-	if (this.banItems.containsItem(item)
-		|| blockMat.equals(Material.CHEST)) {
+	// this.banItems.containsItem(blockMat) ||
+	if (this.banItems.containsItem(item) || blockMat.equals(Material.CHEST)) {
 	    BroadcastTool.sendMessage(p, "banned item");
 	    e.setCancelled(true);
 	}

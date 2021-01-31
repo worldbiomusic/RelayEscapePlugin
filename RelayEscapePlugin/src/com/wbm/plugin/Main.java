@@ -119,10 +119,10 @@ public class Main extends JavaPlugin {
 	BroadcastTool.setMessagePrefix("" + ChatColor.RED + ChatColor.BOLD + "[i] " + ChatColor.WHITE);
 
 	// respawn manager
-	Location loc = Setting.getLoationFromSTDLOC(8.5, 4, 3.5, 90, 0);
+	Location spawn = Setting.getLoationFromSTDLOC(-1.5, 4, -1.5, 90, 0);
 	Location lobby = Setting.getLoationFromSTDLOC(16, 4, 16, 90, 0);
 	;
-	this.respawnManager = new SpawnLocationTool(loc, loc, lobby);
+	this.respawnManager = new SpawnLocationTool(spawn, spawn, lobby);
 
 	// banItem
 	this.banItems = new BanItemTool();

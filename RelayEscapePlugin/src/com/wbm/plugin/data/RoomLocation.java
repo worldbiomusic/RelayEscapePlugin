@@ -12,23 +12,23 @@ import com.wbm.plugin.util.general.SpawnLocationTool;
  */
 public class RoomLocation {
     // MAIN
-    public static final Location MAIN_Pos1 = Setting.getLoationFromSTDLOC(-4, 4, -4);
-    public static final Location MAIN_Pos2 = Setting.getLoationFromSTDLOC(10, 33, 10);
+    public static final Location MAIN_Pos1 = Setting.getLoationFromSTDLOC(10, 4, 10);
+    public static final Location MAIN_Pos2 = Setting.getLoationFromSTDLOC(-14, 28, -14);
     public static final Location MAIN_SPAWN = SpawnLocationTool.JOIN;
 
     // PRACTICE
     public static final Location PRACTICE_Pos1 = Setting.getLoationFromSTDLOC(21, 4, 21);
-    public static final Location PRACTICE_Pos2 = Setting.getLoationFromSTDLOC(35, 33, 35);
-    public static final Location PRACTICE_SPAWN = Setting.getLoationFromSTDLOC(33.5, 4, 28.5);
+    public static final Location PRACTICE_Pos2 = Setting.getLoationFromSTDLOC(45, 28, 45);
+    public static final Location PRACTICE_SPAWN = Setting.getLoationFromSTDLOC(33.5, 4, 33.5);
 
     // MINIGAME
     public static final Location MINIGAME_Pos1 = Setting.getLoationFromSTDLOC(10, 0, 21);
-    public static final Location MINIGAME_Pos2 = Setting.getLoationFromSTDLOC(-4, 33, 35);
+    public static final Location MINIGAME_Pos2 = Setting.getLoationFromSTDLOC(-14, 28, 45);
     public static final Location MINIGAME_SPAWN = SpawnLocationTool.LOBBY;
 
     // FUN
     public static final Location FUN_Pos1 = Setting.getLoationFromSTDLOC(21, 0, 10);
-    public static final Location FUN_Pos2 = Setting.getLoationFromSTDLOC(35, 33, -4);
+    public static final Location FUN_Pos2 = Setting.getLoationFromSTDLOC(45, 28, -14);
     public static final Location FUN_SPAWN = SpawnLocationTool.LOBBY;
 
     // ROOM사이즈 (모든 룸 같은 크기)

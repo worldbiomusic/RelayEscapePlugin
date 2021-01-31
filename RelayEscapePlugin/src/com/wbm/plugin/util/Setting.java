@@ -2,7 +2,9 @@ package com.wbm.plugin.util;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.inventory.ItemStack;
 
 public class Setting {
     /*
@@ -44,6 +46,8 @@ public class Setting {
     public static final int MinimunMakingTime = 60;
     
     public static final int DATA_SAVE_DELAY = 20 * 60 * 60;
+    
+    public static final ItemStack CORE = new ItemStack(Material.GLOWSTONE);
 
     public static Location getAbsoluteLocation(Location loc) {
 	return loc;

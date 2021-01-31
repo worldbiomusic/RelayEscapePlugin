@@ -17,7 +17,6 @@ import com.wbm.plugin.data.BlockData;
 import com.wbm.plugin.data.PlayerData;
 import com.wbm.plugin.data.Room;
 import com.wbm.plugin.data.RoomLocation;
-import com.wbm.plugin.data.RoomLocker;
 import com.wbm.plugin.util.config.DataMember;
 import com.wbm.plugin.util.enums.RoomType;
 import com.wbm.plugin.util.general.BroadcastTool;
@@ -214,9 +213,12 @@ public class RoomManager implements DataMember {
     }
 
     public void setRoom(RoomType roomType, Room room)
-//	setRoom()으로 바꾸고, RoomType으로 결정할 수 있게 하기
     {
 	this.rooms.put(roomType, room);
+	this.fillSpace(roomType, room.getBlocks());
+    }
+    
+    public void loadRoomDataBlocks(RoomType roomType, Room room) {
 	this.fillSpace(roomType, room.getBlocks());
     }
 
@@ -301,7 +303,7 @@ public class RoomManager implements DataMember {
     }
 
     public void setRoomEmpty(RoomType roomType) {
-	this.setRoom(roomType, this.getRoomData("empty"));
+	this.loadRoomDataBlocks(roomType, this.getRoomData("empty"));
     }
 
     public Room getRandomRoomData() {
@@ -321,19 +323,6 @@ public class RoomManager implements DataMember {
 	    i++;
 	}
 	return randomRoom;
-    }
-
-    public void lockRoom(RoomType roomType) {
-	// lock room with some blocks
-	if (roomType == RoomType.MAIN) {
-	    this.fillBlocks(RoomLocker.mainLocker, RoomLocker.mainLockerItem);
-	}
-    }
-
-    public void unlockRoom(RoomType roomType) {
-	if (roomType == RoomType.MAIN) {
-	    this.fillBlocks(RoomLocker.mainLocker, RoomLocker.air);
-	}
     }
 
     public List<Room> getOwnRooms(String maker) {

@@ -34,12 +34,18 @@ public enum MiniGameType {
     CRITICAL(Setting.getAbsoluteLocation(-112, 4, 114), Setting.getAbsoluteLocation(-115, 6, 122),
 	    new Location(Setting.world, -113, 4, 115, 90, 0), 5, 30, 180, 4),
     BANG(Setting.getAbsoluteLocation(-103, 10, 114), Setting.getAbsoluteLocation(-106, 8, 123),
-	    new Location(Setting.world, -104, 8, 115, 0, 0), 5, 30, 30, 4);
+	    new Location(Setting.world, -104, 8, 115, 0, 0), 5, 30, 30, 4),
+    BRIDGE(Setting.getAbsoluteLocation(-65, 18, 149), Setting.getAbsoluteLocation(-53, 5, 101),
+	    Setting.getAbsoluteLocation(-53, 16, 126), 10, 30, 120, 2),
+    PUSH(Setting.getAbsoluteLocation(-115, 15, 259), Setting.getAbsoluteLocation(-72, 4, 212),
+	    Setting.getAbsoluteLocation(-93, 8, 237), 10, 30, 180, 4),
+    CENTER(Setting.getAbsoluteLocation(-61, 12, 166), Setting.getAbsoluteLocation(-53, 4, 158),
+	    Setting.getAbsoluteLocation(-60,10,158), 10, 30, 120, 3);
 
     // pos1, pos2는 이벤트에 반응하는 위치 area를 나타냄
     private Location pos1, pos2;
     // roomLoc은 tp할 지점
-    private Location roomLoc;
+    private Location spawnLoc;
     private int fee;
     // 게임 시작전 대기시간
     private int waitingTime;
@@ -48,11 +54,11 @@ public enum MiniGameType {
     // 최대 입장 인원수
     private int maxPlayerCount;
 
-    private MiniGameType(Location pos1, Location pos2, Location roomLoc, int fee, int waitingTime, int timeLimit,
+    private MiniGameType(Location pos1, Location pos2, Location spawnLoc, int fee, int waitingTime, int timeLimit,
 	    int maxPlayerCount) {
 	this.pos1 = pos1;
 	this.pos2 = pos2;
-	this.roomLoc = roomLoc;
+	this.spawnLoc = spawnLoc;
 	this.fee = fee;
 	this.waitingTime = waitingTime;
 	this.timeLimit = timeLimit;
@@ -60,7 +66,7 @@ public enum MiniGameType {
     }
 
     public Location getSpawnLocation() {
-	return this.roomLoc;
+	return this.spawnLoc;
     }
 
     public int getFee() {

@@ -136,28 +136,61 @@ public abstract class SoloMiniGame extends MiniGame{
 	/*
 	 * 오름차순 score (-34, -13, 3, 14, 50 ...)
 	 */
-	PlayerData pData = pDataManager.getPlayerData(this.player.getUniqueId());
+//	PlayerData pData = pDataManager.getPlayerData(this.player.getUniqueId());
+//
+//	// 1,2,3,4분위 안에 속해있을떄 token 지급
+//	for (int i = 1; i <= 4; i++) {
+//	    String quartilePlayerName = miniGameRankManager.getQuartilePlayerName(this.gameType, i);
+//	    int quartileScore = miniGameRankManager.getScore(this.gameType, quartilePlayerName);
+//	    if (this.score <= quartileScore) {
+//		int rewardToken = (int) ((i / (double) 2) * this.getFee());
+//		BroadcastTool.sendMessage(this.player, "Your score is in the top " + i + " quartile");
+//		BroadcastTool.sendMessage(this.player, "Reward token: " + rewardToken);
+//
+//		pData.plusToken(rewardToken);
+//
+//		return;
+//	    }
+//	}
+//
+//	// 1,2,3,4 분위 안에 속해있지 않다는것 = 1등 점수
+//	BroadcastTool.sendMessage(this.player, "You are first place");
+//	BroadcastTool.sendMessage(this.player, "Reward token: " + this.getFee() * 3);
+//
+//	pData.plusToken(this.getFee() * 3);
+	
+	boolean isFirstScore = false;
 
-	// 1,2,3,4분위 안에 속해있을떄 token 지급
-	for (int i = 1; i <= 4; i++) {
-	    String quartilePlayerName = miniGameRankManager.getQuartilePlayerName(this.gameType, i);
-	    int quartileScore = miniGameRankManager.getScore(this.gameType, quartilePlayerName);
+	int quartileScore = 0;
+	int quartileIndex;
+	for (quartileIndex = 1; quartileIndex <= 4; quartileIndex++) {
+	    String quartilePlayerName = miniGameRankManager.getQuartilePlayerName(this.gameType, quartileIndex);
+	    quartileScore = miniGameRankManager.getScore(this.gameType, quartilePlayerName);
+	    // 1,2,3,4분위 어디 속한지 분위 구함
 	    if (this.score <= quartileScore) {
-		int rewardToken = (int) ((i / (double) 2) * this.getFee());
-		BroadcastTool.sendMessage(this.player, "Your score is in the top " + i + " quartile");
-		BroadcastTool.sendMessage(this.player, "Reward token: " + rewardToken);
-
-		pData.plusToken(rewardToken);
-
-		return;
+		break;
+	    } else if (this.score > quartileScore && quartileIndex == 4) {
+		// 1등 score일때
+		isFirstScore = true;
 	    }
 	}
 
-	// 1,2,3,4 분위 안에 속해있지 않다는것 = 1등 점수
-	BroadcastTool.sendMessage(this.player, "You are first place");
-	BroadcastTool.sendMessage(this.player, "Reward token: " + this.getFee() * 3);
+	for (Player all : this.getAllPlayer()) {
+	    PlayerData pData = pDataManager.getPlayerData(all.getUniqueId());
+	    if (isFirstScore == false) {
+		// 속한 분위대로 token 지급
+		int rewardToken = (int) ((quartileIndex / (double) 2) * this.getFee());
+		BroadcastTool.sendMessage(this.player, "Your score is in the top " + quartileIndex + " quartile");
+		BroadcastTool.sendMessage(this.player, "Reward token: " + rewardToken);
 
-	pData.plusToken(this.getFee() * 3);
+		pData.plusToken(rewardToken);
+	    } else if (isFirstScore) {
+		// 1,2,3,4 분위 안에 속해있지 않다는것 = 1등 점수
+		BroadcastTool.sendMessage(this.player, "You are first place");
+		BroadcastTool.sendMessage(this.player, "Reward token: " + this.getFee() * 3);
+		pData.plusToken(this.getFee() * 3);
+	    }
+	}
     }
 
     /*

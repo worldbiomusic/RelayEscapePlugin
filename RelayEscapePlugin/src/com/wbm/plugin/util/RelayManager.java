@@ -365,7 +365,6 @@ public class RelayManager {
 	// 8.소리재생
 	this.playSoundToEveryone();
 
-	this.manageLockingRoom();
     }
 
     void healEverything() {
@@ -379,22 +378,6 @@ public class RelayManager {
 	    PlayerTool.unhidePlayerFromEveryone(p);
 	    // 발광효과 제거
 	    p.setGlowing(false);
-	}
-    }
-
-    private void manageLockingRoom() {
-	RelayTime time = this.getCurrentTime();
-	switch (time) {
-	case MAKING:
-	case TESTING:
-	case CHALLENGING:
-	    // lock main room
-	    this.roomManager.lockRoom(RoomType.MAIN);
-	    break;
-	case WAITING:
-	    // unlock main room
-	    this.roomManager.unlockRoom(RoomType.MAIN);
-	    break;
 	}
     }
 

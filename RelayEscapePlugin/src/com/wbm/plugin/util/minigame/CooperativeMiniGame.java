@@ -47,12 +47,12 @@ public abstract class CooperativeMiniGame extends MiniGame {
      * 초기화를 위해서 필요한 코드)
      */
     // 방장=master
-      private Player master;
+    private Player master;
     // 모든 플레이어들(방장 포함)
-      private List<Player> players;
-      protected int score;
+    private List<Player> players;
+    protected int score;
 
-      private List<Player> waitPlayers;
+    private List<Player> waitPlayers;
 
     public CooperativeMiniGame(MiniGameType gameType) {
 	super(gameType);
@@ -119,16 +119,16 @@ public abstract class CooperativeMiniGame extends MiniGame {
 	 * waitingList에 등록될 조건(/re minigame ok <name>)
 	 * 
 	 */
-	
+
 	// 인원수 꽉 찬지 검사
-	if(this.checkPlayerCountFull()) {
+	if (this.checkPlayerCountFull()) {
 	    BroadcastTool.sendMessage(this.getMaster(), this.gameType.name() + " game player count is full");
 	    BroadcastTool.sendMessage(waiter, this.gameType.name() + " game player count is full");
 	    return;
 	}
-	
+
 	// wait list에 있는 플레이어인지 체크
-	if(!this.waitPlayers.contains(waiter)) {
+	if (!this.waitPlayers.contains(waiter)) {
 	    BroadcastTool.sendMessage(this.getMaster(), waiter + " is not in waitList");
 	    return;
 	}
@@ -194,7 +194,7 @@ public abstract class CooperativeMiniGame extends MiniGame {
 
 	// score rank 처리
 	String names = "";
-	for (Player all : this.players) {
+	for (Player all : this.getAllPlayer()) {
 	    names += all.getName() + ", ";
 	}
 	miniGameRankManager.updatePlayerRankData(this.gameType, names, this.score);
@@ -234,32 +234,41 @@ public abstract class CooperativeMiniGame extends MiniGame {
 	 * 
 	 * 순서는 정해지지 않았기 때문에 포함여부 메소드를 따로 만들어야 함
 	 */
+	boolean isFirstScore = false;
 
-	for (Player all : this.players) {
-	    PlayerData pData = pDataManager.getPlayerData(all.getUniqueId());
-
-	    // 1,2,3,4분위 안에 속해있을떄 token 지급
-	    for (int i = 1; i <= 4; i++) {
-		String quartilePlayerName = miniGameRankManager.getQuartilePlayerName(this.gameType, i);
-		int quartileScore = miniGameRankManager.getScore(this.gameType, quartilePlayerName);
-		if (this.score <= quartileScore) {
-		    int rewardToken = (int) ((i / (double) 2) * this.getFee());
-		    BroadcastTool.sendMessage(all, "Your team is in " + i + " quartile");
-		    BroadcastTool.sendMessage(all, "Reward token: " + rewardToken);
-
-		    pData.plusToken(rewardToken);
-
-		    return;
-		}
+	int quartileScore = 0;
+	int quartileIndex;
+	for (quartileIndex = 1; quartileIndex <= 4; quartileIndex++) {
+	    String quartilePlayerName = miniGameRankManager.getQuartilePlayerName(this.gameType, quartileIndex);
+	    quartileScore = miniGameRankManager.getScore(this.gameType, quartilePlayerName);
+	    // 1,2,3,4분위 어디 속한지 분위 구함
+	    if (this.score <= quartileScore) {
+		break;
+	    } else if (this.score > quartileScore && quartileIndex == 4) {
+		// 1등 score일때
+		isFirstScore = true;
 	    }
+	}
 
-	    // 1,2,3,4 분위 안에 속해있지 않다는것 = 1등 점수
-	    BroadcastTool.sendMessage(all, "Your team is first place");
-	    BroadcastTool.sendMessage(all, "Reward token: " + this.getFee() * 3);
+	for (Player all : this.getAllPlayer()) {
+	    PlayerData pData = pDataManager.getPlayerData(all.getUniqueId());
+	    if (isFirstScore == false) {
+		// 속한 분위대로 token 지급
+		int rewardToken = (int) ((quartileIndex / (double) 2) * this.getFee());
+		BroadcastTool.sendMessage(all, "Your team is in " + quartileIndex + " quartile");
+		BroadcastTool.sendMessage(all, "Reward token: " + rewardToken);
 
-	    pData.plusToken(this.getFee() * 3);
+		pData.plusToken(rewardToken);
+	    } else if (isFirstScore) {
+		// 1,2,3,4 분위 안에 속해있지 않다는것 = 1등 점수
+		BroadcastTool.sendMessage(all, "Your team is first place");
+		BroadcastTool.sendMessage(all, "Reward token: " + this.getFee() * 3);
+
+		pData.plusToken(this.getFee() * 3);
+	    }
 	}
     }
+
 
     /*
      * 이 메소드는 미니게임에서 플레이어들이 발생한 이벤트를 각 게임에서 처리해주는 범용 메소드 예) if(event instanceof
@@ -348,5 +357,4 @@ public abstract class CooperativeMiniGame extends MiniGame {
 	this.players.add(p);
     }
 
-    
 }

@@ -22,7 +22,6 @@ import com.wbm.plugin.data.RoomLocation;
 import com.wbm.plugin.util.PlayerDataManager;
 import com.wbm.plugin.util.RelayManager;
 import com.wbm.plugin.util.RoomManager;
-import com.wbm.plugin.util.Setting;
 import com.wbm.plugin.util.general.BroadcastTool;
 import com.wbm.plugin.util.general.ChatColorTool;
 import com.wbm.plugin.util.general.InventoryTool;
@@ -483,25 +482,8 @@ public class GoodsListener implements Listener {
 //	    }
 //	    p.openInventory(inv);
 	} else if (good == ShopGoods.FINISH) {
-	    // room finish 실행
-	    if (!this.relayManager.isCorePlaced()) {
-		BroadcastTool.sendMessage(p, "core is not placed");
-		return;
-	    }
-
-//	     MakingTime때 최소 60초는 지나야 맵 테스트할 수 있음
-	    int leftTime = this.relayManager.getLeftTime();
-	    int highestMakingTime = pData.getRoomSettingGoodsHighestValue("MAKINGTIME");
-	    highestMakingTime *= 60;
-	    int timeLimit = highestMakingTime - Setting.MinimunMakingTime;
-
-	    if (leftTime > timeLimit) {
-		BroadcastTool.sendMessage(p, "You can use this goods after " + (leftTime - timeLimit) + " sec");
-		return;
-	    }
-
-	    // 위의 상황을 모두 건너면 다음타임 실행
-	    this.relayManager.startNextTime();
+	    // 명령어 대신 실행
+	    p.performCommand("re room finish");
 	} else if (good == ShopGoods.BLOCK_CHANGER) {
 	    // 플레이어가 들고있는 굿즈의 lore중의 3번째줄을 true or false로 변경
 	    ItemStack blockChanger = p.getInventory().getItemInMainHand();

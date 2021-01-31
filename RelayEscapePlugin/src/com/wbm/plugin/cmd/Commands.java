@@ -104,7 +104,7 @@ public class Commands implements CommandExecutor {
 		}
 		// 게임모드 변경후 join으로 이동
 		TeleportTool.tp(p, SpawnLocationTool.JOIN);
-	    }else {
+	    } else {
 		BroadcastTool.sendMessage(p, "You need GHOST goods");
 	    }
 	} else {
@@ -267,7 +267,7 @@ public class Commands implements CommandExecutor {
 	this.relayManager.setCorePlaced(true);
 
 	// set room
-	this.roomManager.setRoom(RoomType.MAIN, room);
+	this.roomManager.loadRoomDataBlocks(RoomType.MAIN, room);
 	BroadcastTool.sendMessage(p, title + " room is loading...");
 
 	return true;
@@ -282,6 +282,9 @@ public class Commands implements CommandExecutor {
 	    return true;
 	}
 	this.roomManager.setRoomEmpty(RoomType.MAIN);
+
+	// empty룸이므로 core false로 변경
+	this.relayManager.setCorePlaced(false);
 	return true;
     }
 
@@ -305,7 +308,7 @@ public class Commands implements CommandExecutor {
 	if (this.relayManager.checkRoomAndRelayTimeAndRole(RoomType.MAIN, RelayTime.MAKING, Role.MAKER, p)) {
 	    String title = args[2];
 	    if (this.relayManager.isMainRoomTitleExist(title)) {
-		BroadcastTool.sendMessage(p, "Room tile " + title + "is already exist");
+		BroadcastTool.sendMessage(p, "Room title " + title + " is already exist");
 	    } else {
 		this.relayManager.setMainRoomTitle(title);
 		BroadcastTool.sendMessage(p, "Room tile set to " + title);
@@ -324,21 +327,24 @@ public class Commands implements CommandExecutor {
 	PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
 	Role role = pData.getRole();
 
+	// 조건 체크
 	if (time == RelayTime.MAKING) {
 	    if (role == Role.MAKER) {
 
 		// room finish 실행
 		if (!this.relayManager.isCorePlaced()) {
-		    BroadcastTool.sendMessage(p, "core is not placed");
+		    BroadcastTool.sendMessage(p, "core(" + Setting.CORE.getType().name() + ") is not placed");
 		    return true;
 		}
 
-//		     MakingTime때 최소 60초는 지나야 맵 테스트할 수 있음
+//		MakingTime때 최소 Setting.MinimunMakingTime초는 지나야 맵 테스트할 수 있음
 		int leftTime = this.relayManager.getLeftTime();
-		int timeLimit = this.relayManager.getCurrentTime().getAmount() - 60;
+		int highestMakingTime = pData.getRoomSettingGoodsHighestValue("MAKINGTIME");
+		highestMakingTime *= 60; // 굿즈단위가 분이여서 60 곱하기
+		int timeLimit = highestMakingTime - Setting.MinimunMakingTime;
 
 		if (leftTime > timeLimit) {
-		    BroadcastTool.sendMessage(p, "You can use this goods after " + (leftTime - timeLimit) + " sec");
+		    BroadcastTool.sendMessage(p, "You can finish after " + (leftTime - timeLimit) + " sec");
 		    return true;
 		}
 
@@ -429,7 +435,6 @@ public class Commands implements CommandExecutor {
 	String cmd = "\n" + "/re d [relay | reset | pdata <player> | allpdata]\n"
 		+ "/re d [token | cash] [plus | minus] <player> <amount>\n" + "/re d rolechange <playerName> <role>\n"
 		+ "/re d goods [init | addall] <player>\n" + "/re d goods [add | remove] <player> <goods>\n"
-		+ "/re d room <roomType> [load | save | remove | update] <title>\n" + "/re d room <roomType> info\n"
 		+ "/re rank [tokenrank | challengingrank | clearrank | roomcountrank]\n"
 		+ "/re npc create <name> <skinName>\n" + "/re npc delete <name> \n"
 		+ "/re d room [load | save | update] <roomType> <title>\n"
@@ -647,6 +652,8 @@ public class Commands implements CommandExecutor {
 	 * /re minigame [ok | kick] <playerName>
 	 * 
 	 * /re minigame waitlist
+	 * 
+	 * /re minigame rank <minigaem>
 	 */
 
 	MiniGame minigame = this.minigameManager.getPlayingGame(p);
@@ -668,11 +675,23 @@ public class Commands implements CommandExecutor {
 		case "kick":
 		    this.manageList(p, args, game);
 		    break;
+
 		}
 
 	    }
+	} else { // rank 출력
+	    String order = args[1];
+	    switch (order) {
+	    case "rank":
+		this.printMiniGameRank(p, args);
+		break;
+	    }
 	}
 	return true;
+    }
+
+    private void printMiniGameRank(Player p, String[] args) {
+	
     }
 
     private void manageList(Player p, String[] args, CooperativeMiniGame game) {

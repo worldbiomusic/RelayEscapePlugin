@@ -126,11 +126,10 @@ public class GameManager implements Listener {
 	this.processPlayerData(p);
 
 	// time에 따라서 spawn위치 바꾸기
-	if (this.relayManager.getCurrentTime() == RelayTime.MAKING
-		|| this.relayManager.getCurrentTime() == RelayTime.TESTING) {
-	    TeleportTool.tp(p, SpawnLocationTool.LOBBY);
-	} else { // Waiting, Challenging
+	if (this.relayManager.getCurrentTime() == RelayTime.CHALLENGING) {
 	    TeleportTool.tp(p, SpawnLocationTool.JOIN);
+	} else { // Challenging 외의 타임일때
+	    TeleportTool.tp(p, SpawnLocationTool.LOBBY);
 	}
 
 	// 인벤 초기화 후 굿즈 제공

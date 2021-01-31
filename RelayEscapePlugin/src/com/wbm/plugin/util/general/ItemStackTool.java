@@ -47,7 +47,7 @@ public class ItemStackTool {
     }
     
     public static ItemStack enchant(ItemStack item, Enchantment ench, int level) {
-	item.addEnchantment(ench, level);
+	item.addUnsafeEnchantment(ench, level);
 	return item;
     }
 

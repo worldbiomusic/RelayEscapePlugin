@@ -17,6 +17,8 @@ import com.wbm.plugin.util.enums.MiniGameType;
 import com.wbm.plugin.util.general.BroadcastTool;
 import com.wbm.plugin.util.minigame.games.Bang;
 import com.wbm.plugin.util.minigame.games.BattleTown;
+import com.wbm.plugin.util.minigame.games.Bridge;
+import com.wbm.plugin.util.minigame.games.Center;
 import com.wbm.plugin.util.minigame.games.Critical;
 import com.wbm.plugin.util.minigame.games.FindTheBlue;
 import com.wbm.plugin.util.minigame.games.FindTheRed;
@@ -24,6 +26,7 @@ import com.wbm.plugin.util.minigame.games.FindTheYellow;
 import com.wbm.plugin.util.minigame.games.FitTool;
 import com.wbm.plugin.util.minigame.games.JumpMap;
 import com.wbm.plugin.util.minigame.games.Painter;
+import com.wbm.plugin.util.minigame.games.Push;
 
 public class MiniGameManager {
     // MiniGame 체크하기 위한 Map (이용중이면 true, 비어있으면 false)
@@ -58,6 +61,9 @@ public class MiniGameManager {
 	allGame.add(new FitTool());
 	allGame.add(new Critical());
 	allGame.add(new Bang());
+	allGame.add(new Bridge());
+	allGame.add(new Push());
+	allGame.add(new Center());
 
 	// rankData에 등록안된 모든 미니게임 등록
 	for (MiniGame game : allGame) {
