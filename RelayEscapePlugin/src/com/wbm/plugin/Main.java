@@ -51,6 +51,7 @@ import com.wbm.plugin.util.shop.ShopGoods;
 import com.wbm.plugin.util.shop.ShopManager;
 
 public class Main extends JavaPlugin {
+	// main
     Server server;
     PluginManager pluginManager;
 
