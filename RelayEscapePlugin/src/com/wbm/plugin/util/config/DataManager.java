@@ -146,6 +146,6 @@ public class DataManager
 	    public void run() {
 		save();
 	    }
-	},delay , delay);
+	},20 * delay , 20 * delay);
     }
 }

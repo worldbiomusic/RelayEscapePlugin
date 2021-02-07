@@ -39,15 +39,23 @@ public class Setting {
      */
 
     public static final String DISCORD_CH_SERVER_CHAT = "server-chat";
+    public static final String DISCORD_CH_SERVER_RANK = "server-rank";
 
     public static final int MAIN_ROOM_CLEAR_TOKEN = Bukkit.getOnlinePlayers().size() * 1;
-    public static final int PRACTICE_ROOM_CLEAR_TOKEN = Bukkit.getOnlinePlayers().size() * 1;
+    public static final int PRACTICE_ROOM_CLEAR_TOKEN = Bukkit.getOnlinePlayers().size() / 2;
 
     public static final int MinimunMakingTime = 60;
     
-    public static final int DATA_SAVE_DELAY = 20 * 60 * 60;
+    public static final int DATA_SAVE_DELAY = 60 * 60;
     
     public static final ItemStack CORE = new ItemStack(Material.GLOWSTONE);
+    
+    public static final int REWARD_RANK_DELAY_TIME = 20 * 60 * 60 * 12; // 12hour 
+    
+    public static final int RANK_FIRST_TOKEN = 50;
+    public static final int RANK_SECOND_TOKEN = 40;
+    public static final int RANK_THIRD_TOKEN = 30;
+    
 
     public static Location getAbsoluteLocation(Location loc) {
 	return loc;
