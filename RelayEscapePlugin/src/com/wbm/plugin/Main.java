@@ -256,35 +256,29 @@ public class Main extends JavaPlugin {
 					// sidebar setting
 					Objective sidebarObj = board.registerNewObjective("side", "dummy");
 					sidebarObj.setDisplaySlot(DisplaySlot.SIDEBAR);
-					sidebarObj.setDisplayName("===== INFO =====");
+//					sidebarObj.setDisplayName("====== INFO ======");
+					sidebarObj.setDisplayName(ChatColor.BOLD + "       INFO       ");
 
 					// ============sidebar============
 
-					Score role = sidebarObj.getScore("Role: " + r);
-					role.setScore(10);
-
-					Score token = sidebarObj.getScore("Token: " + pData.getToken());
-					token.setScore(1);
-
-					Score cash = sidebarObj.getScore("Cash: " + pData.getCash());
-					cash.setScore(0);
-
-//		    int roomCNT = roomManager.getOwnRooms(p.getName()).size();
-//		    Score roomCount = sidebarObj.getScore("Room: " + roomCNT);
-//		    roomCount.setScore(8);
-//
-//		    int clearCNT = pData.getClearCount();
-//		    Score clearCount = sidebarObj.getScore("Clear: " + clearCNT);
-//		    clearCount.setScore(7);
+					// role
+					Score roleStr = sidebarObj.getScore("" + ChatColor.RED + ChatColor.BOLD + "[Role]");
+					roleStr.setScore(10);
+					Score role = sidebarObj.getScore("" + r.name());
+					role.setScore(9);
 
 					// relay time
+					Score relayTimeStr = sidebarObj.getScore("" + ChatColor.YELLOW + ChatColor.BOLD + "[RelayTime]");
+					relayTimeStr.setScore(8);
 					String leftTime = "" + ChatColor.RED + ChatColor.BOLD + relayManager.getLeftTime()
 							+ ChatColor.WHITE;
 					Score relayTime = sidebarObj
-							.getScore("RelayTime: " + relayManager.getCurrentTime().name() + "(" + leftTime + ")");
-					relayTime.setScore(6);
+							.getScore("" + relayManager.getCurrentTime().name() + "(" + leftTime + ")");
+					relayTime.setScore(7);
 
-					// player location
+					// Room
+					Score roomStr = sidebarObj.getScore("" + ChatColor.BLUE + ChatColor.BOLD + "[Room]");
+					roomStr.setScore(6);
 					RoomType roomType = RoomLocation.getRoomTypeWithLocation(p.getLocation());
 					String roomString;
 					if (roomType == null) {
@@ -293,8 +287,28 @@ public class Main extends JavaPlugin {
 						roomString = roomType.name();
 					}
 
-					Score room = sidebarObj.getScore("Room: " + roomString);
-					room.setScore(9);
+					Score room = sidebarObj.getScore("" + roomString);
+					room.setScore(5);
+
+					// token
+					Score tokenStr = sidebarObj.getScore("" + ChatColor.GREEN + ChatColor.BOLD + "[Token]");
+					tokenStr.setScore(4);
+					Score token = sidebarObj.getScore("" + pData.getToken());
+					token.setScore(3);
+
+					// cash
+					Score cashStr = sidebarObj.getScore("" + ChatColor.GOLD + ChatColor.BOLD + "[Cash]");
+					cashStr.setScore(2);
+					Score cash = sidebarObj.getScore("" + pData.getCash());
+					cash.setScore(1);
+
+//		    int roomCNT = roomManager.getOwnRooms(p.getName()).size();
+//		    Score roomCount = sidebarObj.getScore("Room: " + roomCNT);
+//		    roomCount.setScore(8);
+//
+//		    int clearCNT = pData.getClearCount();
+//		    Score clearCount = sidebarObj.getScore("Clear: " + clearCNT);
+//		    clearCount.setScore(7);
 
 					// ============below name============
 
@@ -389,11 +403,12 @@ public class Main extends JavaPlugin {
 			@Override
 			public void run() {
 				List<String> tips = new ArrayList<>();
-				tips.add("Discord " + ChatColor.WHITE + ":" + ChatColor.GREEN + ChatColor.UNDERLINE + ChatColor.BOLD
+				tips.add("Discord :" + ChatColor.GREEN + ChatColor.UNDERLINE + ChatColor.BOLD
 						+ " https://discord.gg/EwXk9Cd2Ya" + ChatColor.WHITE);
 				tips.add("Tutorial: /re tutorial");
-				tips.add("CHAT: 1 ~ 9 (ex. 1 = HI)");
+				tips.add("CHAT MACRO: 1 ~ 9 (ex. 1 = HI)");
 				tips.add("Reconnect is good way to go to spawn or give up Room");
+				tips.add("WIKI: " + ChatColor.GREEN + ChatColor.UNDERLINE + ChatColor.BOLD+"https://github.com/worldbiomusic/RelayEscape/blob/main/server_wiki/Home.md");
 
 				// random tip 고르기
 				String randomTip = tips.get((int) (Math.random() * tips.size()));

@@ -30,6 +30,13 @@ public enum ShopGoods {
 	WHITE_WOOL(ItemStackTool.item(Material.WOOL, (byte) 0), GoodsRole.MAKING_BLOCK),
 	BLACK_WOOL(ItemStackTool.item(Material.WOOL, (byte) 15), GoodsRole.MAKING_BLOCK),
 
+	YELLOW_FLOWER(ItemStackTool.item(Material.YELLOW_FLOWER), GoodsRole.MAKING_BLOCK),
+	RED_FLOWER(ItemStackTool.item(Material.RED_ROSE), GoodsRole.MAKING_BLOCK),
+	NOTE_BLOCK(ItemStackTool.item(Material.NOTE_BLOCK), GoodsRole.MAKING_BLOCK),
+	LADDER(ItemStackTool.item(Material.LADDER), GoodsRole.MAKING_BLOCK),
+	WATER_LILY(ItemStackTool.item(Material.WATER_LILY), GoodsRole.MAKING_BLOCK),
+	BOOKSHELF(ItemStackTool.item(Material.BOOKSHELF), GoodsRole.MAKING_BLOCK),
+
 	// 2f
 	COAL_BLOCK(ItemStackTool.item(Material.COAL_BLOCK), GoodsRole.MAKING_BLOCK),
 	REDSTONE_BLOCK(ItemStackTool.item(Material.REDSTONE_BLOCK), GoodsRole.MAKING_BLOCK),
@@ -98,12 +105,12 @@ public enum ShopGoods {
 			"sound terror event block"), GoodsRole.MAKING_BLOCK),
 	HURT(ItemStackTool.item(Material.STAINED_GLASS, 1, (short) 1, (byte) 5, "HURT", "hurt payer"),
 			GoodsRole.MAKING_BLOCK),
-	UP_TP(ItemStackTool.item(Material.STAINED_GLASS, 1, (short) 1, (byte) 6, "UP_TP", "teleport player 3 block up"),
+	HEAL(ItemStackTool.item(Material.STAINED_GLASS, 1, (short) 1, (byte) 6, "HEAL", "heal player's everything"),
 			GoodsRole.MAKING_BLOCK),
-	DOWN_TP(ItemStackTool.item(Material.STAINED_GLASS, 1, (short) 1, (byte) 7, "DOWN_TP",
+	UP_TP(ItemStackTool.item(Material.STAINED_GLASS, 1, (short) 1, (byte) 7, "UP_TP", "teleport player 3 block up"),
+			GoodsRole.MAKING_BLOCK),
+	DOWN_TP(ItemStackTool.item(Material.STAINED_GLASS, 1, (short) 1, (byte) 8, "DOWN_TP",
 			"teleport player 3 block down"), GoodsRole.MAKING_BLOCK),
-	HEAL(ItemStackTool.item(Material.STAINED_GLASS, 1, (short) 1, (byte) 8, "HEAL", "heal player's everything"),
-			GoodsRole.MAKING_BLOCK),
 
 	// makingTool
 	// 이 템으로 클릭시 list나오고 명령어로 가능하게 하기(명령어에서 이 템 가지고 있나 체크)
@@ -188,6 +195,7 @@ public enum ShopGoods {
 		for (GoodsRole role : goodsRole) {
 			this.goodsRole.add(role);
 		}
+
 	}
 
 	public ItemStack getItemStack() {
@@ -209,7 +217,7 @@ public enum ShopGoods {
 			}
 		}
 		return goods;
-		
+
 	}
 
 	public boolean isGoodsRoleGoods(GoodsRole r) {
@@ -271,7 +279,6 @@ public enum ShopGoods {
 				InventoryTool.addItemToPlayer(p, good.getItemStack());
 			}
 		}
-
 	}
 
 	public static void giveGoodsToPleyers(PlayerDataManager pDataManager, List<Player> players) {

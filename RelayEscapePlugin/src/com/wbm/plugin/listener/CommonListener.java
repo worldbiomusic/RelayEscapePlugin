@@ -41,7 +41,6 @@ import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.event.server.ServerListPingEvent;
 import org.bukkit.inventory.ItemStack;
 
-import com.destroystokyo.paper.event.entity.ProjectileCollideEvent;
 import com.wbm.plugin.data.PlayerData;
 import com.wbm.plugin.data.RoomLocation;
 import com.wbm.plugin.util.PlayerDataManager;
@@ -687,8 +686,11 @@ public class CommonListener implements Listener {
 		case SNOW_BLOCK:
 			e.setCancelled(true);
 			break;
+		default:
+			break;
 		}
 	}
+
 }
 //
 //

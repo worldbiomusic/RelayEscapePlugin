@@ -281,8 +281,6 @@ public class RelayManager {
     }
 
     private void startChallenging() {
-	System.gc();
-
 //	 RelayTime 관리
 	this.currentTime = RelayTime.CHALLENGING;
 
