@@ -6,6 +6,8 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.inventory.ItemStack;
 
+import com.wbm.plugin.util.shop.ShopGoods;
+
 public class Setting {
     /*
      * 서버의 모든 설정 관리하는 클래스 위치, 이름(템, 지역 등) 등등
@@ -55,6 +57,11 @@ public class Setting {
     public static final int RANK_FIRST_TOKEN = 50;
     public static final int RANK_SECOND_TOKEN = 40;
     public static final int RANK_THIRD_TOKEN = 30;
+    
+    public static final int FIRST_JOIN_TOKEN = 100;
+    
+    public static final ShopGoods[] BASIC_GOODS = { ShopGoods.DIRT, ShopGoods.GLOWSTONE, ShopGoods.CHEST, ShopGoods.HIGH_5,
+			ShopGoods.MAKINGTIME_5, ShopGoods.FINISH, ShopGoods.GOODS_LIST, ShopGoods.SPAWN, ShopGoods.GM_CHANGER, ShopGoods.LOBBY };
     
 
     public static Location getAbsoluteLocation(Location loc) {

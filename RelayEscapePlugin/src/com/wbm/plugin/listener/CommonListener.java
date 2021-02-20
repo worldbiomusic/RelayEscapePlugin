@@ -48,13 +48,13 @@ import com.wbm.plugin.util.RelayManager;
 import com.wbm.plugin.util.Setting;
 import com.wbm.plugin.util.discord.DiscordBot;
 import com.wbm.plugin.util.enums.MiniGameType;
-import com.wbm.plugin.util.enums.RelayTime;
 import com.wbm.plugin.util.enums.Role;
 import com.wbm.plugin.util.enums.RoomType;
 import com.wbm.plugin.util.general.BanItemTool;
 import com.wbm.plugin.util.general.BroadcastTool;
 import com.wbm.plugin.util.general.ChatColorTool;
 import com.wbm.plugin.util.general.CoolDownManager;
+import com.wbm.plugin.util.general.LocationTool;
 import com.wbm.plugin.util.general.NPCManager;
 import com.wbm.plugin.util.general.PlayerTool;
 import com.wbm.plugin.util.general.SpawnLocationTool;
@@ -265,7 +265,7 @@ public class CommonListener implements Listener {
 		if (role == Role.WAITER) {
 			respawnLoc = SpawnLocationTool.LOBBY;
 		} else {
-			respawnLoc = SpawnLocationTool.RESPAWN;
+			respawnLoc = RoomLocation.MAIN_SPAWN;
 		}
 
 		e.setRespawnLocation(respawnLoc);
@@ -369,16 +369,20 @@ public class CommonListener implements Listener {
 	public void onPlayerJoinMiniGame(PlayerInteractEvent e) {
 		Player p = e.getPlayer();
 		Block b = e.getClickedBlock();
+		PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
 
 		if (b != null) {
 			if (b.getType() == Material.SIGN || b.getType() == Material.SIGN_POST
 					|| b.getType() == Material.WALL_SIGN) {
 				if (e.getAction() == Action.RIGHT_CLICK_BLOCK) {
 					// room, time, role 체크
-					if (this.relayManager.checkRoomAndRelayTimeAndRole(RoomType.MINI_GAME, RelayTime.MAKING,
-							Role.WAITER, p)
-							|| this.relayManager.checkRoomAndRelayTimeAndRole(RoomType.MINI_GAME, RelayTime.TESTING,
-									Role.WAITER, p)) {
+					if (pData.getRole() == Role.WAITER) {
+						// maker일때는 제외
+						if (this.pDataManager.isMaker(p)) {
+							BroadcastTool.sendMessage(p, "Maker can not play minigame");
+							return;
+						}
+
 						Sign sign = (Sign) b.getState();
 						/*
 						 * 0: [MINI_GAME]
@@ -688,6 +692,17 @@ public class CommonListener implements Listener {
 			break;
 		default:
 			break;
+		}
+	}
+	
+	@EventHandler
+	public void onViewerMoveFarAway(PlayerMoveEvent e) {
+		Player p = e.getPlayer();
+		PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
+		if(pData.getRole() == Role.VIEWER) {
+			if(!LocationTool.isIn(RoomLocation.MAIN_Pos1, p.getLocation(), RoomLocation.MAIN_Pos2)) {
+				TeleportTool.tp(p,RoomLocation.MAIN_SPAWN);
+			}
 		}
 	}
 

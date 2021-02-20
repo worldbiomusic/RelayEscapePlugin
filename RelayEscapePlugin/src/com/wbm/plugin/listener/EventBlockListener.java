@@ -36,10 +36,12 @@ public class EventBlockListener {
 		} else if (ItemStackTool.isSameWithMaterialNData(ItemStackTool.block2ItemStack(b),
 				ShopGoods.TRAP.getItemStack())) {
 			TRAP(p, b);
-		} else if (ItemStackTool.isSameWithMaterialNData(ItemStackTool.block2ItemStack(b),
-				ShopGoods.FLICKING.getItemStack())) {
-			FLICKING(p, b);
-		} else if (ItemStackTool.isSameWithMaterialNData(ItemStackTool.block2ItemStack(b),
+		} 
+//		else if (ItemStackTool.isSameWithMaterialNData(ItemStackTool.block2ItemStack(b),
+//				ShopGoods.FLICKING.getItemStack())) {
+//			FLICKING(p, b);
+//		} 
+		else if (ItemStackTool.isSameWithMaterialNData(ItemStackTool.block2ItemStack(b),
 				ShopGoods.SOUND_TERROR.getItemStack())) {
 			SOUND_TERROR(p, b);
 		} else if (ItemStackTool.isSameWithMaterialNData(ItemStackTool.block2ItemStack(b),

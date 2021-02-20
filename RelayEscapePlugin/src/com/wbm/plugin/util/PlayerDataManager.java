@@ -12,8 +12,7 @@ import com.wbm.plugin.util.config.ConfigTest;
 import com.wbm.plugin.util.config.DataMember;
 import com.wbm.plugin.util.general.BroadcastTool;
 
-public class PlayerDataManager implements DataMember
-{
+public class PlayerDataManager implements DataMember {
 	// server 켜질때, 꺼질때 config데이터 담긴 데이터
 	// 이것 하나만 가지고 관리하므로 실시간 데이터임
 	private Map<UUID, PlayerData> playerData;
@@ -26,152 +25,96 @@ public class PlayerDataManager implements DataMember
 
 	ConfigTest ct;
 
-	public PlayerDataManager(ConfigTest ct)
-	{
-		this.playerData=new HashMap<UUID, PlayerData>();
-		this.ct=ct;
+	public PlayerDataManager(ConfigTest ct) {
+		this.playerData = new HashMap<UUID, PlayerData>();
+		this.ct = ct;
 	}
-	
+
 	public Map<UUID, PlayerData> getOnlyOnlinePlayerData() {
 		/*
 		 * this.playerData중에서 온라인유저만 간추려서 반환
 		 */
 		Map<UUID, PlayerData> list = new HashMap<UUID, PlayerData>();
-		for(Player p : Bukkit.getOnlinePlayers()) {
+		for (Player p : Bukkit.getOnlinePlayers()) {
 			UUID uuid = p.getUniqueId();
 			PlayerData pData = this.playerData.get(uuid);
 			list.put(uuid, pData);
 		}
-		
+
 		return list;
 	}
-	
+
 	public Map<UUID, PlayerData> getPlayerData() {
 		return this.playerData;
 	}
 
-	public void addPlayerData(PlayerData pData)
-	{
+	public void addPlayerData(PlayerData pData) {
 		this.playerData.put(pData.getUUID(), pData);
 	}
 
 	public PlayerData getPlayerData(UUID uuid) {
 		return this.playerData.get(uuid);
 	}
-	
+
 	public PlayerData getPlayerData(String name) {
-	    for(PlayerData pData : this.getPlayerData().values()) {
-		if(pData.getName().equalsIgnoreCase(name)) {
-		    return pData;
+		for (PlayerData pData : this.getPlayerData().values()) {
+			if (pData.getName().equalsIgnoreCase(name)) {
+				return pData;
+			}
 		}
-	    }
-	    return null;
+		return null;
 	}
 
-	public boolean isFirstJoin(UUID uuid)
-	{
+	public boolean isFirstJoin(UUID uuid) {
 		return !(this.playerData.containsKey(uuid));
 	}
 
-	
-
-
-	public Player getMaker()
-	{
+	public Player getMaker() {
 		return this.maker;
 	}
 
-	public void registerMaker(Player p)
-	{
-		this.maker=p;
+	public void registerMaker(Player p) {
+		this.maker = p;
 	}
 
-	public void unregisterMaker()
-	{
-		this.maker=null;
+	public void unregisterMaker() {
+		this.maker = null;
 	}
 
-	public boolean doesMakerExist()
-	{
-		return (this.maker==null) ? false : true;
+	public boolean doesMakerExist() {
+		return this.maker != null;
 	}
 
-	public boolean isMaker(Player p)
-	{
+	public boolean isMaker(Player p) {
 		return (p.equals(this.maker));
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void installData(Object obj)
-	{
+	public void installData(Object obj) {
 		// TODO Auto-generated method stub
-		this.playerData=(Map<UUID, PlayerData>)obj;
+		this.playerData = (Map<UUID, PlayerData>) obj;
 
 		// print console
 		BroadcastTool.debug("==================PLAYER DATA==================");
-		for(PlayerData pData : this.playerData.values())
-		{
+		for (PlayerData pData : this.playerData.values()) {
 			BroadcastTool.debug(pData.toString());
 		}
 	}
 
 	@Override
-	public Object getData()
-	{
+	public Object getData() {
 		// TODO Auto-generated method stub
 		return this.playerData;
 	}
 
 	@Override
-	public String getDataMemberName()
-	{
+	public String getDataMemberName() {
 		// TODO Auto-generated method stub
 		return "player";
 	}
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 /*
  * 옛날 코드
@@ -380,26 +323,3 @@ public class PlayerDataManager implements DataMember
 //	}
 //
 //}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

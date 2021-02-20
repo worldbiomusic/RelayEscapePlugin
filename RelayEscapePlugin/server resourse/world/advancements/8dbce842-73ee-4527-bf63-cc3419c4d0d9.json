@@ -1,0 +1,44 @@
+{
+  "minecraft:recipes/misc/book": {
+    "criteria": {
+      "has_paper": "2021-02-07 07:54:28 +0900"
+    },
+    "done": true
+  },
+  "minecraft:recipes/tools/flint_and_steel": {
+    "criteria": {
+      "has_flint": "2021-02-07 07:54:58 +0900"
+    },
+    "done": true
+  },
+  "minecraft:recipes/brewing/golden_carrot": {
+    "criteria": {
+      "has_gold_nugget": "2021-02-07 07:54:58 +0900"
+    },
+    "done": true
+  },
+  "minecraft:recipes/building_blocks/brick_block": {
+    "criteria": {
+      "has_brick": "2021-02-07 07:54:58 +0900"
+    },
+    "done": true
+  },
+  "minecraft:recipes/combat/arrow": {
+    "criteria": {
+      "has_flint": "2021-02-07 07:54:58 +0900"
+    },
+    "done": true
+  },
+  "minecraft:recipes/decorations/flower_pot": {
+    "criteria": {
+      "has_brick": "2021-02-07 07:54:58 +0900"
+    },
+    "done": true
+  },
+  "minecraft:adventure/adventuring_time": {
+    "criteria": {
+      "plains": "2021-02-07 07:52:06 +0900"
+    },
+    "done": false
+  }
+}

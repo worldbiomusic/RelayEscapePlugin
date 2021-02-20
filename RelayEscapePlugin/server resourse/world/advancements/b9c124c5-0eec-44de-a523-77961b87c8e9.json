@@ -1,0 +1,20 @@
+{
+  "minecraft:recipes/misc/book": {
+    "criteria": {
+      "has_paper": "2021-01-24 00:06:26 +0900"
+    },
+    "done": true
+  },
+  "minecraft:recipes/redstone/redstone_lamp": {
+    "criteria": {
+      "has_glowstone": "2021-01-24 00:19:11 +0900"
+    },
+    "done": true
+  },
+  "minecraft:adventure/adventuring_time": {
+    "criteria": {
+      "plains": "2021-01-24 00:05:41 +0900"
+    },
+    "done": false
+  }
+}

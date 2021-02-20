@@ -22,12 +22,12 @@ import com.wbm.plugin.data.RoomLocation;
 import com.wbm.plugin.util.PlayerDataManager;
 import com.wbm.plugin.util.RelayManager;
 import com.wbm.plugin.util.RoomManager;
+import com.wbm.plugin.util.enums.Role;
 import com.wbm.plugin.util.general.BroadcastTool;
 import com.wbm.plugin.util.general.ChatColorTool;
 import com.wbm.plugin.util.general.InventoryTool;
 import com.wbm.plugin.util.general.ItemStackTool;
 import com.wbm.plugin.util.general.PlayerTool;
-import com.wbm.plugin.util.general.SpawnLocationTool;
 import com.wbm.plugin.util.shop.GoodsRole;
 import com.wbm.plugin.util.shop.ShopGoods;
 
@@ -462,7 +462,7 @@ public class GoodsListener implements Listener {
 			}
 		} else if (good == ShopGoods.SPAWN) {
 			// spawn
-			p.teleport(SpawnLocationTool.RESPAWN);
+			p.teleport(RoomLocation.MAIN_SPAWN);
 		} else if (good == ShopGoods.ROOM_MANAGER) {
 			// room list출력
 			this.roomManager.printRoomList(p);
@@ -484,28 +484,30 @@ public class GoodsListener implements Listener {
 		} else if (good == ShopGoods.FINISH) {
 			// 명령어 대신 실행
 			p.performCommand("re room finish");
-		} else if (good == ShopGoods.BLOCK_CHANGER) {
-			// 플레이어가 들고있는 굿즈의 lore중의 3번째줄을 true or false로 변경
-			ItemStack blockChanger = p.getInventory().getItemInMainHand();
-			ItemMeta meta = blockChanger.getItemMeta();
-			// lore 조정
-			List<String> lores = meta.getLore();
-			String mode = lores.get(2);
-			if (mode.equalsIgnoreCase("on")) {
-				lores.set(2, "off");
-				BroadcastTool.sendMessage(p, good.name() + " mode set to off");
-			} else if (mode.equalsIgnoreCase("off")) {
-				lores.set(2, "on");
-				BroadcastTool.sendMessage(p, good.name() + " mode set to on");
-			}
-			meta.setLore(lores);
-
-			// meta 설정
-			blockChanger.setItemMeta(meta);
-
-			// main hand에 모드 바뀐것으로 굿즈 체인지
-			p.getInventory().setItemInMainHand(blockChanger);
-		} else if (good == ShopGoods.HIDE) {
+		} 
+//		else if (good == ShopGoods.BLOCK_CHANGER) {
+//			// 플레이어가 들고있는 굿즈의 lore중의 3번째줄을 true or false로 변경
+//			ItemStack blockChanger = p.getInventory().getItemInMainHand();
+//			ItemMeta meta = blockChanger.getItemMeta();
+//			// lore 조정
+//			List<String> lores = meta.getLore();
+//			String mode = lores.get(2);
+//			if (mode.equalsIgnoreCase("on")) {
+//				lores.set(2, "off");
+//				BroadcastTool.sendMessage(p, good.name() + " mode set to off");
+//			} else if (mode.equalsIgnoreCase("off")) {
+//				lores.set(2, "on");
+//				BroadcastTool.sendMessage(p, good.name() + " mode set to on");
+//			}
+//			meta.setLore(lores);
+//
+//			// meta 설정
+//			blockChanger.setItemMeta(meta);
+//
+//			// main hand에 모드 바뀐것으로 굿즈 체인지
+//			p.getInventory().setItemInMainHand(blockChanger);
+//		} 
+		else if (good == ShopGoods.HIDE) {
 			// 플레이어가 들고있는 굿즈의 lore중의 3번째줄을 true or false로 변경
 			ItemStack hideGoods = p.getInventory().getItemInMainHand();
 			ItemMeta meta = hideGoods.getItemMeta();
@@ -531,6 +533,10 @@ public class GoodsListener implements Listener {
 			// main hand에 모드 바뀐것으로 굿즈 체인지
 			p.getInventory().setItemInMainHand(hideGoods);
 		} else if (good == ShopGoods.REDUCE_TIME) {
+			if(this.relayManager.isPlayerInPlayerLog(p, "USE_REDUCE_TIME")) {
+				BroadcastTool.sendMessage(p, "possible in once chance in once ChallengingTime");
+				return;
+			}
 			// ChallengingTime 남은 시간(1/(player수+1)) 단축
 			int leftTime = this.relayManager.getLeftTime();
 			int reductionTime = leftTime / (Bukkit.getOnlinePlayers().size() + 1);
@@ -540,6 +546,9 @@ public class GoodsListener implements Listener {
 			InventoryTool.removeItemFromPlayer(p, good.getItemStack());
 
 			BroadcastTool.sendMessageToEveryone(reductionTime + " sec reduced by " + p.getName());
+			
+			// USE_REDUCE_TIME log 추가
+			this.relayManager.addPlayerLog(p, "USE_REDUCE_TIME");
 		} else if (good == ShopGoods.SUPER_STAR) {
 			// 플레이어가 들고있는 굿즈의 lore중의 3번째줄을 true or false로 변경
 			ItemStack superStar = p.getInventory().getItemInMainHand();
@@ -572,6 +581,42 @@ public class GoodsListener implements Listener {
 				p.setGameMode(GameMode.SURVIVAL);
 				BroadcastTool.sendMessage(p, "change to SURVIVAL");
 			}
+		}  else if (good == ShopGoods.LOBBY) {
+			// 이 굿즈는 역할이 Challenger일때 Waiter로 되어지는 상황일때 사용되는것임
+			pData.setRole(Role.WAITER);
+			this.relayManager.changeRoom(p);
 		}
 	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

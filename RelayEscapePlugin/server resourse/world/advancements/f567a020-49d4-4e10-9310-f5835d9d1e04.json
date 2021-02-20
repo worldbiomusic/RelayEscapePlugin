@@ -1,0 +1,14 @@
+{
+  "minecraft:recipes/misc/book": {
+    "criteria": {
+      "has_paper": "2021-01-23 16:36:12 +0900"
+    },
+    "done": true
+  },
+  "minecraft:adventure/adventuring_time": {
+    "criteria": {
+      "plains": "2021-01-23 16:29:23 +0900"
+    },
+    "done": false
+  }
+}

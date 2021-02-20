@@ -30,11 +30,11 @@ public enum ShopGoods {
 	WHITE_WOOL(ItemStackTool.item(Material.WOOL, (byte) 0), GoodsRole.MAKING_BLOCK),
 	BLACK_WOOL(ItemStackTool.item(Material.WOOL, (byte) 15), GoodsRole.MAKING_BLOCK),
 
-	YELLOW_FLOWER(ItemStackTool.item(Material.YELLOW_FLOWER), GoodsRole.MAKING_BLOCK),
-	RED_FLOWER(ItemStackTool.item(Material.RED_ROSE), GoodsRole.MAKING_BLOCK),
+//	YELLOW_FLOWER(ItemStackTool.item(Material.YELLOW_FLOWER), GoodsRole.MAKING_BLOCK),
+//	RED_FLOWER(ItemStackTool.item(Material.RED_ROSE), GoodsRole.MAKING_BLOCK),
 	NOTE_BLOCK(ItemStackTool.item(Material.NOTE_BLOCK), GoodsRole.MAKING_BLOCK),
-	LADDER(ItemStackTool.item(Material.LADDER), GoodsRole.MAKING_BLOCK),
-	WATER_LILY(ItemStackTool.item(Material.WATER_LILY), GoodsRole.MAKING_BLOCK),
+//	LADDER(ItemStackTool.item(Material.LADDER), GoodsRole.MAKING_BLOCK),
+//	WATER_LILY(ItemStackTool.item(Material.WATER_LILY), GoodsRole.MAKING_BLOCK),
 	BOOKSHELF(ItemStackTool.item(Material.BOOKSHELF), GoodsRole.MAKING_BLOCK),
 
 	// 2f
@@ -81,14 +81,14 @@ public enum ShopGoods {
 	CACTUS(ItemStackTool.item(Material.CACTUS), GoodsRole.MAKING_BLOCK),
 	WEB(ItemStackTool.item(Material.WEB), GoodsRole.MAKING_BLOCK),
 	LAMP(ItemStackTool.item(Material.REDSTONE_LAMP_OFF), GoodsRole.MAKING_BLOCK),
-	STONE_PLATE(ItemStackTool.item(Material.STONE_PLATE), GoodsRole.MAKING_BLOCK),
-	LEVER(ItemStackTool.item(Material.LEVER), GoodsRole.MAKING_BLOCK),
+//	STONE_PLATE(ItemStackTool.item(Material.STONE_PLATE), GoodsRole.MAKING_BLOCK),
+//	LEVER(ItemStackTool.item(Material.LEVER), GoodsRole.MAKING_BLOCK),
 	TRAP_DOOR(ItemStackTool.item(Material.TRAP_DOOR), GoodsRole.MAKING_BLOCK),
 
 	// 8f
-	IRON_DOOR(ItemStackTool.item(Material.IRON_DOOR), GoodsRole.MAKING_BLOCK),
+//	IRON_DOOR(ItemStackTool.item(Material.IRON_DOOR), GoodsRole.MAKING_BLOCK),
 	SOUL_SAND(ItemStackTool.item(Material.SOUL_SAND), GoodsRole.MAKING_BLOCK),
-	ACACIA_DOOR(ItemStackTool.item(Material.ACACIA_DOOR_ITEM), GoodsRole.MAKING_BLOCK),
+//	ACACIA_DOOR(ItemStackTool.item(Material.ACACIA_DOOR_ITEM), GoodsRole.MAKING_BLOCK),
 	SNOW(ItemStackTool.item(Material.SNOW), GoodsRole.MAKING_BLOCK),
 	SNOW_BLOCK(ItemStackTool.item(Material.SNOW_BLOCK), GoodsRole.MAKING_BLOCK),
 
@@ -99,8 +99,8 @@ public enum ShopGoods {
 			GoodsRole.MAKING_BLOCK),
 	TRAP(ItemStackTool.item(Material.STAINED_GLASS, 1, (short) 1, (byte) 2, "TRAP", "random trap event block"),
 			GoodsRole.MAKING_BLOCK),
-	FLICKING(ItemStackTool.item(Material.STAINED_GLASS, 1, (short) 1, (byte) 3, "FLICKING", "flicking event block"),
-			GoodsRole.MAKING_BLOCK),
+//	FLICKING(ItemStackTool.item(Material.STAINED_GLASS, 1, (short) 1, (byte) 3, "FLICKING", "flicking event block"),
+//			GoodsRole.MAKING_BLOCK),
 	SOUND_TERROR(ItemStackTool.item(Material.STAINED_GLASS, 1, (short) 1, (byte) 4, "SOUND_TERROR",
 			"sound terror event block"), GoodsRole.MAKING_BLOCK),
 	HURT(ItemStackTool.item(Material.STAINED_GLASS, 1, (short) 1, (byte) 5, "HURT", "hurt payer"),
@@ -123,10 +123,10 @@ public enum ShopGoods {
 			GoodsRole.MAKING),
 	FINISH(ItemStackTool.item(Material.ARROW, "FINISH", "finish MakingTime and go next to the TesetingTime"),
 			GoodsRole.MAKING),
-	BLOCK_CHANGER(
-			ItemStackTool.item(Material.WOOD_PICKAXE, "BLOCK_CHANGER",
-					"Change the block immediately with the block you are holding", "===Mode===", "off"),
-			GoodsRole.MAKING),
+//	BLOCK_CHANGER(
+//			ItemStackTool.item(Material.WOOD_PICKAXE, "BLOCK_CHANGER",
+//					"Change the block immediately with the block you are holding", "===Mode===", "off"),
+//			GoodsRole.MAKING),
 	HIDE(ItemStackTool.item(Material.BOWL, "HIDE", "You can hide you from everyone", "===Mode===", "off"),
 			GoodsRole.MAKING, GoodsRole.TESTING),
 	GM_CHANGER(ItemStackTool.item(Material.FLINT, "GM_CHANGER", "You can change to survival or creative"),
@@ -165,6 +165,7 @@ public enum ShopGoods {
 			GoodsRole.CHALLENGING),
 	SUPER_STAR(ItemStackTool.item(Material.GLOWSTONE_DUST, "SUPER_STAR", "you are now supre star", "===Mode===", "off"),
 			GoodsRole.ALWAYS),
+	LOBBY(ItemStackTool.item(Material.DIAMOND, "LOBBY", "go to lobby"), GoodsRole.CHALLENGING, GoodsRole.VIEWING),
 
 	// viewrTool
 	GHOST(ItemStackTool.item(Material.GHAST_TEAR, 1, (short) 1, (byte) 3, "GHOST",
@@ -177,7 +178,7 @@ public enum ShopGoods {
 	/*
 	 * CASH
 	 */
-	CHAT(ItemStackTool.item(Material.TORCH, "CHAT", "player can chat"), GoodsRole.IN_POCKET),
+//	CHAT(ItemStackTool.item(Material.TORCH, "CHAT", "player can chat"), GoodsRole.IN_POCKET),
 	TOKEN_500(ItemStackTool.item(Material.EMERALD, "TOKEN_500", "Click to get 500 Token"), GoodsRole.ALWAYS),
 	COLOR_CHAT(ItemStackTool.item(Material.NAME_TAG, "COLOR_CHAT", "Your name will be changed with random color"),
 			GoodsRole.ALWAYS);
@@ -259,7 +260,7 @@ public enum ShopGoods {
 		}
 	}
 
-	public static void giveGoodsToPleyer(PlayerDataManager pDataManager, Player p) {
+	public static void giveGoodsToPlayer(PlayerDataManager pDataManager, Player p) {
 		/*
 		 * playerData가 가지고 있는 good중 해당 role에 맞는 good만을 인벤토리에 추가함 이 메소드가 실행되기 전에 선행되야 하는
 		 * 것: player role 변경!
@@ -283,7 +284,7 @@ public enum ShopGoods {
 
 	public static void giveGoodsToPleyers(PlayerDataManager pDataManager, List<Player> players) {
 		for (Player p : players) {
-			giveGoodsToPleyer(pDataManager, p);
+			giveGoodsToPlayer(pDataManager, p);
 		}
 	}
 }

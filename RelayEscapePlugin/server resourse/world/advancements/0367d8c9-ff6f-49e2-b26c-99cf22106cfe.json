@@ -353,6 +353,12 @@
     },
     "done": true
   },
+  "minecraft:recipes/misc/book": {
+    "criteria": {
+      "has_paper": "2021-01-23 22:18:11 +0900"
+    },
+    "done": true
+  },
   "minecraft:recipes/decorations/green_stained_glass_pane": {
     "criteria": {
       "has_glass": "2021-01-01 18:19:59 +0900"

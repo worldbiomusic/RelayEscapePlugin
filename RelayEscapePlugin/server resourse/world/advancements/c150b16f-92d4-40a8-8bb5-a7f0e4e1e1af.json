@@ -1,0 +1,38 @@
+{
+  "minecraft:recipes/misc/book": {
+    "criteria": {
+      "has_paper": "2021-02-14 17:16:59 +0900"
+    },
+    "done": true
+  },
+  "minecraft:recipes/building_blocks/glowstone": {
+    "criteria": {
+      "has_glowstone_dust": "2021-02-19 15:33:10 +0900"
+    },
+    "done": true
+  },
+  "minecraft:recipes/combat/spectral_arrow": {
+    "criteria": {
+      "has_glowstone_dust": "2021-02-19 15:33:10 +0900"
+    },
+    "done": true
+  },
+  "minecraft:recipes/misc/yellow_dye_from_dandelion": {
+    "criteria": {
+      "has_yellow_flower": "2021-02-14 15:20:42 +0900"
+    },
+    "done": true
+  },
+  "minecraft:adventure/adventuring_time": {
+    "criteria": {
+      "plains": "2021-02-14 15:19:52 +0900"
+    },
+    "done": false
+  },
+  "minecraft:recipes/misc/red_dye_from_poppy": {
+    "criteria": {
+      "has_red_flower": "2021-02-14 15:20:42 +0900"
+    },
+    "done": true
+  }
+}

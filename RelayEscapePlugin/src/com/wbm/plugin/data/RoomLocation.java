@@ -14,7 +14,7 @@ public class RoomLocation {
     // MAIN
     public static final Location MAIN_Pos1 = Setting.getLoationFromSTDLOC(10, 4, 10);
     public static final Location MAIN_Pos2 = Setting.getLoationFromSTDLOC(-14, 28, -14);
-    public static final Location MAIN_SPAWN = SpawnLocationTool.JOIN;
+    public static final Location MAIN_SPAWN = Setting.getLoationFromSTDLOC(-1.5, 4, -1.5, 90, 0);
 
     // PRACTICE
     public static final Location PRACTICE_Pos1 = Setting.getLoationFromSTDLOC(21, 4, 21);

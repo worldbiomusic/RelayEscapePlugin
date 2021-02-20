@@ -3,6 +3,7 @@ package com.wbm.plugin.listener;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -13,6 +14,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerPortalEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 import com.wbm.plugin.data.PlayerData;
@@ -30,6 +32,7 @@ import com.wbm.plugin.util.enums.RoomType;
 import com.wbm.plugin.util.general.BanItemTool;
 import com.wbm.plugin.util.general.BroadcastTool;
 import com.wbm.plugin.util.general.InventoryTool;
+import com.wbm.plugin.util.general.LocationTool;
 import com.wbm.plugin.util.general.PlayerTool;
 import com.wbm.plugin.util.general.SpawnLocationTool;
 import com.wbm.plugin.util.general.TeleportTool;
@@ -72,47 +75,26 @@ public class GameManager implements Listener {
 		// data 처리
 		UUID uuid = p.getUniqueId();
 
-		// 모든 player는 무조건 Challenger or Waiter이고, 각 Time에 맞는 Challenger의 Role로 역할이 배정됨!
-		// (w, m, t = Waiter, c = Challenger)
-		// (Challeging때 나간 Maker가 다시 들어온 경우 Viewer로)
+		// 모든 player는 무조건 waiter로 입장함
 		PlayerData pData;
-
-		// RelayTime = WAITING or MAKING or TESTING일때는 Waiter
-		Role role = Role.WAITER;
-		RelayTime time = this.relayManager.getCurrentTime();
-
-		// RelayTime = CHALLENGING일때 Challenger
-		if (time == RelayTime.CHALLENGING) {
-			role = Role.CHALLENGER;
-		}
 
 		// PlayerDataManager에 데이터 없는지 확인 (= 서버 처음 들어옴)
 		if (this.pDataManager.isFirstJoin(uuid)) {
 			String name = p.getName();
-			pData = new PlayerData(uuid, name, role);
-			pData.plusToken(50);
+			pData = new PlayerData(uuid, name, Role.WAITER);
+			pData.plusToken(Setting.FIRST_JOIN_TOKEN);
+
+			// playerDataManager에 데이터 add
+			this.pDataManager.addPlayerData(pData);
+			
+			// give basic goods
+			this.giveBasicGoods(p);
 		}
-		// 전에 들어온적 있을 때(바꿀것은 Role밖에 없음)
+		// PlayerData가 이미 있을때
 		else {
-			pData = this.pDataManager.getPlayerData(uuid);
-
-			// 현재 ChallengingTime일때 Room의 Maker와 같으면
-			// Role을 Vewer로 바꿔서 자신이 만든룸을 clear못하게 만들어야 함
-			if (time == RelayTime.CHALLENGING) {
-				Room room = this.roomManager.getRoom(RoomType.MAIN);
-				// p가 현재 room maker일 때
-				if (pData.getName().equals(room.getMaker())) {
-					BroadcastTool.sendMessage(p, "you are Viewer in your room");
-					role = Role.VIEWER;
-				}
-			}
+			// role을 waiter로만 변경
+			this.pDataManager.getPlayerData(uuid).setRole(Role.WAITER);
 		}
-
-		// playerDataManager에 데이터 add
-		this.pDataManager.addPlayerData(pData);
-
-		// role 처리
-		pData.setRole(role);
 	}
 
 	public void reRegisterAllPlayer() {
@@ -125,18 +107,11 @@ public class GameManager implements Listener {
 		// PlayerData 관련 처리
 		this.processPlayerData(p);
 
-		// time에 따라서 spawn위치 바꾸기
-		if (this.relayManager.getCurrentTime() == RelayTime.CHALLENGING) {
-			TeleportTool.tp(p, SpawnLocationTool.JOIN);
-		} else { // Challenging 외의 타임일때
-			TeleportTool.tp(p, SpawnLocationTool.LOBBY);
-		}
+		// 입장시 lobby
+		TeleportTool.tp(p, SpawnLocationTool.LOBBY);
 
 		// 인벤 초기화 후 굿즈 제공
 		this.giveGoods(p);
-
-		// 기본 굿즈 PlayerData에 추가
-		this.giveBasicGoods(p);
 
 		// 상태효과 제거
 		PlayerTool.unhidePlayerFromEveryone(p);
@@ -157,7 +132,7 @@ public class GameManager implements Listener {
 
 	void giveGoods(Player p) {
 		InventoryTool.clearPlayerInv(p);
-		ShopGoods.giveGoodsToPleyer(pDataManager, p);
+		ShopGoods.giveGoodsToPlayer(pDataManager, p);
 		// 예외] REDUCE_TIME은 RelayTIme이 바뀔때 처음에만 지급
 		InventoryTool.removeItemFromPlayer(p, ShopGoods.REDUCE_TIME.getItemStack());
 	}
@@ -167,14 +142,15 @@ public class GameManager implements Listener {
 		 * 기본굿즈: ShopGoods.CHEST, ShopGoods.HIGH_5, ShopGoods.MAKINGTIME_5
 		 */
 		PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
-		ShopGoods[] basicGoods = { ShopGoods.DIRT, ShopGoods.GLOWSTONE, ShopGoods.CHEST, ShopGoods.HIGH_5,
-				ShopGoods.MAKINGTIME_5, ShopGoods.FINISH, ShopGoods.GOODS_LIST, ShopGoods.SPAWN, ShopGoods.GM_CHANGER };
 
 		// PlayerData의 goods리스트에 지급
-		for (ShopGoods good : basicGoods) {
-			if (!pData.hasGoods(good)) {
-				pData.addGoods(good);
-			}
+		for (ShopGoods good : Setting.BASIC_GOODS) {
+			pData.addGoods(good);
+		}
+
+		// 모든 ShopGOods 지급
+		for (ShopGoods allGood : ShopGoods.values()) {
+			pData.addGoods(allGood);
 		}
 	}
 
@@ -211,10 +187,8 @@ public class GameManager implements Listener {
 		Role role = pData.getRole();
 		RelayTime time = this.relayManager.getCurrentTime();
 
-		if (time == RelayTime.MAKING || time == RelayTime.TESTING) {
-			if (role == Role.WAITER) {
-				this.miniGameManager.processEvent(e);
-			}
+		if (pData.isPlayingMiniGame()) {
+			this.miniGameManager.processEvent(e);
 		}
 	}
 
@@ -222,35 +196,32 @@ public class GameManager implements Listener {
 		Player p = e.getPlayer();
 		PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
 		Role role = pData.getRole();
-		RelayTime time = this.relayManager.getCurrentTime();
+//		RelayTime time = this.relayManager.getCurrentTime();
 		Block b = e.getClickedBlock();
 
 		if (e.getAction() == Action.RIGHT_CLICK_BLOCK) {
 			if (RoomLocation.getRoomTypeWithLocation(b.getLocation()) == RoomType.PRACTICE) {
-				if (time == RelayTime.MAKING || time == RelayTime.TESTING) {
-					if (role == Role.WAITER) {
+				if (role == Role.WAITER) {
+					// core 부수면 token 지급
+					if (b.getType() == Material.GLOWSTONE) {
+						// token 지급
+						int token = Setting.PRACTICE_ROOM_CLEAR_TOKEN;
 
-						// core 부수면 token 지급
-						if (b.getType() == Material.GLOWSTONE) {
-							// token 지급
-							int token = Setting.PRACTICE_ROOM_CLEAR_TOKEN;
+						BroadcastTool.sendMessage(p, "token + " + token);
 
-							BroadcastTool.sendMessage(p, "token + " + token);
-
-							// practice room안에 있는 플레이어들 모두 lobby로 이동
-							for (Player allP : Bukkit.getOnlinePlayers()) {
-								RoomType roomType = RoomLocation.getRoomTypeWithLocation(allP.getLocation());
-								if (roomType == RoomType.PRACTICE) {
-									TeleportTool.tp(allP, SpawnLocationTool.LOBBY);
-									// 누가 clear했는지 알려주기
-									BroadcastTool.sendMessage(allP, p.getName() + " clear the PRACTICE room");
-								}
+						// practice room안에 있는 플레이어들 모두 lobby로 이동
+						for (Player allP : Bukkit.getOnlinePlayers()) {
+							RoomType roomType = RoomLocation.getRoomTypeWithLocation(allP.getLocation());
+							if (roomType == RoomType.PRACTICE) {
+								TeleportTool.tp(allP, SpawnLocationTool.LOBBY);
+								// 누가 clear했는지 알려주기
+								BroadcastTool.sendMessage(allP, p.getName() + " clear the PRACTICE room");
 							}
-
-							// random room으로 변경
-							Room randomRoom = this.roomManager.getRandomRoomData();
-							this.roomManager.setRoom(RoomType.PRACTICE, randomRoom);
 						}
+
+						// random room으로 변경
+						Room randomRoom = this.roomManager.getRandomRoomData();
+						this.roomManager.setRoom(RoomType.PRACTICE, randomRoom);
 					}
 				}
 			}
@@ -288,6 +259,10 @@ public class GameManager implements Listener {
 			if (RoomLocation.getRoomTypeWithLocation(block.getLocation()) == RoomType.MAIN) {
 				// 플레이어가 MAIN, TESTING, TESER 체크
 				if (this.relayManager.checkRoomAndRelayTimeAndRole(RoomType.MAIN, RelayTime.TESTING, Role.TESTER, p)) {
+
+					BroadcastTool.sendMessage(p, "saving room...(10 sec)");
+
+//					Bukkit
 					// 1.save room, set main room
 					String title = this.relayManager.getMainRoomTitle();
 					this.roomManager.saveRoomData(RoomType.MAIN, p.getName(), title);
@@ -309,7 +284,7 @@ public class GameManager implements Listener {
 					// 2. 클리어한 maker는 pDataManager의 maker로 등록
 					this.pDataManager.registerMaker(p);
 
-					// 3. main room clearCount +1, time측정 후 초기화, 제작자에게 토큰 지급
+					// 3. main room clearCount +1, 제작자에게 토큰 지급
 					Room room = this.roomManager.getRoom(RoomType.MAIN);
 					room.addClearCount(1);
 					this.roomManager.recordMainRoomDurationTime();
@@ -482,6 +457,37 @@ public class GameManager implements Listener {
 				}
 			}
 		}
+	}
+
+	@EventHandler
+	public void onPlayerEnterPortal(PlayerPortalEvent e) {
+		Player p = e.getPlayer();
+
+		Location pLoc = p.getLocation();
+
+		if (LocationTool.isIn(Setting.getAbsoluteLocation(12, 4, 11), pLoc, Setting.getAbsoluteLocation(12, 6, 10))
+				|| LocationTool.isIn(Setting.getAbsoluteLocation(10, 4, 12), pLoc,
+						Setting.getAbsoluteLocation(11, 6, 12))) {
+			RelayTime time = this.relayManager.getCurrentTime();
+			PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
+			Role role = pData.getRole();
+
+			if (time == RelayTime.CHALLENGING && role == Role.WAITER) {
+				BroadcastTool.sendTitle(p, "MAIN ROOM", "");
+
+				TeleportTool.tp(p, RoomLocation.MAIN_SPAWN);
+
+				Room room = this.roomManager.getRoom(RoomType.MAIN);
+				if (p.getName().equalsIgnoreCase(room.getMaker())) {
+					pData.setRole(Role.VIEWER);
+					this.relayManager.changeRoom(p);
+				} else {
+					pData.setRole(Role.CHALLENGER);
+					this.relayManager.changeRoom(p);
+				}
+			}
+		}
+
 	}
 
 }

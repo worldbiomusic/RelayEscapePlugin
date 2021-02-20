@@ -77,6 +77,12 @@
     },
     "done": true
   },
+  "minecraft:recipes/tools/diamond_axe": {
+    "criteria": {
+      "has_diamond": "2021-02-11 19:17:01 +0900"
+    },
+    "done": true
+  },
   "minecraft:recipes/building_blocks/gray_stained_glass": {
     "criteria": {
       "has_glass": "2020-10-02 00:04:52 +0900"
@@ -197,6 +203,12 @@
     },
     "done": true
   },
+  "minecraft:recipes/combat/diamond_sword": {
+    "criteria": {
+      "has_diamond": "2021-02-11 19:17:01 +0900"
+    },
+    "done": true
+  },
   "minecraft:recipes/building_blocks/blue_stained_glass": {
     "criteria": {
       "has_glass": "2020-10-02 00:04:52 +0900"
@@ -227,6 +239,12 @@
     },
     "done": true
   },
+  "minecraft:recipes/combat/arrow": {
+    "criteria": {
+      "has_flint": "2021-01-25 01:24:43 +0900"
+    },
+    "done": true
+  },
   "minecraft:recipes/redstone/redstone_lamp": {
     "criteria": {
       "has_glowstone": "2020-09-06 01:24:25 +0900"
@@ -251,9 +269,21 @@
     },
     "done": true
   },
+  "minecraft:recipes/decorations/jukebox": {
+    "criteria": {
+      "has_diamond": "2021-02-11 19:17:01 +0900"
+    },
+    "done": true
+  },
   "minecraft:recipes/building_blocks/light_blue_wool": {
     "criteria": {
       "has_white_wool": "2020-11-08 23:56:25 +0900"
+    },
+    "done": true
+  },
+  "minecraft:recipes/tools/flint_and_steel": {
+    "criteria": {
+      "has_flint": "2021-01-25 01:24:43 +0900"
     },
     "done": true
   },
@@ -305,6 +335,12 @@
     },
     "done": true
   },
+  "minecraft:recipes/food/mushroom_stew": {
+    "criteria": {
+      "has_bowl": "2021-02-18 23:34:30 +0900"
+    },
+    "done": true
+  },
   "minecraft:recipes/building_blocks/gray_wool": {
     "criteria": {
       "has_white_wool": "2020-11-08 23:56:25 +0900"
@@ -323,6 +359,12 @@
     },
     "done": true
   },
+  "minecraft:husbandry/balanced_diet": {
+    "criteria": {
+      "golden_apple": "2021-01-20 22:43:33 +0900"
+    },
+    "done": false
+  },
   "minecraft:recipes/tools/wooden_hoe": {
     "criteria": {
       "has_stick": "2020-10-31 23:41:58 +0900"
@@ -335,6 +377,12 @@
     },
     "done": true
   },
+  "minecraft:recipes/brewing/golden_carrot": {
+    "criteria": {
+      "has_gold_nugget": "2021-01-31 14:19:46 +0900"
+    },
+    "done": true
+  },
   "minecraft:recipes/building_blocks/cobblestone_slab": {
     "criteria": {
       "has_cobblestone": "2020-11-08 23:56:25 +0900"
@@ -344,6 +392,12 @@
   "minecraft:recipes/decorations/black_banner": {
     "criteria": {
       "has_black_wool": "2020-11-08 23:56:25 +0900"
+    },
+    "done": true
+  },
+  "minecraft:recipes/misc/iron_ingot_from_block": {
+    "criteria": {
+      "has_iron_block": "2021-01-22 21:40:29 +0900"
     },
     "done": true
   },
@@ -443,6 +497,12 @@
     },
     "done": true
   },
+  "minecraft:recipes/combat/diamond_chestplate": {
+    "criteria": {
+      "has_diamond": "2021-02-11 19:17:01 +0900"
+    },
+    "done": true
+  },
   "minecraft:story/mine_stone": {
     "criteria": {
       "get_stone": "2020-11-08 23:56:25 +0900"
@@ -464,6 +524,12 @@
   "minecraft:recipes/decorations/gray_stained_glass_pane": {
     "criteria": {
       "has_glass": "2020-10-02 00:04:52 +0900"
+    },
+    "done": true
+  },
+  "minecraft:recipes/combat/diamond_leggings": {
+    "criteria": {
+      "has_diamond": "2021-02-11 19:17:01 +0900"
     },
     "done": true
   },
@@ -506,6 +572,12 @@
   "minecraft:recipes/tools/wooden_pickaxe": {
     "criteria": {
       "has_stick": "2020-10-31 23:41:58 +0900"
+    },
+    "done": true
+  },
+  "minecraft:husbandry/root": {
+    "criteria": {
+      "consumed_item": "2021-01-20 22:43:33 +0900"
     },
     "done": true
   },
@@ -593,6 +665,12 @@
     },
     "done": true
   },
+  "minecraft:adventure/shoot_arrow": {
+    "criteria": {
+      "shot_arrow": "2021-01-20 22:49:53 +0900"
+    },
+    "done": true
+  },
   "minecraft:recipes/building_blocks/white_concrete_powder": {
     "criteria": {
       "has_gravel": "2020-10-02 00:04:54 +0900"
@@ -617,6 +695,18 @@
     },
     "done": true
   },
+  "minecraft:recipes/tools/diamond_pickaxe": {
+    "criteria": {
+      "has_diamond": "2021-02-11 19:17:01 +0900"
+    },
+    "done": true
+  },
+  "minecraft:recipes/tools/diamond_hoe": {
+    "criteria": {
+      "has_diamond": "2021-02-11 19:17:01 +0900"
+    },
+    "done": true
+  },
   "minecraft:recipes/building_blocks/pink_wool": {
     "criteria": {
       "has_white_wool": "2020-11-08 23:56:25 +0900"
@@ -638,6 +728,18 @@
   "minecraft:recipes/decorations/white_stained_glass_pane": {
     "criteria": {
       "has_glass": "2020-10-02 00:04:52 +0900"
+    },
+    "done": true
+  },
+  "minecraft:recipes/decorations/flower_pot": {
+    "criteria": {
+      "has_brick": "2021-01-31 15:54:03 +0900"
+    },
+    "done": true
+  },
+  "minecraft:recipes/tools/diamond_shovel": {
+    "criteria": {
+      "has_diamond": "2021-02-11 19:17:01 +0900"
     },
     "done": true
   },
@@ -695,15 +797,39 @@
     },
     "done": true
   },
+  "minecraft:recipes/combat/diamond_boots": {
+    "criteria": {
+      "has_diamond": "2021-02-11 19:17:01 +0900"
+    },
+    "done": true
+  },
+  "minecraft:story/mine_diamond": {
+    "criteria": {
+      "diamond": "2021-02-11 19:17:01 +0900"
+    },
+    "done": true
+  },
   "minecraft:recipes/building_blocks/light_gray_wool": {
     "criteria": {
       "has_white_wool": "2020-11-08 23:56:25 +0900"
     },
     "done": true
   },
+  "minecraft:recipes/combat/diamond_helmet": {
+    "criteria": {
+      "has_diamond": "2021-02-11 19:17:01 +0900"
+    },
+    "done": true
+  },
   "minecraft:recipes/building_blocks/red_wool": {
     "criteria": {
       "has_white_wool": "2020-11-08 23:56:25 +0900"
+    },
+    "done": true
+  },
+  "minecraft:recipes/decorations/anvil": {
+    "criteria": {
+      "has_iron_block": "2021-01-22 21:40:29 +0900"
     },
     "done": true
   },
@@ -722,6 +848,12 @@
   "minecraft:recipes/redstone/wooden_door": {
     "criteria": {
       "has_planks": "2020-10-31 23:41:58 +0900"
+    },
+    "done": true
+  },
+  "minecraft:recipes/building_blocks/brick_block": {
+    "criteria": {
+      "has_brick": "2021-01-31 15:54:03 +0900"
     },
     "done": true
   },

@@ -1,8 +1,9 @@
 package com.wbm.plugin.util;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.UUID;
+import java.util.Map;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -23,7 +24,6 @@ import com.wbm.plugin.util.general.InventoryTool;
 import com.wbm.plugin.util.general.PlayerTool;
 import com.wbm.plugin.util.general.SpawnLocationTool;
 import com.wbm.plugin.util.general.TeleportTool;
-import com.wbm.plugin.util.minigame.MiniGame;
 import com.wbm.plugin.util.minigame.MiniGameManager;
 import com.wbm.plugin.util.shop.ShopGoods;
 
@@ -48,568 +48,434 @@ import com.wbm.plugin.util.shop.ShopGoods;
  */
 
 public class RelayManager {
-    // 게임의 흐름 (시간, 유저)를 관리하는 클래스
-    // 중요) startWaiting(), startMaking(), startChallenging(), startWaiting()
-    // 메소드를 절대 직접 호출하지 말기 (시간이 다 되어서 자동으로 넘어갈 때만 사용해야 함)
-    // 대신 stopTaskAndStartNextTime() or stopCurrentTimeAndStartAnotherTime() 사용하기!
-    // (넘어가기전에 task멈춰야하기 때문)
+	// 게임의 흐름 (시간, 유저)를 관리하는 클래스
+	// 중요) startWaiting(), startMaking(), startChallenging(), startWaiting()
+	// 메소드를 절대 직접 호출하지 말기 (시간이 다 되어서 자동으로 넘어갈 때만 사용해야 함)
+	// 대신 stopTaskAndStartNextTime() or stopCurrentTimeAndStartAnotherTime() 사용하기!
+	// (넘어가기전에 task멈춰야하기 때문)
 
-    private PlayerDataManager pDataManager;
-    private RoomManager roomManager;
+	private PlayerDataManager pDataManager;
+	private RoomManager roomManager;
 
-    // TODO: RelayTime이름보단 다른것찾아보기 예> RelayTurn ??
-    private RelayTime currentTime;
+	// TODO: RelayTime이름보단 다른것찾아보기 예> RelayTurn ??
+	private RelayTime currentTime;
 
-    private BukkitTask currentCountDownTask;
+	private BukkitTask currentCountDownTask;
 
-    private boolean corePlaced;
-    private String mainRoomTitle;
+	private boolean corePlaced;
+	private String mainRoomTitle;
 
-    private Counter timer;
-    private int timerTask;
+	private Counter timer;
+	private int timerTask;
 
-    private BukkitTask reservationTask;
+	private BukkitTask reservationTask;
 
-    private MiniGameManager miniGameManager;
+	private MiniGameManager miniGameManager;
 
-    public RelayManager(PlayerDataManager pDataManager, RoomManager roomManager, MiniGameManager miniGameManager) {
-	this.pDataManager = pDataManager;
-	this.roomManager = roomManager;
+	private Map<String, List<Player>> playerLog;
 
-	this.currentTime = RelayTime.CHALLENGING;
-	this.corePlaced = false;
-	this.timer = new Counter();
+	public RelayManager(PlayerDataManager pDataManager, RoomManager roomManager, MiniGameManager miniGameManager) {
+		this.pDataManager = pDataManager;
+		this.roomManager = roomManager;
 
-	this.miniGameManager = miniGameManager;
-    }
+		this.currentTime = RelayTime.CHALLENGING;
+		this.corePlaced = false;
+		this.timer = new Counter();
 
-//    // Waiting이 시작하려면 무조건 maker가 등록되어 있어야 함!
-//    private void startWaiting() {
-//	// RelayTime 관리
-//	this.currentTime = RelayTime.WAITING;
-//
-//	// unlock main room
-//	this.roomManager.unlockRoom(RoomType.MAIN);
-//
-//	// maker(waiter) 관리
-//	if (this.getMaker() == null) {
-//	    BroadcastTool.printConsoleMessage(ChatColor.RED + "[Bug] No Maker in WaitingTime!!!!");
-//	}
-//
-//	// 역할 변경
-//	this.changeEveryoneRoleWithRelayTime(this.getMaker());
-//	// maker 정보 알림
-//	BroadcastTool.sendTitle(this.getMaker(), "Maker", "you are maker");
-//
-//	// tp 관리
-//	TeleportTool.allTpToLocation(SpawnLocationTool.RESPAWN);
-//
-//	// Goods제공 (role변경후 호출되야함)
-//	giveGoodsToPlayer(this.getMaker());
-//
-//	// maker제외한 challenger(waiter) 관리
-//	for (Player p : this.getChallengers()) {
-//	    this.changeEveryoneRoleWithRelayTime(p);
-//	    // core 부서짐 정보 알림
-//	    BroadcastTool.sendTitle(this.getMaker(), "" + ChatColor.RED + ChatColor.BOLD + "!", "core is broken");
-//	    // Goods제공 (role변경후 호출되야함)
-//	    giveGoodsToPlayer(p);
-//	}
-//
-//	// ranking system(stage) 업데이트
-//	this.stageManager.updateAllStage();
-//
-//	RelayTimeCommonTODOList();
-//    }
-//
-//    private void startMaking() {
-//	// RelayTime 관리
-//	this.currentTime = RelayTime.MAKING;
-//
-//	// Main Room Locker
-//	this.roomManager.lockRoom(RoomType.MAIN);
-//
-//	// maker 역할 변경
-//	this.pDataManager.changePlayerRole(this.getMaker().getUniqueId(), Role.MAKER);
-//
-//	// message 관리
-//	BroadcastTool.sendTitle(this.getMaker(), "MakingTime", "");
-//	BroadcastTool.sendMessage(this.getMaker(), "You can save room with title " + "/re room title [title] "
-//		+ "\n(basic title: " + this.roomTitle + ")");
-//
-//	// teleport
-//	TeleportTool.tp(this.getMaker(), SpawnLocationTool.JOIN);
-//
-//	// Goods제공 (role변경후 호출되야함)
-//	this.giveGoodsToPlayer(this.getMaker());
-//
-//	// room basic title 을 "maker이름 + n"으로 설정
-//	this.roomTitle = this.roomManager.getNextTitleWithMakerName(this.getMaker().getName());
-//
-//	// maker제외한 challenger(waiter) 관리
-//	for (Player p : this.getChallengers()) {
-//	    this.pDataManager.changePlayerRole(p.getUniqueId(), Role.WAITER);
-//	    // Goods제공 (role변경후 호출되야함)
-//	    this.giveGoodsToPlayer(p);
-//	    // teleport
-//	    TeleportTool.tp(p, SpawnLocationTool.LOBBY);
-//	}
-//
-//	// practice room 설정
-//	Room randomRoom = this.roomManager.getRandomRoomData();
-//	this.roomManager.setRoom(RoomType.PRACTICE, randomRoom);
-//
-//	RelayTimeCommonTODOList();
-//    }
-//
-//    private void startTesting() {
-//	// RelayTime 관리
-//	this.currentTime = RelayTime.TESTING;
-//
-//	// maker(tester) 관리
-//	this.pDataManager.changePlayerRole(this.getMaker().getUniqueId(), Role.TESTER);
-//	// Goods제공 (role변경후 호출되야함)
-//	giveGoodsToPlayer(this.getMaker());
-//	// teleport
-//	TeleportTool.tp(this.getMaker(), SpawnLocationTool.JOIN);
-//
-//	// maker제외한 challenger(waiter) 관리
-//	for (Player p : this.getChallengers()) {
-//	    this.pDataManager.changePlayerRole(p.getUniqueId(), Role.WAITER);
-//	    // Goods제공 (role변경후 호출되야함)
-//	    giveGoodsToPlayer(p);
-//	}
-//
-//	RelayTimeCommonTODOList();
-//    }
-//
-//    private void startChallenging() {
-//	// RelayTime 관리
-//	this.currentTime = RelayTime.CHALLENGING;
-//
-//	// room challeningCount + 1
-//	this.roomManager.getRoom(RoomType.MAIN).addChallengingCount(1);
-//
-//	// maker(viewer) 관리
-//	// if문 넣은이유: Maker가 만들고 나갔을때 위해서 or 처음시작시 maker가없기 때문
-//	if (this.pDataManager.doesMakerExist()) {
-//	    this.pDataManager.changePlayerRole(this.getMaker().getUniqueId(), Role.VIEWER);
-//	    // Goods제공 (role변경후 호출되야함)
-//	    this.giveGoodsToPlayer(this.getMaker());
-//	    // teleport
-//	    TeleportTool.tp(this.getMaker(), SpawnLocationTool.JOIN);
-//
-//	}
-//
-//	// maker제외한 challenger(challenger) 관리
-//	for (Player p : this.getChallengers()) {
-//	    // minigame 중지 (Maker는 minigame을 못하니까 상관x)
-//	    this.miniGameManager.handlePlayerCurrentMiniGameAndExitGame(p);
-//
-//	    // role 변경
-//	    this.pDataManager.changePlayerRole(p.getUniqueId(), Role.CHALLENGER);
-//
-//	    // challengingCount +1
-//	    UUID uuid = p.getUniqueId();
-//	    PlayerData pData = this.pDataManager.getPlayerData(uuid);
-//	    pData.addChallengingCount(1);
-//
-//	    // Goods제공 (role변경후 호출되야함)
-//	    giveGoodsToPlayer(p);
-//
-//	    // heal
-//	    PlayerTool.heal(p);
-//	}
-//
-//	// 모두 respawn으로 tp
-//	TeleportTool.allTpToLocation(SpawnLocationTool.RESPAWN);
-//
-//	// start room duration time
-//	this.roomManager.startMainRoomDurationTime();
-//
-//	// room state 알림
-//	Room room = this.roomManager.getRoom(RoomType.MAIN);
-//	String roomTitle = room.getTitle();
-//	String roomMaker = room.getMaker();
-//	BroadcastTool.sendMessageToEveryone("Main room: " + roomTitle + "(" + roomMaker + ")");
-//	if (Setting.DEBUG) {
-//	    BroadcastTool.debug("roomData count : " + this.roomManager.getAllRoomCount());
-//	}
-//
-//	RelayTimeCommonTODOList();
-//
-//    }
+		this.miniGameManager = miniGameManager;
+		this.playerLog = new HashMap<>();
+		this.playerLog.put("USE_REDUCE_TIME", new ArrayList<Player>());
+		this.playerLog.put("JOIN_MAIN_ROOM", new ArrayList<Player>());
 
-    // Waiting이 시작하려면 무조건 maker가 등록되어 있어야 함!
-    private void startWaiting() {
+	}
+
+	// Waiting이 시작하려면 무조건 maker가 등록되어 있어야 함!
+	private void startWaiting() {
 //	 RelayTime 관리
-	this.currentTime = RelayTime.WAITING;
+		this.currentTime = RelayTime.WAITING;
 
-	// common todo list
-	RelayTimeCommonTODOList();
-
-	// maker(waiter) 관리
-	if (this.getMaker() == null) {
-	    BroadcastTool.printConsoleMessage(ChatColor.RED + "[Bug] No Maker in WaitingTime!!!!");
-	}
-    }
-
-    private void startMaking() {
-//	 RelayTime 관리
-	this.currentTime = RelayTime.MAKING;
-
-	// make room empty
-	this.roomManager.setRoomEmpty(RoomType.MAIN);
-
-	// room basic title 을 "maker이름 + n"으로 설정
-	this.mainRoomTitle = this.roomManager.getNextTitleWithMakerName(this.getMaker().getName());
-
-	// common todo list
-	RelayTimeCommonTODOList();
-
-	// practice room 설정
-	Room randomRoom = this.roomManager.getRandomRoomData();
-	this.roomManager.setRoom(RoomType.PRACTICE, randomRoom);
-    }
-
-    private void startTesting() {
-//	 RelayTime 관리
-	this.currentTime = RelayTime.TESTING;
-
-	// common todo list
-	RelayTimeCommonTODOList();
-    }
-
-    private void startChallenging() {
-//	 RelayTime 관리
-	this.currentTime = RelayTime.CHALLENGING;
-
-	// maker unregister
-	this.pDataManager.unregisterMaker();
-
-	// maker제외한 challenger(challenger) 관리
-	for (Player p : this.getChallengers()) {
-	    // minigame 중지 (Maker는 minigame을 못하니까 상관x)
-	    this.miniGameManager.handleMiniGameExitDuringPlaying(p, MiniGame.ExitReason.RELAY_TIME_CHANGED);
-
-	    // challengingCount +1
-	    UUID uuid = p.getUniqueId();
-	    PlayerData pData = this.pDataManager.getPlayerData(uuid);
-	    pData.addChallengingCount(1);
-	}
-
-	// common todo list
-	RelayTimeCommonTODOList();
-
-	// room challeningCount + 1 (최소 1명 이상 서버에 플레이어가 존재할 때)
-	if (PlayerTool.onlinePlayersCount() >= 1) {
-	    this.roomManager.getRoom(RoomType.MAIN).addChallengingCount(1);
-	}
-
-	// start recording room duration time
-	this.roomManager.startMainRoomDurationTime();
-    }
-
-    private void RelayTimeCommonTODOList() {
-	/*
-	 * 순서상관 있음: RelayManager는 실제적으로 Maker를 관리하는 PlayerDataManaer에서 변수를 직접받아와서 판단하지만,
-	 * 
-	 * 다른 클래스와 밑의 메소드들은 Role을 가지고 판단하므로 Role변경을 time변경 다음으로 최우선으로 해야 한다(Role을 time에
-	 * 맞게 수정하므로)
-	 * 
-	 * 대부분 메소드들은 각 플레이어의 Role을 가지고 구분해서 수행함
-	 * 
-	 * 1.여기서 this.currentTime = RelayTime.getNextTime(this.currentTime); 사용하면 안되는
-	 * 이유: 항상 다음것으로 흘러가지 않고 중간에 Making이나 Testing이 실패할 수 도 있는 상황이 있기 떄문에 각자의 메소드에서 직접
-	 * 설정해줘야 함(예)this.current = RelayTime.TESTING)
-	 * 
-	 * 2.역할 변경
-	 * 
-	 * 3.maker, challenger 에게 메세지 전송
-	 * 
-	 * 4.위치 변경
-	 * 
-	 * 5.인벤토리 관리(초기화 후, Goods 제공)
-	 * 
-	 * 6.다음 태스크 예약
-	 * 
-	 * 7.힐
-	 * 
-	 * 8.소리재생
-	 * 
-	 * 9.룸 lock
-	 */
-
-//	2.역할 변경
-	for (Player p : Bukkit.getOnlinePlayers()) {
-	    this.changeEveryoneRoleWithRelayTime(p);
-	}
-
-//	3.maker, everyone에게 메세지 전송
-	this.sendMessageEveryoneWithRole();
-
-//	4.위치 변경
-	this.tpEveryoneWithRole();
-
-//	5.인벤토리 관리(초기화 후, Goods 제공)
-	this.initInventoryAndGiveGoods();
-
-	// 6.다음 태스크 예약
-	this.reserveNextTask(this.currentTime.getAmount());
-
-	// 7.힐 & 상태 효과 제거
-	this.healEverything();
-
-	// 8.소리재생
-	this.playSoundToEveryone();
-
-    }
-
-    void healEverything() {
-	if (this.currentTime == RelayTime.TESTING) {
-	    return;
-	}
-	for (Player p : Bukkit.getOnlinePlayers()) {
-	    // 힐
-	    PlayerTool.heal(p);
-	    // 보이기
-	    PlayerTool.unhidePlayerFromEveryone(p);
-	    // 발광효과 제거
-	    p.setGlowing(false);
-	}
-    }
-
-    private void playSoundToEveryone() {
-	if (this.currentTime == RelayTime.WAITING) {
-	    PlayerTool.playSoundToEveryone(Sound.BLOCK_END_PORTAL_SPAWN);
-	} else if (this.currentTime == RelayTime.MAKING) {
-	    PlayerTool.playSoundToEveryone(Sound.BLOCK_ANVIL_USE);
-	} else if (this.currentTime == RelayTime.TESTING) {
-	    PlayerTool.playSoundToEveryone(Sound.BLOCK_ANVIL_DESTROY);
-	} else if (this.currentTime == RelayTime.CHALLENGING) {
-	    PlayerTool.playSoundToEveryone(Sound.ENTITY_ENDERMEN_TELEPORT);
-	}
-    }
-
-    private void initInventoryAndGiveGoods() {
-	// 테스팅타임때는 WAITER들은 인벤 초기화하면 안됨
-	if (this.currentTime == RelayTime.TESTING) {
-	    InventoryTool.clearPlayerInv(this.getMaker());
-	} else {
-	    InventoryTool.clearAllPlayerInv();
-	    ShopGoods.giveGoodsToPleyers(pDataManager, new ArrayList<Player>(Bukkit.getOnlinePlayers()));
-	}
-    }
-
-    private void reserveNextTask(int durationTime) {
-	RelayTime currentTime = getCurrentTime();
-
-	// MakingTime 일때 goods(MAKINGTIME_##)검사해서 추가시간 적용
-	if (currentTime == RelayTime.MAKING) {
-	    // TIME_NN 굿즈 검사해서 MakingTime 조절
-	    PlayerData pData = this.pDataManager.getPlayerData(this.getMaker().getUniqueId());
-	    String kind = ShopGoods.MAKINGTIME_10.name().split("_")[0];
-	    durationTime = 60 * pData.getRoomSettingGoodsHighestValue(kind);
-	}
-
-	// task 예약
-	this.reservationTask = this.currentCountDownTask = Bukkit.getScheduler().runTaskLater(Main.getInstance(),
-		new Runnable() {
-		    @Override
-		    public void run() {
-			// time에 따른 실행
-			if (currentTime == RelayTime.WAITING) {
-			    startNextTime();
-			} else if (currentTime == RelayTime.MAKING) {
-			    if (!isCorePlaced()) {
-				BroadcastTool.sendMessageToEveryone("Maker failed to make the room");
-				resetRelay();
-			    } else {
-				startNextTime();
-			    }
-			} else if (currentTime == RelayTime.TESTING) {
-			    // reset relay
-			    BroadcastTool.sendMessageToEveryone("Maker couldn't pass the room test");
-			    resetRelay();
-			} else if (currentTime == RelayTime.CHALLENGING) {
-			    BroadcastTool.sendMessageToEveryone("No one pass the room");
-
-			    resetRelay();
+		// main room 에 있는 사람들 lobby로 tp
+		for (Player p : Bukkit.getOnlinePlayers()) {
+			if (RoomLocation.getRoomTypeWithLocation(p.getLocation()) == RoomType.MAIN) {
+				PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
+				pData.setRole(Role.WAITER);
+				this.changeRoom(p);
 			}
-		    }
-		}, 20 * durationTime);
+		}
 
-	// timer 시작
-	this.startNewCountDownTimer(durationTime);
-    }
+		// common todo list
+		RelayTimeCommonTODOList(this.getMaker());
 
-    public List<Player> getChallengers() {
-	List<Player> challengers = new ArrayList<Player>(Bukkit.getOnlinePlayers());
-
-	// maker가 있을때만 maker 제거
-	if (this.pDataManager.doesMakerExist()) {
-	    Player maker = this.getMaker();
-	    challengers.remove(maker);
+		// maker(waiter) 관리
+		if (this.getMaker() == null) {
+			BroadcastTool.printConsoleMessage(ChatColor.RED + "[Bug] No Maker in WaitingTime!!!!");
+		}
 	}
 
-	return challengers;
-    }
+	private void startMaking() {
+		// RelayTime 관리
+		this.currentTime = RelayTime.MAKING;
 
-    // this.pDataManager.getMaker()가 너무 길어서 만든 메소드
-    // this.pDataManager.getMaker() <- 여기서만 참조해야 데이터 무결성이 보장됨
-    public Player getMaker() {
-	return this.pDataManager.getMaker();
-    }
+		// make room empty
+		this.roomManager.setRoomEmpty(RoomType.MAIN);
 
-    private void stopCurrentTime() {
-	if (this.currentCountDownTask != null) {
-	    this.currentCountDownTask.cancel();
+		// room basic title 을 "maker이름 + n"으로 설정
+		this.mainRoomTitle = this.roomManager.getNextTitleWithMakerName(this.getMaker().getName());
+
+		// common todo list
+		RelayTimeCommonTODOList(this.getMaker());
 	}
-    }
 
-    // 일반적으로 자연스러운 Time flow (시간이 다 됬을때 or 조건이 만족되었을때(명령어))
-    // 다음Time 조건 검사도 해줌
-    public void startNextTime() {
-	// 먼저 현재 time task 중지
-	this.stopCurrentTime();
+	private void startTesting() {
+		// RelayTime 관리
+		this.currentTime = RelayTime.TESTING;
 
-	RelayTime time = this.currentTime;
-
-	if (time == RelayTime.WAITING) {
-	    this.startMaking();
-	} else if (time == RelayTime.MAKING) {
-	    this.startTesting();
-	} else if (time == RelayTime.TESTING) {
-	    // core부수면 바로 시작
-	    this.startChallenging();
-	} else if (time == RelayTime.CHALLENGING) {
-	    this.startWaiting();
+		// common todo list
+		RelayTimeCommonTODOList(this.getMaker());
 	}
+
+	private void startChallenging() {
+		// RelayTime 관리
+		this.currentTime = RelayTime.CHALLENGING;
+
+		this.roomManager.startMainRoomDurationTime();
+
+		// common todo list
+		RelayTimeCommonTODOList(this.getMaker());
+
+		// reset playerLog
+		this.playerLog.put("USE_REDUCE_TIME", new ArrayList<Player>());
+		this.playerLog.put("JOIN_MAIN_ROOM", new ArrayList<Player>());
+	}
+
+	private void RelayTimeCommonTODOList(Player p) {
+		/*
+		 * 순서 중요함: RelayManager는 실제적으로 Maker를 관리하는 PlayerDataManaer에서 변수를 직접받아와서 판단하지만,
+		 * 
+		 * 다른 클래스와 밑의 메소드들은 Role을 가지고 판단하므로 Role변경을 time변경 다음으로 최우선으로 해야 한다(Role을 time에
+		 * 맞게 수정하므로)
+		 * 
+		 * 대부분 메소드들은 각 플레이어의 Role을 가지고 구분해서 수행함
+		 * 
+		 * 1.여기서 this.currentTime = RelayTime.getNextTime(this.currentTime); 사용하면 안되는
+		 * 이유: 항상 다음것으로 흘러가지 않고 중간에 Making이나 Testing이 실패할 수 도 있는 상황이 있기 떄문에 이 메소드를 실행하기
+		 * 전에 각자시간의 메소드에서 직접 설정해줘야 함(예. startTesting()메소드에서 this.current =
+		 * RelayTime.TESTING후에 이 메소드 호출)
+		 * 
+		 * 2.역할 변경
+		 * 
+		 * 3.maker, challenger 에게 메세지 전송
+		 * 
+		 * 4.위치 변경
+		 * 
+		 * 5.인벤토리 관리(초기화 후, Goods 제공)
+		 * 
+		 * 6.다음 태스크 예약
+		 * 
+		 * 7.힐
+		 * 
+		 * 8.소리재생
+		 */
+
+		if (p == null) {
+			this.reserveNextTask(this.currentTime.getAmount());
+			return;
+		}
+
+		// 2.역할 변경
+		this.changeRoleWithRelayTime(p);
+
+		// 3.maker, everyone에게 메세지 전송
+		this.sendMessageWithRole(p);
+
+		// 4.위치 변경
+		this.tpWithRole(p);
+
+		// 5.인벤토리 관리(초기화 후, Goods 제공)
+		this.initInventoryAndGiveGoods(p);
+
+		// 6.다음 태스크 예약
+		this.reserveNextTask(this.currentTime.getAmount());
+
+		// 7.힐 & 상태 효과 제거
+		this.healEverything(p);
+
+		// 8.소리재생
+		this.playSoundWithRelayTime(p);
+
+	}
+
+	public void changeRoom(Player p) {
+		// relayTime이 안바뀌고 자의적으로 main room같은곳 입장할때 처리할것들
+		// [주의] 입장전에 플레이어 Role변경후 입장해야 함
+
+		// 3.maker, everyone에게 메세지 전송
+		this.sendMessageWithRole(p);
+
+		// 4.위치 변경
+		this.tpWithRole(p);
+//		TeleportTool.tp(p, RoomLocation.MAIN_SPAWN);
+
+		// 5.인벤토리 관리(초기화 후, Goods 제공)
+		this.initInventoryAndGiveGoods(p);
+
+		// 7.힐 & 상태 효과 제거
+		this.healEverything(p);
+
+		// 8.소리재생
+		this.playSoundWithRelayTime(p);
+
+		// joinLog 체크, REDUCE_TIME 굿즈 체크
+		if (!this.isPlayerInPlayerLog(p, "JOIN_MAIN_ROOM")) {
+			this.addPlayerLog(p, "JOIN_MAIN_ROOM");
+			PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
+			pData.addChallengingCount(1);
+		}
+	}
+
+	void healEverything(Player p) {
+		// 힐
+		PlayerTool.heal(p);
+		// 보이기
+		PlayerTool.unhidePlayerFromEveryone(p);
+		// 발광효과 제거
+		p.setGlowing(false);
+	}
+
+	private void playSoundWithRelayTime(Player p) {
+		if (this.currentTime == RelayTime.WAITING) {
+			PlayerTool.playSound(p, Sound.BLOCK_END_PORTAL_SPAWN);
+		} else if (this.currentTime == RelayTime.MAKING) {
+			PlayerTool.playSound(p, Sound.BLOCK_ANVIL_USE);
+		} else if (this.currentTime == RelayTime.TESTING) {
+			PlayerTool.playSound(p, Sound.BLOCK_ANVIL_DESTROY);
+		} else if (this.currentTime == RelayTime.CHALLENGING) {
+			PlayerTool.playSound(p, Sound.ENTITY_ENDERMEN_TELEPORT);
+		}
+	}
+
+	private void initInventoryAndGiveGoods(Player p) {
+		InventoryTool.clearPlayerInv(p);
+		ShopGoods.giveGoodsToPlayer(pDataManager, p);
+	}
+
+	private void reserveNextTask(int durationTime) {
+		RelayTime currentTime = getCurrentTime();
+
+		// MakingTime 일때 goods(MAKINGTIME_##)검사해서 추가시간 적용
+		if (currentTime == RelayTime.MAKING) {
+			// TIME_NN 굿즈 검사해서 MakingTime 조절
+			PlayerData pData = this.pDataManager.getPlayerData(this.getMaker().getUniqueId());
+			durationTime = 60 * pData.getRoomSettingGoodsHighestValue("MAKINGTIME");
+		}
+
+		// task 예약
+		this.reservationTask = this.currentCountDownTask = Bukkit.getScheduler().runTaskLater(Main.getInstance(),
+				new Runnable() {
+					@Override
+					public void run() {
+						// time에 따른 실행
+						if (currentTime == RelayTime.WAITING) {
+							startNextTime();
+						} else if (currentTime == RelayTime.MAKING) {
+							if (!isCorePlaced()) {
+								BroadcastTool.sendMessageToEveryone("Maker failed to make the room");
+								resetRelay();
+							} else {
+								startNextTime();
+							}
+						} else if (currentTime == RelayTime.TESTING) {
+							// reset relay
+							BroadcastTool.sendMessageToEveryone("Maker couldn't pass the room test");
+							resetRelay();
+						} else if (currentTime == RelayTime.CHALLENGING) {
+							BroadcastTool.sendMessageToEveryone("No one pass the room");
+
+							resetRelay();
+						}
+					}
+				}, 20 * durationTime);
+
+		// timer 시작
+		this.startNewCountDownTimer(durationTime);
+	}
+
+	public List<Player> getChallengers() {
+		List<Player> challengers = new ArrayList<Player>(Bukkit.getOnlinePlayers());
+
+		// maker가 있을때만 maker 제거
+		if (this.pDataManager.doesMakerExist()) {
+			Player maker = this.getMaker();
+			challengers.remove(maker);
+		}
+
+		return challengers;
+	}
+
+	// this.pDataManager.getMaker()가 너무 길어서 만든 메소드
+	// this.pDataManager.getMaker() <- 여기서만 참조해야 데이터 무결성이 보장됨
+	public Player getMaker() {
+		return this.pDataManager.getMaker();
+	}
+
+	private void stopCurrentTime() {
+		if (this.currentCountDownTask != null) {
+			this.currentCountDownTask.cancel();
+		}
+	}
+
+	// 일반적으로 자연스러운 Time flow (시간이 다 됬을때 or 조건이 만족되었을때(명령어))
+	// 다음Time 조건 검사도 해줌
+	public void startNextTime() {
+		// 먼저 현재 time task 중지
+		this.stopCurrentTime();
+
+		RelayTime time = this.currentTime;
+
+		if (time == RelayTime.WAITING) {
+			this.startMaking();
+		} else if (time == RelayTime.MAKING) {
+			this.startTesting();
+		} else if (time == RelayTime.TESTING) {
+			// core부수면 바로 시작
+			this.startChallenging();
+		} else if (time == RelayTime.CHALLENGING) {
+			this.startWaiting();
+		}
 
 //	this.startNewCountDownTimer(RelayTime.getNextTime(time));
-    }
-
-    // 예외적인 상황이 발생했을 때 사용 (Maker가 방을 중간에 나가거나 or 조건이 불만족되었을때)
-    public void startAnotherTime(RelayTime anotherTime) {
-	// 먼저 현재 time task 중지
-	this.stopCurrentTime();
-
-	if (anotherTime == RelayTime.WAITING) {
-	    this.startWaiting();
-	} else if (anotherTime == RelayTime.MAKING) {
-	    this.startMaking();
-	} else if (anotherTime == RelayTime.TESTING) {
-	    this.startTesting();
-	} else if (anotherTime == RelayTime.CHALLENGING) {
-	    this.startChallenging();
 	}
+
+	// 예외적인 상황이 발생했을 때 사용 (Maker가 방을 중간에 나가거나 or 조건이 불만족되었을때)
+	public void startAnotherTime(RelayTime anotherTime) {
+		// 먼저 현재 time task 중지
+		this.stopCurrentTime();
+
+		if (anotherTime == RelayTime.WAITING) {
+			this.startWaiting();
+		} else if (anotherTime == RelayTime.MAKING) {
+			this.startMaking();
+		} else if (anotherTime == RelayTime.TESTING) {
+			this.startTesting();
+		} else if (anotherTime == RelayTime.CHALLENGING) {
+			this.startChallenging();
+		}
 
 //	this.startNewCountDownTimer(anotherTime);
-    }
-
-    public void resetRelay() {
-	// resetSettings
-	this.resetRelaySetting();
-
-	// reset message
-	if (Setting.DEBUG) {
-	    BroadcastTool.sendMessageToEveryone(ChatColor.RED + "relay reset!");
 	}
 
-	// Room 초기화
-	Room randomRoom = this.roomManager.getRandomRoomData();
-	this.roomManager.setRoom(RoomType.MAIN, randomRoom);
+	public void resetRelay() {
+		// resetSettings
+		this.resetRelaySetting();
 
-	// RelayTime set to CHALLENGING
-	this.startAnotherTime(RelayTime.CHALLENGING);
-    }
+		// reset message
+		if (Setting.DEBUG) {
+			BroadcastTool.sendMessageToEveryone(ChatColor.RED + "relay reset!");
+		}
 
-    public void resetRelaySetting() {
-	// corePlaced 초기화
-	this.corePlaced = false;
+		// Room 초기화
+		Room randomRoom = this.roomManager.getRandomRoomData();
+		this.roomManager.setRoom(RoomType.MAIN, randomRoom);
+		this.roomManager.setRoom(RoomType.PRACTICE, randomRoom);
 
-	// PlayerDataManager maker = null 처리
-	this.pDataManager.unregisterMaker();
+		// RelayTime set to CHALLENGING
+		this.startAnotherTime(RelayTime.CHALLENGING);
 
-	// Inventory clear
-	InventoryTool.clearAllPlayerInv();
-    }
-
-    public RelayTime getCurrentTime() {
-	return currentTime;
-    }
-
-    public void setCurrentTime(RelayTime currentTime) {
-	this.currentTime = currentTime;
-    }
-
-    public BukkitTask getCurrentCountDownTask() {
-	return currentCountDownTask;
-    }
-
-    public void setCurrentCountDownTask(BukkitTask currentCountDownTask) {
-	this.currentCountDownTask = currentCountDownTask;
-    }
-
-    public boolean isCorePlaced() {
-	return corePlaced;
-    }
-
-    public void setCorePlaced(boolean corePlaced) {
-	this.corePlaced = corePlaced;
-    }
-
-    public String getMainRoomTitle() {
-	return mainRoomTitle;
-    }
-
-    public void setMainRoomTitle(String mainRoomTitle) {
-	this.mainRoomTitle = mainRoomTitle;
-    }
-
-    public boolean isMainRoomTitleExist(String mainRoomTitle) {
-	return this.roomManager.isExistRoomTitle(mainRoomTitle);
-    }
-
-    public int getLeftTime() {
-	return this.timer.getCount();
-    }
-
-    private void startNewCountDownTimer(int leftTime) {
-	// stop current timer
-	Bukkit.getScheduler().cancelTask(this.timerTask);
-
-	this.timer.setCount(leftTime);
-
-	this.timerTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(Main.getInstance(), new Runnable() {
-	    @Override
-	    public void run() {
-		timer.removeCount(1);
-	    }
-	}, 0, 20 * 1);
-    }
-
-    public void reduceTime(int reductionTime) {
-	this.reservationTask.cancel();
-	this.reserveNextTask(this.timer.getCount() - reductionTime);
-    }
-
-    public boolean checkRoomAndRelayTimeAndRole(RoomType roomType, RelayTime relayTime, Role role, Player p) {
-	/*
-	 * 이 메소드를 사용하는 입장에서는 현재 RoomType, RelayTime, Role을 검사를 받는것이기 때문에 밑의 예시처럼 사용해야 함
-	 * checkRoomAndRelayTimeAndRole(RoomType.MAIN, RelayTime.MAKING, Role.MAKER, p)
-	 * = 지금 p가 MAIN room인지 MakingTime인지, p의 role이 MAKER인지?
-	 */
-	RoomType currentRoom = RoomLocation.getRoomTypeWithLocation(p.getLocation());
-	RelayTime currentTime = this.getCurrentTime();
-	PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
-
-	if (currentRoom == roomType && currentTime == relayTime && pData.getRole() == role) {
-	    return true;
+		BroadcastTool.sendMessageToEveryone("MainRoom Reset");
 	}
 
-	return false;
-    }
+	public void resetRelaySetting() {
+		// corePlaced 초기화
+		this.corePlaced = false;
+
+		// MainRoom에 있는 maker -> waiter로 변경 (룸 만들기 실패한 메이커 대상 실행하는 부분)
+		if (this.pDataManager.doesMakerExist()) {
+			PlayerData makerPData = this.pDataManager.getPlayerData(this.getMaker().getUniqueId());
+			// title이 time에 전송되야 되서... 어쩔수없이 변경해봄
+			this.currentTime = RelayTime.CHALLENGING;
+			makerPData.setRole(Role.WAITER);
+			this.changeRoom(this.getMaker());
+		}
+		
+//			PlayerDataManager maker = null 처리
+		this.pDataManager.unregisterMaker();
+	}
+
+	public RelayTime getCurrentTime() {
+		return currentTime;
+	}
+
+	public void setCurrentTime(RelayTime currentTime) {
+		this.currentTime = currentTime;
+	}
+
+	public BukkitTask getCurrentCountDownTask() {
+		return currentCountDownTask;
+	}
+
+	public void setCurrentCountDownTask(BukkitTask currentCountDownTask) {
+		this.currentCountDownTask = currentCountDownTask;
+	}
+
+	public boolean isCorePlaced() {
+		return corePlaced;
+	}
+
+	public void setCorePlaced(boolean corePlaced) {
+		this.corePlaced = corePlaced;
+	}
+
+	public String getMainRoomTitle() {
+		return mainRoomTitle;
+	}
+
+	public void setMainRoomTitle(String mainRoomTitle) {
+		this.mainRoomTitle = mainRoomTitle;
+	}
+
+	public boolean isMainRoomTitleExist(String mainRoomTitle) {
+		return this.roomManager.isExistRoomTitle(mainRoomTitle);
+	}
+
+	public int getLeftTime() {
+		return this.timer.getCount();
+	}
+
+	private void startNewCountDownTimer(int leftTime) {
+		// stop current timer
+		Bukkit.getScheduler().cancelTask(this.timerTask);
+
+		this.timer.setCount(leftTime);
+
+		this.timerTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(Main.getInstance(), new Runnable() {
+			@Override
+			public void run() {
+				timer.removeCount(1);
+			}
+		}, 0, 20 * 1);
+	}
+
+	public void reduceTime(int reductionTime) {
+		this.reservationTask.cancel();
+		this.reserveNextTask(this.timer.getCount() - reductionTime);
+	}
+
+	public boolean checkRoomAndRelayTimeAndRole(RoomType roomType, RelayTime relayTime, Role role, Player p) {
+		/*
+		 * 이 메소드를 사용하는 입장에서는 현재 RoomType, RelayTime, Role을 검사를 받는것이기 때문에 밑의 예시처럼 사용해야 함
+		 * checkRoomAndRelayTimeAndRole(RoomType.MAIN, RelayTime.MAKING, Role.MAKER, p)
+		 * = 지금 p가 MAIN room인지 MakingTime인지, p의 role이 MAKER인지?
+		 */
+		RoomType currentRoom = RoomLocation.getRoomTypeWithLocation(p.getLocation());
+		RelayTime currentTime = this.getCurrentTime();
+		PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
+
+		if (currentRoom == roomType && currentTime == relayTime && pData.getRole() == role) {
+			return true;
+		}
+
+		return false;
+	}
 
 //    private void giveGoodsToPlayer(Player p) {
 //	/*
@@ -627,102 +493,115 @@ public class RelayManager {
 //	}
 //    }
 
-    public void changeEveryoneRoleWithRelayTime(Player p) {
-	/*
-	 * 이 메소드는 Role 자체를 설정하는 것이기 때문에 PlayerDataManager의 변수를 가지고 설정 Maker, Non Maker 로
-	 * 나뉨(PlayerDataManager 관점에서) 그리고 Time에 맞게 Role 설정
-	 * 
-	 * 순서]
-	 * 
-	 * 첫째: Maker, 둘째: non maker
-	 * 
-	 * Waiting: Waiter, Waiter
-	 * 
-	 * Making: Maker, Waiter
-	 * 
-	 * Testing: Tester, Waiter
-	 * 
-	 * Challenging: Viewer, Challenger
-	 */
+	public void changeRoleWithRelayTime(Player p) {
+		/*
+		 * 이 메소드는 Role 자체를 설정하는 것이기 때문에 PlayerDataManager의 변수를 가지고 설정 Maker, Non Maker 로
+		 * 나뉨(PlayerDataManager 관점에서) 그리고 Time에 맞게 Role 설정
+		 * 
+		 * 순서]
+		 * 
+		 * 첫째: Maker, 둘째: non maker
+		 * 
+		 * Waiting: Waiter, Waiter
+		 * 
+		 * Making: Maker, Waiter
+		 * 
+		 * Testing: Tester, Waiter
+		 * 
+		 * Challenging: Viewer, Challenger
+		 */
 
-	PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
-	Role role = Role.WAITER; // 기본값
+		PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
+		Role role = pData.getRole(); // 기본값
 
-	if (this.currentTime == RelayTime.MAKING && this.pDataManager.isMaker(p)) {
-	    role = Role.MAKER;
-	} else if (this.currentTime == RelayTime.TESTING && this.pDataManager.isMaker(p)) {
-	    role = Role.TESTER;
-	} else if (this.currentTime == RelayTime.CHALLENGING) {
-	    Room room = this.roomManager.getRoom(RoomType.MAIN);
-	    // 현재 main room maker가 플레이어이면 Viewer로 역할 변경해서 클리어 불가능 하게
-	    BroadcastTool.debug("pData: " + pData);
-	    if (room.getMaker().equals(pData.getName())) {
-		role = Role.VIEWER;
-	    } else {
-		role = Role.CHALLENGER;
-	    }
-	}
-
-	pData.setRole(role);
-    }
-
-    private void tpEveryoneWithRole() {
-	/*
-	 * Role에 맞게 Maker tp
-	 * 
-	 * waiter: LOBBY
-	 * 
-	 * maker, tester, challenger, viewer: RESPAWN
-	 */
-	for (Player p : Bukkit.getOnlinePlayers()) {
-	    PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
-	    Role role = pData.getRole();
-	    if (role == Role.WAITER) {
-		if (!(this.currentTime == RelayTime.TESTING)) {
-		    // making -> testing 으로 넘어갈때 waiter는 tp 할 필요 없음(게임중일 수도 있음)
-		    TeleportTool.tp(p, SpawnLocationTool.LOBBY);
+		if (this.currentTime == RelayTime.MAKING && this.pDataManager.isMaker(p)) {
+			role = Role.MAKER;
+		} else if (this.currentTime == RelayTime.TESTING && this.pDataManager.isMaker(p)) {
+			role = Role.TESTER;
+		} else if (this.currentTime == RelayTime.CHALLENGING) {
+			role = Role.WAITER;
 		}
-	    } else {
-		TeleportTool.tp(p, SpawnLocationTool.RESPAWN);
-	    }
-	}
-    }
 
-    private void sendMessageEveryoneWithRole() {
-	/*
-	 * 이 메소드는 Role로 구별해서 메세지 전송
-	 * 
-	 * 메세지 내용: 이전 RelayTime에서 넘어온것이므로 현재 Time이 시작되었을떄의 내용
-	 */
-	for (Player p : Bukkit.getOnlinePlayers()) {
-	    PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
-	    Role role = pData.getRole();
-	    if (role == Role.WAITER && this.currentTime == RelayTime.WAITING) {
-		// 특별히 WaitingTime일때는 누군가 부신거므로 코어 부셔졌다고 메세지 전송
-		BroadcastTool.sendMessage(p, this.getMaker().getName() + " break the core");
-	    } else if (role == Role.MAKER) {
-		BroadcastTool.sendMessage(p, "You can save room with title " + "/re room title [title] "
-			+ "\n(basic title: " + this.mainRoomTitle + ")");
-	    } else if (role == Role.TESTER) {
-		BroadcastTool.sendMessage(p, "You must break core to save this room");
-	    } else if (role == Role.CHALLENGER) {
-		Room room = this.roomManager.getRoom(RoomType.MAIN);
-		String roomTitle = room.getTitle();
-		String roomMaker = room.getMaker();
-		BroadcastTool.sendMessage(p, "Main room: " + roomTitle + "(" + roomMaker + ")");
-		if (Setting.DEBUG) {
-		    BroadcastTool.debug("roomData count : " + this.roomManager.getAllRoomCount());
+		pData.setRole(role);
+	}
+
+	private void tpWithRole(Player p) {
+		/*
+		 * Waiting떄 main room에 있는 플레이어: lobby
+		 * 
+		 * maker, tester, challneger, viewer 플레이어: main room spawn
+		 * 
+		 */
+		PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
+		Role role = pData.getRole();
+
+		switch (role) {
+		case WAITER:
+			if (RoomLocation.getRoomTypeWithLocation(p.getLocation()) == RoomType.MAIN) {
+				TeleportTool.tp(p, SpawnLocationTool.LOBBY);
+			}
+			break;
+		case MAKER:
+		case TESTER:
+		case CHALLENGER:
+		case VIEWER:
+			TeleportTool.tp(p, RoomLocation.MAIN_SPAWN);
+			break;
 		}
-	    } else if (role == Role.VIEWER) {
-		Room room = this.roomManager.getRoom(RoomType.MAIN);
-		String roomTitle = room.getTitle();
-		String roomMaker = room.getMaker();
-		BroadcastTool.sendMessage(p, "Main room: " + roomTitle + "(" + roomMaker + ")");
-		BroadcastTool.sendMessage(p, "You are Viewer in your room");
-	    }
-
-	    // 공통 title 전송
-	    BroadcastTool.sendTitle(p, this.currentTime.name(), "you are " + role.name());
 	}
-    }
+
+	private void sendMessageWithRole(Player p) {
+		/*
+		 * 이 메소드는 Role로 구별해서 메세지 전송
+		 * 
+		 * 메세지 내용: 이전 RelayTime에서 넘어온것이므로 현재 Time이 시작되었을떄의 내용
+		 */
+		PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
+		Role role = pData.getRole();
+		if (this.currentTime == RelayTime.WAITING) {
+			// 특별히 WaitingTime일때는 누군가 부신거므로 코어 부셔졌다고 모두에게 메세지 전송
+			BroadcastTool.sendMessage(p, this.getMaker().getName() + " break the core");
+		} else if (role == Role.MAKER) {
+			BroadcastTool.sendMessage(p, "You can save room with title " + "/re room title [title] "
+					+ "\n(basic title: " + this.mainRoomTitle + ")");
+		} else if (role == Role.TESTER) {
+			BroadcastTool.sendMessage(p, "You must break core to save this room");
+		} else if (role == Role.CHALLENGER) {
+			Room room = this.roomManager.getRoom(RoomType.MAIN);
+			String roomTitle = room.getTitle();
+			String roomMaker = room.getMaker();
+			BroadcastTool.sendMessage(p, "Main room: " + roomTitle + "(" + roomMaker + ")");
+			if (Setting.DEBUG) {
+				BroadcastTool.debug("roomData count : " + this.roomManager.getAllRoomCount());
+			}
+		} else if (role == Role.VIEWER) {
+			Room room = this.roomManager.getRoom(RoomType.MAIN);
+			String roomTitle = room.getTitle();
+			String roomMaker = room.getMaker();
+			BroadcastTool.sendMessage(p, "Main room: " + roomTitle + "(" + roomMaker + ")");
+			BroadcastTool.sendMessage(p, "You are Viewer in your room");
+		}
+
+		System.out.println(this.currentTime.name());
+		// 공통 title 전송
+		BroadcastTool.sendTitle(p, this.currentTime.name(), "you are " + role.name());
+	}
+
+	public Map<String, List<Player>> getPlayerLog() {
+		return playerLog;
+	}
+
+	public boolean isPlayerInPlayerLog(Player p, String logKind) {
+		return this.playerLog.get(logKind).contains(p);
+	}
+
+	public boolean addPlayerLog(Player p, String logKind) {
+		if (this.isPlayerInPlayerLog(p, logKind)) {
+			return false;
+		} else {
+			this.playerLog.get(logKind).add(p);
+			return true;
+		}
+	}
+
 }
