@@ -8,49 +8,36 @@ import java.util.Map;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 
-import com.wbm.plugin.data.BlockData;
 import com.wbm.plugin.data.PlayerData;
 import com.wbm.plugin.data.Room;
 import com.wbm.plugin.data.RoomLocation;
 import com.wbm.plugin.util.config.DataMember;
 import com.wbm.plugin.util.enums.RoomType;
 import com.wbm.plugin.util.general.BroadcastTool;
-import com.wbm.plugin.util.general.MathTool;
 
 public class RoomManager implements DataMember {
 	/*
-	 * 룸 크기: 10 * 50 * 10 = 5000
+	 * WorldEdit API 사용해서 schematic "파일"로 룸 데이터 관리
 	 * 
-	 * [AIR를 null로 저장했을때]
-	 * 
-	 * 룸 개수: 51개 크기: 255KB
-	 * 
-	 * 룸 1개당 크기: 5KB
-	 * 
-	 * null(AIR)저장 크기 = 0.001KB
-	 * 
-	 * 일반블럭 저장크기 = 0.012KB
-	 * 
-	 * 12배 차이남
-	 * 
-	 * ※더욱 데이터 아끼는 방법 HashMap<Location, BlockData>으로 저장 (fill 하기 전에 모두 AIR로 변경후에)
+	 * 디렉토리: dataFolder()/roomData/
 	 */
+
+	WorldEditAPIController worldeditAPI;
 
 	// 단순한 Room 데이터들
 	// title, room
 	Map<String, Room> roomData;
+
 
 	// 현재 roomType에 맞는 실제 room data
 	Map<RoomType, Room> rooms;
 
 	private double durationStartTime;
 
-	public RoomManager() {
+	public RoomManager(WorldEditAPIController worldeditAPI) {
+		this.worldeditAPI = worldeditAPI;
 		this.roomData = new HashMap<>();
 		this.rooms = new HashMap<>();
 
@@ -83,16 +70,34 @@ public class RoomManager implements DataMember {
 
 	public String saveRoomData(RoomType roomType, String maker, String roomTitle) {
 
-		// room data 가져오기
-		List<BlockData> blockDatas = this.getRoomBlockDatas(roomType);
+		// room을 shematic file로 저장
+		this.saveRoomToSchematicFile(roomType, roomTitle);
 
 		// room 객체 생성
-		Room room = new Room(roomTitle, maker, blockDatas, LocalDateTime.now());
+		Room room = new Room(roomTitle, maker, LocalDateTime.now());
 
 		// rooms 에 저장
 		this.roomData.put(roomTitle, room);
 
 		return roomTitle;
+	}
+
+	private void saveRoomToSchematicFile(RoomType roomType, String roomTitle) {
+		Location minPos = null, maxPos = null;
+
+		if (roomType == RoomType.MAIN) {
+			minPos = RoomLocation.MAIN_Pos1;
+			maxPos = RoomLocation.MAIN_Pos2;
+		} else if (roomType == RoomType.PRACTICE) {
+			minPos = RoomLocation.PRACTICE_Pos1;
+			maxPos = RoomLocation.PRACTICE_Pos2;
+		} else {
+			return;
+		}
+
+		// schematic file로 저장
+		this.worldeditAPI.copy(minPos, maxPos);
+		this.worldeditAPI.save(roomTitle + ".schem");
 	}
 
 	public boolean updateRoom(String title, Room room) {
@@ -107,73 +112,15 @@ public class RoomManager implements DataMember {
 	public String getNextTitleWithMakerName(String maker) {
 		// Room title입력안했을시 maker1, maker2, maker3 ... 순으로 title이 저장됨
 		for (int i = 1; i < 100000000; i++) {
-			String title = maker + i;
+			String title = maker + "_" + i;
 			if (!(this.roomData.containsKey(title))) {
 				return title;
 			}
 		}
 
-		// 한 사람이 방을 10000개 초과 만들었을떄 ㄷㄷ
+		// 한 사람이 방을 100000000개 초과 만들었을떄
+		BroadcastTool.reportBug("한 사람이 방을 100000000개 초과 만들었을떄의 버그");
 		return null;
-	}
-
-	@SuppressWarnings("deprecation")
-	public List<BlockData> getRoomBlockDatas(RoomType roomType) {
-		/*
-		 * Material.AIR는 BlockData = null로 저장 (데이터 크기 줄이기)
-		 */
-		// Main room
-		Location pos1 = null, pos2 = null;
-		if (roomType == RoomType.MAIN) {
-			pos1 = RoomLocation.MAIN_Pos1;
-			pos2 = RoomLocation.MAIN_Pos2;
-		} else if (roomType == RoomType.PRACTICE) {
-			pos1 = RoomLocation.PRACTICE_Pos1;
-			pos2 = RoomLocation.PRACTICE_Pos2;
-		}
-
-		int pos1X = (int) pos1.getX();
-		int pos2X = (int) pos2.getX();
-		int pos1Y = (int) pos1.getY();
-		int pos2Y = (int) pos2.getY();
-		int pos1Z = (int) pos1.getZ();
-		int pos2Z = (int) pos2.getZ();
-
-		// get difference
-		int dx = MathTool.getDiff(pos1X, pos2X);
-		int dy = MathTool.getDiff(pos1Y, pos2Y);
-		int dz = MathTool.getDiff(pos1Z, pos2Z);
-
-		// get smaller x, y, z
-		int smallX = Math.min(pos1X, pos2X);
-		int smallY = Math.min(pos1Y, pos2Y);
-		int smallZ = Math.min(pos1Z, pos2Z);
-
-		List<BlockData> blocks = new ArrayList<>();
-		for (int y = 0; y <= dy; y++) {
-			for (int z = 0; z <= dz; z++) {
-				for (int x = 0; x <= dx; x++) {
-					Location loc = new Location(Setting.world, smallX, smallY, smallZ);
-					loc.add(x, y, z);
-					Block b = loc.getBlock();
-
-					Material mat = b.getType();
-					Byte data = b.getData();
-
-					BlockData blockData = new BlockData(mat, data);
-
-					// AIR일때 null로 저장(데이터 크기 줄일 수 있음)
-					if (mat == Material.AIR) {
-						blockData = null;
-					}
-
-					// add to blockData list
-					blocks.add(blockData);
-				}
-			}
-		}
-
-		return blocks;
 	}
 
 	private void registerBasicRooms() {
@@ -181,128 +128,42 @@ public class RoomManager implements DataMember {
 
 		// empty room
 		if (!(this.roomData.containsKey("empty"))) {
-			// make room
-			List<BlockData> emptyBlocks = new ArrayList<>();
-			for (int i = 0; i < mainRoomBlockCount; i++) {
-				// Material.AIR
-				emptyBlocks.add(null);
-			}
-
 			// put room
-			Room emptyRoom = new Room("empty", "worldbiomusic", emptyBlocks, LocalDateTime.of(2020, 11, 1, 0, 0));
+			Room emptyRoom = new Room("empty", "worldbiomusic", LocalDateTime.of(2020, 11, 1, 0, 0));
 			this.roomData.put("empty", emptyRoom);
 		}
 
 		// base room
 		if (!(this.roomData.containsKey("base"))) {
-			// make room
-			List<BlockData> baseBlocks = new ArrayList<>();
-			for (int i = 0; i < mainRoomBlockCount; i++) {
-				// Material.AIR
-				baseBlocks.add(null);
-			}
-
-			// set core block
-			baseBlocks.set(0, new BlockData(Material.GLOWSTONE, 0));
-
 			// put room
-			Room baseRoom = new Room("base", "worldbiomusic", baseBlocks, LocalDateTime.of(2020, 11, 1, 0, 0));
+			Room baseRoom = new Room("base", "worldbiomusic", LocalDateTime.of(2020, 11, 1, 0, 0));
 			this.roomData.put("base", baseRoom);
 		}
-
 	}
 
 	public void setRoom(RoomType roomType, Room room) {
 		this.rooms.put(roomType, room);
-		this.fillSpace(roomType, room.getBlocks());
+		this.fillSpace(roomType, room.getTitle());
 	}
 
-	public void loadRoomDataBlocks(RoomType roomType, Room room) {
-		this.fillSpace(roomType, room.getBlocks());
-	}
-
-	@SuppressWarnings("deprecation")
-	void fillSpace(RoomType roomType, List<BlockData> blocks) {
-		/*
-		 * BlockData == null 인것은 Material.AIR로 변경 (데이터 크기 줄이기)
-		 */
-		Location pos1 = null, pos2 = null;
+	public void fillSpace(RoomType roomType, String schematicTitle) {
+		System.out.println("TITLE: " + schematicTitle);
+		Location minPos = null;
 
 		if (roomType == RoomType.MAIN) {
-			pos1 = RoomLocation.MAIN_Pos1;
-			pos2 = RoomLocation.MAIN_Pos2;
+			minPos = RoomLocation.MAIN_Pos1;
 		} else if (roomType == RoomType.PRACTICE) {
-			pos1 = RoomLocation.PRACTICE_Pos1;
-			pos2 = RoomLocation.PRACTICE_Pos2;
+			minPos = RoomLocation.PRACTICE_Pos1;
 		} else {
-			// wrong RoomType
-			BroadcastTool.debug(" bug!!!!!!!!!!!!!!!!!");
 			return;
 		}
 
-		int pos1X = (int) pos1.getX();
-		int pos2X = (int) pos2.getX();
-		int pos1Y = (int) pos1.getY();
-		int pos2Y = (int) pos2.getY();
-		int pos1Z = (int) pos1.getZ();
-		int pos2Z = (int) pos2.getZ();
-
-		// get difference
-		int dx = MathTool.getDiff(pos1X, pos2X);
-		int dy = MathTool.getDiff(pos1Y, pos2Y);
-		int dz = MathTool.getDiff(pos1Z, pos2Z);
-
-		// get smaller x, y, z
-		int smallX = Math.min(pos1X, pos2X);
-		int smallY = Math.min(pos1Y, pos2Y);
-		int smallZ = Math.min(pos1Z, pos2Z);
-
-		int index = 0;
-		/*
-		 * for문에서 <=dx인 이유: 만약 (1,1) ~ (3,3) 면적의 블럭을 지정하면 총 9개의 블럭을 가리키는것인데 위에서 dx, dy,
-		 * dz를 구할때 차이를 구하므로 3-1 = 2 즉 2칸만을 의미하게 되서 <=을 해줘서 3칸을 채우게 함
-		 */
-		for (int y = 0; y <= dy; y++) {
-			for (int z = 0; z <= dz; z++) {
-				for (int x = 0; x <= dx; x++) {
-					Location loc = new Location(Setting.world, smallX, smallY, smallZ);
-					loc.add(x, y, z);
-
-					BlockData blockData = blocks.get(index);
-					Material mat;
-					Byte data;
-
-					// blockData == null일때 AIR로 변경해서 채우기
-					if (blockData == null) {
-						mat = Material.AIR;
-						data = 0;
-					} else {
-						mat = blockData.getMaterial();
-						data = blockData.getData();
-					}
-
-					// set type
-					loc.getBlock().setType(mat);
-					// set data
-					loc.getBlock().setData(data);
-
-					index++;
-				}
-			}
-		}
-	}
-
-	@SuppressWarnings("deprecation")
-	void fillBlocks(List<Location> locs, ItemStack item) {
-		for (Location loc : locs) {
-			loc.getBlock().setType(item.getType());
-			loc.getBlock().setData(item.getData().getData());
-			loc.getBlock().getState().update();
-		}
+		this.worldeditAPI.load(schematicTitle + ".schem");
+		this.worldeditAPI.paste(minPos);
 	}
 
 	public void setRoomEmpty(RoomType roomType) {
-		this.loadRoomDataBlocks(roomType, this.getRoomData("empty"));
+		this.setRoom(roomType, this.getRoomData("empty"));
 	}
 
 	public Room getRandomRoomData() {

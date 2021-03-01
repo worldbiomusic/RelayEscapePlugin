@@ -14,6 +14,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerPortalEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
@@ -86,9 +87,6 @@ public class GameManager implements Listener {
 
 			// playerDataManager에 데이터 add
 			this.pDataManager.addPlayerData(pData);
-			
-			// give basic goods
-			this.giveBasicGoods(p);
 		}
 		// PlayerData가 이미 있을때
 		else {
@@ -110,6 +108,10 @@ public class GameManager implements Listener {
 		// 입장시 lobby
 		TeleportTool.tp(p, SpawnLocationTool.LOBBY);
 
+		// give basic goods
+		// 들어올때마다 실행되야 하는 이유: BASIC_GOODS에 새로운 기본 굿즈가 추가되면 전에 있던 플레이어들도 기본 굿즈를 받아야 하기 때문에
+		this.giveBasicGoods(p);
+
 		// 인벤 초기화 후 굿즈 제공
 		this.giveGoods(p);
 
@@ -126,7 +128,7 @@ public class GameManager implements Listener {
 		}
 
 		// update stage
-		stageManager.updateAllStage();
+//		stageManager.updateAllStage();
 
 	}
 
@@ -150,6 +152,9 @@ public class GameManager implements Listener {
 
 		// 모든 ShopGOods 지급
 		for (ShopGoods allGood : ShopGoods.values()) {
+			if(allGood == ShopGoods.TOKEN_500) {
+				continue;
+			}
 			pData.addGoods(allGood);
 		}
 	}
@@ -460,14 +465,14 @@ public class GameManager implements Listener {
 	}
 
 	@EventHandler
-	public void onPlayerEnterPortal(PlayerPortalEvent e) {
+	public void onPlayerEnterRoom(PlayerMoveEvent e) {
 		Player p = e.getPlayer();
-
 		Location pLoc = p.getLocation();
 
 		if (LocationTool.isIn(Setting.getAbsoluteLocation(12, 4, 11), pLoc, Setting.getAbsoluteLocation(12, 6, 10))
 				|| LocationTool.isIn(Setting.getAbsoluteLocation(10, 4, 12), pLoc,
-						Setting.getAbsoluteLocation(11, 6, 12))) {
+						Setting.getAbsoluteLocation(12, 6, 12))) {
+
 			RelayTime time = this.relayManager.getCurrentTime();
 			PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
 			Role role = pData.getRole();

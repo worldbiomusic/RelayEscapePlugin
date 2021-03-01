@@ -1,5 +1,6 @@
 package com.wbm.plugin;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,6 +18,10 @@ import org.bukkit.scoreboard.Score;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.ScoreboardManager;
 
+import com.sk89q.worldedit.bukkit.BukkitWorld;
+import com.sk89q.worldedit.extent.clipboard.Clipboard;
+import com.sk89q.worldedit.session.ClipboardHolder;
+import com.sk89q.worldedit.world.World;
 import com.wbm.plugin.cmd.Commands;
 import com.wbm.plugin.data.PlayerData;
 import com.wbm.plugin.data.RoomLocation;
@@ -29,6 +34,7 @@ import com.wbm.plugin.util.RelayManager;
 import com.wbm.plugin.util.RoomManager;
 import com.wbm.plugin.util.Setting;
 import com.wbm.plugin.util.StageManager;
+import com.wbm.plugin.util.WorldEditAPIController;
 import com.wbm.plugin.util.config.ConfigTest;
 import com.wbm.plugin.util.config.DataManager;
 import com.wbm.plugin.util.discord.DiscordBot;
@@ -79,8 +85,21 @@ public class Main extends JavaPlugin {
 	BanItemTool banItems;
 	SkinManager skinManager;
 	DiscordBot discordBot;
+	WorldEditAPIController worldeditAPI;
 
 	static Main main;
+
+	// 저장용 clipboard
+	private ClipboardHolder clipboardHolder;
+
+	// copy, paste용 clipboard
+	private Clipboard clipboard;
+
+	// 기본 디렉토리
+	private String baseDir;
+
+	// 월드
+	private World w;
 
 	public static Main getInstance() {
 		return main;
@@ -88,6 +107,13 @@ public class Main extends JavaPlugin {
 
 	@Override
 	public void onEnable() {
+//		this.w = new BukkitWorld(Bukkit.getWorld("world"));
+//		try {
+//			this.worldeditAPI = new WorldEditAPIController(getDataFolder().getPath() + File.separator + "roomData");
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+
 //		ConfigurationSerialization.registerClass(PlayerData.class);
 		main = this;
 
@@ -143,7 +169,7 @@ public class Main extends JavaPlugin {
 		this.skinManager = new SkinManager();
 
 		// NPC
-		this.npcManager = new NPCManager(this.skinManager);
+//		this.npcManager = new NPCManager(this.skinManager);
 
 		// update scoreboard every 1 sec
 		this.loopUpdatingScoreboard();
@@ -162,6 +188,10 @@ public class Main extends JavaPlugin {
 
 		// ranking system(stage) 업데이트
 		this.loopUpdateAllStage();
+
+		// world edit API
+		getLogger().info(this.getDataFolder().getPath() + File.separator + "roomData");
+		this.worldeditAPI = new WorldEditAPIController(this.getDataFolder().getPath() + File.separator + "roomData", "world");
 	}
 
 	void setupMain() {
@@ -183,12 +213,12 @@ public class Main extends JavaPlugin {
 		this.dataManager.registerMember(this.pDataManager);
 		this.dataManager.loopSavingData(Setting.DATA_SAVE_DELAY); // save 데이터 주기 설정
 
-		this.roomManager = new RoomManager();
+		this.roomManager = new RoomManager(this.worldeditAPI);
 		this.dataManager.registerMember(this.roomManager);
 
 		this.rankManager = new RankManager(this.pDataManager, this.roomManager, this.discordBot);
 
-		this.dataManager.registerMember(this.npcManager);
+//		this.dataManager.registerMember(this.npcManager);
 		this.dataManager.registerMember(this.skinManager);
 		this.dataManager.registerMember(this.miniGameRankManager);
 		this.dataManager.registerMember(this.rankManager);
@@ -339,40 +369,40 @@ public class Main extends JavaPlugin {
 	}
 
 	private void setupRankStages() {
-		/*
-		 * token] yaw, pitch: (-90, 0) 12.5, 6, 5.5 12.5, 5, 6.5 12.5, 4, 4.5
-		 * 
-		 * challenging (0, 0) 14.5, 6, 1.5 13.5, 5, 1.5 15.5, 4, 1.5
-		 * 
-		 * clear (0, 0) 17.5, 6, 1.5 16.5, 5, 1.5 18.5, 4, 1.5
-		 * 
-		 * room (90, 0) 19.5, 6, 6.5 19.5, 5, 5.5 19.5, 4, 7.5
-		 */
-		List<Location> tokenLocs = new ArrayList<Location>();
-		tokenLocs.add(Setting.getLoationFromSTDLOC(12.5, 6, 3.5, -90, 0));
-		tokenLocs.add(Setting.getLoationFromSTDLOC(12.5, 5, 4.5, -90, 0));
-		tokenLocs.add(Setting.getLoationFromSTDLOC(12.5, 4, 2.5, -90, 0));
-
-		List<Location> challengingLocs = new ArrayList<Location>();
-		challengingLocs.add(Setting.getLoationFromSTDLOC(12.5, 6, -0.5, -90, 0));
-		challengingLocs.add(Setting.getLoationFromSTDLOC(12.5, 5, 0.5, -90, 0));
-		challengingLocs.add(Setting.getLoationFromSTDLOC(12.5, 4, -1.5, -90, 0));
-
-		List<Location> clearLocs = new ArrayList<Location>();
-		clearLocs.add(Setting.getLoationFromSTDLOC(19.5, 6, -0.5, 90, 0));
-		clearLocs.add(Setting.getLoationFromSTDLOC(19.5, 5, -1.5, 90, 0));
-		clearLocs.add(Setting.getLoationFromSTDLOC(19.5, 4, 0.5, 90, 0));
-
-		List<Location> roomLocs = new ArrayList<Location>();
-		roomLocs.add(Setting.getLoationFromSTDLOC(19.5, 6, 3.5, 90, 0));
-		roomLocs.add(Setting.getLoationFromSTDLOC(19.5, 5, 2.5, 90, 0));
-		roomLocs.add(Setting.getLoationFromSTDLOC(19.5, 4, 4.5, 90, 0));
-
-		// stage 에 드록
-		this.stageManager.registerLocations("tokenCount", tokenLocs);
-		this.stageManager.registerLocations("challengingCount", challengingLocs);
-		this.stageManager.registerLocations("clearCount", clearLocs);
-		this.stageManager.registerLocations("roomCount", roomLocs);
+//		/*
+//		 * token] yaw, pitch: (-90, 0) 12.5, 6, 5.5 12.5, 5, 6.5 12.5, 4, 4.5
+//		 * 
+//		 * challenging (0, 0) 14.5, 6, 1.5 13.5, 5, 1.5 15.5, 4, 1.5
+//		 * 
+//		 * clear (0, 0) 17.5, 6, 1.5 16.5, 5, 1.5 18.5, 4, 1.5
+//		 * 
+//		 * room (90, 0) 19.5, 6, 6.5 19.5, 5, 5.5 19.5, 4, 7.5
+//		 */
+//		List<Location> tokenLocs = new ArrayList<Location>();
+//		tokenLocs.add(Setting.getLoationFromSTDLOC(12.5, 6, 3.5, -90, 0));
+//		tokenLocs.add(Setting.getLoationFromSTDLOC(12.5, 5, 4.5, -90, 0));
+//		tokenLocs.add(Setting.getLoationFromSTDLOC(12.5, 4, 2.5, -90, 0));
+//
+//		List<Location> challengingLocs = new ArrayList<Location>();
+//		challengingLocs.add(Setting.getLoationFromSTDLOC(12.5, 6, -0.5, -90, 0));
+//		challengingLocs.add(Setting.getLoationFromSTDLOC(12.5, 5, 0.5, -90, 0));
+//		challengingLocs.add(Setting.getLoationFromSTDLOC(12.5, 4, -1.5, -90, 0));
+//
+//		List<Location> clearLocs = new ArrayList<Location>();
+//		clearLocs.add(Setting.getLoationFromSTDLOC(19.5, 6, -0.5, 90, 0));
+//		clearLocs.add(Setting.getLoationFromSTDLOC(19.5, 5, -1.5, 90, 0));
+//		clearLocs.add(Setting.getLoationFromSTDLOC(19.5, 4, 0.5, 90, 0));
+//
+//		List<Location> roomLocs = new ArrayList<Location>();
+//		roomLocs.add(Setting.getLoationFromSTDLOC(19.5, 6, 3.5, 90, 0));
+//		roomLocs.add(Setting.getLoationFromSTDLOC(19.5, 5, 2.5, 90, 0));
+//		roomLocs.add(Setting.getLoationFromSTDLOC(19.5, 4, 4.5, 90, 0));
+//
+//		// stage 에 드록
+//		this.stageManager.registerLocations("tokenCount", tokenLocs);
+//		this.stageManager.registerLocations("challengingCount", challengingLocs);
+//		this.stageManager.registerLocations("clearCount", clearLocs);
+//		this.stageManager.registerLocations("roomCount", roomLocs);
 	}
 
 	private void checkPlayerIsTooFarAway() {
@@ -407,7 +437,10 @@ public class Main extends JavaPlugin {
 				tips.add("Tutorial: /re tutorial");
 				tips.add("CHAT MACRO: 1 ~ 9 (ex. 1 = HI)");
 				tips.add("Reconnect is good way to go to spawn or give up Room");
-				tips.add("WIKI: " + ChatColor.GREEN + ChatColor.UNDERLINE + ChatColor.BOLD+"https://github.com/worldbiomusic/RelayEscape/blob/main/server_wiki/Home.md");
+				tips.add("WIKI: " + ChatColor.GREEN + ChatColor.UNDERLINE + ChatColor.BOLD
+						+ "https://github.com/worldbiomusic/RelayEscape/blob/main/server_wiki/Home.md");
+				tips.add("Youtube: " + ChatColor.GREEN + ChatColor.UNDERLINE + ChatColor.BOLD
+						+ "https://youtube.com/playlist?list=PLyAy6dRJHYxuH0S4IkcG86pNgzUdAFnTH");
 
 				// random tip 고르기
 				String randomTip = tips.get((int) (Math.random() * tips.size()));
@@ -510,16 +543,16 @@ public class Main extends JavaPlugin {
 	}
 
 	private void loopUpdateAllStage() {
-		Bukkit.getScheduler().scheduleSyncRepeatingTask(Main.getInstance(), new Runnable() {
-
-			@Override
-			public void run() {
-				stageManager.updateAllStage();
-
-				// gc 실행
-				System.gc();
-			}
-		}, 0, 20 * 60 * 5);
+//		Bukkit.getScheduler().scheduleSyncRepeatingTask(Main.getInstance(), new Runnable() {
+//
+//			@Override
+//			public void run() {
+//				stageManager.updateAllStage();
+//
+//				// gc 실행
+//				System.gc();
+//			}
+//		}, 0, 20 * 60 * 5);
 	}
 
 	private void setupDiscordBot() {
@@ -553,7 +586,7 @@ public class Main extends JavaPlugin {
 		// rank NPC 는 NPC자체가 저장될 필요가 없음
 		// 왜냐하면 각 waitingTime마다 순위에 따라서 NPC가 바뀌므로
 		// StageManager에 위치만 지정해놓고 각 상황에따라 NPC를 삭제하고 불러와야 하므로.
-		this.stageManager.removeRemainingRankNPCs();
+//		this.stageManager.removeRemainingRankNPCs();
 
 		// file save
 		this.dataManager.save();

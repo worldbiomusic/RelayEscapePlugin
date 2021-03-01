@@ -45,7 +45,7 @@ public class Bang extends BattleMiniGame {
     public void initGameSettings() {
 	super.initGameSettings();
 //	setup
-	this.bangItem = ItemStackTool.item(Material.WOOD_SWORD);
+	this.bangItem = ItemStackTool.item(Material.WOODEN_SWORD);
 
 	this.locs = new ArrayList<>();
 	locs.add(Setting.getAbsoluteLocation(-103.5, 8, 117.5));
@@ -119,7 +119,7 @@ public class Bang extends BattleMiniGame {
 	super.runTaskAfterStartGame();
 
 	// bang블럭 생성
-	bangBlock.getBlock().setType(Material.CONCRETE);
+	bangBlock.getBlock().setType(Material.WHITE_CONCRETE);
 
 	// task 취소
 	if (this.bangTask != null) {
@@ -171,7 +171,7 @@ public class Bang extends BattleMiniGame {
 	super.runTaskBeforeExitGame();
 
 	// bang블럭 생성
-	bangBlock.getBlock().setType(Material.CONCRETE);
+	bangBlock.getBlock().setType(Material.WHITE_CONCRETE);
 
 	// task 취소
 	if (this.bangTask != null) {

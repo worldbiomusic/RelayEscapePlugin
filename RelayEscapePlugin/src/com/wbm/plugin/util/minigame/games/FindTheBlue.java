@@ -17,7 +17,7 @@ import com.wbm.plugin.util.minigame.BattleMiniGame;
 
 public class FindTheBlue extends BattleMiniGame {
 
-    private static ItemStack plusItem = ItemStackTool.item(Material.RED_ROSE, (byte) 1);
+    private static ItemStack plusItem = ItemStackTool.item(Material.POPPY);
 
     public FindTheBlue() {
 	super(MiniGameType.FIND_THE_BLUE);
@@ -28,14 +28,13 @@ public class FindTheBlue extends BattleMiniGame {
 	if (event instanceof BlockBreakEvent) {
 	    BlockBreakEvent e = (BlockBreakEvent) event;
 	    Block b = e.getBlock();
-	    @SuppressWarnings("deprecation")
-	    ItemStack blockItem = ItemStackTool.item(b.getType(), b.getData());
+	    ItemStack blockItem = ItemStackTool.item(b.getType());
 	    Player p = e.getPlayer();
 
 	    // score
 	    if (ItemStackTool.isSameWithMaterialNData(blockItem, plusItem)) {
 		this.plusScore(p, 1);
-	    } else if (b.getType() == Material.YELLOW_FLOWER) {
+	    } else if (b.getType() == Material.DANDELION) {
 		this.minusScore(p, 2);
 	    }
 
@@ -61,7 +60,7 @@ public class FindTheBlue extends BattleMiniGame {
 
     private void generateNewBlocks() {
 	// 블럭 재정비
-	ItemStack yellow = new ItemStack(Material.YELLOW_FLOWER);
+	ItemStack yellow = new ItemStack(Material.DANDELION);
 	List<ItemStack> flowers = new ArrayList<>();
 
 	for (int i = 0; i < this.getGameBlockCount(); i++) {

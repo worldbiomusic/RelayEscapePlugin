@@ -50,7 +50,6 @@ public class BlockTool {
 		}
 	}
 
-	@SuppressWarnings("deprecation")
 	public static void setBlockWithItemStack(Location pos1, Location pos2, List<ItemStack> items) {
 		int pos1X = (int) pos1.getX();
 		int pos2X = (int) pos2.getX();
@@ -82,11 +81,8 @@ public class BlockTool {
 
 					ItemStack item = items.get(index);
 					Material mat = item.getType();
-					Byte data = item.getData().getData();
 					// set type
 					loc.getBlock().setType(mat);
-					// set data
-					loc.getBlock().setData(data);
 
 					index++;
 				}
@@ -94,14 +90,12 @@ public class BlockTool {
 		}
 	}
 
-	@SuppressWarnings("deprecation")
 	public static boolean isAllSameBlock(Location pos1, Location pos2) {
 		// 전체와 비교할 기준 ItemStack 가져오기
-		ItemStack STDItemStack = ItemStackTool.item(pos1.getBlock().getType(), pos1.getBlock().getData());
+		ItemStack STDItemStack = ItemStackTool.item(pos1.getBlock().getType());
 		return isAllSameBlockWithItemStack(pos1, pos2, STDItemStack);
 	}
 
-	@SuppressWarnings("deprecation")
 	public static boolean isAllSameBlockWithItemStack(Location pos1, Location pos2, ItemStack targetItem) {
 		// 전체와 비교할 ItemStack 가져오기
 		int pos1X = (int) pos1.getX();
@@ -133,7 +127,7 @@ public class BlockTool {
 
 					// 비교
 					Block locB = loc.getBlock();
-					ItemStack locItemStack = ItemStackTool.item(locB.getType(), locB.getData());
+					ItemStack locItemStack = ItemStackTool.item(locB.getType());
 
 					if (!(ItemStackTool.isSameWithMaterialNData(targetItem, locItemStack))) {
 						// 하나라도 같지 않으면 false

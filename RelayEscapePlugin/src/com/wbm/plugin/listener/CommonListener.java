@@ -288,8 +288,8 @@ public class CommonListener implements Listener {
 		if (b != null) {
 
 			// sign click
-			if (b.getType() == Material.WALL_SIGN || b.getType() == Material.SIGN_POST
-					|| b.getType() == Material.SIGN) {
+			if (b.getType() == Material.OAK_WALL_SIGN
+					|| b.getType() == Material.OAK_SIGN) {
 				Action act = e.getAction();
 				if (act == Action.RIGHT_CLICK_BLOCK) {
 					Sign sign = (Sign) b.getState();
@@ -322,7 +322,7 @@ public class CommonListener implements Listener {
 	@EventHandler
 	public void onPlayerOpenIventoryWhenMaker(InventoryCreativeEvent e) {
 		Player p = (Player) e.getWhoClicked();
-		String invTitle = e.getInventory().getTitle();
+		String invTitle = e.getView().getTitle();
 		BroadcastTool.debug("invTitle: " + invTitle);
 
 		Role role = this.pDataManager.getPlayerData(p.getUniqueId()).getRole();
@@ -349,9 +349,9 @@ public class CommonListener implements Listener {
 		}
 
 		// NPC packet
-		if (npc.getNPCs() == null || npc.getNPCs().isEmpty())
-			return;
-		npc.sendAllNPCPacketToPlayer(p);
+//		if (npc.getNPCs() == null || npc.getNPCs().isEmpty())
+//			return;
+//		npc.sendAllNPCPacketToPlayer(p);
 
 		// discord info
 		this.discordBot.sendMsgToChannelWithTime(Setting.DISCORD_CH_SERVER_CHAT, pName + " join the server");
@@ -372,8 +372,8 @@ public class CommonListener implements Listener {
 		PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
 
 		if (b != null) {
-			if (b.getType() == Material.SIGN || b.getType() == Material.SIGN_POST
-					|| b.getType() == Material.WALL_SIGN) {
+			if (b.getType() == Material.OAK_WALL_SIGN
+					|| b.getType() == Material.OAK_SIGN) {
 				if (e.getAction() == Action.RIGHT_CLICK_BLOCK) {
 					// room, time, role 체크
 					if (pData.getRole() == Role.WAITER) {
@@ -448,7 +448,7 @@ public class CommonListener implements Listener {
 
 	@EventHandler
 	public void onCropBreakingByEntity(PlayerInteractEvent e) {
-		if (e.getAction() == Action.PHYSICAL && e.getClickedBlock().getType() == Material.SOIL) {
+		if (e.getAction() == Action.PHYSICAL && e.getClickedBlock().getType() == Material.FARMLAND) {
 			e.setCancelled(true);
 		}
 	}
@@ -508,9 +508,7 @@ public class CommonListener implements Listener {
 		String motd = "              " + ChatColorTool.random() + ChatColor.BOLD + "Relay";
 		motd += "" + ChatColorTool.random() + ChatColor.BOLD + " Escape ";
 		motd += ChatColor.WHITE + "[";
-		motd += ChatColorTool.random() + "1.12.2";
-		motd += ChatColor.WHITE + " - ";
-		motd += ChatColorTool.random() + "1.16";
+		motd += ChatColorTool.random() + "1.16.4 - 1.16.5";
 		motd += ChatColor.WHITE + "]\n";
 		motd += ChatColor.WHITE + "                    NOW: ";
 		motd += "" + ChatColor.WHITE + ChatColor.BOLD + this.relayManager.getCurrentTime().name();
@@ -542,8 +540,8 @@ public class CommonListener implements Listener {
 		// 터치한 블럭 없을때 return
 		if (b != null) {
 			// sign click
-			if (b.getType() == Material.WALL_SIGN || b.getType() == Material.SIGN_POST
-					|| b.getType() == Material.SIGN) {
+			if (b.getType() == Material.OAK_WALL_SIGN
+					|| b.getType() == Material.OAK_SIGN) {
 				Action act = e.getAction();
 				if (act == Action.RIGHT_CLICK_BLOCK) {
 					Sign sign = (Sign) b.getState();

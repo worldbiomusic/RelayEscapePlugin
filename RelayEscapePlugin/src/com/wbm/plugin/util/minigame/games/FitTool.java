@@ -69,19 +69,19 @@ public class FitTool extends SoloMiniGame {
 	randomBlocks.add(Material.STONE);
 	randomBlocks.add(Material.COBBLESTONE);
 	randomBlocks.add(Material.GOLD_ORE);
-	randomBlocks.add(Material.ENDER_STONE);
+	randomBlocks.add(Material.END_STONE);
 
 	// sword
-	randomBlocks.add(Material.WEB);
-	randomBlocks.add(Material.LEAVES);
-	randomBlocks.add(Material.WEB);
-	randomBlocks.add(Material.WEB);
+	randomBlocks.add(Material.COBWEB);
+	randomBlocks.add(Material.ACACIA_LEAVES);
+	randomBlocks.add(Material.OAK_LEAVES);
+	randomBlocks.add(Material.JUNGLE_LEAVES);
 
 	// axe
 	randomBlocks.add(Material.PUMPKIN);
-	randomBlocks.add(Material.JUNGLE_WOOD_STAIRS);
+	randomBlocks.add(Material.OAK_STAIRS);
 	randomBlocks.add(Material.ACACIA_FENCE);
-	randomBlocks.add(Material.MELON_BLOCK);
+	randomBlocks.add(Material.MELON);
 
 	// shovel
 	randomBlocks.add(Material.DIRT);
@@ -90,12 +90,12 @@ public class FitTool extends SoloMiniGame {
 	randomBlocks.add(Material.SOUL_SAND);
 
 	// etc
-	randomBlocks.add(Material.WOOL);
+	randomBlocks.add(Material.WHITE_WOOL);
     }
 
     private void giveTools() {
 	ItemStack[] items = { ItemStackTool.item(Material.IRON_AXE), ItemStackTool.item(Material.IRON_PICKAXE),
-		ItemStackTool.item(Material.IRON_SWORD), ItemStackTool.item(Material.IRON_SPADE) };
+		ItemStackTool.item(Material.IRON_SWORD), ItemStackTool.item(Material.IRON_SHOVEL) };
 	InventoryTool.addItemsToPlayers(this.getAllPlayer(), items);
     }
 

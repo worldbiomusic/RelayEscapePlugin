@@ -32,9 +32,9 @@ public class FindTheRed extends SoloMiniGame {
 			Block b = e.getBlock();
 
 			// score
-			if (b.getType() == Material.RED_ROSE) {
+			if (b.getType() == Material.POPPY) {
 				this.plusScore(1);
-			} else if (b.getType() == Material.YELLOW_FLOWER) {
+			} else if (b.getType() == Material.DANDELION) {
 				this.minusScore(2);
 			}
 
@@ -60,7 +60,7 @@ public class FindTheRed extends SoloMiniGame {
 
 	private void generateNewBlocks() {
 		// 블럭 재정비
-		Material yellow = Material.YELLOW_FLOWER;
+		Material yellow = Material.DANDELION;
 		List<Material> flowers = new ArrayList<>();
 
 		for (int i = 0; i < this.getGameBlockCount(); i++) {
@@ -68,7 +68,7 @@ public class FindTheRed extends SoloMiniGame {
 		}
 
 		int r = (int) (Math.random() * 16);
-		flowers.set(r, Material.RED_ROSE);
+		flowers.set(r, Material.POPPY);
 
 		BlockTool.setBlockWithMaterial(this.getGamePos1(), this.getGamePos2(), flowers);
 	}

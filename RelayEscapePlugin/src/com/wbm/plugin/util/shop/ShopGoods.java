@@ -26,15 +26,14 @@ public enum ShopGoods {
 	COBBLESTONE(ItemStackTool.item(Material.COBBLESTONE), GoodsRole.MAKING_BLOCK),
 	JACK_O_LANTERN(ItemStackTool.item(Material.JACK_O_LANTERN), GoodsRole.MAKING_BLOCK),
 	GLASS(ItemStackTool.item(Material.GLASS), GoodsRole.MAKING_BLOCK),
-	FENCE(ItemStackTool.item(Material.FENCE), GoodsRole.MAKING_BLOCK),
-	WHITE_WOOL(ItemStackTool.item(Material.WOOL, (byte) 0), GoodsRole.MAKING_BLOCK),
-	BLACK_WOOL(ItemStackTool.item(Material.WOOL, (byte) 15), GoodsRole.MAKING_BLOCK),
+	FENCE(ItemStackTool.item(Material.OAK_FENCE), GoodsRole.MAKING_BLOCK),
+	WHITE_WOOL(ItemStackTool.item(Material.WHITE_WOOL)), BLACK_WOOL(ItemStackTool.item(Material.BLACK_WOOL)),
 
-//	YELLOW_FLOWER(ItemStackTool.item(Material.YELLOW_FLOWER), GoodsRole.MAKING_BLOCK),
-//	RED_FLOWER(ItemStackTool.item(Material.RED_ROSE), GoodsRole.MAKING_BLOCK),
+	DANDELION(ItemStackTool.item(Material.DANDELION), GoodsRole.MAKING_BLOCK),
+	POPPY(ItemStackTool.item(Material.POPPY), GoodsRole.MAKING_BLOCK),
 	NOTE_BLOCK(ItemStackTool.item(Material.NOTE_BLOCK), GoodsRole.MAKING_BLOCK),
-//	LADDER(ItemStackTool.item(Material.LADDER), GoodsRole.MAKING_BLOCK),
-//	WATER_LILY(ItemStackTool.item(Material.WATER_LILY), GoodsRole.MAKING_BLOCK),
+	LADDER(ItemStackTool.item(Material.LADDER), GoodsRole.MAKING_BLOCK),
+	WATER_LILY(ItemStackTool.item(Material.LILY_PAD), GoodsRole.MAKING_BLOCK),
 	BOOKSHELF(ItemStackTool.item(Material.BOOKSHELF), GoodsRole.MAKING_BLOCK),
 
 	// 2f
@@ -46,28 +45,28 @@ public enum ShopGoods {
 	DIAMOND_BLOCK(ItemStackTool.item(Material.DIAMOND_BLOCK), GoodsRole.MAKING_BLOCK),
 
 	// 3f
-	WOOD(ItemStackTool.item(Material.WOOD), GoodsRole.MAKING_BLOCK),
+	WOOD(ItemStackTool.item(Material.OAK_LOG), GoodsRole.MAKING_BLOCK),
 	ACACIA_STAIRS(ItemStackTool.item(Material.ACACIA_STAIRS), GoodsRole.MAKING_BLOCK),
-	WOOD_STEP(ItemStackTool.item(Material.WOOD_STEP), GoodsRole.MAKING_BLOCK),
-	LOG(ItemStackTool.item(Material.LOG), GoodsRole.MAKING_BLOCK),
-	LOG2(ItemStackTool.item(Material.LOG, (byte) 2), GoodsRole.MAKING_BLOCK),
-	LOG3(ItemStackTool.item(Material.LOG, (byte) 3), GoodsRole.MAKING_BLOCK),
+	WOOD_STEP(ItemStackTool.item(Material.OAK_SLAB), GoodsRole.MAKING_BLOCK),
+	LOG(ItemStackTool.item(Material.OAK_LOG), GoodsRole.MAKING_BLOCK),
+	LOG2(ItemStackTool.item(Material.BIRCH_LOG), GoodsRole.MAKING_BLOCK),
+	LOG3(ItemStackTool.item(Material.JUNGLE_LOG), GoodsRole.MAKING_BLOCK),
 
 	// 4f
 	GRASS(ItemStackTool.item(Material.GRASS), GoodsRole.MAKING_BLOCK),
-	DIRT2(ItemStackTool.item(Material.DIRT, (byte) 2), GoodsRole.MAKING_BLOCK),
+	DIRT2(ItemStackTool.item(Material.DIRT), GoodsRole.MAKING_BLOCK),
 	GRAVEL(ItemStackTool.item(Material.GRAVEL), GoodsRole.MAKING_BLOCK),
 	STONE(ItemStackTool.item(Material.STONE), GoodsRole.MAKING_BLOCK),
-	STONE6(ItemStackTool.item(Material.STONE, (byte) 6), GoodsRole.MAKING_BLOCK),
-	STONE2(ItemStackTool.item(Material.STONE, (byte) 2), GoodsRole.MAKING_BLOCK),
+	STONE6(ItemStackTool.item(Material.STONE), GoodsRole.MAKING_BLOCK),
+	STONE2(ItemStackTool.item(Material.STONE), GoodsRole.MAKING_BLOCK),
 
 	// 5f
 	SANDSTONE(ItemStackTool.item(Material.SANDSTONE), GoodsRole.MAKING_BLOCK),
-	SANDSTONE2(ItemStackTool.item(Material.SANDSTONE, (byte) 2), GoodsRole.MAKING_BLOCK),
-	SMOOTH_STAIRS(ItemStackTool.item(Material.SMOOTH_STAIRS), GoodsRole.MAKING_BLOCK),
-	STEP1(ItemStackTool.item(Material.STEP, (byte) 1), GoodsRole.MAKING_BLOCK),
-	SANDSTONE1(ItemStackTool.item(Material.SANDSTONE, (byte) 1), GoodsRole.MAKING_BLOCK),
-	SAND(ItemStackTool.item(Material.SAND, (byte) 2), GoodsRole.MAKING_BLOCK),
+	SANDSTONE2(ItemStackTool.item(Material.SANDSTONE), GoodsRole.MAKING_BLOCK),
+	SMOOTH_STAIRS(ItemStackTool.item(Material.SANDSTONE_STAIRS), GoodsRole.MAKING_BLOCK),
+	STEP1(ItemStackTool.item(Material.SANDSTONE_SLAB), GoodsRole.MAKING_BLOCK),
+	SANDSTONE1(ItemStackTool.item(Material.SANDSTONE), GoodsRole.MAKING_BLOCK),
+	SAND(ItemStackTool.item(Material.SAND), GoodsRole.MAKING_BLOCK),
 
 	// 6f
 	WATER_BUCKET(ItemStackTool.item(Material.WATER_BUCKET), GoodsRole.MAKING_BLOCK),
@@ -79,38 +78,35 @@ public enum ShopGoods {
 
 	// 7f
 	CACTUS(ItemStackTool.item(Material.CACTUS), GoodsRole.MAKING_BLOCK),
-	WEB(ItemStackTool.item(Material.WEB), GoodsRole.MAKING_BLOCK),
-	LAMP(ItemStackTool.item(Material.REDSTONE_LAMP_OFF), GoodsRole.MAKING_BLOCK),
-//	STONE_PLATE(ItemStackTool.item(Material.STONE_PLATE), GoodsRole.MAKING_BLOCK),
-//	LEVER(ItemStackTool.item(Material.LEVER), GoodsRole.MAKING_BLOCK),
-	TRAP_DOOR(ItemStackTool.item(Material.TRAP_DOOR), GoodsRole.MAKING_BLOCK),
+	WEB(ItemStackTool.item(Material.COBWEB), GoodsRole.MAKING_BLOCK),
+	LAMP(ItemStackTool.item(Material.REDSTONE_LAMP), GoodsRole.MAKING_BLOCK),
+	STONE_PLATE(ItemStackTool.item(Material.STONE_PRESSURE_PLATE), GoodsRole.MAKING_BLOCK),
+	LEVER(ItemStackTool.item(Material.LEVER), GoodsRole.MAKING_BLOCK),
+	TRAP_DOOR(ItemStackTool.item(Material.OAK_TRAPDOOR), GoodsRole.MAKING_BLOCK),
 
 	// 8f
-//	IRON_DOOR(ItemStackTool.item(Material.IRON_DOOR), GoodsRole.MAKING_BLOCK),
+	IRON_DOOR(ItemStackTool.item(Material.IRON_DOOR), GoodsRole.MAKING_BLOCK),
 	SOUL_SAND(ItemStackTool.item(Material.SOUL_SAND), GoodsRole.MAKING_BLOCK),
-//	ACACIA_DOOR(ItemStackTool.item(Material.ACACIA_DOOR_ITEM), GoodsRole.MAKING_BLOCK),
+	ACACIA_DOOR(ItemStackTool.item(Material.ACACIA_DOOR), GoodsRole.MAKING_BLOCK),
 	SNOW(ItemStackTool.item(Material.SNOW), GoodsRole.MAKING_BLOCK),
 	SNOW_BLOCK(ItemStackTool.item(Material.SNOW_BLOCK), GoodsRole.MAKING_BLOCK),
 
 	// event making block
-	JUMPING(ItemStackTool.item(Material.STAINED_GLASS, 1, (short) 1, (byte) 0, "JUMPING", "super jump event block"),
+	JUMPING(ItemStackTool.item(Material.WHITE_STAINED_GLASS, "JUMPING", "super jump event block"),
 			GoodsRole.MAKING_BLOCK),
-	RESPAWN(ItemStackTool.item(Material.STAINED_GLASS, 1, (short) 1, (byte) 1, "RESPAWN", "respawn event block"),
+	RESPAWN(ItemStackTool.item(Material.ORANGE_STAINED_GLASS, "RESPAWN", "respawn event block"),
 			GoodsRole.MAKING_BLOCK),
-	TRAP(ItemStackTool.item(Material.STAINED_GLASS, 1, (short) 1, (byte) 2, "TRAP", "random trap event block"),
-			GoodsRole.MAKING_BLOCK),
-//	FLICKING(ItemStackTool.item(Material.STAINED_GLASS, 1, (short) 1, (byte) 3, "FLICKING", "flicking event block"),
+	TRAP(ItemStackTool.item(Material.MAGENTA_STAINED_GLASS, "TRAP", "random trap event block"), GoodsRole.MAKING_BLOCK),
+//	FLICKING(ItemStackTool.item(Material.LIGHT_BLUE_STAINED_GLASS, 1, (short) 1, (byte) 3, "FLICKING", "flicking event block"),
 //			GoodsRole.MAKING_BLOCK),
-	SOUND_TERROR(ItemStackTool.item(Material.STAINED_GLASS, 1, (short) 1, (byte) 4, "SOUND_TERROR",
-			"sound terror event block"), GoodsRole.MAKING_BLOCK),
-	HURT(ItemStackTool.item(Material.STAINED_GLASS, 1, (short) 1, (byte) 5, "HURT", "hurt payer"),
+	SOUND_TERROR(ItemStackTool.item(Material.YELLOW_STAINED_GLASS, "SOUND_TERROR", "sound terror event block"),
 			GoodsRole.MAKING_BLOCK),
-	HEAL(ItemStackTool.item(Material.STAINED_GLASS, 1, (short) 1, (byte) 6, "HEAL", "heal player's everything"),
+	HURT(ItemStackTool.item(Material.LIME_STAINED_GLASS, "HURT", "hurt payer"), GoodsRole.MAKING_BLOCK),
+	HEAL(ItemStackTool.item(Material.PINK_STAINED_GLASS, "HEAL", "heal player's everything"), GoodsRole.MAKING_BLOCK),
+	UP_TP(ItemStackTool.item(Material.GRAY_STAINED_GLASS, "UP_TP", "teleport player 3 block up"),
 			GoodsRole.MAKING_BLOCK),
-	UP_TP(ItemStackTool.item(Material.STAINED_GLASS, 1, (short) 1, (byte) 7, "UP_TP", "teleport player 3 block up"),
+	DOWN_TP(ItemStackTool.item(Material.LIGHT_GRAY_STAINED_GLASS, "DOWN_TP", "teleport player 3 block down"),
 			GoodsRole.MAKING_BLOCK),
-	DOWN_TP(ItemStackTool.item(Material.STAINED_GLASS, 1, (short) 1, (byte) 8, "DOWN_TP",
-			"teleport player 3 block down"), GoodsRole.MAKING_BLOCK),
 
 	// makingTool
 	// 이 템으로 클릭시 list나오고 명령어로 가능하게 하기(명령어에서 이 템 가지고 있나 체크)
@@ -119,8 +115,7 @@ public enum ShopGoods {
 	UNDER_BLOCK(ItemStackTool.item(Material.STICK, "UNDER_BLOCK", "create stone under your foot"), GoodsRole.MAKING),
 	SPAWN(ItemStackTool.item(Material.GOLD_NUGGET, "SPAWN", "teleport to spawn"), GoodsRole.MAKING, GoodsRole.TESTING,
 			GoodsRole.CHALLENGING, GoodsRole.VIEWING),
-	CHEST(ItemStackTool.item(Material.CLAY_BRICK, "CHEST", "open inventory which has blocks you can use"),
-			GoodsRole.MAKING),
+	CHEST(ItemStackTool.item(Material.BRICK, "CHEST", "open inventory which has blocks you can use"), GoodsRole.MAKING),
 	FINISH(ItemStackTool.item(Material.ARROW, "FINISH", "finish MakingTime and go next to the TesetingTime"),
 			GoodsRole.MAKING),
 //	BLOCK_CHANGER(
@@ -161,19 +156,17 @@ public enum ShopGoods {
 			GoodsRole.ROOM_SETTING),
 
 	// challengerTool
-	REDUCE_TIME(ItemStackTool.item(Material.WATCH, "HALF_TIME", "delete half of challenging time"),
+	REDUCE_TIME(ItemStackTool.item(Material.CLOCK, "HALF_TIME", "delete half of challenging time"),
 			GoodsRole.CHALLENGING),
 	SUPER_STAR(ItemStackTool.item(Material.GLOWSTONE_DUST, "SUPER_STAR", "you are now supre star", "===Mode===", "off"),
 			GoodsRole.ALWAYS),
 	LOBBY(ItemStackTool.item(Material.DIAMOND, "LOBBY", "go to lobby"), GoodsRole.CHALLENGING, GoodsRole.VIEWING),
 
 	// viewrTool
-	GHOST(ItemStackTool.item(Material.GHAST_TEAR, 1, (short) 1, (byte) 3, "GHOST",
-			"can move other player's view easily"), GoodsRole.VIEWING),
+	GHOST(ItemStackTool.item(Material.GHAST_TEAR, "GHOST", "can move other player's view easily"), GoodsRole.VIEWING),
 
 	// ALWAYS
-	GOODS_LIST(ItemStackTool.item(Material.PAPER, 1, (short) 1, (byte) 3, "GOODS_LIST", "open Goods List GUI"),
-			GoodsRole.ALWAYS),
+	GOODS_LIST(ItemStackTool.item(Material.PAPER, "GOODS_LIST", "open Goods List GUI"), GoodsRole.ALWAYS),
 
 	/*
 	 * CASH
@@ -196,7 +189,6 @@ public enum ShopGoods {
 		for (GoodsRole role : goodsRole) {
 			this.goodsRole.add(role);
 		}
-
 	}
 
 	public ItemStack getItemStack() {

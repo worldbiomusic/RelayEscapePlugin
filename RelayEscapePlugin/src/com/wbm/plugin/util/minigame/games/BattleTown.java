@@ -98,7 +98,7 @@ public class BattleTown extends BattleMiniGame {
 
 	// 기본 킷
 	for (Player p : this.getAllPlayer()) {
-	    InventoryTool.addItemToPlayer(p, new ItemStack(Material.WOOD_SWORD));
+	    InventoryTool.addItemToPlayer(p, new ItemStack(Material.WOODEN_SWORD));
 	    InventoryTool.addItemToPlayer(p, new ItemStack(Material.GOLDEN_APPLE));
 	    InventoryTool.addItemToPlayer(p, new ItemStack(Material.BOW));
 	    InventoryTool.addItemToPlayer(p, new ItemStack(Material.ARROW, 10));

@@ -191,7 +191,7 @@ public class Critical extends BattleMiniGame {
 	super.runTaskAfterStartGame();
 
 	// kit
-	InventoryTool.addItemToPlayers(this.getAllPlayer(), ItemStackTool.item(Material.WOOD_SWORD));
+	InventoryTool.addItemToPlayers(this.getAllPlayer(), ItemStackTool.item(Material.WOODEN_SWORD));
 
 	// hungry 조절
 	for (Player p : this.getAllPlayer()) {

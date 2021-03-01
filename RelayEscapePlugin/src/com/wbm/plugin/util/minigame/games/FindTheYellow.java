@@ -25,9 +25,9 @@ public class FindTheYellow extends CooperativeMiniGame {
 	    Block b = e.getBlock();
 
 	    // score
-	    if (b.getType() == Material.YELLOW_FLOWER) {
+	    if (b.getType() == Material.DANDELION) {
 		this.plusScore(1);
-	    } else if (b.getType() == Material.RED_ROSE) {
+	    } else if (b.getType() == Material.POPPY) {
 		this.minusScore(2);
 	    }
 
@@ -51,7 +51,7 @@ public class FindTheYellow extends CooperativeMiniGame {
 
     private void generateNewBlocks() {
 	// 블럭 재정비
-	Material yellow = Material.RED_ROSE;
+	Material yellow = Material.POPPY;
 	List<Material> flowers = new ArrayList<>();
 
 	for (int i = 0; i < this.getGameBlockCount(); i++) {
@@ -59,7 +59,7 @@ public class FindTheYellow extends CooperativeMiniGame {
 	}
 
 	int r = (int) (Math.random() * 16);
-	flowers.set(r, Material.YELLOW_FLOWER);
+	flowers.set(r, Material.DANDELION);
 
 	BlockTool.setBlockWithMaterial(this.getGamePos1(),this.getGamePos2(), flowers);
     }

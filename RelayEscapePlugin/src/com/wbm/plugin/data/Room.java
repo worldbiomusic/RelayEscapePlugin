@@ -4,7 +4,6 @@ import java.io.Serializable;
 // start 
 // end 21
 import java.time.LocalDateTime;
-import java.util.List;
 
 public class Room implements Serializable
 {
@@ -17,9 +16,6 @@ public class Room implements Serializable
 	// room member 
 	private String title;
 	private String maker;
-//	Room의 List<Block> 이 null이면 모두 Block.Air로 처리
-//	blocks안에 있는 Block들의 위치정보는 사용하면 안됨 (정해진 Room에 순서대로 block들이 정해지는것이기 때문)
-	private List<BlockData> blocks;
 	private int challengingCount;
 	private int clearCount;
 	private LocalDateTime birth;
@@ -31,12 +27,10 @@ public class Room implements Serializable
 	
 	public Room(String title
 	, String maker
-	, List<BlockData> blocks
 	, LocalDateTime birth) 
 	{
 		this.title = title;
 		this.maker = maker;
-		this.blocks = blocks;
 		this.birth = birth;
 		this.challengingCount = 0;
 		this.clearCount = 0;
@@ -65,14 +59,6 @@ public class Room implements Serializable
 		this.maker=maker;
 	}
 
-	public List<BlockData> getBlocks()
-	{
-		return blocks;
-	}
-	public void setBlocks(List<BlockData> blocks)
-	{
-		this.blocks=blocks;
-	}
 	public int getChallengingCount()
 	{
 		return challengingCount;

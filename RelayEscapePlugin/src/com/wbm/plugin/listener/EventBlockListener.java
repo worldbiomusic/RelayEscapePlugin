@@ -87,8 +87,6 @@ public class EventBlockListener {
 
 	private void FLICKING(Player p, Block b) {
 		Material mat = b.getType();
-		@SuppressWarnings("deprecation")
-		byte data = b.getData();
 
 		// 3초후 사라짐
 		Bukkit.getScheduler().runTaskLater(Main.getInstance(), new Runnable() {
@@ -102,11 +100,9 @@ public class EventBlockListener {
 		// 6초후 나타남
 		Bukkit.getScheduler().runTaskLater(Main.getInstance(), new Runnable() {
 
-			@SuppressWarnings("deprecation")
 			@Override
 			public void run() {
 				b.setType(mat);
-				b.setData(data);
 			}
 		}, 20 * 6);
 	}

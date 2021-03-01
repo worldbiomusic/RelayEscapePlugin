@@ -212,7 +212,6 @@ public class Commands implements CommandExecutor {
 
 			// 명령어 cooldown 체크
 			if (CoolDownManager.addPlayer(Setting.CoolDown_Subject_CMD_ROOM, p)) {
-//		BroadcastTool.sendMessage(p, "??????????????");
 				String second = args[1];
 
 				switch (second) {
@@ -267,7 +266,7 @@ public class Commands implements CommandExecutor {
 		this.relayManager.setCorePlaced(true);
 
 		// set room
-		this.roomManager.loadRoomDataBlocks(RoomType.MAIN, room);
+		this.roomManager.fillSpace(RoomType.MAIN, title);
 		BroadcastTool.sendMessage(p, title + " room is loading...");
 
 		return true;
@@ -456,6 +455,7 @@ public class Commands implements CommandExecutor {
 		String pName = args[3];
 		int token = Integer.parseInt(args[4]);
 		UUID uuid = Bukkit.getPlayerUniqueId(pName);
+		
 
 		PlayerData pData = this.pDataManager.getPlayerData(uuid);
 		if (order.equalsIgnoreCase("plus")) {
@@ -615,33 +615,33 @@ public class Commands implements CommandExecutor {
 	}
 
 	private boolean npc(Player p, String[] args) {
-		/*
-		 * /re npc create <name> <skin>
-		 * 
-		 * /re npc delete <name>
-		 */
-
-		// check OP
-		if (!p.isOp()) {
-			BroadcastTool.sendMessage(p, "OP CMD");
-			return true;
-		}
-		if (args.length >= 3) {
-			String option = args[1];
-			String name = args[2];
-			switch (option) {
-			case "create":
-				if (args.length == 4) {
-					String skin = args[3];
-					npc.createNPC(p.getLocation(), name, skin);
-					return true;
-				}
-				return false;
-			case "delete":
-				npc.delete(name);
-				return true;
-			}
-		}
+//		/*
+//		 * /re npc create <name> <skin>
+//		 * 
+//		 * /re npc delete <name>
+//		 */
+//
+//		// check OP
+//		if (!p.isOp()) {
+//			BroadcastTool.sendMessage(p, "OP CMD");
+//			return true;
+//		}
+//		if (args.length >= 3) {
+//			String option = args[1];
+//			String name = args[2];
+//			switch (option) {
+//			case "create":
+//				if (args.length == 4) {
+//					String skin = args[3];
+//					npc.createNPC(p.getLocation(), name, skin);
+//					return true;
+//				}
+//				return false;
+//			case "delete":
+//				npc.delete(name);
+//				return true;
+//			}
+//		}
 		return false;
 	}
 

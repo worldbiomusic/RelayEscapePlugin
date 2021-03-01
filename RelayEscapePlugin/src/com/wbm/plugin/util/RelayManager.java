@@ -250,7 +250,7 @@ public class RelayManager {
 		} else if (this.currentTime == RelayTime.TESTING) {
 			PlayerTool.playSound(p, Sound.BLOCK_ANVIL_DESTROY);
 		} else if (this.currentTime == RelayTime.CHALLENGING) {
-			PlayerTool.playSound(p, Sound.ENTITY_ENDERMEN_TELEPORT);
+			PlayerTool.playSound(p, Sound.ENTITY_ENDERMAN_TELEPORT);
 		}
 	}
 

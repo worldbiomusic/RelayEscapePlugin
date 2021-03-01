@@ -104,7 +104,7 @@ public class GoodsListener implements Listener {
 		// 45 46 47 48 49 50 51 52 53
 		inv.setItem(48, ItemStackTool.item(Material.LEVER, "previous page"));
 		inv.setItem(49, ItemStackTool.item(Material.PAPER, "PAGE " + page));
-		inv.setItem(50, ItemStackTool.item(Material.REDSTONE_TORCH_ON, "next page"));
+		inv.setItem(50, ItemStackTool.item(Material.REDSTONE_TORCH, "next page"));
 
 		// inventory는 무조건 0~44칸까지만 채워짐
 		int invIndex = 0;
@@ -169,7 +169,7 @@ public class GoodsListener implements Listener {
 	public void onPlayerClickGoodsListInventory(InventoryClickEvent e) {
 		Player p = (Player) e.getWhoClicked();
 		Inventory inv = e.getInventory();
-		String invTitle = e.getInventory().getTitle();
+		String invTitle = e.getView().getTitle();
 		GoodsRole[] goodsRoles = null;
 
 		// 해당되는 title을 가지고 있는 inventory만 클릭 반응
@@ -585,6 +585,8 @@ public class GoodsListener implements Listener {
 			// 이 굿즈는 역할이 Challenger일때 Waiter로 되어지는 상황일때 사용되는것임
 			pData.setRole(Role.WAITER);
 			this.relayManager.changeRoom(p);
+		} else if (good == ShopGoods.GHOST) {
+			Bukkit.dispatchCommand(p, "re ghost");
 		}
 	}
 }
