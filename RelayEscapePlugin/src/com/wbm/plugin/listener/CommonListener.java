@@ -170,28 +170,28 @@ public class CommonListener implements Listener {
 			String translatedMsg = msg;
 			switch (msg) {
 			case "1":
-				translatedMsg = "HI";
+				translatedMsg = "안녕하세요!";
 				break;
 			case "2":
-				translatedMsg = "BYE";
+				translatedMsg = "잘 가요!";
 				break;
 			case "3":
-				translatedMsg = "FUXX";
+				translatedMsg = "이런!";
 				break;
 			case "4":
-				translatedMsg = "FOLLOW ME";
+				translatedMsg = "따라오세요";
 				break;
 			case "5":
 				translatedMsg = "OK";
 				break;
 			case "6":
-				translatedMsg = "PASS";
+				translatedMsg = "패스";
 				break;
 			case "7":
-				translatedMsg = "WOW";
+				translatedMsg = "와우";
 				break;
 			case "8":
-				translatedMsg = "LOL";
+				translatedMsg = "ㅋㅋ";
 				break;
 			case "9":
 				translatedMsg = "...";
@@ -206,7 +206,7 @@ public class CommonListener implements Listener {
 			// 메세지 설정
 			e.setMessage(translatedMsg);
 		} else {
-			BroadcastTool.sendMessage(p, "too fast chat");
+			BroadcastTool.sendMessage(p, "채팅속도가 너무 빠릅니다. 잠시 기다려주세요^^");
 			e.setCancelled(true);
 		}
 
@@ -226,7 +226,7 @@ public class CommonListener implements Listener {
 		// re명령어 빼고 모두 막기 (일반유저)
 		if (msg.startsWith("/")) {
 			if (!msg.startsWith("/re")) {
-				BroadcastTool.sendMessage(p, ChatColor.RED + "you can only use \"/re\"");
+				BroadcastTool.sendMessage(p, ChatColor.RED + "\"/re\"명령어만 사용 가능합니다");
 				e.setCancelled(true);
 			}
 		}
@@ -262,7 +262,7 @@ public class CommonListener implements Listener {
 		Role role = this.pDataManager.getPlayerData(p.getUniqueId()).getRole();
 
 		Location respawnLoc = SpawnLocationTool.RESPAWN;
-		if (role == Role.WAITER) {
+		if (role == Role.웨이터) {
 			respawnLoc = SpawnLocationTool.LOBBY;
 		} else {
 			respawnLoc = RoomLocation.MAIN_SPAWN;
@@ -296,7 +296,7 @@ public class CommonListener implements Listener {
 					String[] lines = sign.getLines();
 
 					// SHOP click
-					if (lines[0].equals("[SHOP]")) {
+					if (lines[0].equals("[상점]")) {
 						String goods = lines[1];
 						String[] costString = lines[2].split(" ");
 						String type = costString[0];
@@ -326,9 +326,9 @@ public class CommonListener implements Listener {
 		BroadcastTool.debug("invTitle: " + invTitle);
 
 		Role role = this.pDataManager.getPlayerData(p.getUniqueId()).getRole();
-		if (role == Role.MAKER || role == Role.VIEWER) {
-			if (!invTitle.equals(ShopGoods.CHEST.name())) {
-				BroadcastTool.debug("only " + ShopGoods.CHEST.name() + " inventory is allowed");
+		if (role == Role.메이커 || role == Role.뷰어) {
+			if (!invTitle.equals(ShopGoods.상자.name())) {
+				BroadcastTool.debug("only " + ShopGoods.상자.name() + " inventory is allowed");
 				e.setCancelled(true);
 			}
 		}
@@ -354,7 +354,7 @@ public class CommonListener implements Listener {
 //		npc.sendAllNPCPacketToPlayer(p);
 
 		// discord info
-		this.discordBot.sendMsgToChannelWithTime(Setting.DISCORD_CH_SERVER_CHAT, pName + " join the server");
+		this.discordBot.sendMsgToChannelWithTime(Setting.DISCORD_CH_SERVER_CHAT, pName + "님 서버 입장했습니다");
 	}
 
 	@EventHandler
@@ -376,13 +376,7 @@ public class CommonListener implements Listener {
 					|| b.getType() == Material.OAK_SIGN) {
 				if (e.getAction() == Action.RIGHT_CLICK_BLOCK) {
 					// room, time, role 체크
-					if (pData.getRole() == Role.WAITER) {
-						// maker일때는 제외
-						if (this.pDataManager.isMaker(p)) {
-							BroadcastTool.sendMessage(p, "Maker can not play minigame");
-							return;
-						}
-
+					if (pData.getRole() == Role.웨이터) {
 						Sign sign = (Sign) b.getState();
 						/*
 						 * 0: [MINI_GAME]
@@ -399,7 +393,12 @@ public class CommonListener implements Listener {
 						// token은 안 남겨줘도 gameType에서 가져옴
 
 						// 1
-						if (minigame.equalsIgnoreCase("[MINI_GAME]")) {
+						if (minigame.equalsIgnoreCase("[미니게임]")) {
+							// maker일때는 제외
+							if (this.pDataManager.isMaker(p)) {
+								BroadcastTool.sendMessage(p, "메이커일 때는 미니게임을 플레이할 수 없습니다");
+								return;
+							}
 							this.miniGameManager.enterRoom(MiniGameType.valueOf(title), p);
 						}
 					}
@@ -419,7 +418,7 @@ public class CommonListener implements Listener {
 		this.miniGameManager.handleMiniGameExitDuringPlaying(p, MiniGame.ExitReason.SELF_EXIT);
 
 		// discord info
-		this.discordBot.sendMsgToChannelWithTime(Setting.DISCORD_CH_SERVER_CHAT, p.getName() + " quit the server");
+		this.discordBot.sendMsgToChannelWithTime(Setting.DISCORD_CH_SERVER_CHAT, p.getName() + "님이 서버 나갔습니다");
 	}
 
 	@EventHandler
@@ -462,7 +461,7 @@ public class CommonListener implements Listener {
 		Location loc = b.getLocation();
 		RoomType roomType = RoomLocation.getRoomTypeWithLocation(loc);
 		int bonusToken = 0;
-		if (roomType == RoomType.FUN) {
+		if (roomType == RoomType.펀) {
 			if (b.getType() == Material.IRON_BLOCK) {
 				bonusToken = 1;
 			} else if (b.getType() == Material.GOLD_BLOCK) {
@@ -478,7 +477,7 @@ public class CommonListener implements Listener {
 			Player p = e.getPlayer();
 			PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
 			pData.plusToken(bonusToken);
-			BroadcastTool.sendMessage(p, "Bonus token: " + bonusToken);
+			BroadcastTool.sendMessage(p, "보너스 토큰: " + bonusToken);
 
 			// 블럭 없에기
 			b.setType(Material.AIR);
@@ -505,12 +504,12 @@ public class CommonListener implements Listener {
 	public void setServerMOTD(ServerListPingEvent e) {
 		e.setMaxPlayers(20);
 
-		String motd = "              " + ChatColorTool.random() + ChatColor.BOLD + "Relay";
-		motd += "" + ChatColorTool.random() + ChatColor.BOLD + " Escape ";
+		String motd = "              " + ChatColorTool.random() + ChatColor.BOLD + "릴레이";
+		motd += "" + ChatColorTool.random() + ChatColor.BOLD + " 이스케이프 ";
 		motd += ChatColor.WHITE + "[";
 		motd += ChatColorTool.random() + "1.16.4 - 1.16.5";
 		motd += ChatColor.WHITE + "]\n";
-		motd += ChatColor.WHITE + "                    NOW: ";
+		motd += ChatColor.WHITE + "                    현재: ";
 		motd += "" + ChatColor.WHITE + ChatColor.BOLD + this.relayManager.getCurrentTime().name();
 		e.setMotd(motd);
 	}
@@ -548,9 +547,9 @@ public class CommonListener implements Listener {
 					String[] lines = sign.getLines();
 
 					// TP sign click
-					if (lines[0].equals("[TP]")) {
+					if (lines[0].equals("[텔레포트]")) {
 						if (pData.isPlayingMiniGame()) {
-							BroadcastTool.sendMessage(p, "you can't use TP sign while playing Minigame");
+							BroadcastTool.sendMessage(p, "미니게임 중에는 텔레포트가 불가능합니다");
 							return;
 						}
 
@@ -569,9 +568,9 @@ public class CommonListener implements Listener {
 //	    Location targetLoc = TPManager.getLocation(locTitle);
 //		    TeleportTool.tp(p, targetLoc);
 							TeleportTool.tp(p, x, y, z);
-							BroadcastTool.sendMessage(p, "teleport to " + locTitle);
+							BroadcastTool.sendMessage(p,  locTitle + "로 TP했습니다");
 						} else {
-							BroadcastTool.sendMessage(p, "you need more token");
+							BroadcastTool.sendMessage(p, "토큰이 부족합니다");
 						}
 					}
 				}
@@ -618,7 +617,7 @@ public class CommonListener implements Listener {
 
 		// this.banItems.containsItem(blockMat) ||
 		if (this.banItems.containsItem(item) || blockMat.equals(Material.CHEST)) {
-			BroadcastTool.sendMessage(p, "banned item");
+			BroadcastTool.sendMessage(p, "밴 아이템입니다");
 			e.setCancelled(true);
 		}
 
@@ -636,7 +635,7 @@ public class CommonListener implements Listener {
 		Role role = pData.getRole();
 
 		// Role별로 권한 체크
-		if (role == Role.MAKER) {
+		if (role == Role.메이커) {
 			Material mat = e.getBucket();
 			if (this.banItems.containsItem(mat)) {
 				e.setCancelled(true);
@@ -697,7 +696,7 @@ public class CommonListener implements Listener {
 	public void onViewerMoveFarAway(PlayerMoveEvent e) {
 		Player p = e.getPlayer();
 		PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
-		if(pData.getRole() == Role.VIEWER) {
+		if(pData.getRole() == Role.뷰어) {
 			if(!LocationTool.isIn(RoomLocation.MAIN_Pos1, p.getLocation(), RoomLocation.MAIN_Pos2)) {
 				TeleportTool.tp(p,RoomLocation.MAIN_SPAWN);
 			}

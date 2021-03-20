@@ -51,6 +51,8 @@ public class ChatListener extends ListenerAdapter {
 			} else {
 				this.getMcbotTutorial().forEach((cmd) -> e.getChannel().sendMessage(cmd));
 			}
+		} else {
+			e.getChannel().sendMessage("사용법: player 플레이어닉네임").queue();
 		}
 	}
 
@@ -78,11 +80,15 @@ public class ChatListener extends ListenerAdapter {
 			String pName = msg[2];
 			PlayerData pData = this.pDataManager.getPlayerData(pName);
 			if (sec.equalsIgnoreCase("plus")) {
+				int oldToken = pData.getToken();
 				int token = Integer.parseInt(msg[3]);
 				pData.plusToken(token);
+				e.getChannel().sendMessage("Token add from " + oldToken + " to " + pData.getToken());
 			} else if (sec.equalsIgnoreCase("minus")) {
+				int oldToken = pData.getToken();
 				int token = Integer.parseInt(msg[3]);
 				pData.minusToken(token);
+				e.getChannel().sendMessage("Token minus from " + oldToken + " to " + pData.getToken());
 			} else if (sec.equalsIgnoreCase("info")) {
 				e.getChannel().sendMessage(pData.toString()).queue();
 			}

@@ -2,8 +2,8 @@ package com.wbm.plugin.util.enums;
 
 public enum RoomType
 {
-	MAIN,
-	PRACTICE,
-	MINI_GAME,
-	FUN;
+	메인,
+	연습,
+	미니게임,
+	펀;
 }

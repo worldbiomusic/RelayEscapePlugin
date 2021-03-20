@@ -121,7 +121,7 @@ public class PlayerData implements Serializable {
 		p.setGameMode(this.role.getGameMode());
 
 		// VIEWER && GHOST 굿즈가 있으면 서바이벌 -> 관전자 모드로 변경
-		if (this.role == Role.VIEWER && this.hasGoods(ShopGoods.GHOST)) {
+		if (this.role == Role.뷰어 && this.hasGoods(ShopGoods.고스트)) {
 			p.setGameMode(GameMode.SPECTATOR);
 		}
 	}
@@ -135,11 +135,11 @@ public class PlayerData implements Serializable {
 //	this.token = token;
 //    }
 
-	public void plusToken(int token) {
+	public int plusToken(int token) {
 		/*
 		 * pData plus할때는 서버 토큰에서 minus
 		 */
-		this.token += token;
+		return (this.token += token);
 	}
 
 	public boolean minusToken(int token) {

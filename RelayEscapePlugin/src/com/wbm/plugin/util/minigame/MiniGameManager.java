@@ -29,157 +29,156 @@ import com.wbm.plugin.util.minigame.games.Painter;
 import com.wbm.plugin.util.minigame.games.Push;
 
 public class MiniGameManager {
-    // MiniGame 체크하기 위한 Map (이용중이면 true, 비어있으면 false)
-    private Map<MiniGameType, MiniGame> games;
+	private Map<MiniGameType, MiniGame> games;
 
-    // 미니게임 랭크 데이터 저장하는 클래스
-    MiniGameRankManager miniGameRankManager;
+	// 미니게임 랭크 데이터 저장하는 클래스
+	MiniGameRankManager miniGameRankManager;
 
-    PlayerDataManager pDataManager;
+	PlayerDataManager pDataManager;
 
-    public MiniGameManager(PlayerDataManager pDataManager, MiniGameRankManager miniGameRankManager) {
-	this.pDataManager = pDataManager;
-	this.miniGameRankManager = miniGameRankManager;
+	public MiniGameManager(PlayerDataManager pDataManager, MiniGameRankManager miniGameRankManager) {
+		this.pDataManager = pDataManager;
+		this.miniGameRankManager = miniGameRankManager;
 
-	this.games = new HashMap<>();
-	this.initMiniGame();
-    }
-
-    private void initMiniGame() {
-	// 모든 미니게임에서 편하게 접근할 수 있게 static으로 저장
-	MiniGame.pDataManager = this.pDataManager;
-	MiniGame.miniGameRankManager = this.miniGameRankManager;
-
-	// 미니게임 생성
-	List<MiniGame> allGame = new ArrayList<>();
-	allGame.add(new FindTheRed());
-	allGame.add(new Painter());
-	allGame.add(new FindTheYellow());
-	allGame.add(new FindTheBlue());
-	allGame.add(new BattleTown());
-	allGame.add(new JumpMap());
-	allGame.add(new FitTool());
-	allGame.add(new Critical());
-	allGame.add(new Bang());
-	allGame.add(new Bridge());
-	allGame.add(new Push());
-	allGame.add(new Center());
-
-	// rankData에 등록안된 모든 미니게임 등록
-	for (MiniGame game : allGame) {
-	    this.games.put(game.getGameType(), game);
-	}
-    }
-
-    public void enterRoom(MiniGameType gameType, Player p) {
-	/*
-	 * 모든 미니게임]
-	 * 
-	 * 1.SoloMiniGame( 1인용)
-	 * 
-	 * 2.MultiCooperativeMiniGame(다인용 협력)
-	 * 
-	 * 3.MultiBattleMiniGame(다인용 배틀)
-	 * 
-	 */
-
-	MiniGame game = this.games.get(gameType);
-
-	// 시작
-	// activated상태이면 참가 불가능
-	if (game.isActivated()) {
-	    BroadcastTool.sendMessage(p, "game is already started");
-	    return;
-	} else {
-	    game.enterRoom(p, this.pDataManager);
-	}
-    }
-
-    public void processEvent(Event event) {
-
-	/*
-	 * MiniGame에서 이벤트에 취할 행동들 (이벤트 위치에 따라 각 미니게임 클래스로 넘겨주기)
-	 *
-	 * [주의] 이벤트 넘겨주기 전에 꼭! 미니게임 장소에서 발생한 이벤트인지 체크해야 함!
-	 */
-	Location eventLoc;
-
-	if (event instanceof BlockEvent) { // 블럭 관련 이벤트
-	    BlockEvent blockEvent = (BlockEvent) event;
-	    eventLoc = blockEvent.getBlock().getLocation();
-	} else if (event instanceof EntityEvent) { // 엔티티 관련 이벤트
-	    EntityEvent entityEvent = (EntityEvent) event;
-	    eventLoc = entityEvent.getEntity().getLocation();
-	} else if (event instanceof PlayerEvent) { // 플레이어 관련 이벤트
-	    PlayerEvent playerEvent = (PlayerEvent) event;
-	    eventLoc = playerEvent.getPlayer().getLocation();
-	} else {
-	    // 처리할 이벤트 대상이 아닐땐 반환
-	    return;
+		this.games = new HashMap<>();
+		this.initMiniGame();
 	}
 
-	MiniGameType gameType = MiniGameType.getMiniGameWithLocation(eventLoc);
+	private void initMiniGame() {
+		// 모든 미니게임에서 편하게 접근할 수 있게 static으로 저장
+		MiniGame.pDataManager = this.pDataManager;
+		MiniGame.miniGameRankManager = this.miniGameRankManager;
 
-	// ㅇ
-	MiniGame game = this.games.get(gameType);
+		// 미니게임 생성
+		List<MiniGame> allGame = new ArrayList<>();
+		allGame.add(new FindTheRed());
+		allGame.add(new Painter());
+		allGame.add(new FindTheYellow());
+		allGame.add(new FindTheBlue());
+		allGame.add(new BattleTown());
+		allGame.add(new JumpMap());
+		allGame.add(new FitTool());
+		allGame.add(new Critical());
+		allGame.add(new Bang());
+		allGame.add(new Bridge());
+		allGame.add(new Push());
+		allGame.add(new Center());
 
-	if (game != null) {
-
-	    // gameRoom블럭이 활성화 됫을시에만 반응
-	    if (game.isActivated()) {
-		game.processEvent(event);
-	    }
+		// rankData에 등록안된 모든 미니게임 등록
+		for (MiniGame game : allGame) {
+			this.games.put(game.getGameType(), game);
+		}
 	}
-    }
 
-    public void handleMiniGameExitDuringPlaying(Player p, MiniGame.ExitReason reason) {
-	/*
-	 * 플레이어가 진행중이던 game이 있을 때, 강제로 멈춰야 할때 사용하는 메소드
-	 * 
-	 * -MiniGame의 startGame에서 예약해놓은 exitGame() thread 없에야 함
-	 * 
-	 * [주의]이 메소드를 호출하는 위치는 거의 앞쪽이여야 함(인벤, 위치 설정이 되기 때문에)
-	 * 
-	 * 각 미니게임에서 processHandlingMiniGameExitDuringPlaying() 메소드 실행하기
-	 * 
-	 * SoloMiniGame - stopAllTasks(), exitGame()
-	 * 
-	 * CooperativeMiniGame - players에서 탈퇴, 보상 못받음
-	 * 
-	 * BattleMiniGame - players에서 탈퇴, 보상 못받음
-	 * 
-	 * 각 나가는 상황이 어쩔 수 없는 경우에는(RelayTime으로 인한 핸들링) 게임 자체를 정상적으로 종료하기
-	 */
-	if (this.isPlayerPlayingGame(p)) {
-	    MiniGame game = this.getPlayingGame(p);
-	    if (game != null) {
-		game.processHandlingMiniGameExitDuringPlaying(p, this.pDataManager, reason);
-	    }
+	public void enterRoom(MiniGameType gameType, Player p) {
+		/*
+		 * 모든 미니게임]
+		 * 
+		 * 1.SoloMiniGame( 1인용)
+		 * 
+		 * 2.MultiCooperativeMiniGame(다인용 협력)
+		 * 
+		 * 3.MultiBattleMiniGame(다인용 배틀)
+		 * 
+		 */
 
-	    BroadcastTool.debug("handle exit game!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+		MiniGame game = this.games.get(gameType);
+
+		// 시작
+		// activated상태이면 참가 불가능
+		if (game.isActivated()) {
+			BroadcastTool.sendMessage(p, "미니게임이 이미 시작했습니다");
+			return;
+		} else {
+			game.enterRoom(p, this.pDataManager);
+		}
 	}
-    }
 
-    public boolean isPlayerPlayingGame(Player p) {
-	/*
-	 * player가 게임 중인지?
-	 */
-	for (MiniGame game : this.games.values()) {
-	    if (game.isPlayerPlayingGame(p)) {
-		return true;
-	    }
-	}
-	return false;
-    }
+	public void processEvent(Event event) {
 
-    public MiniGame getPlayingGame(Player p) {
-	for (MiniGame game : this.games.values()) {
-	    if (game.isPlayerPlayingGame(p)) {
-		return game;
-	    }
+		/*
+		 * MiniGame에서 이벤트에 취할 행동들 (이벤트 위치에 따라 각 미니게임 클래스로 넘겨주기)
+		 *
+		 * [주의] 이벤트 넘겨주기 전에 꼭! 미니게임 장소에서 발생한 이벤트인지 체크해야 함!
+		 */
+		Location eventLoc;
+
+		if (event instanceof BlockEvent) { // 블럭 관련 이벤트
+			BlockEvent blockEvent = (BlockEvent) event;
+			eventLoc = blockEvent.getBlock().getLocation();
+		} else if (event instanceof EntityEvent) { // 엔티티 관련 이벤트
+			EntityEvent entityEvent = (EntityEvent) event;
+			eventLoc = entityEvent.getEntity().getLocation();
+		} else if (event instanceof PlayerEvent) { // 플레이어 관련 이벤트
+			PlayerEvent playerEvent = (PlayerEvent) event;
+			eventLoc = playerEvent.getPlayer().getLocation();
+		} else {
+			// 처리할 이벤트 대상이 아닐땐 반환
+			return;
+		}
+
+		MiniGameType gameType = MiniGameType.getMiniGameWithLocation(eventLoc);
+
+		// ㅇ
+		MiniGame game = this.games.get(gameType);
+
+		if (game != null) {
+
+			// gameRoom블럭이 활성화 됫을시에만 반응
+			if (game.isActivated()) {
+				game.processEvent(event);
+			}
+		}
 	}
-	return null;
-    }
+
+	public void handleMiniGameExitDuringPlaying(Player p, MiniGame.ExitReason reason) {
+		/*
+		 * 플레이어가 진행중이던 game이 있을 때, 강제로 멈춰야 할때 사용하는 메소드
+		 * 
+		 * -MiniGame의 startGame에서 예약해놓은 exitGame() thread 없에야 함
+		 * 
+		 * [주의]이 메소드를 호출하는 위치는 거의 앞쪽이여야 함(인벤, 위치 설정이 되기 때문에)
+		 * 
+		 * 각 미니게임에서 processHandlingMiniGameExitDuringPlaying() 메소드 실행하기
+		 * 
+		 * SoloMiniGame - stopAllTasks(), exitGame()
+		 * 
+		 * CooperativeMiniGame - players에서 탈퇴, 보상 못받음
+		 * 
+		 * BattleMiniGame - players에서 탈퇴, 보상 못받음
+		 * 
+		 * 각 나가는 상황이 어쩔 수 없는 경우에는(RelayTime으로 인한 핸들링) 게임 자체를 정상적으로 종료하기
+		 */
+		if (this.isPlayerPlayingGame(p)) {
+			MiniGame game = this.getPlayingGame(p);
+			if (game != null) {
+				game.processHandlingMiniGameExitDuringPlaying(p, this.pDataManager, reason);
+			}
+
+			BroadcastTool.debug("handle exit game!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+		}
+	}
+
+	public boolean isPlayerPlayingGame(Player p) {
+		/*
+		 * player가 게임 중인지?
+		 */
+		for (MiniGame game : this.games.values()) {
+			if (game.isPlayerPlayingGame(p)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public MiniGame getPlayingGame(Player p) {
+		for (MiniGame game : this.games.values()) {
+			if (game.isPlayerPlayingGame(p)) {
+				return game;
+			}
+		}
+		return null;
+	}
 
 //    @SuppressWarnings("unchecked")
 //    @Override

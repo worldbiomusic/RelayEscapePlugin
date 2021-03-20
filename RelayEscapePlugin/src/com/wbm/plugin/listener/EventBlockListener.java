@@ -28,13 +28,13 @@ public class EventBlockListener {
 		Player p = e.getPlayer();
 		Block b = p.getLocation().subtract(0, 1, 0).getBlock();
 
-		if (ItemStackTool.isSameWithMaterialNData(ItemStackTool.block2ItemStack(b), ShopGoods.JUMPING.getItemStack())) {
+		if (ItemStackTool.isSameWithMaterialNData(ItemStackTool.block2ItemStack(b), ShopGoods.점핑블럭.getItemStack())) {
 			JUMPING(p, b);
 		} else if (ItemStackTool.isSameWithMaterialNData(ItemStackTool.block2ItemStack(b),
-				ShopGoods.RESPAWN.getItemStack())) {
+				ShopGoods.리스폰블럭.getItemStack())) {
 			RESPAWN(p, b);
 		} else if (ItemStackTool.isSameWithMaterialNData(ItemStackTool.block2ItemStack(b),
-				ShopGoods.TRAP.getItemStack())) {
+				ShopGoods.함정블럭.getItemStack())) {
 			TRAP(p, b);
 		} 
 //		else if (ItemStackTool.isSameWithMaterialNData(ItemStackTool.block2ItemStack(b),
@@ -42,19 +42,19 @@ public class EventBlockListener {
 //			FLICKING(p, b);
 //		} 
 		else if (ItemStackTool.isSameWithMaterialNData(ItemStackTool.block2ItemStack(b),
-				ShopGoods.SOUND_TERROR.getItemStack())) {
+				ShopGoods.소리테러블럭.getItemStack())) {
 			SOUND_TERROR(p, b);
 		} else if (ItemStackTool.isSameWithMaterialNData(ItemStackTool.block2ItemStack(b),
-				ShopGoods.HURT.getItemStack())) {
+				ShopGoods.상처블럭.getItemStack())) {
 			HURT(p, b);
 		} else if (ItemStackTool.isSameWithMaterialNData(ItemStackTool.block2ItemStack(b),
-				ShopGoods.UP_TP.getItemStack())) {
+				ShopGoods.위_순간이동.getItemStack())) {
 			UP_TP(p, b);
 		} else if (ItemStackTool.isSameWithMaterialNData(ItemStackTool.block2ItemStack(b),
-				ShopGoods.DOWN_TP.getItemStack())) {
+				ShopGoods.아래_순간이동.getItemStack())) {
 			DOWN_TP(p, b);
 		} else if (ItemStackTool.isSameWithMaterialNData(ItemStackTool.block2ItemStack(b),
-				ShopGoods.HEAL.getItemStack())) {
+				ShopGoods.회복블럭.getItemStack())) {
 			HEAL(p, b);
 		}
 	}

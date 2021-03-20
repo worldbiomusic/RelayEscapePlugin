@@ -20,7 +20,7 @@ public class FindTheBlue extends BattleMiniGame {
     private static ItemStack plusItem = ItemStackTool.item(Material.POPPY);
 
     public FindTheBlue() {
-	super(MiniGameType.FIND_THE_BLUE);
+	super(MiniGameType.파란꽃_찾기);
     }
 
     @Override
@@ -45,7 +45,7 @@ public class FindTheBlue extends BattleMiniGame {
 
     @Override
     public String[] getGameTutorialStrings() {
-	String[] msg = { "Break Blue flower: +1", "Break Yellow flower: -2", };
+	String[] msg = { "파란 꽃: +1", "노란 꽃: -2", };
 
 	return msg;
     }

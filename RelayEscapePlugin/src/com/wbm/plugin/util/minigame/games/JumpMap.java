@@ -26,7 +26,7 @@ public class JumpMap extends SoloMiniGame {
     int minusDelay;
 
     public JumpMap() {
-	super(MiniGameType.JUMP_MAP);
+	super(MiniGameType.점프맵);
 	
     }
 
@@ -77,8 +77,8 @@ public class JumpMap extends SoloMiniGame {
 
     @Override
     public String[] getGameTutorialStrings() {
-	String[] tutorials = { "break JACK_O_LANTERN: finish game", "Start: +" + this.getTimeLimit(),
-		"every " + this.minusDelay + " sec: -1" };
+	String[] tutorials = { "잭오랜턴 부수기: finish game", "게임 시작: +" + this.getTimeLimit(),
+		"매  " + this.minusDelay + " 초: -1" };
 	return tutorials;
     }
 

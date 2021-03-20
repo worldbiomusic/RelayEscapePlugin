@@ -38,7 +38,7 @@ public class Bang extends BattleMiniGame {
     int killCount;
 
     public Bang() {
-	super(MiniGameType.BANG);
+	super(MiniGameType.빵);
     }
 
     @Override
@@ -90,11 +90,11 @@ public class Bang extends BattleMiniGame {
 
 		    TeleportTool.tp(victim, this.gameType.getSpawnLocation());
 		    PlayerTool.heal(victim);
-		    BroadcastTool.sendTitle(victim, "YOU DIE", "");
-		    BroadcastTool.sendMessage(victim, "You have to stay here until minigame finish");
+		    BroadcastTool.sendTitle(victim, "죽었습니다!", "");
+		    BroadcastTool.sendMessage(victim, "미니게임이 끝날 때까지 여기서 기다리세요");
 		    // damager
 		    this.plusScore(damager, 1);
-		    BroadcastTool.sendMessage(damager, "you kill " + victim.getName());
+		    BroadcastTool.sendMessage(damager, victim.getName() + "를 죽였습니다");
 
 		    // killcount 증가
 		    this.killCount += 1;
@@ -158,7 +158,7 @@ public class Bang extends BattleMiniGame {
 		    int r = (int) (Math.random() * 9);
 		    p.getInventory().setItem(r, bangItem);
 		    // title
-		    BroadcastTool.sendTitle(p, "BANG", "");
+		    BroadcastTool.sendTitle(p, "빵!", "");
 		}
 
 	    }
@@ -181,7 +181,7 @@ public class Bang extends BattleMiniGame {
 
     @Override
     public String[] getGameTutorialStrings() {
-	String[] tutorial = { "hit with bangItem: +1", "die: game over" };
+	String[] tutorial = { "나무 칼로 때리기: +1", "죽음: 게임 오버" };
 	return tutorial;
     }
 

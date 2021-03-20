@@ -92,23 +92,23 @@ public class Commands implements CommandExecutor {
 		// 조건 1.자신의 역할이 viewer일 때, 2.GHOST굿즈 가지고 있을 때
 		// SPECTATOR <-> ADVENTURE 변경
 		PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
-		if (pData.getRole() == Role.VIEWER) {
-			if (pData.hasGoods(ShopGoods.GHOST)) {
+		if (pData.getRole() == Role.뷰어) {
+			if (pData.hasGoods(ShopGoods.고스트)) {
 				GameMode gm = p.getGameMode();
-				if (gm == Role.VIEWER.getGameMode()) {
+				if (gm == Role.뷰어.getGameMode()) {
 					p.setGameMode(GameMode.SPECTATOR);
-					BroadcastTool.sendMessage(p, "Gamemode changed to " + GameMode.SPECTATOR.name());
+					BroadcastTool.sendMessage(p, "게임모드가 " + GameMode.SPECTATOR.name() + " 로 변경되었습니다");
 				} else {
-					p.setGameMode(Role.VIEWER.getGameMode());
-					BroadcastTool.sendMessage(p, "Gamemode changed to " + Role.VIEWER.getGameMode().name());
+					p.setGameMode(Role.뷰어.getGameMode());
+					BroadcastTool.sendMessage(p, "게임모드가 " + Role.뷰어.getGameMode().name() + " 로 변경되었습니다");
 				}
 				// 게임모드 변경후 join으로 이동
 				TeleportTool.tp(p, RoomLocation.MAIN_SPAWN);
 			} else {
-				BroadcastTool.sendMessage(p, "You need GHOST goods");
+				BroadcastTool.sendMessage(p, "GHOST굿즈가 필요합니다");
 			}
 		} else {
-			BroadcastTool.sendMessage(p, "Only Viewer can use");
+			BroadcastTool.sendMessage(p, "맵 제작자만 사용가능합니다");
 		}
 		return true;
 	}
@@ -145,10 +145,10 @@ public class Commands implements CommandExecutor {
 				if (this.pDataManager.getPlayerData(maker) != null) {
 					room.setMaker(maker);
 				} else {
-					BroadcastTool.sendMessage(p, "not exist player");
+					BroadcastTool.sendMessage(p, "존재하지 않는 플레이어");
 				}
 			} else {
-				BroadcastTool.sendMessage(p, "not exist room");
+				BroadcastTool.sendMessage(p, "존재하지 않는 맵");
 			}
 		}
 
@@ -161,7 +161,7 @@ public class Commands implements CommandExecutor {
 			if (this.roomManager.isExistRoomTitle(roomTitle)) {
 				room = this.roomManager.getRoomData(roomTitle);
 			} else {
-				BroadcastTool.sendMessage(p, "not exist room");
+				BroadcastTool.sendMessage(p, "존재하지 않는 맵");
 				return true;
 			}
 
@@ -169,7 +169,7 @@ public class Commands implements CommandExecutor {
 				BroadcastTool.sendMessage(p, room.toString());
 			} else if (cmd.equalsIgnoreCase("remove")) {
 				if (this.roomManager.removeRoom(roomTitle) == null) {
-					BroadcastTool.sendMessage(p, "not exist room");
+					BroadcastTool.sendMessage(p, "존재하지 않는 맵");
 				}
 			}
 		} else if (args.length == 5) {
@@ -184,7 +184,7 @@ public class Commands implements CommandExecutor {
 					Room room = this.roomManager.getRoomData(roomTitle);
 					this.roomManager.setRoom(roomType, room);
 				} else {
-					BroadcastTool.sendMessage(p, "not exist room");
+					BroadcastTool.sendMessage(p, "존재하지 않는 맵");
 				}
 			} else if (cmd.equalsIgnoreCase("save")) {
 				// title이 존재하지 않는 룸일때 저장
@@ -198,7 +198,7 @@ public class Commands implements CommandExecutor {
 					Room room = this.roomManager.getRoomData(roomTitle);
 					this.roomManager.saveRoomData(roomType, room.getMaker(), roomTitle);
 				} else {
-					BroadcastTool.sendMessage(p, "not exist room");
+					BroadcastTool.sendMessage(p, "존재하지 않는 맵");
 				}
 			}
 		}
@@ -208,7 +208,7 @@ public class Commands implements CommandExecutor {
 
 	private boolean room(Player p, String[] args) {
 		// Main room, RelayTime.Making, Role Maker 체크
-		if (this.relayManager.checkRoomAndRelayTimeAndRole(RoomType.MAIN, RelayTime.MAKING, Role.MAKER, p)) {
+		if (this.relayManager.checkRoomAndRelayTimeAndRole(RoomType.메인, RelayTime.메이킹, Role.메이커, p)) {
 
 			// 명령어 cooldown 체크
 			if (CoolDownManager.addPlayer(Setting.CoolDown_Subject_CMD_ROOM, p)) {
@@ -231,11 +231,11 @@ public class Commands implements CommandExecutor {
 					return this.finishRoomMaking(p, args);
 				}
 			} else {
-				BroadcastTool.sendMessage(p, "too fast cmd");
+				BroadcastTool.sendMessage(p, "명령어 입력이 너무 빠릅니다. 조금만 기다려주세요");
 				return true;
 			}
 		}
-		BroadcastTool.sendMessage(p, "this command is for Maker");
+		BroadcastTool.sendMessage(p, "해당 명령어는 메이커를 위한 명령어 입니다");
 		return true;
 	}
 
@@ -252,13 +252,13 @@ public class Commands implements CommandExecutor {
 
 		// 없는 room일경우 반환
 		if (room == null) {
-			BroadcastTool.sendMessage(p, title + " room is not exist");
+			BroadcastTool.sendMessage(p, title + " 존재하지 않는 맵");
 			return true;
 		}
 
 		// room maker가 아닐시 반환
 		if (!room.getMaker().equals(p.getName())) {
-			BroadcastTool.sendMessage(p, "You are not Maker of " + title + " room");
+			BroadcastTool.sendMessage(p, "당신은 " + title + " 맵의 제작자가 아닙니다");
 			return true;
 		}
 
@@ -266,8 +266,8 @@ public class Commands implements CommandExecutor {
 		this.relayManager.setCorePlaced(true);
 
 		// set room
-		this.roomManager.fillSpace(RoomType.MAIN, title);
-		BroadcastTool.sendMessage(p, title + " room is loading...");
+		this.roomManager.fillSpace(RoomType.메인, title);
+		BroadcastTool.sendMessage(p, title + " 맵을 불러왔습니다");
 
 		return true;
 	}
@@ -280,7 +280,7 @@ public class Commands implements CommandExecutor {
 		if (!this.hasRoomManagerItem(p)) {
 			return true;
 		}
-		this.roomManager.setRoomEmpty(RoomType.MAIN);
+		this.roomManager.setRoomEmpty(RoomType.메인);
 
 		// empty룸이므로 core false로 변경
 		this.relayManager.setCorePlaced(false);
@@ -304,13 +304,13 @@ public class Commands implements CommandExecutor {
 		if (args.length != 3) {
 			return false;
 		}
-		if (this.relayManager.checkRoomAndRelayTimeAndRole(RoomType.MAIN, RelayTime.MAKING, Role.MAKER, p)) {
+		if (this.relayManager.checkRoomAndRelayTimeAndRole(RoomType.메인, RelayTime.메이킹, Role.메이커, p)) {
 			String title = args[2];
 			if (this.relayManager.isMainRoomTitleExist(title)) {
-				BroadcastTool.sendMessage(p, "Room title " + title + " is already exist");
+				BroadcastTool.sendMessage(p, "맵 제목이 이미 존재합니다");
 			} else {
 				this.relayManager.setMainRoomTitle(title);
-				BroadcastTool.sendMessage(p, "Room tile set to " + title);
+				BroadcastTool.sendMessage(p, "맵 제목이 " + title + " 로 설정되었습니다");
 			}
 		}
 		return true;
@@ -327,12 +327,12 @@ public class Commands implements CommandExecutor {
 		Role role = pData.getRole();
 
 		// 조건 체크
-		if (time == RelayTime.MAKING) {
-			if (role == Role.MAKER) {
+		if (time == RelayTime.메이킹) {
+			if (role == Role.메이커) {
 
 				// room finish 실행
 				if (!this.relayManager.isCorePlaced()) {
-					BroadcastTool.sendMessage(p, "core(" + Setting.CORE.getType().name() + ") is not placed");
+					BroadcastTool.sendMessage(p, "코어(발광석)가 설치되지 않았습니다");
 					return true;
 				}
 
@@ -343,7 +343,7 @@ public class Commands implements CommandExecutor {
 				int timeLimit = highestMakingTime - Setting.MinimunMakingTime;
 
 				if (leftTime > timeLimit) {
-					BroadcastTool.sendMessage(p, "You can finish after " + (leftTime - timeLimit) + " sec");
+					BroadcastTool.sendMessage(p, (leftTime - timeLimit) + " 초 후에 테스트가 가능합니다");
 					return true;
 				}
 
@@ -360,10 +360,10 @@ public class Commands implements CommandExecutor {
 		 * ROOM_MANAGER goods 가지고 있는지 검사
 		 */
 		PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
-		if (pData.hasGoods(ShopGoods.ROOM_MANAGER)) {
+		if (pData.hasGoods(ShopGoods.맵_관리)) {
 			return true;
 		}
-		BroadcastTool.sendMessage(p, "you need \"ROOM_MANAGER\" for this command");
+		BroadcastTool.sendMessage(p, "\"ROOM_MANAGER\" 굿즈가 필요합니다");
 		return false;
 	}
 
@@ -455,7 +455,6 @@ public class Commands implements CommandExecutor {
 		String pName = args[3];
 		int token = Integer.parseInt(args[4]);
 		UUID uuid = Bukkit.getPlayerUniqueId(pName);
-		
 
 		PlayerData pData = this.pDataManager.getPlayerData(uuid);
 		if (order.equalsIgnoreCase("plus")) {
@@ -552,11 +551,11 @@ public class Commands implements CommandExecutor {
 		p.sendMessage(ChatColor.BOLD + "[Room]");
 
 		p.sendMessage(ChatColor.RED + "MainRoom" + ChatColor.WHITE);
-		Room mainRoom = this.roomManager.getRoom(RoomType.MAIN);
+		Room mainRoom = this.roomManager.getRoom(RoomType.메인);
 		p.sendMessage(mainRoom.toString());
 
 		p.sendMessage(ChatColor.RED + "PracticeRoom" + ChatColor.WHITE);
-		Room practiceRoom = this.roomManager.getRoom(RoomType.PRACTICE);
+		Room practiceRoom = this.roomManager.getRoom(RoomType.연습);
 		if (practiceRoom != null)
 			p.sendMessage(practiceRoom.toString());
 
@@ -708,7 +707,7 @@ public class Commands implements CommandExecutor {
 		Player targetPlayer = Bukkit.getPlayer(targetPlayerName);
 		// 1.player가 null이 아닐때(서버 안나갔을때)(밖에서 거름)
 		if (targetPlayer == null) {
-			BroadcastTool.sendMessage(p, "not exist player");
+			BroadcastTool.sendMessage(p, "존재하지 않는 플레이어 이름");
 			return;
 		}
 
@@ -716,7 +715,7 @@ public class Commands implements CommandExecutor {
 
 		// 2.이미 <name> 플레이어가 다른 미니게임을 플레이하고 있지 않을 때
 		if (this.minigameManager.isPlayerPlayingGame(targetPlayer)) {
-			BroadcastTool.sendMessage(p, targetPlayer.getName() + " is already playing another minigame");
+			BroadcastTool.sendMessage(p, targetPlayer.getName() + "님은 이미 다른 미니게임을 플레이 중입니다");
 			return;
 		}
 
@@ -729,7 +728,7 @@ public class Commands implements CommandExecutor {
 	}
 
 	private void printWaitList(Player p, String[] args, CooperativeMiniGame game) {
-		BroadcastTool.sendMessage(p, "========= WAIT LIST =========");
+		BroadcastTool.sendMessage(p, "========= 대기 리스트 =========");
 		for (Player waiter : game.getAllPlayer()) {
 			BroadcastTool.sendMessage(p, waiter.getName());
 		}
@@ -793,33 +792,12 @@ public class Commands implements CommandExecutor {
 	private boolean printTutorial(Player p, String[] args) {
 		List<String> tutorials = new ArrayList<>();
 		tutorials.add("=================================");
-		tutorials.add("=========      Tutorial       =========");
-		tutorials.add("=================================");
-		tutorials.add("- Player: MAKER or CHALLENGER");
-		tutorials.add("- You can become a Maker if you right-click core(glowstone) MainRoom in ChallengingTime");
-		tutorials.add("- Token is server money");
-		tutorials.add("- Time: Waiting->Making->Testing->Challenging->Waiting...(cycle)");
-		tutorials.add("- You can play MiniGame in MakingTime and TestingTime");
-		tutorials.add("- Chat: enter number 1 ~ 9");
-		tutorials.add("- Commands: /re");
-		tutorials.add(
-				"- Discord: " + ChatColor.YELLOW + ChatColor.BOLD + " https://discord.gg/EwXk9Cd2Ya" + ChatColor.WHITE);
-		tutorials.add("=================================");
-		tutorials.add("=========         END         =========");
-		tutorials.add("=================================");
-
-		tutorials.add("=================================");
 		tutorials.add("=========      튜토리얼       =========");
 		tutorials.add("=================================");
-		tutorials.add("- 플레이어: 메이커 or 도전자");
-		tutorials.add("- 룸의 코어(발광석)을 찾아 우클릭 하면 메이커가 될 수 있습니다");
-		tutorials.add("- 토큰은 서버의 가상화폐입니다");
-		tutorials.add("- 릴레이 순서: Waiting->Making->Testing->Challenging->Waiting...(반복)");
-		tutorials.add("- Making 과 Testing 시간에만 미니게임을 즐길 수 있습니다");
-		tutorials.add("- 채팅: 1번 ~ 9번을 입력하면 됩니다 (ex.1 = HI)");
+		tutorials.add("- 규칙: 맵의 코어(발광석)을 찾아 우클릭 하면 메이커가 될 수 있습니다");
 		tutorials.add("- 커맨드 자세히 보기: /re");
 		tutorials.add(
-				"- Discord: " + ChatColor.YELLOW + ChatColor.BOLD + " https://discord.gg/EwXk9Cd2Ya" + ChatColor.WHITE);
+				"- 디스코드: " + ChatColor.YELLOW + ChatColor.BOLD + " https://discord.gg/EwXk9Cd2Ya" + ChatColor.WHITE + "(클릭)");
 
 		tutorials.add("=================================");
 		tutorials.add("=========         끝         =========");
@@ -833,7 +811,7 @@ public class Commands implements CommandExecutor {
 	}
 
 	private boolean printGoods(Player p, String[] args) {
-		BroadcastTool.sendMessage(p, "========= Goods List =========");
+		BroadcastTool.sendMessage(p, "========= 굿즈 컬렉션 =========");
 		PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
 		for (ShopGoods good : pData.getGoods()) {
 			BroadcastTool.sendMessage(p, good.name());

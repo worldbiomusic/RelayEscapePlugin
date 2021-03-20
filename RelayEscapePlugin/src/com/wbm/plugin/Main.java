@@ -291,13 +291,13 @@ public class Main extends JavaPlugin {
 					// ============sidebar============
 
 					// role
-					Score roleStr = sidebarObj.getScore("" + ChatColor.RED + ChatColor.BOLD + "[Role]");
+					Score roleStr = sidebarObj.getScore("" + ChatColor.RED + ChatColor.BOLD + "[역할]");
 					roleStr.setScore(10);
 					Score role = sidebarObj.getScore("" + r.name());
 					role.setScore(9);
 
 					// relay time
-					Score relayTimeStr = sidebarObj.getScore("" + ChatColor.YELLOW + ChatColor.BOLD + "[RelayTime]");
+					Score relayTimeStr = sidebarObj.getScore("" + ChatColor.YELLOW + ChatColor.BOLD + "[타임]");
 					relayTimeStr.setScore(8);
 					String leftTime = "" + ChatColor.RED + ChatColor.BOLD + relayManager.getLeftTime()
 							+ ChatColor.WHITE;
@@ -305,31 +305,31 @@ public class Main extends JavaPlugin {
 							.getScore("" + relayManager.getCurrentTime().name() + "(" + leftTime + ")");
 					relayTime.setScore(7);
 
-					// Room
-					Score roomStr = sidebarObj.getScore("" + ChatColor.BLUE + ChatColor.BOLD + "[Room]");
-					roomStr.setScore(6);
-					RoomType roomType = RoomLocation.getRoomTypeWithLocation(p.getLocation());
-					String roomString;
-					if (roomType == null) {
-						roomString = "NOT ROOM";
-					} else {
-						roomString = roomType.name();
-					}
-
-					Score room = sidebarObj.getScore("" + roomString);
-					room.setScore(5);
+//					// Room
+//					Score roomStr = sidebarObj.getScore("" + ChatColor.BLUE + ChatColor.BOLD + "[방]");
+//					roomStr.setScore(6);
+//					RoomType roomType = RoomLocation.getRoomTypeWithLocation(p.getLocation());
+//					String roomString;
+//					if (roomType == null) {
+//						roomString = "방 아님";
+//					} else {
+//						roomString = roomType.name();
+//					}
+//
+//					Score room = sidebarObj.getScore("" + roomString);
+//					room.setScore(5);
 
 					// token
-					Score tokenStr = sidebarObj.getScore("" + ChatColor.GREEN + ChatColor.BOLD + "[Token]");
+					Score tokenStr = sidebarObj.getScore("" + ChatColor.GREEN + ChatColor.BOLD + "[토큰]");
 					tokenStr.setScore(4);
 					Score token = sidebarObj.getScore("" + pData.getToken());
 					token.setScore(3);
 
-					// cash
-					Score cashStr = sidebarObj.getScore("" + ChatColor.GOLD + ChatColor.BOLD + "[Cash]");
-					cashStr.setScore(2);
-					Score cash = sidebarObj.getScore("" + pData.getCash());
-					cash.setScore(1);
+//					// cash
+//					Score cashStr = sidebarObj.getScore("" + ChatColor.GOLD + ChatColor.BOLD + "[캐쉬]");
+//					cashStr.setScore(2);
+//					Score cash = sidebarObj.getScore("" + pData.getCash());
+//					cash.setScore(1);
 
 //		    int roomCNT = roomManager.getOwnRooms(p.getName()).size();
 //		    Score roomCount = sidebarObj.getScore("Room: " + roomCNT);
@@ -432,21 +432,21 @@ public class Main extends JavaPlugin {
 			@Override
 			public void run() {
 				List<String> tips = new ArrayList<>();
-				tips.add("Discord :" + ChatColor.GREEN + ChatColor.UNDERLINE + ChatColor.BOLD
-						+ " https://discord.gg/EwXk9Cd2Ya" + ChatColor.WHITE);
-				tips.add("Tutorial: /re tutorial");
-				tips.add("CHAT MACRO: 1 ~ 9 (ex. 1 = HI)");
-				tips.add("Reconnect is good way to go to spawn or give up Room");
-				tips.add("WIKI: " + ChatColor.GREEN + ChatColor.UNDERLINE + ChatColor.BOLD
+				tips.add("디스코드 :" + ChatColor.GREEN + ChatColor.UNDERLINE + ChatColor.BOLD
+						+ " https://discord.gg/EwXk9Cd2Ya" + ChatColor.WHITE +"(링크를 클릭하세요)");
+				tips.add("튜토리얼: /re tutorial");
+				tips.add("채팅 매크로: 1 ~ 9 입력(ex. 1 = 안녕하세요)");
+				tips.add("어떤 상황에 갇혔다면 재접속으로 해결할 수 있습니다");
+				tips.add("위키: " + ChatColor.GREEN + ChatColor.UNDERLINE + ChatColor.BOLD
 						+ "https://github.com/worldbiomusic/RelayEscape/blob/main/server_wiki/Home.md");
-				tips.add("Youtube: " + ChatColor.GREEN + ChatColor.UNDERLINE + ChatColor.BOLD
-						+ "https://youtube.com/playlist?list=PLyAy6dRJHYxuH0S4IkcG86pNgzUdAFnTH");
+				tips.add("유튜브: " + ChatColor.GREEN + ChatColor.UNDERLINE + ChatColor.BOLD
+						+ "https://youtube.com/playlist?list=PLyAy6dRJHYxuH0S4IkcG86pNgzUdAFnTH"+ ChatColor.WHITE +"(링크를 클릭하세요)");
 
 				// random tip 고르기
 				String randomTip = tips.get((int) (Math.random() * tips.size()));
 
 				// 색깔 줘서 알리기
-				String tipMsg = "" + ChatColor.YELLOW + ChatColor.BOLD + "[TIP] " + ChatColor.WHITE + randomTip;
+				String tipMsg = "" + ChatColor.YELLOW + ChatColor.BOLD + "[팁] " + ChatColor.WHITE + randomTip;
 				BroadcastTool.sendMessageToEveryoneWithoutPrefix(tipMsg);
 			}
 		}, 0, 20 * 60 * 5);

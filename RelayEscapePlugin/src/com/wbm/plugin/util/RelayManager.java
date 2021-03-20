@@ -1,3 +1,4 @@
+
 package com.wbm.plugin.util;
 
 import java.util.ArrayList;
@@ -7,6 +8,7 @@ import java.util.Map;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
@@ -78,7 +80,7 @@ public class RelayManager {
 		this.pDataManager = pDataManager;
 		this.roomManager = roomManager;
 
-		this.currentTime = RelayTime.CHALLENGING;
+		this.currentTime = RelayTime.챌린징;
 		this.corePlaced = false;
 		this.timer = new Counter();
 
@@ -92,13 +94,13 @@ public class RelayManager {
 	// Waiting이 시작하려면 무조건 maker가 등록되어 있어야 함!
 	private void startWaiting() {
 //	 RelayTime 관리
-		this.currentTime = RelayTime.WAITING;
+		this.currentTime = RelayTime.웨이팅;
 
 		// main room 에 있는 사람들 lobby로 tp
 		for (Player p : Bukkit.getOnlinePlayers()) {
-			if (RoomLocation.getRoomTypeWithLocation(p.getLocation()) == RoomType.MAIN) {
+			if (RoomLocation.getRoomTypeWithLocation(p.getLocation()) == RoomType.메인) {
 				PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
-				pData.setRole(Role.WAITER);
+				pData.setRole(Role.웨이터);
 				this.changeRoom(p);
 			}
 		}
@@ -114,10 +116,10 @@ public class RelayManager {
 
 	private void startMaking() {
 		// RelayTime 관리
-		this.currentTime = RelayTime.MAKING;
+		this.currentTime = RelayTime.메이킹;
 
 		// make room empty
-		this.roomManager.setRoomEmpty(RoomType.MAIN);
+		this.roomManager.setRoomEmpty(RoomType.메인);
 
 		// room basic title 을 "maker이름 + n"으로 설정
 		this.mainRoomTitle = this.roomManager.getNextTitleWithMakerName(this.getMaker().getName());
@@ -128,7 +130,7 @@ public class RelayManager {
 
 	private void startTesting() {
 		// RelayTime 관리
-		this.currentTime = RelayTime.TESTING;
+		this.currentTime = RelayTime.테스팅;
 
 		// common todo list
 		RelayTimeCommonTODOList(this.getMaker());
@@ -136,7 +138,16 @@ public class RelayManager {
 
 	private void startChallenging() {
 		// RelayTime 관리
-		this.currentTime = RelayTime.CHALLENGING;
+		this.currentTime = RelayTime.챌린징;
+
+		// main room에 있는 사람들 로비로
+		for (Player p : Bukkit.getOnlinePlayers()) {
+			if (RoomLocation.getRoomTypeWithLocation(p.getLocation()) == RoomType.메인) {
+				PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
+				pData.setRole(Role.웨이터);
+				TeleportTool.tp(p, SpawnLocationTool.LOBBY);
+			}
+		}
 
 		this.roomManager.startMainRoomDurationTime();
 
@@ -243,13 +254,13 @@ public class RelayManager {
 	}
 
 	private void playSoundWithRelayTime(Player p) {
-		if (this.currentTime == RelayTime.WAITING) {
+		if (this.currentTime == RelayTime.웨이팅) {
 			PlayerTool.playSound(p, Sound.BLOCK_END_PORTAL_SPAWN);
-		} else if (this.currentTime == RelayTime.MAKING) {
+		} else if (this.currentTime == RelayTime.메이킹) {
 			PlayerTool.playSound(p, Sound.BLOCK_ANVIL_USE);
-		} else if (this.currentTime == RelayTime.TESTING) {
+		} else if (this.currentTime == RelayTime.테스팅) {
 			PlayerTool.playSound(p, Sound.BLOCK_ANVIL_DESTROY);
-		} else if (this.currentTime == RelayTime.CHALLENGING) {
+		} else if (this.currentTime == RelayTime.챌린징) {
 			PlayerTool.playSound(p, Sound.ENTITY_ENDERMAN_TELEPORT);
 		}
 	}
@@ -263,10 +274,10 @@ public class RelayManager {
 		RelayTime currentTime = getCurrentTime();
 
 		// MakingTime 일때 goods(MAKINGTIME_##)검사해서 추가시간 적용
-		if (currentTime == RelayTime.MAKING) {
+		if (currentTime == RelayTime.메이킹) {
 			// TIME_NN 굿즈 검사해서 MakingTime 조절
 			PlayerData pData = this.pDataManager.getPlayerData(this.getMaker().getUniqueId());
-			durationTime = 60 * pData.getRoomSettingGoodsHighestValue("MAKINGTIME");
+			durationTime = 60 * pData.getRoomSettingGoodsHighestValue("제작시간");
 		}
 
 		// task 예약
@@ -275,21 +286,21 @@ public class RelayManager {
 					@Override
 					public void run() {
 						// time에 따른 실행
-						if (currentTime == RelayTime.WAITING) {
+						if (currentTime == RelayTime.웨이팅) {
 							startNextTime();
-						} else if (currentTime == RelayTime.MAKING) {
+						} else if (currentTime == RelayTime.메이킹) {
 							if (!isCorePlaced()) {
-								BroadcastTool.sendMessageToEveryone("Maker failed to make the room");
+								BroadcastTool.sendMessageToEveryone("메이커가 맵 제작을 실패했습니다");
 								resetRelay();
 							} else {
 								startNextTime();
 							}
-						} else if (currentTime == RelayTime.TESTING) {
+						} else if (currentTime == RelayTime.테스팅) {
 							// reset relay
-							BroadcastTool.sendMessageToEveryone("Maker couldn't pass the room test");
+							BroadcastTool.sendMessageToEveryone("메이커가 맵 테스트를 실패했습니다");
 							resetRelay();
-						} else if (currentTime == RelayTime.CHALLENGING) {
-							BroadcastTool.sendMessageToEveryone("No one pass the room");
+						} else if (currentTime == RelayTime.챌린징) {
+							BroadcastTool.sendMessageToEveryone("아무도 맵을 클리어하지 못했습니다");
 
 							resetRelay();
 						}
@@ -332,14 +343,14 @@ public class RelayManager {
 
 		RelayTime time = this.currentTime;
 
-		if (time == RelayTime.WAITING) {
+		if (time == RelayTime.웨이팅) {
 			this.startMaking();
-		} else if (time == RelayTime.MAKING) {
+		} else if (time == RelayTime.메이킹) {
 			this.startTesting();
-		} else if (time == RelayTime.TESTING) {
+		} else if (time == RelayTime.테스팅) {
 			// core부수면 바로 시작
 			this.startChallenging();
-		} else if (time == RelayTime.CHALLENGING) {
+		} else if (time == RelayTime.챌린징) {
 			this.startWaiting();
 		}
 
@@ -351,13 +362,13 @@ public class RelayManager {
 		// 먼저 현재 time task 중지
 		this.stopCurrentTime();
 
-		if (anotherTime == RelayTime.WAITING) {
+		if (anotherTime == RelayTime.웨이팅) {
 			this.startWaiting();
-		} else if (anotherTime == RelayTime.MAKING) {
+		} else if (anotherTime == RelayTime.메이킹) {
 			this.startMaking();
-		} else if (anotherTime == RelayTime.TESTING) {
+		} else if (anotherTime == RelayTime.테스팅) {
 			this.startTesting();
-		} else if (anotherTime == RelayTime.CHALLENGING) {
+		} else if (anotherTime == RelayTime.챌린징) {
 			this.startChallenging();
 		}
 
@@ -375,13 +386,13 @@ public class RelayManager {
 
 		// Room 초기화
 		Room randomRoom = this.roomManager.getRandomRoomData();
-		this.roomManager.setRoom(RoomType.MAIN, randomRoom);
-		this.roomManager.setRoom(RoomType.PRACTICE, randomRoom);
+		this.roomManager.setRoom(RoomType.메인, randomRoom);
+		this.roomManager.setRoom(RoomType.연습, randomRoom);
 
 		// RelayTime set to CHALLENGING
-		this.startAnotherTime(RelayTime.CHALLENGING);
+		this.startAnotherTime(RelayTime.챌린징);
 
-		BroadcastTool.sendMessageToEveryone("MainRoom Reset");
+		BroadcastTool.sendMessageToEveryone("새로운 맵이 등장합니다");
 	}
 
 	public void resetRelaySetting() {
@@ -392,11 +403,11 @@ public class RelayManager {
 		if (this.pDataManager.doesMakerExist()) {
 			PlayerData makerPData = this.pDataManager.getPlayerData(this.getMaker().getUniqueId());
 			// title이 time에 전송되야 되서... 어쩔수없이 변경해봄
-			this.currentTime = RelayTime.CHALLENGING;
-			makerPData.setRole(Role.WAITER);
+			this.currentTime = RelayTime.챌린징;
+			makerPData.setRole(Role.웨이터);
 			this.changeRoom(this.getMaker());
 		}
-		
+
 //			PlayerDataManager maker = null 처리
 		this.pDataManager.unregisterMaker();
 	}
@@ -514,12 +525,12 @@ public class RelayManager {
 		PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
 		Role role = pData.getRole(); // 기본값
 
-		if (this.currentTime == RelayTime.MAKING && this.pDataManager.isMaker(p)) {
-			role = Role.MAKER;
-		} else if (this.currentTime == RelayTime.TESTING && this.pDataManager.isMaker(p)) {
-			role = Role.TESTER;
-		} else if (this.currentTime == RelayTime.CHALLENGING) {
-			role = Role.WAITER;
+		if (this.currentTime == RelayTime.메이킹 && this.pDataManager.isMaker(p)) {
+			role = Role.메이커;
+		} else if (this.currentTime == RelayTime.테스팅 && this.pDataManager.isMaker(p)) {
+			role = Role.테스터;
+		} else if (this.currentTime == RelayTime.챌린징) {
+			role = Role.웨이터;
 		}
 
 		pData.setRole(role);
@@ -536,15 +547,15 @@ public class RelayManager {
 		Role role = pData.getRole();
 
 		switch (role) {
-		case WAITER:
-			if (RoomLocation.getRoomTypeWithLocation(p.getLocation()) == RoomType.MAIN) {
+		case 웨이터:
+			if (RoomLocation.getRoomTypeWithLocation(p.getLocation()) == RoomType.메인) {
 				TeleportTool.tp(p, SpawnLocationTool.LOBBY);
 			}
 			break;
-		case MAKER:
-		case TESTER:
-		case CHALLENGER:
-		case VIEWER:
+		case 메이커:
+		case 테스터:
+		case 챌린저:
+		case 뷰어:
 			TeleportTool.tp(p, RoomLocation.MAIN_SPAWN);
 			break;
 		}
@@ -558,33 +569,34 @@ public class RelayManager {
 		 */
 		PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
 		Role role = pData.getRole();
-		if (this.currentTime == RelayTime.WAITING) {
+		if (this.currentTime == RelayTime.웨이팅) {
 			// 특별히 WaitingTime일때는 누군가 부신거므로 코어 부셔졌다고 모두에게 메세지 전송
-			BroadcastTool.sendMessage(p, this.getMaker().getName() + " break the core");
-		} else if (role == Role.MAKER) {
-			BroadcastTool.sendMessage(p, "You can save room with title " + "/re room title [title] "
-					+ "\n(basic title: " + this.mainRoomTitle + ")");
-		} else if (role == Role.TESTER) {
-			BroadcastTool.sendMessage(p, "You must break core to save this room");
-		} else if (role == Role.CHALLENGER) {
-			Room room = this.roomManager.getRoom(RoomType.MAIN);
+			BroadcastTool.sendMessage(p, this.getMaker().getName() + " 님이 맵을 클리어했습니다");
+		} else if (role == Role.메이커) {
+			BroadcastTool.sendMessage(p, Material.BRICK.name() + "를 우클릭해서 블럭을 꺼내서 사용하세요");
+			BroadcastTool.sendMessage(p,
+					"\"/re room title <맵제목>\" 명령어로 맵 이름을 바꿔서 저장할 수 있습니다" + "\n(기본 제목: " + this.mainRoomTitle + ")");
+		} else if (role == Role.테스터) {
+			BroadcastTool.sendMessage(p, "코어(발광석)을 우클릭해서 테스트를 통과해야 합니다");
+		} else if (role == Role.챌린저) {
+			Room room = this.roomManager.getRoom(RoomType.메인);
 			String roomTitle = room.getTitle();
 			String roomMaker = room.getMaker();
-			BroadcastTool.sendMessage(p, "Main room: " + roomTitle + "(" + roomMaker + ")");
+			BroadcastTool.sendMessage(p, "맵 제목: " + roomTitle + "(제작자: " + roomMaker + ")");
 			if (Setting.DEBUG) {
 				BroadcastTool.debug("roomData count : " + this.roomManager.getAllRoomCount());
 			}
-		} else if (role == Role.VIEWER) {
-			Room room = this.roomManager.getRoom(RoomType.MAIN);
+		} else if (role == Role.뷰어) {
+			Room room = this.roomManager.getRoom(RoomType.메인);
 			String roomTitle = room.getTitle();
 			String roomMaker = room.getMaker();
-			BroadcastTool.sendMessage(p, "Main room: " + roomTitle + "(" + roomMaker + ")");
-			BroadcastTool.sendMessage(p, "You are Viewer in your room");
+			BroadcastTool.sendMessage(p, "맵 제목: " + roomTitle + "(제작자: " + roomMaker + ")");
+			BroadcastTool.sendMessage(p, "해당 맵의 메이커이므로 관전자 모드로 바뀝니다");
 		}
 
 		System.out.println(this.currentTime.name());
 		// 공통 title 전송
-		BroadcastTool.sendTitle(p, this.currentTime.name(), "you are " + role.name());
+		BroadcastTool.sendTitle(p, this.currentTime.name(), "역할 " + role.name());
 	}
 
 	public Map<String, List<Player>> getPlayerLog() {

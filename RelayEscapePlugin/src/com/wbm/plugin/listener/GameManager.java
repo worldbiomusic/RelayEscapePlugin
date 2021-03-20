@@ -1,5 +1,7 @@
 package com.wbm.plugin.listener;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
@@ -15,7 +17,6 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
-import org.bukkit.event.player.PlayerPortalEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 import com.wbm.plugin.data.PlayerData;
@@ -32,6 +33,7 @@ import com.wbm.plugin.util.enums.Role;
 import com.wbm.plugin.util.enums.RoomType;
 import com.wbm.plugin.util.general.BanItemTool;
 import com.wbm.plugin.util.general.BroadcastTool;
+import com.wbm.plugin.util.general.ChatColorTool;
 import com.wbm.plugin.util.general.InventoryTool;
 import com.wbm.plugin.util.general.LocationTool;
 import com.wbm.plugin.util.general.PlayerTool;
@@ -82,7 +84,7 @@ public class GameManager implements Listener {
 		// PlayerDataManager에 데이터 없는지 확인 (= 서버 처음 들어옴)
 		if (this.pDataManager.isFirstJoin(uuid)) {
 			String name = p.getName();
-			pData = new PlayerData(uuid, name, Role.WAITER);
+			pData = new PlayerData(uuid, name, Role.웨이터);
 			pData.plusToken(Setting.FIRST_JOIN_TOKEN);
 
 			// playerDataManager에 데이터 add
@@ -91,7 +93,7 @@ public class GameManager implements Listener {
 		// PlayerData가 이미 있을때
 		else {
 			// role을 waiter로만 변경
-			this.pDataManager.getPlayerData(uuid).setRole(Role.WAITER);
+			this.pDataManager.getPlayerData(uuid).setRole(Role.웨이터);
 		}
 	}
 
@@ -109,7 +111,8 @@ public class GameManager implements Listener {
 		TeleportTool.tp(p, SpawnLocationTool.LOBBY);
 
 		// give basic goods
-		// 들어올때마다 실행되야 하는 이유: BASIC_GOODS에 새로운 기본 굿즈가 추가되면 전에 있던 플레이어들도 기본 굿즈를 받아야 하기 때문에
+		// 들어올때마다 실행되야 하는 이유: BASIC_GOODS에 새로운 기본 굿즈가 추가되면 전에 있던 플레이어들도 기본 굿즈를 받아야 하기
+		// 때문에
 		this.giveBasicGoods(p);
 
 		// 인벤 초기화 후 굿즈 제공
@@ -136,7 +139,7 @@ public class GameManager implements Listener {
 		InventoryTool.clearPlayerInv(p);
 		ShopGoods.giveGoodsToPlayer(pDataManager, p);
 		// 예외] REDUCE_TIME은 RelayTIme이 바뀔때 처음에만 지급
-		InventoryTool.removeItemFromPlayer(p, ShopGoods.REDUCE_TIME.getItemStack());
+		InventoryTool.removeItemFromPlayer(p, ShopGoods.도전시간_줄이기.getItemStack());
 	}
 
 	void giveBasicGoods(Player p) {
@@ -152,7 +155,7 @@ public class GameManager implements Listener {
 
 		// 모든 ShopGOods 지급
 		for (ShopGoods allGood : ShopGoods.values()) {
-			if(allGood == ShopGoods.TOKEN_500) {
+			if (allGood == ShopGoods.토큰_500) {
 				continue;
 			}
 			pData.addGoods(allGood);
@@ -177,7 +180,7 @@ public class GameManager implements Listener {
 		PlayerData pData = this.pDataManager.getPlayerData(e.getPlayer().getUniqueId());
 
 		// Main Room 체크
-		if (RoomLocation.getRoomTypeWithLocation(b.getLocation()) == RoomType.MAIN) {
+		if (RoomLocation.getRoomTypeWithLocation(b.getLocation()) == RoomType.메인) {
 			this.onPlayerBreakBlockInMainRoom(e);
 		} else if (pData.isPlayingMiniGame()) {
 			// minigame 플레이중일때만 e넘기기
@@ -205,28 +208,28 @@ public class GameManager implements Listener {
 		Block b = e.getClickedBlock();
 
 		if (e.getAction() == Action.RIGHT_CLICK_BLOCK) {
-			if (RoomLocation.getRoomTypeWithLocation(b.getLocation()) == RoomType.PRACTICE) {
-				if (role == Role.WAITER) {
+			if (RoomLocation.getRoomTypeWithLocation(b.getLocation()) == RoomType.연습) {
+				if (role == Role.웨이터) {
 					// core 부수면 token 지급
 					if (b.getType() == Material.GLOWSTONE) {
 						// token 지급
 						int token = Setting.PRACTICE_ROOM_CLEAR_TOKEN;
 
-						BroadcastTool.sendMessage(p, "token + " + token);
+						BroadcastTool.sendMessage(p, "토큰 + " + token);
 
 						// practice room안에 있는 플레이어들 모두 lobby로 이동
 						for (Player allP : Bukkit.getOnlinePlayers()) {
 							RoomType roomType = RoomLocation.getRoomTypeWithLocation(allP.getLocation());
-							if (roomType == RoomType.PRACTICE) {
+							if (roomType == RoomType.연습) {
 								TeleportTool.tp(allP, SpawnLocationTool.LOBBY);
 								// 누가 clear했는지 알려주기
-								BroadcastTool.sendMessage(allP, p.getName() + " clear the PRACTICE room");
+								BroadcastTool.sendMessage(allP, p.getName() + " 님이 연습룸을 클리어했습니다");
 							}
 						}
 
 						// random room으로 변경
 						Room randomRoom = this.roomManager.getRandomRoomData();
-						this.roomManager.setRoom(RoomType.PRACTICE, randomRoom);
+						this.roomManager.setRoom(RoomType.연습, randomRoom);
 					}
 				}
 			}
@@ -242,7 +245,7 @@ public class GameManager implements Listener {
 		e.setCancelled(true);
 
 		// Main Room 체크
-		if (RoomLocation.getRoomTypeWithLocation(b.getLocation()) == RoomType.MAIN) {
+		if (RoomLocation.getRoomTypeWithLocation(b.getLocation()) == RoomType.메인) {
 			this.onPlayerPlaceBlockInMainRoom(e);
 		}
 	}
@@ -261,25 +264,25 @@ public class GameManager implements Listener {
 				return;
 			}
 			// 블럭의 위치가 MAIN룸 내부인지 체크
-			if (RoomLocation.getRoomTypeWithLocation(block.getLocation()) == RoomType.MAIN) {
+			if (RoomLocation.getRoomTypeWithLocation(block.getLocation()) == RoomType.메인) {
 				// 플레이어가 MAIN, TESTING, TESER 체크
-				if (this.relayManager.checkRoomAndRelayTimeAndRole(RoomType.MAIN, RelayTime.TESTING, Role.TESTER, p)) {
+				if (this.relayManager.checkRoomAndRelayTimeAndRole(RoomType.메인, RelayTime.테스팅, Role.테스터, p)) {
 
-					BroadcastTool.sendMessage(p, "saving room...(10 sec)");
+					BroadcastTool.sendMessage(p, "맵을 저장했습니다");
 
 //					Bukkit
 					// 1.save room, set main room
 					String title = this.relayManager.getMainRoomTitle();
-					this.roomManager.saveRoomData(RoomType.MAIN, p.getName(), title);
+					this.roomManager.saveRoomData(RoomType.메인, p.getName(), title);
 					Room mainRoom = this.roomManager.getRoomData(title);
-					this.roomManager.setRoom(RoomType.MAIN, mainRoom);
+					this.roomManager.setRoom(RoomType.메인, mainRoom);
 
 					// 2.next relay 시작
 					this.relayManager.startNextTime();
 				}
 				// 플레이어가 MAIN, CHALLENGING, CHALLENGER 체크
-				else if (this.relayManager.checkRoomAndRelayTimeAndRole(RoomType.MAIN, RelayTime.CHALLENGING,
-						Role.CHALLENGER, p)) {
+				else if (this.relayManager.checkRoomAndRelayTimeAndRole(RoomType.메인, RelayTime.챌린징,
+						Role.챌린저, p)) {
 					// resetRelaySettings
 					this.relayManager.resetRelaySetting();
 
@@ -290,11 +293,11 @@ public class GameManager implements Listener {
 					this.pDataManager.registerMaker(p);
 
 					// 3. main room clearCount +1, 제작자에게 토큰 지급
-					Room room = this.roomManager.getRoom(RoomType.MAIN);
+					Room room = this.roomManager.getRoom(RoomType.메인);
 					room.addClearCount(1);
 					this.roomManager.recordMainRoomDurationTime();
 					this.roomManager.plusTokenToRoomMaker(pDataManager, room, this.getRoomMakerToken());
-					this.roomManager.setRoomEmpty(RoomType.MAIN);
+					this.roomManager.setRoomEmpty(RoomType.메인);
 
 					// 4.next relay 시작
 					this.relayManager.startNextTime();
@@ -352,7 +355,7 @@ public class GameManager implements Listener {
 		// maker의 방이 클리어됬을때 사용한 시간이 ChallengingTime의 절반에 가까울 수록 토큰을 많이 얻는다
 		// 현재 토큰 기준은 10개
 		int tokenMax = 10;
-		int challengingTimeMax = RelayTime.CHALLENGING.getAmount();
+		int challengingTimeMax = RelayTime.챌린징.getAmount();
 		int midTime = challengingTimeMax / 2;
 		int challengingLeftTime = this.relayManager.getLeftTime();
 		// 밑의 공식이 map같은 함수역할
@@ -372,7 +375,7 @@ public class GameManager implements Listener {
 		RelayTime time = this.relayManager.getCurrentTime();
 
 		// making time
-		if (time == RelayTime.MAKING) {
+		if (time == RelayTime.메이킹) {
 			Player p = e.getPlayer();
 			// maker
 			if (this.pDataManager.isMaker(p)) {
@@ -382,7 +385,7 @@ public class GameManager implements Listener {
 
 				// core검사
 				if (core.getType() == Material.GLOWSTONE) {
-					BroadcastTool.sendMessage(p, "core is broken");
+					BroadcastTool.sendMessage(p, "코어가 부숴졌습니다");
 					this.relayManager.setCorePlaced(false);
 				}
 			}
@@ -400,7 +403,7 @@ public class GameManager implements Listener {
 		Role role = pData.getRole();
 		RelayTime time = this.relayManager.getCurrentTime();
 		// making time && maker
-		if (time == RelayTime.MAKING && role == Role.MAKER) {
+		if (time == RelayTime.메이킹 && role == Role.메이커) {
 			// 기본적으로 설치할수있게
 			e.setCancelled(false);
 
@@ -409,25 +412,25 @@ public class GameManager implements Listener {
 
 			// HIGH_## 굿즈중에서 가장 높은 굿즈 검색
 //	    String kind = ShopGoods.HIGH_10.name().split("_")[0];
-			String kind = "HIGH";
+			String kind = "높이제한";
 			int allowedHigh = pData.getRoomSettingGoodsHighestValue(kind);
 
 			// 높이제한 검사
 			if (blockHigh > allowedHigh) {
 				// 높이제한보다 높을때 취소
-				BroadcastTool.sendMessage(p, "you can place block up to " + allowedHigh);
-				BroadcastTool.sendMessage(p, "HIGH_## Goods can highten your limit");
+				BroadcastTool.sendMessage(p, "당신은 " + allowedHigh + "칸까지 블럭을 설치할 수 있습니다");
+				BroadcastTool.sendMessage(p, "높이제한 굿즈로 높이제한을 해제할 수 있습니다");
 				e.setCancelled(true);
 			} else {
 				// 높이보다 낮으면 가능, 그리고 core 체크
 				if (block.getType() == Material.GLOWSTONE) {
 					if (this.relayManager.isCorePlaced()) {
 						// 설치 o 있을때
-						BroadcastTool.sendMessage(p, "core is already placed");
+						BroadcastTool.sendMessage(p, "코어(발광석)가 이미 설치되어있습니다");
 						e.setCancelled(true);
 					} else {
 						// 설치 x 있을때
-						BroadcastTool.sendMessage(p, "core is placed (max: 1)");
+						BroadcastTool.sendMessage(p, "코어(발광석)가 설치되었습니다(최대 갯수: 1)");
 						this.relayManager.setCorePlaced(true);
 					}
 				}
@@ -438,7 +441,13 @@ public class GameManager implements Listener {
 	@EventHandler
 	public void onPlayerJoin(PlayerJoinEvent e) {
 		Player p = e.getPlayer();
-		BroadcastTool.sendTitle(p, "RelayEscape", "");
+		List<String> joinMsg = new ArrayList<>();
+		joinMsg.add("반가워요!");
+		joinMsg.add("ㅎㅇ!");
+		joinMsg.add("안녕하세요!");
+		String randomMsg = joinMsg.get((int) (Math.random() * joinMsg.size()));
+
+		BroadcastTool.sendTitle(p, ChatColorTool.random() + randomMsg, "");
 		// PlayerData 처리
 		this.TODOListWhenplayerJoinServer(p);
 	}
@@ -453,9 +462,9 @@ public class GameManager implements Listener {
 				RelayTime time = this.relayManager.getCurrentTime();
 
 				// Time = WAITING, MAKING, TESTING일떄 maker가 나가면 resetRelay()
-				if (time == RelayTime.WAITING || time == RelayTime.MAKING || time == RelayTime.TESTING) {
+				if (time == RelayTime.웨이팅 || time == RelayTime.메이킹 || time == RelayTime.테스팅) {
 					// msg보내기
-					BroadcastTool.sendTitleToEveryone("Relay Reset", "Maker quit the server");
+					BroadcastTool.sendTitleToEveryone("맵 리셋", "메이커가 서버를 나갔습니다");
 
 					// reset relay
 					this.relayManager.resetRelay();
@@ -477,17 +486,17 @@ public class GameManager implements Listener {
 			PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
 			Role role = pData.getRole();
 
-			if (time == RelayTime.CHALLENGING && role == Role.WAITER) {
-				BroadcastTool.sendTitle(p, "MAIN ROOM", "");
+			if (time == RelayTime.챌린징 && role == Role.웨이터) {
+				BroadcastTool.sendTitle(p, "메인 방", "");
 
 				TeleportTool.tp(p, RoomLocation.MAIN_SPAWN);
 
-				Room room = this.roomManager.getRoom(RoomType.MAIN);
+				Room room = this.roomManager.getRoom(RoomType.메인);
 				if (p.getName().equalsIgnoreCase(room.getMaker())) {
-					pData.setRole(Role.VIEWER);
+					pData.setRole(Role.뷰어);
 					this.relayManager.changeRoom(p);
 				} else {
-					pData.setRole(Role.CHALLENGER);
+					pData.setRole(Role.챌린저);
 					this.relayManager.changeRoom(p);
 				}
 			}

@@ -27,7 +27,7 @@ public class Painter extends SoloMiniGame {
     Material mat1, mat2;
 
     public Painter() {
-	super(MiniGameType.PAINTER);
+	super(MiniGameType.페인터);
     }
 
     @Override
@@ -77,7 +77,7 @@ public class Painter extends SoloMiniGame {
     @Override
     public String[] getGameTutorialStrings() {
 	// TODO Auto-generated method stub
-	String[] msg = { "All Same Block: +1", };
+	String[] msg = { "블럭 부수기: 다른 블럭으로 바뀜", "모두 같은 블럭: +1"};
 
 	return msg;
     }

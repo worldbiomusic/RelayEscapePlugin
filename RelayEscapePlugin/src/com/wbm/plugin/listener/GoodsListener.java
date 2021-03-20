@@ -7,6 +7,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -58,6 +59,15 @@ public class GoodsListener implements Listener {
 		ItemStack item = e.getItem();
 		ShopGoods good = null;
 
+		Block b = e.getClickedBlock();
+		if (e.getAction() == Action.RIGHT_CLICK_BLOCK) {
+			Material mat = b.getType();
+			// GLOWSTONE인지 체크
+			if (mat.equals(Material.GLOWSTONE)) {
+				return;
+			}
+		}
+
 		// item이 goods인지 체크
 		for (ShopGoods goods : ShopGoods.values()) {
 			if (ItemStackTool.isSameWithMaterialNDisplay(item, goods.getItemStack())) {
@@ -102,9 +112,9 @@ public class GoodsListener implements Listener {
 		Inventory inv = Bukkit.createInventory(null, 54, invTitle);
 
 		// 45 46 47 48 49 50 51 52 53
-		inv.setItem(48, ItemStackTool.item(Material.LEVER, "previous page"));
-		inv.setItem(49, ItemStackTool.item(Material.PAPER, "PAGE " + page));
-		inv.setItem(50, ItemStackTool.item(Material.REDSTONE_TORCH, "next page"));
+		inv.setItem(48, ItemStackTool.item(Material.LEVER, "이전"));
+		inv.setItem(49, ItemStackTool.item(Material.PAPER, "페이지 " + page));
+		inv.setItem(50, ItemStackTool.item(Material.REDSTONE_TORCH, "다음"));
 
 		// inventory는 무조건 0~44칸까지만 채워짐
 		int invIndex = 0;
@@ -173,11 +183,13 @@ public class GoodsListener implements Listener {
 		GoodsRole[] goodsRoles = null;
 
 		// 해당되는 title을 가지고 있는 inventory만 클릭 반응
-		if (invTitle.equalsIgnoreCase(ShopGoods.CHEST.name())) {
+		if (invTitle.equalsIgnoreCase(ShopGoods.상자.name())) {
 			goodsRoles = new GoodsRole[] { GoodsRole.MAKING_BLOCK };
 			e.setCancelled(false);
-		} else if (invTitle.equalsIgnoreCase(p.getName() + "'s Goods List")) {
+		} else if (invTitle.equalsIgnoreCase("굿즈 컬렉션")) {
 			goodsRoles = GoodsRole.values();
+			e.setCancelled(true);
+		} else if (e.getCurrentItem().equals(ShopGoods.상자.getItemStack())) {
 			e.setCancelled(true);
 		} else {
 			return;
@@ -200,7 +212,7 @@ public class GoodsListener implements Listener {
 
 		// previous, next click 구현
 		if (displayName != null) {
-			if (displayName.equalsIgnoreCase("previous page")) {
+			if (displayName.equalsIgnoreCase("이전")) {
 				e.setCancelled(true);
 				if (page >= 1) {
 					// page 0부터 시작함
@@ -208,7 +220,7 @@ public class GoodsListener implements Listener {
 					Inventory nextInv = this.getPlayerGoodsPageInv(p, invTitle, page, goodsRoles);
 					p.openInventory(nextInv);
 				}
-			} else if (displayName.equalsIgnoreCase("next page")) {
+			} else if (displayName.equalsIgnoreCase("다음")) {
 				e.setCancelled(true);
 				if (inv.getItem(44) != null) {
 					// 44칸이 비어있으면 꽉 안 찬 것임
@@ -216,7 +228,7 @@ public class GoodsListener implements Listener {
 					Inventory nextInv = this.getPlayerGoodsPageInv(p, invTitle, page, goodsRoles);
 					p.openInventory(nextInv);
 				}
-			} else if (displayName.contains("PAGE")) {
+			} else if (displayName.contains("페이지")) {
 				e.setCancelled(true);
 			}
 		}
@@ -421,26 +433,26 @@ public class GoodsListener implements Listener {
 
 	private void useGoods(Player p, ShopGoods good) {
 		PlayerData pData = this.pDataManager.getPlayerData(p.getUniqueId());
-		if (good == ShopGoods.GOODS_LIST) {
+		if (good == ShopGoods.굿즈_컬렉션) {
 			// goods들을 포함한 GUI inventory 보여주기 (클락 불가능)
-			Inventory inv = this.getPlayerGoodsPageInv(p, p.getName() + "'s Goods List", 0, GoodsRole.values());
-//	    Inventory inv = this.getPlayerGoodsPageInv(p, p.getName() + "'s Goods List", 0, GoodsRole.MAKING_BLOCK);
+			Inventory inv = this.getPlayerGoodsPageInv(p, "굿즈 컬렉션", 0, GoodsRole.values());
+//	    Inventory inv = this.getPlayerGoodsPageInv(p, p.getName() + "굿즈 컬렉션", 0, GoodsRole.MAKING_BLOCK);
 			p.openInventory(inv);
-		} else if (good == ShopGoods.TOKEN_500) {
+		} else if (good == ShopGoods.토큰_500) {
 			// token 500 추가
 			pData.plusToken(500);
 			// 클릭시 playerData에서 굿즈 제거
-			pData.removeGoods(ShopGoods.TOKEN_500);
+			pData.removeGoods(ShopGoods.토큰_500);
 			// 클릭시 현재 인벤토리에서 굿즈 제거
-			InventoryTool.removeItemFromPlayer(p, ShopGoods.TOKEN_500.getItemStack());
+			InventoryTool.removeItemFromPlayer(p, ShopGoods.토큰_500.getItemStack());
 			// 알림
-			BroadcastTool.sendMessage(p, "You got 500 Token!");
-		} else if (good == ShopGoods.COLOR_CHAT) {
+			BroadcastTool.sendMessage(p, "+ 500 토큰!");
+		} else if (good == ShopGoods.컬러_채팅) {
 			// 알림
 			ChatColor c = ChatColorTool.random();
 			p.setDisplayName(c + p.getName() + ChatColor.WHITE);
-			BroadcastTool.sendMessage(p, "Your name color set to: " + c + c.name());
-		} else if (good == ShopGoods.UNDER_BLOCK) {
+			BroadcastTool.sendMessage(p, "채팅 이름 색깔: " + c + c.name());
+		} else if (good == ShopGoods.공중블럭) {
 			// 발밑에 블럭 생성
 			Location underFootLoc = p.getLocation().clone();
 			// 높이 제한 검사 (Goods) (4시작인데 4에 놓으면 0이므로 +1 을 해줌)
@@ -448,27 +460,27 @@ public class GoodsListener implements Listener {
 
 			// HIGH_## 굿즈중에서 가장 높은 굿즈 검색
 //	    String kind = ShopGoods.HIGH_10.name().split("_")[0];
-			String kind = "HIGH";
+			String kind = "높이제한";
 			int allowedHigh = pData.getRoomSettingGoodsHighestValue(kind);
 
 			// 높이제한 검사
 			if (blockHigh > allowedHigh) {
 				// 높이제한보다 높을때 취소
-				BroadcastTool.sendMessage(p, "you can place block up to " + allowedHigh);
-				BroadcastTool.sendMessage(p, "HIGH_## Goods can highten your limit");
+				BroadcastTool.sendMessage(p, "당신은 " + allowedHigh + " 칸 높이까지만 블럭을 설치할 수 있습니다");
+				BroadcastTool.sendMessage(p, "HIGH_## 굿즈로 높이제한을 해제할 수 있습니다");
 				return;
 			} else {
 				p.getWorld().getBlockAt(underFootLoc).setType(Material.DIRT);
 			}
-		} else if (good == ShopGoods.SPAWN) {
+		} else if (good == ShopGoods.스폰) {
 			// spawn
 			p.teleport(RoomLocation.MAIN_SPAWN);
-		} else if (good == ShopGoods.ROOM_MANAGER) {
+		} else if (good == ShopGoods.맵_관리) {
 			// room list출력
 			this.roomManager.printRoomList(p);
-		} else if (good == ShopGoods.CHEST) {
+		} else if (good == ShopGoods.상자) {
 
-			Inventory inv = this.getPlayerGoodsPageInv(p, ShopGoods.CHEST.name(), 0, GoodsRole.MAKING_BLOCK);
+			Inventory inv = this.getPlayerGoodsPageInv(p, ShopGoods.상자.name(), 0, GoodsRole.MAKING_BLOCK);
 			p.openInventory(inv);
 
 //	    // makingBlock들을 담고 있는 인벤토리 오픈
@@ -481,10 +493,10 @@ public class GoodsListener implements Listener {
 //		}
 //	    }
 //	    p.openInventory(inv);
-		} else if (good == ShopGoods.FINISH) {
+		} else if (good == ShopGoods.테스트) {
 			// 명령어 대신 실행
 			p.performCommand("re room finish");
-		} 
+		}
 //		else if (good == ShopGoods.BLOCK_CHANGER) {
 //			// 플레이어가 들고있는 굿즈의 lore중의 3번째줄을 true or false로 변경
 //			ItemStack blockChanger = p.getInventory().getItemInMainHand();
@@ -507,7 +519,7 @@ public class GoodsListener implements Listener {
 //			// main hand에 모드 바뀐것으로 굿즈 체인지
 //			p.getInventory().setItemInMainHand(blockChanger);
 //		} 
-		else if (good == ShopGoods.HIDE) {
+		else if (good == ShopGoods.은신) {
 			// 플레이어가 들고있는 굿즈의 lore중의 3번째줄을 true or false로 변경
 			ItemStack hideGoods = p.getInventory().getItemInMainHand();
 			ItemMeta meta = hideGoods.getItemMeta();
@@ -516,12 +528,12 @@ public class GoodsListener implements Listener {
 			String mode = lores.get(2);
 			if (mode.equalsIgnoreCase("on")) {
 				lores.set(2, "off");
-				BroadcastTool.sendMessage(p, good.name() + " mode set to off");
+				BroadcastTool.sendMessage(p, good.name() + " 모드가 꺼졌습니다");
 				// unhide
 				PlayerTool.unhidePlayerFromEveryone(p);
 			} else if (mode.equalsIgnoreCase("off")) {
 				lores.set(2, "on");
-				BroadcastTool.sendMessage(p, good.name() + " mode set to on");
+				BroadcastTool.sendMessage(p, good.name() + " 모드가 켜졌습니다");
 				// hide
 				PlayerTool.hidePlayerFromEveryone(p);
 			}
@@ -532,9 +544,9 @@ public class GoodsListener implements Listener {
 
 			// main hand에 모드 바뀐것으로 굿즈 체인지
 			p.getInventory().setItemInMainHand(hideGoods);
-		} else if (good == ShopGoods.REDUCE_TIME) {
-			if(this.relayManager.isPlayerInPlayerLog(p, "USE_REDUCE_TIME")) {
-				BroadcastTool.sendMessage(p, "possible in once chance in once ChallengingTime");
+		} else if (good == ShopGoods.도전시간_줄이기) {
+			if (this.relayManager.isPlayerInPlayerLog(p, "USE_REDUCE_TIME")) {
+				BroadcastTool.sendMessage(p, "한개의 맵에는 한번만 사용 가능합니다");
 				return;
 			}
 			// ChallengingTime 남은 시간(1/(player수+1)) 단축
@@ -545,11 +557,11 @@ public class GoodsListener implements Listener {
 			// 사용한후에 삭제
 			InventoryTool.removeItemFromPlayer(p, good.getItemStack());
 
-			BroadcastTool.sendMessageToEveryone(reductionTime + " sec reduced by " + p.getName());
-			
+			BroadcastTool.sendMessageToEveryone(reductionTime + "초가 " + p.getName() + " 님에 의해 줄어들었습니다");
+
 			// USE_REDUCE_TIME log 추가
 			this.relayManager.addPlayerLog(p, "USE_REDUCE_TIME");
-		} else if (good == ShopGoods.SUPER_STAR) {
+		} else if (good == ShopGoods.슈퍼스타) {
 			// 플레이어가 들고있는 굿즈의 lore중의 3번째줄을 true or false로 변경
 			ItemStack superStar = p.getInventory().getItemInMainHand();
 			ItemMeta meta = superStar.getItemMeta();
@@ -558,11 +570,11 @@ public class GoodsListener implements Listener {
 			String mode = lores.get(2);
 			if (mode.equalsIgnoreCase("on")) {
 				lores.set(2, "off");
-				BroadcastTool.sendMessage(p, good.name() + " mode set to off");
+				BroadcastTool.sendMessage(p, good.name() + " 모드가 꺼졌습니다");
 				p.setGlowing(false);
 			} else if (mode.equalsIgnoreCase("off")) {
 				lores.set(2, "on");
-				BroadcastTool.sendMessage(p, good.name() + " mode set to on");
+				BroadcastTool.sendMessage(p, good.name() + " 모드가 꺼졌습니다");
 				p.setGlowing(true);
 			}
 			meta.setLore(lores);
@@ -572,53 +584,21 @@ public class GoodsListener implements Listener {
 
 			// main hand에 모드 바뀐것으로 굿즈 체인지
 			p.getInventory().setItemInMainHand(superStar);
-		} else if (good == ShopGoods.GM_CHANGER) {
+		} else if (good == ShopGoods.겜모변경) {
 			GameMode mode = p.getGameMode();
 			if (mode == GameMode.SURVIVAL) {
 				p.setGameMode(GameMode.CREATIVE);
-				BroadcastTool.sendMessage(p, "change to CREATIVE");
+				BroadcastTool.sendMessage(p, "크리에이티브 모드로 변경되었습니다");
 			} else if (mode == GameMode.CREATIVE) {
 				p.setGameMode(GameMode.SURVIVAL);
-				BroadcastTool.sendMessage(p, "change to SURVIVAL");
+				BroadcastTool.sendMessage(p, "모험가 모드로 변경되었습니다");
 			}
-		}  else if (good == ShopGoods.LOBBY) {
+		} else if (good == ShopGoods.로비) {
 			// 이 굿즈는 역할이 Challenger일때 Waiter로 되어지는 상황일때 사용되는것임
-			pData.setRole(Role.WAITER);
+			pData.setRole(Role.웨이터);
 			this.relayManager.changeRoom(p);
-		} else if (good == ShopGoods.GHOST) {
+		} else if (good == ShopGoods.고스트) {
 			Bukkit.dispatchCommand(p, "re ghost");
 		}
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

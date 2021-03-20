@@ -10,10 +10,10 @@ public enum RelayTime
 //	WAITING(5 * 2);
 	
     // 단위: 초
-    	WAITING(Setting.WAITING_TIME),
-	MAKING(Setting.MAKING_TIME),
-	TESTING(Setting.TESTING_TIME),
-	CHALLENGING(Setting.CHALLENGING_TIME);
+    	웨이팅(Setting.WAITING_TIME),
+	메이킹(Setting.MAKING_TIME),
+	테스팅(Setting.TESTING_TIME),
+	챌린징(Setting.CHALLENGING_TIME);
 	
 	private final int time;
 	
@@ -26,13 +26,13 @@ public enum RelayTime
 	}
 	
 	public static RelayTime getNextTime(RelayTime time) {
-		if(time == RelayTime.MAKING) {
-			return RelayTime.TESTING;
-		} else if(time == RelayTime.TESTING) {
-			return RelayTime.CHALLENGING;
-		} else if(time == RelayTime.CHALLENGING) {
-			return RelayTime.WAITING;
+		if(time == RelayTime.메이킹) {
+			return RelayTime.테스팅;
+		} else if(time == RelayTime.테스팅) {
+			return RelayTime.챌린징;
+		} else if(time == RelayTime.챌린징) {
+			return RelayTime.웨이팅;
 		} else // if(time == RelayTime.WAITING) {
-			return RelayTime.MAKING;
+			return RelayTime.메이킹;
 	}
 }

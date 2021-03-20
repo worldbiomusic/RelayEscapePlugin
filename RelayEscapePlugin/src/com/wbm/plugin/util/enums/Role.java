@@ -3,11 +3,11 @@ package com.wbm.plugin.util.enums;
 import org.bukkit.GameMode;
 
 public enum Role {
-    WAITER(GameMode.SURVIVAL),
-    MAKER(GameMode.CREATIVE),
-    TESTER(GameMode.ADVENTURE),
-    CHALLENGER(GameMode.ADVENTURE),
-    VIEWER(GameMode.ADVENTURE);
+    웨이터(GameMode.SURVIVAL),
+    메이커(GameMode.CREATIVE),
+    테스터(GameMode.ADVENTURE),
+    챌린저(GameMode.ADVENTURE),
+    뷰어(GameMode.ADVENTURE);
 
     GameMode gamemode;
 

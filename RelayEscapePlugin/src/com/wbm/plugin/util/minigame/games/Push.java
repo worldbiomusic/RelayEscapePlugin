@@ -28,7 +28,7 @@ public class Push extends BattleMiniGame {
     Location viewLoc;
 
     public Push() {
-	super(MiniGameType.PUSH);
+	super(MiniGameType.밀어밀어);
 
 	this.pSpawnLocs = new ArrayList<>();
 	this.pSpawnLocs.add(Setting.getAbsoluteLocation(-80,8,249));
@@ -57,7 +57,7 @@ public class Push extends BattleMiniGame {
 
 	    // 바닥에 deathBlock으로 떨어진지 확인후 점수 차감
 	    if (belowBlock == deathBlock) {
-		BroadcastTool.sendMessage(loser, "you died!");
+		BroadcastTool.sendMessage(loser, "죽었습니다!");
 		this.minusScore(loser, this.killCount + 1);
 		// killcount 증가
 		this.killCount++;
@@ -106,7 +106,7 @@ public class Push extends BattleMiniGame {
 
     @Override
     public String[] getGameTutorialStrings() {
-	return new String[] { "GameStart: +(playerCount)", "fall: -(diedPlayerCount+1)" };
+	return new String[] { "게임시작: +(참가자 수)", "떨어짐: -(죽은 사람 수+1)" };
     }
 
 }

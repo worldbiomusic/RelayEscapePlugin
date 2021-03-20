@@ -74,18 +74,18 @@ public abstract class BattleMiniGame extends MiniGame {
 
 		// 인원수 꽉 찬지 검사
 		if (this.checkPlayerCountFull()) {
-			BroadcastTool.sendMessage(p, this.gameType.name() + " game player count is full");
+			BroadcastTool.sendMessage(p, this.gameType.name() + " 미니게임 인원수가 꽉 찼습니다");
 			return;
 		}
 
 		// 먼저: token충분한지 검사
 		if (!pData.minusToken(this.getFee())) {
-			BroadcastTool.sendMessage(p, "you need more token");
+			BroadcastTool.sendMessage(p, "토큰이 부족합니다");
 			return;
 		}
 
 		// 참가 알림
-		BroadcastTool.sendMessage(this.getAllPlayer(), p.getName() + " join game");
+		BroadcastTool.sendMessage(this.getAllPlayer(), p.getName() + " 가 미니게임에 참여했습니다");
 
 		// 누군가 있을때
 		if (this.isSomeoneInGameRoom()) {
@@ -120,6 +120,7 @@ public abstract class BattleMiniGame extends MiniGame {
 		// 1명이면 게임 바로 끝나게
 		if(this.getAllPlayer().size() == 1) {
 			this.exitGame(pDataManager);
+//			return;
 		}
 	}
 
@@ -166,21 +167,21 @@ public abstract class BattleMiniGame extends MiniGame {
 		for (Player p : this.getAllPlayer()) {
 			// GAME END print
 			BroadcastTool.sendMessage(p, "=================================");
-			BroadcastTool.sendMessage(p, "" + ChatColor.RED + ChatColor.BOLD + "Game End");
+			BroadcastTool.sendMessage(p, "" + ChatColor.RED + ChatColor.BOLD + "게임 종료");
 			BroadcastTool.sendMessage(p, "=================================");
 
 			// 전체플레이어 score 공개
-			BroadcastTool.sendMessage(p, "" + ChatColor.BOLD + "[ RANK ]");
+			BroadcastTool.sendMessage(p, "" + ChatColor.BOLD + "[ 랭크 ]");
 			List<Entry<String, Integer>> rank = miniGameRankManager.getDescendingSortedMapEntrys(this.players);
 			for (int i = 0; i < rank.size(); i++) {
 				Entry<String, Integer> entry = rank.get(i);
 				String name = entry.getKey();
 				int score = entry.getValue();
-				BroadcastTool.sendMessage(p, "[" + (i + 1) + "]" + name + " score: " + score);
+				BroadcastTool.sendMessage(p, "[" + (i + 1) + "]" + name + " 점수: " + score);
 			}
 
 			// send title
-			BroadcastTool.sendTitle(p, "Game End", "");
+			BroadcastTool.sendTitle(p, "게임 종료", "");
 			BroadcastTool.sendMessage(p, "");
 		}
 	}
@@ -263,7 +264,7 @@ public abstract class BattleMiniGame extends MiniGame {
 			pData.plusToken(reward);
 
 			// msg
-			BroadcastTool.sendMessage(p, "Reward token: " + reward);
+			BroadcastTool.sendMessage(p, "보상 토큰: " + reward);
 		}
 
 	}
@@ -301,7 +302,7 @@ public abstract class BattleMiniGame extends MiniGame {
 			pData.setNull();
 
 			// 남은 인원에게 알리기
-			BroadcastTool.sendMessage(this.getAllPlayer(), p.getName() + " exit " + this.gameType.name());
+			BroadcastTool.sendMessage(this.getAllPlayer(), p.getName() + "님이  " + this.gameType.name() + " 미니게임을 나갔습니다");
 
 			// 패널티
 			pData.minusToken(this.getFee() * 2);

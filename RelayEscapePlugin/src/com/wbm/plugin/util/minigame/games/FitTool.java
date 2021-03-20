@@ -24,7 +24,7 @@ public class FitTool extends SoloMiniGame {
     List<Material> randomBlocks;
 
     public FitTool() {
-	super(MiniGameType.FIT_TOOL);
+	super(MiniGameType.각종도구);
     }
 
     @Override
@@ -118,7 +118,7 @@ public class FitTool extends SoloMiniGame {
 
     @Override
     public String[] getGameTutorialStrings() {
-	String[] tutorial = { "Break ALL Blocks: +1" };
+	String[] tutorial = { "모든 블럭 부수기: +1" };
 
 	return tutorial;
     }

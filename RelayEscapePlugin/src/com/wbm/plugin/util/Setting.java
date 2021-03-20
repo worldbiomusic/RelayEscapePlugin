@@ -60,8 +60,8 @@ public class Setting {
     
     public static final int FIRST_JOIN_TOKEN = 100;
     
-    public static final ShopGoods[] BASIC_GOODS = { ShopGoods.DIRT, ShopGoods.GLOWSTONE, ShopGoods.CHEST, ShopGoods.HIGH_5,
-			ShopGoods.MAKINGTIME_5, ShopGoods.FINISH, ShopGoods.GOODS_LIST, ShopGoods.SPAWN, ShopGoods.GM_CHANGER, ShopGoods.LOBBY };
+    public static final ShopGoods[] BASIC_GOODS = { ShopGoods.흙, ShopGoods.코어, ShopGoods.상자, ShopGoods.높이제한_5,
+			ShopGoods.제작시간_5, ShopGoods.테스트, ShopGoods.굿즈_컬렉션, ShopGoods.스폰, ShopGoods.겜모변경, ShopGoods.로비 };
     
 
     public static Location getAbsoluteLocation(Location loc) {

@@ -1,3 +1,4 @@
+
 package com.wbm.plugin.util;
 
 import java.time.LocalDateTime;
@@ -30,7 +31,6 @@ public class RoomManager implements DataMember {
 	// title, room
 	Map<String, Room> roomData;
 
-
 	// 현재 roomType에 맞는 실제 room data
 	Map<RoomType, Room> rooms;
 
@@ -48,7 +48,7 @@ public class RoomManager implements DataMember {
 	public void recordMainRoomDurationTime() {
 		int secDuration = Math.round((float) ((System.currentTimeMillis() - this.durationStartTime) / 1000));
 		System.out.println("secDuration: " + secDuration);
-		Room mainRoom = this.rooms.get(RoomType.MAIN);
+		Room mainRoom = this.rooms.get(RoomType.메인);
 		// room avgDurationTime 업데이트
 		mainRoom.addNewAvgDurationTime(secDuration);
 	}
@@ -85,10 +85,10 @@ public class RoomManager implements DataMember {
 	private void saveRoomToSchematicFile(RoomType roomType, String roomTitle) {
 		Location minPos = null, maxPos = null;
 
-		if (roomType == RoomType.MAIN) {
+		if (roomType == RoomType.메인) {
 			minPos = RoomLocation.MAIN_Pos1;
 			maxPos = RoomLocation.MAIN_Pos2;
-		} else if (roomType == RoomType.PRACTICE) {
+		} else if (roomType == RoomType.연습) {
 			minPos = RoomLocation.PRACTICE_Pos1;
 			maxPos = RoomLocation.PRACTICE_Pos2;
 		} else {
@@ -124,7 +124,7 @@ public class RoomManager implements DataMember {
 	}
 
 	private void registerBasicRooms() {
-		int mainRoomBlockCount = RoomLocation.getRoomBlockCount(RoomType.MAIN);
+		int mainRoomBlockCount = RoomLocation.getRoomBlockCount(RoomType.메인);
 
 		// empty room
 		if (!(this.roomData.containsKey("empty"))) {
@@ -147,12 +147,11 @@ public class RoomManager implements DataMember {
 	}
 
 	public void fillSpace(RoomType roomType, String schematicTitle) {
-		System.out.println("TITLE: " + schematicTitle);
 		Location minPos = null;
 
-		if (roomType == RoomType.MAIN) {
+		if (roomType == RoomType.메인) {
 			minPos = RoomLocation.MAIN_Pos1;
-		} else if (roomType == RoomType.PRACTICE) {
+		} else if (roomType == RoomType.연습) {
 			minPos = RoomLocation.PRACTICE_Pos1;
 		} else {
 			return;
@@ -201,13 +200,13 @@ public class RoomManager implements DataMember {
 		 */
 		List<Room> rooms = this.getOwnRooms(p.getName());
 
-		BroadcastTool.sendMessage(p, "=====[Room List]=====");
+		BroadcastTool.sendMessage(p, "=====[맵 리스트]=====");
 		for (Room room : rooms) {
 			LocalDateTime b = room.getBirth();
-			String date = String.format("%d/%d/%d-%dH:%dM", b.getYear(), b.getMonthValue(), b.getDayOfMonth(),
+			String date = String.format("%d/%d/%d-%d시:%d분", b.getYear(), b.getMonthValue(), b.getDayOfMonth(),
 					b.getHour(), b.getMinute());
-			String roomInfo = String.format(ChatColor.BLUE + "Date" + ChatColor.WHITE + ": %s       " + ChatColor.RED
-					+ "Title" + ChatColor.WHITE + ": %s", date, room.getTitle());
+			String roomInfo = String.format(ChatColor.BLUE + "날짜" + ChatColor.WHITE + ": %s       " + ChatColor.RED
+					+ "제목" + ChatColor.WHITE + ": %s", date, room.getTitle());
 
 			BroadcastTool.sendMessage(p, roomInfo);
 		}
@@ -228,7 +227,11 @@ public class RoomManager implements DataMember {
 	public void plusTokenToRoomMaker(PlayerDataManager pDataManager, Room room, int token) {
 		String maker = room.getMaker();
 		PlayerData roomMakerPData = pDataManager.getPlayerData(maker);
-		roomMakerPData.plusToken(token);
+		if (roomMakerPData == null) {
+			BroadcastTool.debug("room Maker가 없습니다");
+		} else {
+			roomMakerPData.plusToken(token);
+		}
 	}
 
 	@SuppressWarnings("unchecked")

@@ -21,7 +21,7 @@ public class FindTheRed extends SoloMiniGame {
 	 * 게임소개 노랑꽃중에서 빨간꽃을 부수면 점수 얻는 게임
 	 */
 	public FindTheRed() {
-		super(MiniGameType.FIND_THE_RED);
+		super(MiniGameType.빨간꽃_찾기);
 	}
 
 	@Override
@@ -53,7 +53,7 @@ public class FindTheRed extends SoloMiniGame {
 
 	@Override
 	public String[] getGameTutorialStrings() {
-		String[] msg = { "Break Red Rose: +1", "Break Yellow flower: -2", };
+		String[] msg = { "빨간 꽃: +1", "노란 꽃: -2", };
 
 		return msg;
 	}

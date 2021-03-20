@@ -15,7 +15,7 @@ import com.wbm.plugin.util.minigame.CooperativeMiniGame;
 public class FindTheYellow extends CooperativeMiniGame {
 
     public FindTheYellow() {
-	super(MiniGameType.FIND_THE_YELLOW);
+	super(MiniGameType.노란꽃_찾기);
     }
 
     @Override
@@ -38,7 +38,7 @@ public class FindTheYellow extends CooperativeMiniGame {
 
     @Override
     public String[] getGameTutorialStrings() {
-	String[] msg = { "Break Yellow flower: +1", "Break Red rose: -2", };
+	String[] msg = { "노란 꽃: +1", "빨간 꽃: -2", };
 
 	return msg;
     }

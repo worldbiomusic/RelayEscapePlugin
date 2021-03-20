@@ -26,7 +26,7 @@ public class DiscordBot {
 		try {
 			jda = jdaBuilder.build();
 			jda.getPresence().setStatus(OnlineStatus.ONLINE);
-			jda.getPresence().setActivity(Activity.playing("Relay Escape"));
+			jda.getPresence().setActivity(Activity.playing("마크"));
 
 			jda.addEventListener(new ChatListener(this.pDataManager));
 		} catch (Exception e) {

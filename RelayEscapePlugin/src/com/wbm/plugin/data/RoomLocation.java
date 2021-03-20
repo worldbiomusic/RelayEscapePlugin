@@ -41,16 +41,16 @@ public class RoomLocation {
 
 	public static int getRoomBlockCount(RoomType roomType) {
 		Location pos1 = null, pos2 = null;
-		if (roomType == RoomType.MAIN) {
+		if (roomType == RoomType.메인) {
 			pos1 = MAIN_Pos1;
 			pos2 = MAIN_Pos2;
-		} else if (roomType == RoomType.PRACTICE) {
+		} else if (roomType == RoomType.연습) {
 			pos1 = PRACTICE_Pos1;
 			pos2 = PRACTICE_Pos2;
-		} else if (roomType == RoomType.MINI_GAME) {
+		} else if (roomType == RoomType.미니게임) {
 			pos1 = MINIGAME_Pos1;
 			pos2 = MINIGAME_Pos2;
-		} else if (roomType == RoomType.FUN) {
+		} else if (roomType == RoomType.펀) {
 			pos1 = FUN_Pos1;
 			pos2 = FUN_Pos2;
 		}
@@ -60,13 +60,13 @@ public class RoomLocation {
 
 	public static RoomType getRoomTypeWithLocation(Location loc) {
 		if (LocationTool.isIn(MAIN_Pos1, loc, MAIN_Pos2)) {
-			return RoomType.MAIN;
+			return RoomType.메인;
 		} else if (LocationTool.isIn(PRACTICE_Pos1, loc, PRACTICE_Pos2)) {
-			return RoomType.PRACTICE;
+			return RoomType.연습;
 		} else if (LocationTool.isIn(MINIGAME_Pos1, loc, MINIGAME_Pos2)) {
-			return RoomType.MINI_GAME;
+			return RoomType.미니게임;
 		} else if (LocationTool.isIn(FUN_Pos1, loc, FUN_Pos2)) {
-			return RoomType.FUN;
+			return RoomType.펀;
 		}
 
 		return null;
@@ -74,13 +74,13 @@ public class RoomLocation {
 
 	public static Location getRoomSpawnLocation(RoomType roomType) {
 		switch (roomType) {
-		case MAIN:
+		case 메인:
 			return MAIN_SPAWN;
-		case PRACTICE:
+		case 연습:
 			return PRACTICE_SPAWN;
-		case MINI_GAME:
+		case 미니게임:
 			return MINIGAME_SPAWN;
-		case FUN:
+		case 펀:
 			return FUN_SPAWN;
 		default:
 			return null;
