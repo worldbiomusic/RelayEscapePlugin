@@ -69,8 +69,9 @@
 - `jump map관련`
 - RESPAWN, HURT 이벤트 블럭 사용금지
 
-# 주의사항
+# 꼭 지켜야 할 사항
 - 서브 클래스에서 수퍼 클래스 메소드 오바라이딩 할떄 `super.method()` 꼭! 하기
+- 하위 미니게임 클래스에서 사용되는 변수들은 MiniGame의 initGameSettings()메소드를 오버라이딩해서 사용(initGameSettings()메소드는 플레이어가 미니게임에 참여할때마다 실행
 
 # 개선할 것
 - 각 Solo, Cooperative, Battle 미니게임 클래스에서 중복되는 구간이 많이 존재함, 하지만 다른 구간도 껴있어서 공통적인것을
