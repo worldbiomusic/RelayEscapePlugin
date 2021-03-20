@@ -52,19 +52,19 @@
 
 - ## listerner
 - 모든 이벤트를 CommndListener에서 순서를 관리하고 다른 클래스로 넘겨줄까 고민중!
-> - [CommonListener](CommonListener.md): 
-> - [GameManager](GameManager.md): 
-> - [GoodsListener](GoodsListener.md): 
-> - [EventBlockListener](EventBlockListener.md): 
+> - [CommonListener](CommonListener.md): 공통 이벤트 리스너
+> - [GameManager](GameManager.md): 릴레이 관련 이벤트 리스너
+> - [GoodsListener](GoodsListener.md): 굿즈 관련 이벤트 리스너
+> - [EventBlockListener](EventBlockListener.md): 이벤트 블럭 관련 이벤트 리스너
 
 - ## util
-> - [Main](Main.md): 
-> - [PlayerDataManager](PlayerDataManager.md): 
-> - [RankManager](RankManager.md): 
-> - [RelayManager](RelayManager.md): 
-> - [RoomManager](RoomManager.md): 
-> - [Setting](Setting.md): 
-> - [StageManager](StageManager.md): 
+> - [Main](Main.md): 플러그인의 메인 클래스
+> - [PlayerDataManager](PlayerDataManager.md): 플레이어 데이터를 관리
+> - [RankManager](RankManager.md): 랭크(token, challengingCount, clearCount, roomCount) 를 관리
+> - [RelayManager](RelayManager.md): 서버의 전반적인 흐름인 릴레이 타임 관리
+> - [RoomManager](RoomManager.md): 서버의 룸 관리 (주로 Main, Practice 룸)
+> - [Setting](Setting.md): 세팅 값 관리
+> - [StageManager](StageManager.md): (패킷 이용한)랭크 관련 NPC entity 관리
 > - [WorldEditAPIController](WorldEditAPIController.md): 유저가 만든 룸을 월드에딧 스카미틱 파일(.schem)로 관리해주는 클래스
 
 - ## util.config
@@ -72,24 +72,24 @@
 > - [DataMember](DataMember.md): 데이터를 저장하는 클래스 (인터페이스)
 
 - ## util.enum
-> - [MiniGameType](MiniGameType.md): 
-> - [RelayTime](RelayTime.md): 
-> - [Role](Role.md): 
-> - [RolePermission](RolePermission.md): 
-> - [RoomType](RoomType.md): 
+> - [MiniGameType](MiniGameType.md): 미니게임 타입 enum
+> - [RelayTime](RelayTime.md): 릴레이 타임 enum
+> - [Role](Role.md): 역할 enum
+> - [RolePermission](RolePermission.md): 사용안함
+> - [RoomType](RoomType.md): 룸 타임 enum
 
 - ## util.minigame
-> - [MiniGameManager](MiniGameManager.md): 
-> - [MiniGame](MiniGame.md): 
-> - [SoloMiniGame](SoloMiniGame.md): 
-> - [CooperativeMiniGame](CooperativeMiniGame.md): 
-> - [BattleMiniGame](BattleMiniGame.md): 
+> - [MiniGameManager](MiniGameManager.md): 미니게임의 유저와 게임사이를 관리
+> - [MiniGame](MiniGame.md): 미니게임 최상위 클래스
+> - [SoloMiniGame](SoloMiniGame.md): MiniGame 상속한 솔로 미니게임
+> - [CooperativeMiniGame](CooperativeMiniGame.md): MiniGame 상속한 협동 미니게임
+> - [BattleMiniGame](BattleMiniGame.md): MiniGame 상속한 배틀 미니게임
 > - [MiniGameRankManager](MiniGameRankManager.md): SoloMiniGame, CooperativeMiniGame의 rank를  계산해주는 클래스
 
 - ## util.shop
-> - [GoodsRole](GoodsRole.md): 
-> - [ShopGoods](ShopGoods.md): 
-> - [ShopManager](ShopManager.md): 
+> - [GoodsRole](GoodsRole.md): 굿즈들의 역할 enum
+> - [ShopGoods](ShopGoods.md): 굿즈 관리 enum
+> - [ShopManager](ShopManager.md): 상점 표지판과 유저사이를 관리
 
 - ## util.discord
 > - [DiscordBot](DiscordBot.md): 서버 디스코드 채널에 사용되는 디스코드 봇 클래스
