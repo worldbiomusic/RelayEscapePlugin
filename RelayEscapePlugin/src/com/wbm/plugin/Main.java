@@ -18,13 +18,8 @@ import org.bukkit.scoreboard.Score;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.ScoreboardManager;
 
-import com.sk89q.worldedit.bukkit.BukkitWorld;
-import com.sk89q.worldedit.extent.clipboard.Clipboard;
-import com.sk89q.worldedit.session.ClipboardHolder;
-import com.sk89q.worldedit.world.World;
 import com.wbm.plugin.cmd.Commands;
 import com.wbm.plugin.data.PlayerData;
-import com.wbm.plugin.data.RoomLocation;
 import com.wbm.plugin.listener.CommonListener;
 import com.wbm.plugin.listener.GameManager;
 import com.wbm.plugin.listener.GoodsListener;
@@ -35,11 +30,9 @@ import com.wbm.plugin.util.RoomManager;
 import com.wbm.plugin.util.Setting;
 import com.wbm.plugin.util.StageManager;
 import com.wbm.plugin.util.WorldEditAPIController;
-import com.wbm.plugin.util.config.ConfigTest;
 import com.wbm.plugin.util.config.DataManager;
 import com.wbm.plugin.util.discord.DiscordBot;
 import com.wbm.plugin.util.enums.Role;
-import com.wbm.plugin.util.enums.RoomType;
 import com.wbm.plugin.util.general.BanItemTool;
 import com.wbm.plugin.util.general.BlockRotateTool;
 import com.wbm.plugin.util.general.BroadcastTool;
@@ -78,8 +71,6 @@ public class Main extends JavaPlugin {
 	// command executor
 	Commands dCmd;
 
-	ConfigTest ct;
-
 	// Tools
 	SpawnLocationTool respawnManager;
 	BanItemTool banItems;
@@ -89,32 +80,12 @@ public class Main extends JavaPlugin {
 
 	static Main main;
 
-	// 저장용 clipboard
-	private ClipboardHolder clipboardHolder;
-
-	// copy, paste용 clipboard
-	private Clipboard clipboard;
-
-	// 기본 디렉토리
-	private String baseDir;
-
-	// 월드
-	private World w;
-
 	public static Main getInstance() {
 		return main;
 	}
 
 	@Override
 	public void onEnable() {
-//		this.w = new BukkitWorld(Bukkit.getWorld("world"));
-//		try {
-//			this.worldeditAPI = new WorldEditAPIController(getDataFolder().getPath() + File.separator + "roomData");
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
-
-//		ConfigurationSerialization.registerClass(PlayerData.class);
 		main = this;
 
 		try {
@@ -202,7 +173,7 @@ public class Main extends JavaPlugin {
 	void setupManagers() throws Exception {
 		this.dataManager = new DataManager(this.getDataFolder().getPath());
 
-		this.pDataManager = new PlayerDataManager(this.ct);
+		this.pDataManager = new PlayerDataManager();
 
 		// discord bot 실행
 		this.setupDiscordBot();
@@ -283,6 +254,7 @@ public class Main extends JavaPlugin {
 					Scoreboard board = manager.getNewScoreboard();
 
 					// sidebar setting
+					@SuppressWarnings("deprecation")
 					Objective sidebarObj = board.registerNewObjective("side", "dummy");
 					sidebarObj.setDisplaySlot(DisplaySlot.SIDEBAR);
 //					sidebarObj.setDisplayName("====== INFO ======");

@@ -8,7 +8,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import com.wbm.plugin.data.PlayerData;
-import com.wbm.plugin.util.config.ConfigTest;
 import com.wbm.plugin.util.config.DataMember;
 import com.wbm.plugin.util.general.BroadcastTool;
 
@@ -23,11 +22,9 @@ public class PlayerDataManager implements DataMember {
 	// 경우)
 	Player maker;
 
-	ConfigTest ct;
 
-	public PlayerDataManager(ConfigTest ct) {
+	public PlayerDataManager() {
 		this.playerData = new HashMap<UUID, PlayerData>();
-		this.ct = ct;
 	}
 
 	public Map<UUID, PlayerData> getOnlyOnlinePlayerData() {

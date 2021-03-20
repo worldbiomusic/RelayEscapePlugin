@@ -55,7 +55,8 @@ public class WorldEditAPIController {
 		CuboidRegion region = new CuboidRegion(w, pos1, pos2);
 		this.clipboard = new BlockArrayClipboard(region);
 
-		try (EditSession editSession = WorldEdit.getInstance().getEditSessionFactory().getEditSession(w, -1)) {
+		try (@SuppressWarnings("deprecation")
+		EditSession editSession = WorldEdit.getInstance().getEditSessionFactory().getEditSession(w, -1)) {
 			ForwardExtentCopy forwardExtentCopy = new ForwardExtentCopy(editSession, region, this.clipboard,
 					region.getMinimumPoint());
 			// configure here
