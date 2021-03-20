@@ -33,12 +33,23 @@
 
 # 개발 환경
 - window 10
-- eclipse
+- eclipse 2020-03
 - Github / Git
 - JDK 8
 - paper 1.16.5 API
-- [wbm library]()
 
+# 사용한 라이브러리 (maven 사용)
+- wbm library
+- WorldEdit API (월드에딧)
+- JDA API (디스코드)
+
+# 사용한 플러그인 목록
+- RelayEscape
+- AutoRestart
+- WorldEdit
+- ViaVersion
+- NoteBlock API
+- McMusic
 
 # 서버 stop, reload 관련
 - reload시 서버를 리셋하고, 모든 플레이어를 다시 재등록하게 설계함
