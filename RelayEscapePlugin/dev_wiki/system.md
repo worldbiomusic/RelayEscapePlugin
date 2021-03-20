@@ -4,7 +4,7 @@
 
 # 구조
 - 모든것은 Main룸에서 진행되는 RelayEscape게임을 중점으로 진행됨
-- 모든 클래스는 Main을 통해서 서로 상호작용함
+- 모든 클래스는 Main 클래스를 통해서 서로 인스턴스를 주고 
 - 파일저장은 yml을 사용하지 않고, 자바 Serializable을 이용해서 객체를 저장/읽기 함
 - 서버는 시간 사이클로 돌아감
 
@@ -65,6 +65,7 @@
 > - [RoomManager](RoomManager.md): 
 > - [Setting](Setting.md): 
 > - [StageManager](StageManager.md): 
+> - [WorldEditAPIController](WorldEditAPIController.md): 유저가 만든 룸을 월드에딧 스카미틱 파일(.schem)로 관리해주는 클래스
 
 - ## util.config
 > - [DataManager](DataManager.md): 
@@ -90,7 +91,12 @@
 > - [ShopGoods](ShopGoods.md): 
 > - [ShopManager](ShopManager.md): 
 
+- ## util.discord
+> - [DiscordBot](DiscordBot.md): 서버 디스코드 채널에 사용되는 디스코드 봇 클래스
+> - [ChatListener](ChatListener.md): 디스코드 봇 리스너 클래스
 
+- ## util.google
+> - [GoogleDrive](GoogleDrive.md): 유저가 만든 룸 파일(.schem) 을 자동으로 구글 드라이브에 올리는 클래스 
 
 
 
