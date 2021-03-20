@@ -68,8 +68,8 @@
 > - [WorldEditAPIController](WorldEditAPIController.md): 유저가 만든 룸을 월드에딧 스카미틱 파일(.schem)로 관리해주는 클래스
 
 - ## util.config
-> - [DataManager](DataManager.md): 
-> - [DataMember](DataMember.md): 
+> - [DataManager](DataManager.md): 데이터 관리 해주는 클래스
+> - [DataMember](DataMember.md): 데이터를 저장하는 클래스 (인터페이스)
 
 - ## util.enum
 > - [MiniGameType](MiniGameType.md): 
