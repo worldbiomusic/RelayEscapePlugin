@@ -20,27 +20,27 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>net.dv8tion</groupId> 
+			<groupId>net.dv8tion</groupId>
 			<artifactId>JDA</artifactId>
 			<version>4.2.0_227</version>
 		</dependency>
-<!-- 		<dependency> -->
-<!-- 			<groupId>com.google.apis</groupId> -->
-<!-- 			<artifactId>google-api-services-drive</artifactId> -->
-<!-- 			<version>v3-rev20210228-1.31.0</version> -->
-<!-- 		</dependency> -->
-<!-- 		 https://mvnrepository.com/artifact/com.google.api-client/google-api-client -->
-<!-- 		<dependency> -->
-<!-- 			<groupId>com.google.api-client</groupId> -->
-<!-- 			<artifactId>google-api-client</artifactId> -->
-<!-- 			<version>1.31.0</version> -->
-<!-- 		</dependency> -->
-<!-- 		 https://mvnrepository.com/artifact/com.google.oauth-client/google-oauth-client-jetty -->
-<!-- 		<dependency> -->
-<!-- 			<groupId>com.google.oauth-client</groupId> -->
-<!-- 			<artifactId>google-oauth-client-jetty</artifactId> -->
-<!-- 			<version>1.31.0</version> -->
-<!-- 		</dependency> -->
+		<!-- <dependency> -->
+		<!-- <groupId>com.google.apis</groupId> -->
+		<!-- <artifactId>google-api-services-drive</artifactId> -->
+		<!-- <version>v3-rev20210228-1.31.0</version> -->
+		<!-- </dependency> -->
+		<!-- https://mvnrepository.com/artifact/com.google.api-client/google-api-client -->
+		<!-- <dependency> -->
+		<!-- <groupId>com.google.api-client</groupId> -->
+		<!-- <artifactId>google-api-client</artifactId> -->
+		<!-- <version>1.31.0</version> -->
+		<!-- </dependency> -->
+		<!-- https://mvnrepository.com/artifact/com.google.oauth-client/google-oauth-client-jetty -->
+		<!-- <dependency> -->
+		<!-- <groupId>com.google.oauth-client</groupId> -->
+		<!-- <artifactId>google-oauth-client-jetty</artifactId> -->
+		<!-- <version>1.31.0</version> -->
+		<!-- </dependency> -->
 	</dependencies>
 
 	<repositories>
@@ -79,6 +79,22 @@
 						<descriptorRef>jar-with-dependencies</descriptorRef>
 					</descriptorRefs>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<version>3.2.0</version>
+				<configuration>
+					<!-- put your configurations here -->
+				</configuration>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>

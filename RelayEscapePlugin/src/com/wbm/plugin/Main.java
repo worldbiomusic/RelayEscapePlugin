@@ -30,7 +30,7 @@ import com.wbm.plugin.util.RoomManager;
 import com.wbm.plugin.util.Setting;
 import com.wbm.plugin.util.StageManager;
 import com.wbm.plugin.util.WorldEditAPIController;
-import com.wbm.plugin.util.config.DataManager;
+import com.wbm.plugin.util.data.serial.SerialDataManager;
 import com.wbm.plugin.util.discord.DiscordBot;
 import com.wbm.plugin.util.enums.Role;
 import com.wbm.plugin.util.general.BanItemTool;
@@ -59,7 +59,7 @@ public class Main extends JavaPlugin {
 	PlayerDataManager pDataManager;
 	RoomManager roomManager;
 	RelayManager relayManager;
-	DataManager dataManager;
+	SerialDataManager dataManager;
 	ShopManager shopManager;
 	GoodsListener goodsListener;
 	RankManager rankManager;
@@ -162,7 +162,8 @@ public class Main extends JavaPlugin {
 
 		// world edit API
 		getLogger().info(this.getDataFolder().getPath() + File.separator + "roomData");
-		this.worldeditAPI = new WorldEditAPIController(this.getDataFolder().getPath() + File.separator + "roomData", "world");
+		this.worldeditAPI = new WorldEditAPIController(this.getDataFolder().getPath() + File.separator + "roomData",
+				"world");
 	}
 
 	void setupMain() {
@@ -171,7 +172,7 @@ public class Main extends JavaPlugin {
 	}
 
 	void setupManagers() throws Exception {
-		this.dataManager = new DataManager(this.getDataFolder().getPath());
+		this.dataManager = new SerialDataManager(this.getDataFolder().getPath());
 
 		this.pDataManager = new PlayerDataManager();
 
@@ -405,14 +406,15 @@ public class Main extends JavaPlugin {
 			public void run() {
 				List<String> tips = new ArrayList<>();
 				tips.add("디스코드 :" + ChatColor.GREEN + ChatColor.UNDERLINE + ChatColor.BOLD
-						+ " https://discord.gg/EwXk9Cd2Ya" + ChatColor.WHITE +"(링크를 클릭하세요)");
+						+ " https://discord.gg/EwXk9Cd2Ya" + ChatColor.WHITE + "(링크를 클릭하세요)");
 				tips.add("튜토리얼: /re tutorial");
 				tips.add("채팅 매크로: 1 ~ 9 입력(ex. 1 = 안녕하세요)");
 				tips.add("어떤 상황에 갇혔다면 재접속으로 해결할 수 있습니다");
 				tips.add("위키: " + ChatColor.GREEN + ChatColor.UNDERLINE + ChatColor.BOLD
 						+ "https://github.com/worldbiomusic/RelayEscape/blob/main/server_wiki/Home.md");
 				tips.add("유튜브: " + ChatColor.GREEN + ChatColor.UNDERLINE + ChatColor.BOLD
-						+ "https://youtube.com/playlist?list=PLyAy6dRJHYxuH0S4IkcG86pNgzUdAFnTH"+ ChatColor.WHITE +"(링크를 클릭하세요)");
+						+ "https://youtube.com/playlist?list=PLyAy6dRJHYxuH0S4IkcG86pNgzUdAFnTH" + ChatColor.WHITE
+						+ "(링크를 클릭하세요)");
 
 				// random tip 고르기
 				String randomTip = tips.get((int) (Math.random() * tips.size()));

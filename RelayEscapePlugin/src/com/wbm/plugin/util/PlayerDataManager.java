@@ -8,10 +8,10 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import com.wbm.plugin.data.PlayerData;
-import com.wbm.plugin.util.config.DataMember;
+import com.wbm.plugin.util.data.serial.SerialDataMember;
 import com.wbm.plugin.util.general.BroadcastTool;
 
-public class PlayerDataManager implements DataMember {
+public class PlayerDataManager implements SerialDataMember {
 	// server 켜질때, 꺼질때 config데이터 담긴 데이터
 	// 이것 하나만 가지고 관리하므로 실시간 데이터임
 	private Map<UUID, PlayerData> playerData;

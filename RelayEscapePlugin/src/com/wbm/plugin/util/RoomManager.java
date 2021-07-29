@@ -14,11 +14,11 @@ import org.bukkit.entity.Player;
 import com.wbm.plugin.data.PlayerData;
 import com.wbm.plugin.data.Room;
 import com.wbm.plugin.data.RoomLocation;
-import com.wbm.plugin.util.config.DataMember;
+import com.wbm.plugin.util.data.serial.SerialDataMember;
 import com.wbm.plugin.util.enums.RoomType;
 import com.wbm.plugin.util.general.BroadcastTool;
 
-public class RoomManager implements DataMember {
+public class RoomManager implements SerialDataMember {
 	/*
 	 * WorldEdit API 사용해서 schematic "파일"로 룸 데이터 관리
 	 * 

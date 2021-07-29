@@ -11,10 +11,10 @@ import org.bukkit.Bukkit;
 
 import com.wbm.plugin.Main;
 import com.wbm.plugin.data.PlayerData;
-import com.wbm.plugin.util.config.DataMember;
+import com.wbm.plugin.util.data.serial.SerialDataMember;
 import com.wbm.plugin.util.discord.DiscordBot;
 
-public class RankManager implements DataMember {
+public class RankManager implements SerialDataMember {
 	/*
 	 * [rank list] token challengingCount clearCount RoomCount
 	 */

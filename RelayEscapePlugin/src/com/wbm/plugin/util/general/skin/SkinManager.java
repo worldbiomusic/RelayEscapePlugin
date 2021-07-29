@@ -7,10 +7,10 @@ import java.util.Map;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.wbm.plugin.util.config.DataMember;
+import com.wbm.plugin.util.data.serial.SerialDataMember;
 import com.wbm.plugin.util.general.BroadcastTool;
 
-public class SkinManager implements DataMember
+public class SkinManager implements SerialDataMember
 {
 	Map<String, SkinData> skinData;
 	

@@ -12,7 +12,7 @@ import org.bukkit.entity.Player;
 import org.yaml.snakeyaml.introspector.Property;
 
 import com.wbm.plugin.Main;
-import com.wbm.plugin.util.config.DataMember;
+import com.wbm.plugin.util.data.serial.SerialDataMember;
 import com.wbm.plugin.util.general.skin.SkinData;
 import com.wbm.plugin.util.general.skin.SkinManager;
 
@@ -63,7 +63,7 @@ class EntityPlayerData implements Serializable {
 
 }
 
-public class NPCManager implements DataMember {
+public class NPCManager implements SerialDataMember {
 
 	@Override
 	public void installData(Object obj) {

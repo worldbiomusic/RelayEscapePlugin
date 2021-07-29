@@ -10,13 +10,13 @@ import java.util.Map.Entry;
 
 import org.bukkit.entity.Player;
 
-import com.wbm.plugin.util.config.DataMember;
+import com.wbm.plugin.util.data.serial.SerialDataMember;
 import com.wbm.plugin.util.enums.MiniGameType;
 import com.wbm.plugin.util.general.BroadcastTool;
 
 import net.md_5.bungee.api.ChatColor;
 
-public class MiniGameRankManager implements DataMember {
+public class MiniGameRankManager implements SerialDataMember {
 	/*
 	 * 모든 미니게임의 랭크 데이터를 관리하는 클래스
 	 */

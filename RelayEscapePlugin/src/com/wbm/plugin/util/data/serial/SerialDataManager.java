@@ -1,4 +1,4 @@
-package com.wbm.plugin.util.config;
+package com.wbm.plugin.util.data.serial;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -13,24 +13,14 @@ import org.bukkit.Bukkit;
 
 import com.wbm.plugin.Main;
 
-public class DataManager
-/*
- * 여러개 클래스의 java Serializable로 Object read/write해주는 클래스 여기서 사용되는 클래스들은
- * Serializable을 구현해야 함!
- * 
- * [고민중] 각 member마다 각 파일 저장 vs 한파일에 모든 멤버 map으로 저장 [결론] 각 파일 저장: 한개의 파일이 커지면
- * IO시간이 너무 오래걸릴수 있음
- * 
- * [고민중] save할때 굳이 다시 데이터를 회수할 필요가 잇나? 객체가 ram에 등록되고 나눠줘서 DataMember에서 관리되면
- * 레퍼런스가 아직 끊기지 않으니까 그냥 데이터 저장하면 되지 않나?
- */
+public class SerialDataManager
 {
 	File baseDir;
 
 	// member 저장공간
-	Map<String, DataMember> members;
+	Map<String, SerialDataMember> members;
 
-	public DataManager(String baseDirPath) {
+	public SerialDataManager(String baseDirPath) {
 		// set baseDir
 		this.baseDir = new File(baseDirPath);
 
@@ -39,7 +29,7 @@ public class DataManager
 
 	}
 
-	public void registerMember(DataMember member) {
+	public void registerMember(SerialDataMember member) {
 		this.members.put(member.getDataMemberName(), member);
 //		// 바로 distribute 실행
 		this.distributeData(member);
@@ -47,8 +37,8 @@ public class DataManager
 
 	public void distributeData() {
 		// distribute map data to members
-		for (Entry<String, DataMember> memberEntry : this.members.entrySet()) {
-			DataMember member = memberEntry.getValue();
+		for (Entry<String, SerialDataMember> memberEntry : this.members.entrySet()) {
+			SerialDataMember member = memberEntry.getValue();
 
 			// load map data
 			Object loadedData = this.loadData(member);
@@ -60,7 +50,7 @@ public class DataManager
 		}
 	}
 
-	public void distributeData(DataMember member) {
+	public void distributeData(SerialDataMember member) {
 		// distribute map data to member
 		// load map data
 		Object loadedData = this.loadData(member);
@@ -73,8 +63,8 @@ public class DataManager
 
 	public void save() {
 		// gather members data and save each file
-		for (Entry<String, DataMember> memberEntry : this.members.entrySet()) {
-			DataMember member = memberEntry.getValue();
+		for (Entry<String, SerialDataMember> memberEntry : this.members.entrySet()) {
+			SerialDataMember member = memberEntry.getValue();
 			Object data = member.getData();
 
 			// save each Object data to file
@@ -83,7 +73,7 @@ public class DataManager
 
 	}
 
-	private void saveDataToFile(DataMember member, Object data) {
+	private void saveDataToFile(SerialDataMember member, Object data) {
 		try {
 			// write object(map) to file
 			File file = new File(this.baseDir, member.getDataMemberName() + ".dat");
@@ -100,7 +90,7 @@ public class DataManager
 		}
 	}
 
-	public Object loadData(DataMember member) {
+	public Object loadData(SerialDataMember member) {
 		Object data = null;
 
 		FileInputStream fis = null;

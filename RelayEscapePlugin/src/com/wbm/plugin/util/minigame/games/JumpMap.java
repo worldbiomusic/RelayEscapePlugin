@@ -14,37 +14,37 @@ import com.wbm.plugin.util.minigame.SoloMiniGame;
 
 public class JumpMap extends SoloMiniGame {
 
-    /*
-     * 처음에 timeLimit만큼 점수 주고 5초에 -1씩
-     * 
-     * event block처리 (RESPAWN, HRUT 사용불가능!)
-     * 
-     * 호박부섰을떄 finishTimer stop하기, 후에 exitGame()
-     * 
-     */
-    int finishTimer;
-    int minusDelay;
+	/*
+	 * 처음에 timeLimit만큼 점수 주고 5초에 -1씩
+	 * 
+	 * event block처리 (RESPAWN, HRUT 사용불가능!)
+	 * 
+	 * 호박부섰을떄 finishTimer stop하기, 후에 exitGame()
+	 * 
+	 */
+	int finishTimer;
+	int minusDelay;
 
-    public JumpMap() {
-	super(MiniGameType.점프맵);
-	
-    }
+	public JumpMap() {
+		super(MiniGameType.점프맵);
 
-    @Override
-    public void processEvent(Event event) {
-	if (event instanceof BlockBreakEvent) {
-	    BlockBreakEvent e = (BlockBreakEvent) event;
-	    Block b = e.getBlock();
+	}
 
-	    // score
-	    if (b.getType() == Material.JACK_O_LANTERN) {
-		this.stopFinishTimer();
-		this.exitGame(pDataManager);
-	    }
-	} else if (event instanceof PlayerMoveEvent) {
-	    /*
-	     * RESPAWN처리
-	     */
+	@Override
+	public void processEvent(Event event) {
+		if (event instanceof BlockBreakEvent) {
+			BlockBreakEvent e = (BlockBreakEvent) event;
+			Block b = e.getBlock();
+
+			// score
+			if (b.getType() == Material.JACK_O_LANTERN) {
+				this.stopFinishTimer();
+				this.exitGame(pDataManager);
+			}
+		} else if (event instanceof PlayerMoveEvent) {
+			/*
+			 * RESPAWN처리
+			 */
 //
 //	    PlayerMoveEvent e = (PlayerMoveEvent) event;
 //	    Player p = e.getPlayer();
@@ -56,7 +56,7 @@ public class JumpMap extends SoloMiniGame {
 //		System.out.println("RESPAWN!!!!!!!!!!!!!!!!!");
 //		TeleportTool.tp(this.getAllPlayer(), this.getGameType().getSpawnLocation());
 //	    }
-	}
+		}
 //	else if (event instanceof EntityDamageEvent)
 //	{
 //	    EntityDamageEvent e = (EntityDamageEvent) event;
@@ -73,57 +73,57 @@ public class JumpMap extends SoloMiniGame {
 //
 //	}
 
-    }
+	}
 
-    @Override
-    public String[] getGameTutorialStrings() {
-	String[] tutorials = { "잭오랜턴 부수기: finish game", "게임 시작: +" + this.getTimeLimit(),
-		"매  " + this.minusDelay + " 초: -1" };
-	return tutorials;
-    }
+	@Override
+	public String[] getGameTutorialStrings() {
+		String[] tutorials = { "잭오랜턴 부수기: finish game", "게임 시작: +" + this.getTimeLimit(),
+				"매  " + this.minusDelay + " 초: -1" };
+		return tutorials;
+	}
 
-    @Override
-    public void runTaskAfterStartGame() {
-	super.runTaskAfterStartGame();
+	@Override
+	public void runTaskAfterStartGame() {
+		super.runTaskAfterStartGame();
 
-	// 처음에 timeLimit만큼 점수 주기
-	this.plusScore(this.getTimeLimit());
+		// 처음에 timeLimit만큼 점수 주기
+		this.plusScore(this.getTimeLimit());
 
-	// finishTimer 체크시작
-	this.stopFinishTimer();
+		// finishTimer 체크시작
+		this.stopFinishTimer();
 
-	this.startFinishTimer();
+		this.startFinishTimer();
 
-    }
+	}
 
-    private void startFinishTimer() {
-	this.finishTimer = Bukkit.getScheduler().scheduleSyncRepeatingTask(Main.getInstance(), new Runnable() {
+	private void startFinishTimer() {
+		this.finishTimer = Bukkit.getScheduler().scheduleSyncRepeatingTask(Main.getInstance(), new Runnable() {
 
-	    @Override
-	    public void run() {
-		minusScore(1);
-	    }
-	}, 0, 20 * this.minusDelay);
-    }
+			@Override
+			public void run() {
+				minusScore(1);
+			}
+		}, 0, 20 * this.minusDelay);
+	}
 
-    private void stopFinishTimer() {
-	Bukkit.getScheduler().cancelTask(this.finishTimer);
+	private void stopFinishTimer() {
+		Bukkit.getScheduler().cancelTask(this.finishTimer);
 
-	BroadcastTool.debug("STOP JUMP MAP!!!!");
-    }
+		BroadcastTool.debug("STOP JUMP MAP!!!!");
+	}
 
-    @Override
-    public void runTaskBeforeExitGame() {
-	super.runTaskBeforeExitGame();
+	@Override
+	public void runTaskBeforeExitGame() {
+		super.runTaskBeforeExitGame();
 
-	this.stopFinishTimer();
-    }
+		this.stopFinishTimer();
+	}
 
-    @Override
-    public void initGameSettings() {
-	super.initGameSettings();
-	
-	this.minusDelay = 5;
-	this.stopFinishTimer();
-    }
+	@Override
+	public void initGameSettings() {
+		super.initGameSettings();
+
+		this.minusDelay = 5;
+		this.stopFinishTimer();
+	}
 }
